@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { signIn } from '../actions'
+import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function LoginPage({
   searchParams,
@@ -39,7 +40,7 @@ export default async function LoginPage({
             </div>
             <Input id="password" name="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">Masuk</Button>
+          <SubmitButton label="Masuk" loadingLabel="Masuk..." />
         </form>
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

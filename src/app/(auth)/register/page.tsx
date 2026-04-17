@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { signUp } from '../actions'
+import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function RegisterPage({
   searchParams,
@@ -43,7 +44,7 @@ export default async function RegisterPage({
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" minLength={6} required />
           </div>
-          <Button type="submit" className="w-full">Buat Akun</Button>
+          <SubmitButton label="Buat Akun" loadingLabel="Membuat akun..." />
         </form>
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
