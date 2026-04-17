@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String   @id @default(cuid())
+  supabaseId       String   @unique
+  email            String   @unique
+  name             String?
+  avatar           String?
+  role             Role     @default(USER)
+  subscriptionTier SubscriptionTier @default(FREE)
+  subscriptionEndsAt DateTime?
+  createdAt        DateTime @default(now())
+  
+  readingProgress  ReadingProgress[]
+  transactions     Transaction[]
+}
+
+model Book {
+  id           String   @id @default(cuid())
+  title        String
+  author       String
+  description  String?
+  coverUrl     String?
+  fileUrl      String?  // signed URL base path in Supabase Storage
+  fileType     FileType @default(EPUB)
+  genre        String[]
+  language     Language @default(ID)
+  year         Int?
+  publisher    String?
+  pageCount    Int?
+  isPublished  Boolean  @default(false)
+  isPremium    Boolean  @default(true)
+  readCount    Int      @default(0)
+  createdAt    DateTime @default(now())
+  
+  readingProgress ReadingProgress[]
+}
+
+model ReadingProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  progress  Float    @default(0) // 0.0–1.0
+  location  String?  // epub cfi or pdf page
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, bookId])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  xenditId      String   @unique
+  amount        Int      // in IDR
+  status        PaymentStatus @default(PENDING)
+  tier          SubscriptionTier
+  createdAt     DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role { 
+  USER 
+  ADMIN 
+  CONTENT_MANAGER 
+}
+
+enum SubscriptionTier { 
+  FREE 
+  BASIC 
+  PREMIUM 
+}
+
+enum FileType { 
+  EPUB 
+  PDF 
+}
+
+enum Language { 
+  ID 
+  EN 
+}
+
+enum PaymentStatus { 
+  PENDING 
+  SUCCESS 
+  FAILED 
+  EXPIRED 
+}
