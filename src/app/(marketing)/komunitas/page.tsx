@@ -6,8 +6,8 @@ export default function KomunitasPage() {
       {/* ══════════════════════════════════════
      KOMUNITAS HERO
 ══════════════════════════════════════ */}
-      <section style={{ 
-        padding: '160px 24px 60px', 
+      <section style={{
+        padding: '160px 24px 60px',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'
@@ -41,7 +41,7 @@ export default function KomunitasPage() {
             Bergabunglah dengan ratusan ribu pembaca Indonesia. Diskusikan buku favoritmu, ikuti klub baca, dan temukan teman sefrekuensi.
           </p>
 
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <div className="komunitas-hero-btns">
             <button className="price-cta-btn price-cta-filled" style={{ background: '#A855F7', color: '#fff', border: 'none', width: 'auto', padding: '12px 32px' }}>
               Gabung Komunitas
             </button>
@@ -56,12 +56,12 @@ export default function KomunitasPage() {
      MAIN LAYOUT GRID
 ══════════════════════════════════════ */}
       <section style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '32px', alignItems: 'start' }}>
-          
+        <div className="komunitas-main-grid">
+
           {/* LEFT: Live Feed */}
           <div>
             <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#fff', marginBottom: '24px' }}>🔴 Live Feed</h2>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Post 1 */}
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px' }}>
@@ -110,12 +110,12 @@ export default function KomunitasPage() {
 
           {/* RIGHT: Sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            
+
             {/* Active Clubs */}
             <div>
               <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '16px' }}>Klub Baca Aktif</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                
+
                 <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <div style={{ fontSize: '15px', fontWeight: '700', color: '#fff' }}>📚 Fiksi Klasik ID</div>

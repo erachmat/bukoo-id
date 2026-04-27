@@ -114,7 +114,7 @@ export default function PenerbitPage() {
           
           {/* Dashboard Body */}
           <div style={{ padding: '40px 32px', background: '#0d1117' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
+          <div className="publisher-stats-header">
               <div>
                 <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>Performa Bulan Ini</h3>
                 <div style={{ color: 'var(--teal)', fontWeight: '600', fontSize: '14px' }}>+12.4% dari bulan lalu</div>

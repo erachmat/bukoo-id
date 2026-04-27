@@ -1715,7 +1715,8 @@ a {
   min-width: 800px;
 }
 
-.compare-table th, .compare-table td {
+.compare-table th,
+.compare-table td {
   padding: 20px 24px;
   text-align: center;
   border-bottom: 1px solid var(--border);
@@ -1724,12 +1725,13 @@ a {
 }
 
 .compare-table th {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   font-weight: 700;
   font-size: 16px;
 }
 
-.compare-table td:first-child, .compare-table th:first-child {
+.compare-table td:first-child,
+.compare-table th:first-child {
   text-align: left;
   font-weight: 600;
   border-right: 1px solid var(--border);
@@ -1737,12 +1739,12 @@ a {
 }
 
 .compare-table th:nth-child(4) {
-  background: rgba(201,149,42,0.05);
+  background: rgba(201, 149, 42, 0.05);
   color: var(--amber);
 }
 
 .compare-table td:nth-child(4) {
-  background: rgba(201,149,42,0.02);
+  background: rgba(201, 149, 42, 0.02);
   font-weight: 700;
 }
 
@@ -1753,7 +1755,7 @@ a {
 }
 
 .compare-cross {
-  color: rgba(255,255,255,0.2);
+  color: rgba(255, 255, 255, 0.2);
   font-size: 18px;
 }
 
@@ -1789,7 +1791,7 @@ a {
 .auth-input:focus {
   outline: none;
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(0,201,167,0.15);
+  box-shadow: 0 0 0 3px rgba(0, 201, 167, 0.15);
   background: var(--surface);
 }
 
@@ -1815,10 +1817,42 @@ a {
   border-color: var(--border-hi);
 }
 
+.enterprise-banner {
+  background: linear-gradient(135deg, rgba(0, 201, 167, 0.1), rgba(13, 17, 23, 1));
+  border: 1px solid var(--teal);
+  border-radius: 16px;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
 .penerbit-cta-btns {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.publisher-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.komunitas-hero-btns {
   display: flex;
   gap: 16px;
   justify-content: center;
+}
+
+.komunitas-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 32px;
+  align-items: start;
 }
 
 @media (max-width: 768px) {
@@ -2171,6 +2205,37 @@ a {
 
   .penerbit-cta-btns button {
     width: 100% !important;
+  }
+
+  .enterprise-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px 24px;
+  }
+
+  .enterprise-banner button {
+    width: 100% !important;
+  }
+
+  .publisher-stats-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .komunitas-hero-btns {
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+  }
+
+  .komunitas-hero-btns button {
+    width: 100% !important;
+  }
+
+  .komunitas-main-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
 
   /* CTA Final */
