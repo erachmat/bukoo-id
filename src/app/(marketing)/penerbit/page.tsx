@@ -157,7 +157,7 @@ export default function PenerbitPage() {
           <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', marginBottom: '40px', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto 40px' }}>
             Bergabunglah dengan ratusan penerbit dan penulis independen lainnya yang telah mempercayakan karyanya pada BUKOO.
           </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <div className="penerbit-cta-btns">
             <button className="price-cta-btn price-cta-filled" style={{ width: 'auto', padding: '16px 40px', fontSize: '18px' }}>Isi Formulir Kemitraan</button>
             <button className="price-cta-btn price-cta-outline" style={{ width: 'auto', padding: '16px 40px', fontSize: '18px' }}>Pelajari Lebih Lanjut</button>
           </div>
