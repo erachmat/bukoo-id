@@ -22,7 +22,7 @@ export default function Navbar() {
         <div className="nav-logo">BUKOO</div>
         <ul className="nav-links">
           <li><Link href="/">Beranda</Link></li>
-          <li><Link href="/library">Koleksi</Link></li>
+          <li><Link href="/koleksi">Koleksi</Link></li>
           <li><Link href="#">BUKOO Originals</Link></li>
           <li><Link href="/pricing">Harga</Link></li>
           <li><Link href="#">Komunitas</Link></li>
@@ -44,7 +44,7 @@ export default function Navbar() {
         <div className="mobile-dropdown">
           <ul className="mobile-dropdown-links">
             <li><Link href="/" onClick={() => setMobileMenuOpen(false)}>Beranda</Link></li>
-            <li><Link href="/library" onClick={() => setMobileMenuOpen(false)}>Koleksi</Link></li>
+            <li><Link href="/koleksi" onClick={() => setMobileMenuOpen(false)}>Koleksi</Link></li>
             <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>BUKOO Originals</Link></li>
             <li><Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>Harga</Link></li>
             <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>Komunitas</Link></li>

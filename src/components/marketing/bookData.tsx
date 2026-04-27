@@ -270,3 +270,165 @@ export const originalBooks: Book[] = [
     )
   }
 ];
+
+export const sastraIndonesiaBooks: Book[] = [
+  {
+    id: 's1',
+    title: 'Laut Bercerita',
+    author: 'Leila S. Chudori',
+    bgClass: 'bg-laut',
+    tags: ['🇮🇩 Sastra', 'Novel', 'Sejarah'],
+    rating: 4.8,
+    readers: '42.841',
+    coverContent: (
+      <>
+        <svg style={{ position: 'absolute', bottom: '0', left: '0', right: '0', width: '100%', height: '40%' }} viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,18 Q25,8 50,18 Q75,28 100,18 L100,30 L0,30Z" fill="rgba(255,255,255,.12)" /></svg>
+        <div style={{ position: 'relative', zIndex: '1', textAlign: 'center' }}>
+          <div style={{ fontSize: '8px', fontWeight: '700', color: 'rgba(255,255,255,.85)', textTransform: 'uppercase', letterSpacing: '.5px', lineHeight: '1.4' }}>LAUT<br />BERCERITA</div>
+          <div style={{ fontSize: '7px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>LEILA S.C.</div>
+        </div>
+      </>
+    )
+  },
+  {
+    id: 's2',
+    title: 'Bumi Manusia',
+    author: 'Pramoedya A.T.',
+    bgClass: 'bg-bumi',
+    tags: ['🇮🇩 Sastra', 'Klasik'],
+    rating: 4.9,
+    readers: '29.556',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '7.5px', fontWeight: '700', color: 'rgba(255,200,100,.9)', textAlign: 'center', lineHeight: '1.4' }}>BUMI<br />MANUSIA</div>
+        <div style={{ fontSize: '6px', color: 'rgba(255,255,255,.4)', marginTop: '3px' }}>PRAMOEDYA</div>
+        <div style={{ marginTop: '4px', background: 'rgba(0,201,167,.7)', padding: '1px 6px', borderRadius: '2px', fontSize: '6px', fontWeight: '700', color: '#0D1117' }}>🇮🇩</div>
+      </>
+    )
+  },
+  {
+    id: 's3',
+    title: 'Cantik Itu Luka',
+    author: 'Eka Kurniawan',
+    bgClass: 'bg-noa', // Reuse generic background for now
+    tags: ['🇮🇩 Sastra', 'Fiksi'],
+    rating: 4.6,
+    readers: '18.291',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '6.5px', fontWeight: '700', color: '#fff', textAlign: 'center', lineHeight: '1.4' }}>CANTIK<br />ITU LUKA</div>
+        <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>EKA KURNIAWAN</div>
+      </>
+    )
+  },
+  {
+    id: 's4',
+    title: 'Gadis Kretek',
+    author: 'Ratih Kumala',
+    bgClass: 'bg-power',
+    tags: ['🇮🇩 Sastra', 'Sejarah'],
+    rating: 4.7,
+    readers: '21.405',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '6.5px', fontWeight: '700', color: '#fff', textAlign: 'center', lineHeight: '1.4' }}>GADIS<br />KRETEK</div>
+        <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>RATIH KUMALA</div>
+      </>
+    )
+  },
+  {
+    id: 's5',
+    title: 'Hujan Bulan Juni',
+    author: 'Sapardi Djoko D.',
+    bgClass: 'bg-flow',
+    tags: ['🇮🇩 Puisi', 'Sastra'],
+    rating: 4.8,
+    readers: '25.102',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '6.5px', fontWeight: '700', color: '#fff', textAlign: 'center', lineHeight: '1.4' }}>HUJAN<br />BULAN JUNI</div>
+        <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>SAPARDI D.D.</div>
+      </>
+    )
+  }
+];
+
+export const selfDevBooks: Book[] = [
+  {
+    id: 'sd1',
+    title: 'Atomic Habits',
+    author: 'James Clear',
+    bgClass: 'bg-atomic',
+    tags: ['Self-Dev', 'Produktivitas'],
+    rating: 4.9,
+    readers: '38.124',
+    coverContent: (
+      <>
+        <div style={{ width: '32px', height: '32px', border: '2px solid rgba(78,205,196,.7)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}><div style={{ width: '16px', height: '16px', border: '2px solid rgba(78,205,196,.9)', borderRadius: '50%' }}></div></div>
+        <div style={{ fontSize: '6.5px', fontWeight: '700', color: 'rgba(78,205,196,.9)', textAlign: 'center' }}>ATOMIC<br />HABITS</div>
+        <div style={{ fontSize: '6px', color: 'rgba(255,255,255,.35)', marginTop: '2px' }}>JAMES CLEAR</div>
+      </>
+    )
+  },
+  {
+    id: 'sd2',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    bgClass: 'bg-deepwk',
+    tags: ['Produktivitas', 'Self-Dev'],
+    rating: 4.7,
+    readers: '12.108',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '8px', fontWeight: '700', color: 'rgba(255,255,255,.8)', textAlign: 'center', lineHeight: '1.3' }}>DEEP<br />WORK</div>
+        <div style={{ fontSize: '5px', color: 'rgba(255,255,255,.35)', marginTop: '2px' }}>CAL NEWPORT</div>
+      </>
+    )
+  },
+  {
+    id: 'sd3',
+    title: 'Ikigai',
+    author: 'Garcia & Miralles',
+    bgClass: 'bg-ikigai',
+    tags: ['Filosofi', 'Gaya Hidup'],
+    rating: 4.7,
+    readers: '11.503',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '9px', fontWeight: '700', color: '#fff', letterSpacing: '.5px' }}>IKIGAI</div>
+        <div style={{ fontSize: '14px', marginTop: '2px' }}>🌸</div>
+        <div style={{ fontSize: '5px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>GARCIA & MIRALLES</div>
+      </>
+    )
+  },
+  {
+    id: 'sd4',
+    title: 'The Psychology of Money',
+    author: 'Morgan Housel',
+    bgClass: 'bg-psych',
+    tags: ['Keuangan', 'Bisnis'],
+    rating: 4.8,
+    readers: '17.445',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '5px', color: 'rgba(147,197,253,.8)', letterSpacing: '.5px', marginBottom: '2px' }}>MORGAN HOUSEL</div>
+        <div style={{ fontSize: '7px', fontWeight: '700', color: 'rgba(147,197,253,.9)', textAlign: 'center', lineHeight: '1.3' }}>THE PSYCH<br />OF MONEY</div>
+      </>
+    )
+  },
+  {
+    id: 'sd5',
+    title: 'Zero to One',
+    author: 'Peter Thiel',
+    bgClass: 'bg-zero',
+    tags: ['Bisnis', 'Startup'],
+    rating: 4.6,
+    readers: '14.221',
+    coverContent: (
+      <>
+        <div style={{ fontSize: '5px', fontWeight: '700', color: 'rgba(147,197,253,.9)', textAlign: 'center', lineHeight: '1.3' }}>ZERO TO<br />ONE</div>
+        <div style={{ fontSize: '4px', color: 'rgba(255,255,255,.35)', marginTop: '1px' }}>P. THIEL</div>
+      </>
+    )
+  }
+];
