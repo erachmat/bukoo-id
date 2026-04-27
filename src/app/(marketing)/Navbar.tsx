@@ -26,7 +26,7 @@ export default function Navbar() {
           <li><Link href="/originals">BUKOO Originals</Link></li>
           <li><Link href="/pricing">Harga</Link></li>
           <li><Link href="/komunitas">Komunitas</Link></li>
-          <li><Link href="#">Untuk Penerbit</Link></li>
+          <li><Link href="/penerbit">Untuk Penerbit</Link></li>
         </ul>
         <div className="nav-right">
           <Link href="/login"><button className="btn-ghost">Masuk</button></Link>
@@ -48,7 +48,7 @@ export default function Navbar() {
             <li><Link href="/originals" onClick={() => setMobileMenuOpen(false)}>BUKOO Originals</Link></li>
             <li><Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>Harga</Link></li>
             <li><Link href="/komunitas" onClick={() => setMobileMenuOpen(false)}>Komunitas</Link></li>
-            <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>Untuk Penerbit</Link></li>
+            <li><Link href="/penerbit" onClick={() => setMobileMenuOpen(false)}>Untuk Penerbit</Link></li>
           </ul>
           <div className="mobile-dropdown-actions">
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost">Masuk</button></Link>
