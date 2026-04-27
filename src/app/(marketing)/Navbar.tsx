@@ -23,9 +23,9 @@ export default function Navbar() {
         <ul className="nav-links">
           <li><Link href="/">Beranda</Link></li>
           <li><Link href="/koleksi">Koleksi</Link></li>
-          <li><Link href="#">BUKOO Originals</Link></li>
+          <li><Link href="/originals">BUKOO Originals</Link></li>
           <li><Link href="/pricing">Harga</Link></li>
-          <li><Link href="#">Komunitas</Link></li>
+          <li><Link href="/komunitas">Komunitas</Link></li>
           <li><Link href="#">Untuk Penerbit</Link></li>
         </ul>
         <div className="nav-right">
@@ -45,9 +45,9 @@ export default function Navbar() {
           <ul className="mobile-dropdown-links">
             <li><Link href="/" onClick={() => setMobileMenuOpen(false)}>Beranda</Link></li>
             <li><Link href="/koleksi" onClick={() => setMobileMenuOpen(false)}>Koleksi</Link></li>
-            <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>BUKOO Originals</Link></li>
+            <li><Link href="/originals" onClick={() => setMobileMenuOpen(false)}>BUKOO Originals</Link></li>
             <li><Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>Harga</Link></li>
-            <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>Komunitas</Link></li>
+            <li><Link href="/komunitas" onClick={() => setMobileMenuOpen(false)}>Komunitas</Link></li>
             <li><Link href="#" onClick={() => setMobileMenuOpen(false)}>Untuk Penerbit</Link></li>
           </ul>
           <div className="mobile-dropdown-actions">
