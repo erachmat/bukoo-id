@@ -1764,6 +1764,57 @@ a {
   margin-top: 4px;
 }
 
+/* ══════════════════════════════════════
+   AUTH FORMS
+══════════════════════════════════════ */
+.auth-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,201,167,0.15);
+  background: var(--surface);
+}
+
+.auth-btn-social {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-btn-social:hover {
+  background: var(--card-bg-hi);
+  border-color: var(--border-hi);
+}
+
 @media (max-width: 768px) {
 
   /* Navbar */
