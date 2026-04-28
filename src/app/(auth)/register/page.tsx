@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { signUp } from '../actions'
+import { PasswordInput } from '@/components/auth/password-input'
 
 export default async function RegisterPage(props: {
   searchParams: Promise<{ error?: string; success?: string }>
@@ -51,7 +52,7 @@ export default async function RegisterPage(props: {
 
         <div>
           <label htmlFor="password" className="auth-label">Password</label>
-          <input id="password" name="password" type="password" minLength={6} required className="auth-input" placeholder="Minimal 6 karakter" />
+          <PasswordInput id="password" name="password" minLength={6} required className="auth-input" placeholder="Minimal 6 karakter" />
         </div>
 
         <button type="submit" className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none' }}>

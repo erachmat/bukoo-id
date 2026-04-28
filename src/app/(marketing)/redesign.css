@@ -1786,6 +1786,12 @@ a {
   color: #fff;
   font-size: 15px;
   transition: all 0.2s;
+  color-scheme: dark;
+}
+
+.auth-input::-ms-reveal,
+.auth-input::-ms-clear {
+  display: none;
 }
 
 .auth-input:focus {

@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { signIn } from '../actions'
 
+import { PasswordInput } from '@/components/auth/password-input'
+
 export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
   const params = await props.searchParams
   
@@ -30,7 +32,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
               Lupa password?
             </Link>
           </div>
-          <input id="password" name="password" type="password" required className="auth-input" />
+          <PasswordInput id="password" name="password" required className="auth-input" />
         </div>
         
         <button type="submit" className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none' }}>
