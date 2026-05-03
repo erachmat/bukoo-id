@@ -1,19 +1,30 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/supabase-middleware'
+import { auth } from "@/lib/auth"
+import { NextResponse } from "next/server"
 
-export async function proxy(request: NextRequest) {
-  return await updateSession(request)
-}
+export const proxy = auth((req) => {
+  const { pathname } = req.nextUrl
+  const user = req.auth?.user
+
+  // Protected routes: redirect to login if not authenticated
+  if (pathname.startsWith("/library") || pathname.startsWith("/book")) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/login", req.url))
+    }
+  }
+
+  // Admin routes: require ADMIN role
+  if (pathname.startsWith("/admin")) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/login", req.url))
+    }
+    if ((user as any).role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/library", req.url))
+    }
+  }
+
+  return NextResponse.next()
+})
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 }

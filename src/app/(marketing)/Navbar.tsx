@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +17,10 @@ export default function Navbar() {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
+  };
 
   return (
     <>
@@ -29,8 +35,17 @@ export default function Navbar() {
           <li><Link href="/penerbit">Untuk Penerbit</Link></li>
         </ul>
         <div className="nav-right">
-          <Link href="/login"><button className="btn-ghost">Masuk</button></Link>
-          <Link href="/register"><button className="btn-cta">Coba Gratis</button></Link>
+          {status === 'authenticated' ? (
+            <>
+              <Link href="/library"><button className="btn-ghost">Library</button></Link>
+              <button className="btn-cta" onClick={handleSignOut}>Keluar</button>
+            </>
+          ) : (
+            <>
+              <Link href="/login"><button className="btn-ghost">Masuk</button></Link>
+              <Link href="/register"><button className="btn-cta">Coba Gratis</button></Link>
+            </>
+          )}
         </div>
         <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? (
@@ -51,8 +66,17 @@ export default function Navbar() {
             <li><Link href="/penerbit" onClick={() => setMobileMenuOpen(false)}>Untuk Penerbit</Link></li>
           </ul>
           <div className="mobile-dropdown-actions">
-            <Link href="/login" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost">Masuk</button></Link>
-            <Link href="/register" onClick={() => setMobileMenuOpen(false)}><button className="btn-cta">Coba Gratis</button></Link>
+            {status === 'authenticated' ? (
+              <>
+                <Link href="/library" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Library</button></Link>
+                <button className="btn-cta" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} style={{ width: '100%' }}>Keluar</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Masuk</button></Link>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)}><button className="btn-cta" style={{ width: '100%' }}>Coba Gratis</button></Link>
+              </>
+            )}
           </div>
         </div>
       )}

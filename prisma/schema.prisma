@@ -8,17 +8,53 @@ datasource db {
 
 model User {
   id               String   @id @default(cuid())
-  supabaseId       String   @unique
   email            String   @unique
+  emailVerified    DateTime?
   name             String?
+  password         String?  // bcrypt hash for credentials login
   avatar           String?
   role             Role     @default(USER)
   subscriptionTier SubscriptionTier @default(FREE)
   subscriptionEndsAt DateTime?
   createdAt        DateTime @default(now())
   
+  accounts         Account[]
+  sessions         Session[]
   readingProgress  ReadingProgress[]
   transactions     Transaction[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
 }
 
 model Book {
@@ -27,7 +63,7 @@ model Book {
   author       String
   description  String?
   coverUrl     String?
-  fileUrl      String?  // signed URL base path in Supabase Storage
+  fileUrl      String?  // signed URL base path or local path
   fileType     FileType @default(EPUB)
   genre        String[]
   language     Language @default(ID)
@@ -72,6 +108,7 @@ enum Role {
   USER 
   ADMIN 
   CONTENT_MANAGER 
+  PUBLISHER
 }
 
 enum SubscriptionTier { 

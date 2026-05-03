@@ -1,58 +1,72 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-
-// The deployed site URL - used for email redirect links
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bukoo-woad.vercel.app'
+import { signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
+import { redirect } from "next/navigation"
 
 export async function signUp(formData: FormData) {
-  const supabase = await createClient()
-
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { full_name: name },
-      emailRedirectTo: `${SITE_URL}/auth/callback`,
-    },
+  const existing = await prisma.user.findUnique({
+    where: { email }
   })
 
-  if (error) {
-    return redirect(`/register?error=${encodeURIComponent(error.message)}`)
+  if (existing) {
+    return redirect(`/register?error=${encodeURIComponent('Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.')}`)
   }
 
-  // If identities is empty, the user already exists (Supabase security behavior)
-  if (data?.user && data.user.identities?.length === 0) {
-    return redirect(
-      `/register?error=${encodeURIComponent('Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.')}`
-    )
-  }
+  const hashedPassword = await bcrypt.hash(password, 12)
 
-  return redirect('/register?success=Cek%20email%20Anda%20untuk%20konfirmasi%20akun!')
+  await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      name,
+    }
+  })
+
+  // Auto sign-in after registration
+  try {
+    await nextAuthSignIn("credentials", {
+      email,
+      password,
+      redirectTo: "/library",
+    })
+  } catch (error: any) {
+    if (error.type === "CredentialsSignin") {
+        return redirect(`/login?error=${encodeURIComponent('Pendaftaran berhasil, silakan masuk secara manual.')}`)
+    }
+    throw error
+  }
 }
 
 export async function signIn(formData: FormData) {
-  const supabase = await createClient()
-
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
-
-  if (error) {
-    return redirect(`/login?error=${encodeURIComponent(error.message)}`)
+  try {
+    await nextAuthSignIn("credentials", {
+      email,
+      password,
+      redirectTo: "/library",
+    })
+  } catch (error: any) {
+    if (error.type === "CredentialsSignin") {
+        return redirect(`/login?error=${encodeURIComponent('Email atau password salah.')}`)
+    }
+    // NextAuth throws a redirect error for successful sign-ins, so we need to re-throw it
+    // if it's a redirect, otherwise we can handle the error.
+    if (error.message === "NEXT_REDIRECT") {
+        throw error
+    }
+    // For other errors, redirect back with message
+    return redirect(`/login?error=${encodeURIComponent('Terjadi kesalahan. Silakan coba lagi.')}`)
   }
-
-  return redirect('/library')
 }
 
 export async function signOut() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  return redirect('/')
+  await nextAuthSignOut({ redirectTo: "/" })
 }
