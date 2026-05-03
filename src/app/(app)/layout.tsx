@@ -14,33 +14,36 @@ export default function AppLayout({
         top: 0, 
         zIndex: 50, 
         width: '100%', 
-        borderBottom: '1px solid rgba(255,255,255,0.1)', 
-        background: '#00181A', 
+        borderBottom: '1px solid rgba(201, 149, 42, 0.08)', 
+        background: 'rgba(0, 24, 26, 0.98)', 
         color: '#ffffff', 
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' 
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        backdropFilter: 'blur(12px)',
       }}>
         <div style={{ 
-          maxWidth: '1200px', 
+          width: '100%',
+          maxWidth: 'min(1200px, 100%)',
           margin: '0 auto', 
           display: 'flex', 
-          height: '64px', 
+          height: '68px', 
           alignItems: 'center', 
           justifyContent: 'space-between', 
-          padding: '0 24px' 
+          padding: '0 clamp(20px, 4vw, 60px)',
+          boxSizing: 'border-box',
         }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
             <span style={{ 
               fontFamily: "'Playfair Display', serif",
-              fontSize: '28px', 
+              fontSize: 'clamp(22px, 3vw, 28px)', 
               fontWeight: '900', 
               letterSpacing: '-1px', 
-              color: '#C9952A'
+              color: '#C9952A',
             }}>
               BUKOO
             </span>
           </Link>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: 'auto', flexShrink: 0 }}>
             <Link href="/library" style={{ textDecoration: 'none' }}>
               <Button variant="ghost" size="sm" style={{ 
                 display: 'flex', 

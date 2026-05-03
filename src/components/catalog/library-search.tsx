@@ -3,6 +3,7 @@
 import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { mergeLibraryPath } from '@/lib/library/catalog-params'
 
 export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
   const router = useRouter()
@@ -11,53 +12,52 @@ export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
 
   useEffect(() => {
     const urlQ = searchParams.get('q') ?? ''
-    const id = window.setTimeout(() => {
-      setValue(urlQ)
-    }, 0)
+    const id = window.setTimeout(() => setValue(urlQ), 0)
     return () => window.clearTimeout(id)
   }, [searchParams])
 
-  useEffect(() => {
-    const q = value.trim()
-    const current = (searchParams.get('q') ?? '').trim()
-    if (q === current) return
-
-    const handle = window.setTimeout(() => {
-      const next = new URLSearchParams(searchParams.toString())
-      if (q) next.set('q', q)
-      else next.delete('q')
-      const qs = next.toString()
-      router.replace(qs ? `/library?${qs}` : '/library')
-    }, 300)
-
-    return () => window.clearTimeout(handle)
-  }, [value, router, searchParams])
+  function commitSearch() {
+    const path = mergeLibraryPath(searchParams, { q: value.trim() })
+    router.push(path)
+  }
 
   return (
-    <div style={{ position: 'relative', maxWidth: 520, marginTop: 28 }}>
+    <form
+      style={{ position: 'relative', maxWidth: 520, marginTop: 28 }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        commitSearch()
+      }}
+    >
       <label htmlFor="library-catalog-search" className="sr-only">
         Cari judul, penulis, genre
       </label>
-      <Search
+      <span
         aria-hidden
         style={{
           position: 'absolute',
           left: 18,
           top: '50%',
           transform: 'translateY(-50%)',
-          height: 20,
-          width: 20,
-          color: 'rgba(255,255,255,0.85)',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           pointerEvents: 'none',
+          color: '#ffffff',
         }}
-      />
+      >
+        <Search strokeWidth={2.5} size={22} />
+      </span>
       <input
         id="library-catalog-search"
-        type="search"
+        name="q"
+        type="text"
         placeholder="Cari judul, penulis, genre..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
         autoComplete="off"
+        enterKeyHint="search"
         style={{
           width: '100%',
           height: 52,
@@ -66,7 +66,7 @@ export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
           background: 'rgba(255,255,255,0.07)',
           color: '#ffffff',
           fontSize: 15,
-          paddingLeft: 52,
+          paddingLeft: 54,
           paddingRight: 24,
           outline: 'none',
           backdropFilter: 'blur(8px)',
@@ -74,6 +74,6 @@ export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
           fontFamily: 'inherit',
         }}
       />
-    </div>
+    </form>
   )
 }
