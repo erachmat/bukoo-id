@@ -25,7 +25,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`} id="navbar">
-        <div className="nav-logo">BUKOO</div>
+        <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>BUKOO</Link>
         <ul className="nav-links">
           <li><Link href="/">Beranda</Link></li>
           <li><Link href="/koleksi">Koleksi</Link></li>

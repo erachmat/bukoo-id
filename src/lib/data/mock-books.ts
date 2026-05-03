@@ -57,7 +57,7 @@ export const mockBooks: MockBook[] = [
     title: "Pride and Prejudice",
     author: "Jane Austen",
     description: "A classic novel of manners, following the character development of Elizabeth Bennet, the dynamic protagonist of the book who learns about the repercussions of hasty judgments.",
-    coverUrl: "https://images.unsplash.com/photo-1629196914275-f9a464197e41?q=80&w=600&auto=format&fit=crop",
+    coverUrl: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop",
     genre: ["Classic", "Romance"],
     language: "EN",
     year: 1813,

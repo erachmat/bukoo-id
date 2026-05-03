@@ -18,19 +18,22 @@ export const metadata: Metadata = {
 };
 
 import { Providers } from "@/components/providers";
+import { auth } from "@/lib/auth";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-full flex flex-col`}>
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );
