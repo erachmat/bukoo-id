@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { BookCard } from '@/components/catalog/book-card'
 import { mockBooks } from '@/lib/data/mock-books'
 import { Button } from '@/components/ui/button'
