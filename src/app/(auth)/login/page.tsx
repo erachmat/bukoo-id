@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { signIn } from '../actions'
 
 import { PasswordInput } from '@/components/auth/password-input'
+import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
   const params = await props.searchParams
@@ -35,9 +36,9 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
           <PasswordInput id="password" name="password" required className="auth-input" />
         </div>
         
-        <button type="submit" className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none' }}>
+        <SubmitButton className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none', width: '100%' }}>
           Masuk
-        </button>
+        </SubmitButton>
       </form>
 
       <div style={{ margin: '32px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>

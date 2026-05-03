@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { signUp } from '../actions'
 import { PasswordInput } from '@/components/auth/password-input'
+import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function RegisterPage(props: {
   searchParams: Promise<{ error?: string; success?: string }>
@@ -55,9 +56,9 @@ export default async function RegisterPage(props: {
           <PasswordInput id="password" name="password" minLength={6} required className="auth-input" placeholder="Minimal 6 karakter" />
         </div>
 
-        <button type="submit" className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none' }}>
+        <SubmitButton className="price-cta-btn price-cta-filled" style={{ marginTop: '8px', border: 'none', width: '100%' }}>
           Mulai Gratis 7 Hari →
-        </button>
+        </SubmitButton>
       </form>
 
       <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>
