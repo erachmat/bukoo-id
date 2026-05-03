@@ -1,8 +1,35 @@
 import Link from 'next/link'
-import { mockBooks } from '@/lib/data/mock-books'
+import { Suspense } from 'react'
+import { prisma } from '@/lib/prisma'
+import { prismaBookToCatalogBook } from '@/lib/data/book-mapper'
 import { BookCatalogCard } from '@/components/catalog/book-catalog-card'
+import { LibrarySearch } from '@/components/catalog/library-search'
 
-export default function LibraryPage() {
+export default async function LibraryPage(props: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q: rawQ } = await props.searchParams
+  const q = rawQ?.trim() ?? ''
+
+  const where = {
+    isPublished: true,
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: 'insensitive' as const } },
+            { author: { contains: q, mode: 'insensitive' as const } },
+            { description: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  }
+
+  const books = await prisma.book.findMany({
+    where,
+    orderBy: { readCount: 'desc' },
+  })
+  const catalogBooks = books.map(prismaBookToCatalogBook)
+
   const genres = ["Semua", "Fiksi", "Non-Fiksi", "Sastra", "Pengembangan Diri", "Bisnis", "Sejarah", "Roman", "Klasik"]
 
   return (
@@ -30,25 +57,19 @@ export default function LibraryPage() {
             Katalog Buku
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, marginTop: 12, fontWeight: 500 }}>
-            Temukan bacaan Anda selanjutnya dari <strong style={{ color: '#00C9A7' }}>{mockBooks.length} judul</strong> pilihan terbaik
+            {q ? (
+              <>Hasil pencarian: <strong style={{ color: '#00C9A7' }}>{catalogBooks.length} judul</strong> untuk &quot;{q}&quot;</>
+            ) : (
+              <>Temukan bacaan Anda selanjutnya dari <strong style={{ color: '#00C9A7' }}>{catalogBooks.length} judul</strong> pilihan terbaik</>
+            )}
           </p>
 
-          {/* Search bar in hero */}
-          <div style={{ position: 'relative', maxWidth: 520, marginTop: 28 }}>
-            <svg style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              type="search"
-              placeholder="Cari judul, penulis, genre..."
-              style={{
-                width: '100%', height: 52, borderRadius: 999, border: '1.5px solid rgba(255,255,255,0.15)',
-                background: 'rgba(255,255,255,0.07)', color: '#ffffff', fontSize: 15,
-                paddingLeft: 52, paddingRight: 24, outline: 'none', backdropFilter: 'blur(8px)',
-                boxSizing: 'border-box', fontFamily: 'inherit',
-              }}
-            />
-          </div>
+          <Suspense fallback={(
+            <div style={{ position: 'relative', maxWidth: 520, marginTop: 28, height: 52 }} aria-hidden />
+          )}
+          >
+            <LibrarySearch initialQuery={q} />
+          </Suspense>
 
           {/* Genre quick filter chips */}
           <div style={{ display: 'flex', gap: 10, marginTop: 24, flexWrap: 'wrap' }}>
@@ -122,7 +143,7 @@ export default function LibraryPage() {
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
               <span style={{ fontSize: 14, color: '#6B7A8D', fontWeight: 600 }}>
-                Menampilkan <strong style={{ color: '#1A2332' }}>{mockBooks.length * 2}</strong> buku
+                Menampilkan <strong style={{ color: '#1A2332' }}>{catalogBooks.length}</strong> buku
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: 13, color: '#6B7A8D', fontWeight: 700 }}>Urutkan:</span>
@@ -147,8 +168,8 @@ export default function LibraryPage() {
               gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))',
               gap: 24,
             }}>
-              {[...mockBooks, ...mockBooks].map((book, idx) => (
-                <BookCatalogCard key={`${book.id}-${idx}`} book={book} />
+              {catalogBooks.map((book) => (
+                <BookCatalogCard key={book.id} book={book} />
               ))}
             </div>
 
@@ -201,4 +222,3 @@ function FilterItem({ label, badge }: { label: string, badge?: boolean }) {
     </label>
   )
 }
-
