@@ -17,15 +17,18 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   const book = prismaBookToCatalogBook(row)
 
   return (
-    <div className="container py-8 px-4 md:px-8 max-w-5xl mx-auto">
-      <Link href="/library" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors">
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-10">
+      <Link
+        href="/library"
+        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors"
+      >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Katalog
       </Link>
 
-      <div className="flex flex-col md:flex-row gap-10">
-        {/* Left Column: Cover */}
-        <div className="w-full md:w-1/3 max-w-[300px] shrink-0 mx-auto md:mx-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)] gap-10 lg:gap-14 lg:items-start">
+        {/* Cover */}
+        <div className="w-full max-w-[320px] mx-auto lg:mx-0 lg:sticky lg:top-24 lg:self-start">
           <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border">
             <img
               src={book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop'}
@@ -42,15 +45,15 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        {/* Right Column: Details */}
-        <div className="flex-1 space-y-6">
+        {/* Details */}
+        <div className="min-w-0 space-y-6 w-full">
           <div>
             <div className="flex flex-wrap gap-2 mb-3">
               {book.genre.map((g) => (
                 <Badge key={g} variant="secondary" className="bg-primary/10 text-primary border-primary/20">{g}</Badge>
               ))}
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-2 text-balance">{book.title}</h1>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-2 text-pretty">{book.title}</h1>
             <p className="text-xl text-muted-foreground">Oleh <span className="text-foreground font-medium">{book.author}</span></p>
           </div>
 
@@ -74,24 +77,25 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
           <div className="space-y-4">
             <h3 className="font-bold text-lg">Sinopsis</h3>
-            <p className="text-muted-foreground leading-relaxed text-balance">
+            <p className="max-w-prose text-muted-foreground leading-relaxed text-pretty">
               {book.description || '—'}
             </p>
           </div>
 
           <div className="pt-6 flex flex-col sm:flex-row gap-4">
-            <Link href={`/book/${resolvedParams.id}/read`} className="flex-1 sm:flex-none">
-              <Button size="lg" className="w-full sm:w-auto h-14 px-10 rounded-full text-base font-bold shadow-lg hover:shadow-xl transition-all">
-                Mulai Baca Sekarang
-              </Button>
+            <Link
+              href={`/book/${resolvedParams.id}/read`}
+              className="inline-flex h-14 shrink-0 items-center justify-center rounded-full bg-primary px-10 text-base font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 hover:shadow-xl w-full sm:w-auto text-center"
+            >
+              Mulai Baca Sekarang
             </Link>
 
             <div className="flex gap-4">
-              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0">
+              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0" type="button">
                 <BookmarkPlus className="h-5 w-5" />
                 <span className="sr-only">Simpan kelist</span>
               </Button>
-              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0">
+              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0" type="button">
                 <Share2 className="h-5 w-5" />
                 <span className="sr-only">Bagikan</span>
               </Button>
