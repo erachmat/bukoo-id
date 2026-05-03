@@ -2,24 +2,53 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
-    // run once to set initial state
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Force a session refetch every time this Navbar mounts.
+  // This ensures that when navigating from /library back to /,
+  // the session state is always fresh and reflects the real auth status.
+  useEffect(() => {
+    update();
+  }, []);
+
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
+  };
+
+  const renderAuthButtons = () => {
+    if (status === 'loading') {
+      // Render a ghost placeholder to prevent layout shift
+      return <div style={{ width: 160, height: 40 }} />;
+    }
+    if (status === 'authenticated') {
+      return (
+        <>
+          <Link href="/library"><button className="btn-ghost">Library</button></Link>
+          <button className="btn-cta" onClick={handleSignOut}>Keluar</button>
+        </>
+      );
+    }
+    return (
+      <>
+        <Link href="/login"><button className="btn-ghost">Masuk</button></Link>
+        <Link href="/register"><button className="btn-cta">Coba Gratis</button></Link>
+      </>
+    );
   };
 
   return (
@@ -35,17 +64,7 @@ export default function Navbar() {
           <li><Link href="/penerbit">Untuk Penerbit</Link></li>
         </ul>
         <div className="nav-right">
-          {status === 'authenticated' ? (
-            <>
-              <Link href="/library"><button className="btn-ghost">Library</button></Link>
-              <button className="btn-cta" onClick={handleSignOut}>Keluar</button>
-            </>
-          ) : (
-            <>
-              <Link href="/login"><button className="btn-ghost">Masuk</button></Link>
-              <Link href="/register"><button className="btn-cta">Coba Gratis</button></Link>
-            </>
-          )}
+          {renderAuthButtons()}
         </div>
         <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? (
@@ -71,6 +90,8 @@ export default function Navbar() {
                 <Link href="/library" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Library</button></Link>
                 <button className="btn-cta" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} style={{ width: '100%' }}>Keluar</button>
               </>
+            ) : status === 'loading' ? (
+              <div style={{ height: 80 }} />
             ) : (
               <>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Masuk</button></Link>
