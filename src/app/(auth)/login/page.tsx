@@ -1,10 +1,17 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { signIn } from '../actions'
+import { auth } from '@/lib/auth'
 
 import { PasswordInput } from '@/components/auth/password-input'
 import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
+  const session = await auth()
+  if (session) {
+    redirect('/library')
+  }
+
   const params = await props.searchParams
   
   return (

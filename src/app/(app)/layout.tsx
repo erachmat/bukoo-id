@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { User, BookOpen } from 'lucide-react'
-import { HeaderSearch } from '@/components/layout/header-search'
 
 export default function AppLayout({
   children,
@@ -31,29 +30,15 @@ export default function AppLayout({
         }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
             <span style={{ 
-              fontSize: '24px', 
-              fontWeight: '800', 
-              letterSpacing: '-0.025em', 
-              background: 'linear-gradient(to right, #00C9A7, #60A5FA)', 
-              WebkitBackgroundClip: 'text', 
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: 'transparent'
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '28px', 
+              fontWeight: '900', 
+              letterSpacing: '-1px', 
+              color: '#C9952A'
             }}>
               BUKOO
             </span>
           </Link>
-          
-          <div style={{ 
-            display: 'flex', 
-            flex: 1, 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            padding: '0 24px',
-            maxWidth: '500px'
-          }}>
-            <HeaderSearch />
-          </div>
 
           <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Link href="/library" style={{ textDecoration: 'none' }}>

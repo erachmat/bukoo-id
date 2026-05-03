@@ -1,11 +1,19 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { signUp } from '../actions'
+import { auth } from '@/lib/auth'
+
 import { PasswordInput } from '@/components/auth/password-input'
 import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function RegisterPage(props: {
   searchParams: Promise<{ error?: string; success?: string }>
 }) {
+  const session = await auth()
+  if (session) {
+    redirect('/library')
+  }
+
   const params = await props.searchParams
 
   return (
