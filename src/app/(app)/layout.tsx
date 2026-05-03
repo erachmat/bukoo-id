@@ -8,37 +8,102 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-[#00181A] text-white shadow-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[#00C9A7] to-blue-400 bg-clip-text text-transparent">
+    <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column', background: '#F8FAFC' }}>
+      <header style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 50, 
+        width: '100%', 
+        borderBottom: '1px solid rgba(255,255,255,0.1)', 
+        background: '#00181A', 
+        color: '#ffffff', 
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' 
+      }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto', 
+          display: 'flex', 
+          height: '64px', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '0 24px' 
+        }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <span style={{ 
+              fontSize: '24px', 
+              fontWeight: '800', 
+              letterSpacing: '-0.025em', 
+              background: 'linear-gradient(to right, #00C9A7, #60A5FA)', 
+              WebkitBackgroundClip: 'text', 
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent'
+            }}>
               BUKOO
             </span>
           </Link>
           
-          <div className="hidden md:flex flex-1 items-center justify-center px-6">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div style={{ 
+            display: 'flex', 
+            flex: 1, 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '0 24px',
+            maxWidth: '500px'
+          }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Search style={{ 
+                position: 'absolute', 
+                left: '14px', 
+                top: '50%', 
+                transform: 'translateY(-50%)', 
+                height: '16px', 
+                width: '16px', 
+                color: '#9CA3AF',
+                zIndex: 10
+              }} />
               <input
                 type="search"
                 placeholder="Cari judul, penulis, atau penerbit..."
-                className="flex h-10 w-full rounded-full border-none bg-white/10 px-4 py-2 pl-10 text-sm text-white placeholder:text-gray-500 focus:bg-white/20 focus:outline-none focus:ring-1 focus:ring-[#00C9A7] transition-all"
+                style={{ 
+                  height: '40px', 
+                  width: '100%', 
+                  borderRadius: '9999px', 
+                  border: 'none', 
+                  background: 'rgba(255, 255, 255, 0.1)', 
+                  padding: '0 16px 0 42px', 
+                  fontSize: '14px', 
+                  color: '#ffffff', 
+                  outline: 'none',
+                  transition: 'background 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                onBlur={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
               />
             </div>
           </div>
 
-          <nav className="flex items-center space-x-4">
-            <Link href="/library">
-              <Button variant="ghost" size="sm" className="hidden sm:flex text-gray-300 hover:text-white hover:bg-white/10">
-                <BookOpen className="h-4 w-4 mr-2" />
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Link href="/library" style={{ textDecoration: 'none' }}>
+              <Button variant="ghost" size="sm" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                color: '#D1D5DB', 
+                backgroundColor: 'transparent' 
+              }}>
+                <BookOpen style={{ height: '16px', width: '16px', marginRight: '8px' }} />
                 Library
               </Button>
             </Link>
-            <Link href="/account">
-              <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-white hover:bg-white/10">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Akun Saya</span>
+            <Link href="/account" style={{ textDecoration: 'none' }}>
+              <Button variant="ghost" size="icon" style={{ 
+                borderRadius: '9999px', 
+                color: '#D1D5DB', 
+                backgroundColor: 'transparent' 
+              }}>
+                <User style={{ height: '20px', width: '20px' }} />
+                <span style={{ display: 'none' }}>Akun Saya</span>
               </Button>
             </Link>
           </nav>
