@@ -16,16 +16,35 @@ export function AdminSidebar() {
   ]
 
   return (
-    <aside className="w-full md:w-64 bg-background border-r flex flex-col">
-      <div className="h-16 flex items-center px-6 border-b">
-        <Link href="/admin">
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            BUKOO<span className="text-foreground ml-1 text-sm font-normal uppercase tracking-widest">Admin</span>
+    <aside style={{
+      width: '260px',
+      backgroundColor: '#ffffff',
+      borderRight: '1px solid #E8ECF0',
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      flexShrink: 0
+    }}>
+      <div style={{
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 24px',
+        borderBottom: '1px solid #E8ECF0'
+      }}>
+        <Link href="/admin" style={{ textDecoration: 'none' }}>
+          <span style={{
+            fontSize: '20px',
+            fontWeight: '800',
+            letterSpacing: '-0.5px',
+            color: '#1A2332'
+          }}>
+            BUKOO <span style={{ color: '#6B7A8D', fontSize: '13px', fontWeight: '400', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '4px' }}>Admin</span>
           </span>
         </Link>
       </div>
       
-      <nav className="flex-1 py-6 px-4 space-y-1">
+      <nav style={{ flex: 1, padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {navItems.map((item) => {
           const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href)
           const Icon = item.icon
@@ -34,26 +53,46 @@ export function AdminSidebar() {
             <Link 
               key={item.href} 
               href={item.href} 
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors ${
-                isActive 
-                  ? 'bg-primary/10 text-primary' 
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                backgroundColor: isActive ? 'rgba(0, 201, 167, 0.08)' : 'transparent',
+                color: isActive ? '#00C9A7' : '#6B7A8D',
+              }}
             >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
+              <Icon size={20} />
+              <span style={{ fontWeight: isActive ? '700' : '500', fontSize: '14px' }}>{item.name}</span>
             </Link>
           )
         })}
       </nav>
       
-      <div className="p-4 border-t">
+      <div style={{ padding: '16px', borderTop: '1px solid #E8ECF0' }}>
         <button 
           onClick={() => signOut({ callbackUrl: '/' })}
-          className="flex w-full items-center space-x-3 px-3 py-2.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            border: 'none',
+            backgroundColor: 'transparent',
+            color: '#EF4444',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Keluar</span>
+          <LogOut size={20} />
+          <span style={{ fontWeight: '600', fontSize: '14px' }}>Keluar</span>
         </button>
       </div>
     </aside>
