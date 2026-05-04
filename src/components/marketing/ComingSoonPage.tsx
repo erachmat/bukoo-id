@@ -54,7 +54,30 @@ export function ComingSoonPage({
           Segera hadir
         </span>
         <div style={{ marginTop: 40 }}>
-          <Link href="/" className="price-cta-btn price-cta-outline" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '12px 28px',
+              borderRadius: '999px',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#ffffff',
+              fontWeight: 600,
+              fontSize: '15px',
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
+            }}
+          >
             Kembali ke beranda
           </Link>
         </div>

@@ -87,9 +87,9 @@ export default async function RegisterPage(props: {
 
       <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '24px', lineHeight: '1.6' }}>
         Dengan mendaftar, Anda menyetujui{' '}
-        <Link href="#" style={{ color: 'var(--teal)', textDecoration: 'none' }}>Syarat & Ketentuan</Link>
+        <Link href="/syarat-ketentuan" style={{ color: 'var(--teal)', textDecoration: 'none' }}>Syarat & Ketentuan</Link>
         {' '}dan{' '}
-        <Link href="#" style={{ color: 'var(--teal)', textDecoration: 'none' }}>Kebijakan Privasi</Link>
+        <Link href="/privasi" style={{ color: 'var(--teal)', textDecoration: 'none' }}>Kebijakan Privasi</Link>
         {' '}kami.
       </p>
 
