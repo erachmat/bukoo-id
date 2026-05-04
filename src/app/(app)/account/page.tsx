@@ -11,7 +11,7 @@ export default async function AccountPage() {
   const session = await auth()
 
   return (
-    <div style={{ maxWidth: '512px', margin: '0 auto', padding: '48px 16px', boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: '512px', margin: '0 auto', padding: 'clamp(24px, 6vw, 64px) clamp(16px, 4vw, 32px)', boxSizing: 'border-box' }}>
       <h1 style={{ fontSize: '30px', fontWeight: '800', letterSpacing: '-0.025em', color: '#00181A', margin: 0 }}>Akun saya</h1>
       <p style={{ marginTop: '8px', fontSize: '14px', color: '#6B7280' }}>
         Kelola profil dan akses pembaca Anda.

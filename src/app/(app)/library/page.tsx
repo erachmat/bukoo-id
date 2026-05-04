@@ -24,7 +24,7 @@ export default async function LibraryPage(props: {
       {/* Hero Header Band */}
       <div style={{
         background: 'linear-gradient(135deg, #00181A 0%, #00302E 60%, #004D4A 100%)',
-        padding: '48px 32px 64px',
+        padding: 'clamp(28px, 6vw, 64px) clamp(16px, 4vw, 48px) clamp(40px, 6vw, 80px)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -65,15 +65,17 @@ export default async function LibraryPage(props: {
       </div>
 
       {/* Main Body */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 32px' }}>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(24px, 4vw, 40px) clamp(16px, 4vw, 32px)' }}>
+        <div className="lib-body-grid" style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
 
-          <Suspense fallback={(
-            <aside style={{ width: 240, flexShrink: 0, height: 400, borderRadius: 20, background: '#ffffff', border: '1px solid #E8ECF0' }} aria-hidden />
-          )}
-          >
-            <LibrarySidebarFilters />
-          </Suspense>
+          <div className="lib-sidebar-wrap">
+            <Suspense fallback={(
+              <aside style={{ width: 240, flexShrink: 0, height: 400, borderRadius: 20, background: '#ffffff', border: '1px solid #E8ECF0' }} aria-hidden />
+            )}
+            >
+              <LibrarySidebarFilters />
+            </Suspense>
+          </div>
 
           {/* Content */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -88,16 +90,26 @@ export default async function LibraryPage(props: {
             </div>
 
             {/* Book Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))',
-              gap: 24,
-            }}
+            <div
+              className="lib-book-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                gap: 20,
+              }}
             >
               {catalogBooks.map((book) => (
                 <BookCatalogCard key={book.id} book={book} />
               ))}
             </div>
+            <style>{`
+              @media (max-width: 480px) {
+                .lib-book-grid {
+                  grid-template-columns: repeat(2, 1fr) !important;
+                  gap: 14px !important;
+                }
+              }
+            `}</style>
 
             {/* Load More */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
@@ -122,6 +134,17 @@ export default async function LibraryPage(props: {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .lib-sidebar-wrap {
+            display: none;
+          }
+          .lib-body-grid {
+            flex-direction: column !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

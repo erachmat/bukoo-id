@@ -8,7 +8,8 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
   const searchParams = useSearchParams()
 
   return (
-    <div style={{ display: 'flex', gap: 10, marginTop: 24, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: 10, marginTop: 24, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 4, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <style>{`.lib-genre-chips::-webkit-scrollbar { display: none; }`}</style>
       {LIBRARY_GENRES.map((g) => {
         const selected =
           g === 'Semua'
@@ -33,6 +34,8 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
               transition: 'all 0.2s',
               letterSpacing: '0.01em',
               textDecoration: 'none',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
             }}
           >
             {g}

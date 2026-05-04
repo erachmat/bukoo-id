@@ -11,8 +11,16 @@ export default function AuthLayout({
       {/* Left Form Side */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 24px' }}>
         <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-          <Link href="/" style={{ display: 'inline-block', marginBottom: '32px', fontSize: '24px', fontWeight: '800', letterSpacing: '1px', color: '#fff', textDecoration: 'none' }}>
-            BUKOO
+          <Link href="/" style={{ display: 'inline-block', marginBottom: '32px', textDecoration: 'none' }}>
+            <span style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '28px',
+              fontWeight: '900',
+              letterSpacing: '-1px',
+              color: '#C9952A',
+            }}>
+              BUKOO
+            </span>
           </Link>
           {children}
         </div>
