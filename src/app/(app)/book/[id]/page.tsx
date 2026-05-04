@@ -17,92 +17,104 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   const book = prismaBookToCatalogBook(row)
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-10">
+    <div style={{ width: '100%', maxWidth: '1152px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box' }}>
       <Link
         href="/library"
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors"
+        style={{ display: 'inline-flex', alignItems: 'center', fontSize: '14px', fontWeight: '500', color: '#6B7280', textDecoration: 'none', marginBottom: '32px' }}
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
+        <ArrowLeft style={{ marginRight: '8px', height: '16px', width: '16px' }} />
         Kembali ke Katalog
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)] gap-10 lg:gap-14 lg:items-start">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 320px) minmax(0, 1fr)', gap: '56px', alignItems: 'start' }}>
         {/* Cover */}
-        <div className="w-full max-w-[320px] mx-auto lg:mx-0 lg:sticky lg:top-24 lg:self-start">
-          <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border">
+        <div style={{ width: '100%', maxWidth: '320px', position: 'sticky', top: '96px', alignSelf: 'flex-start' }}>
+          <div style={{ position: 'relative', aspectRatio: '2/3', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #E5E7EB' }}>
             <img
               src={book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop'}
               alt={book.title}
-              className="object-cover w-full h-full"
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
             />
             {book.isPremium && (
-              <div className="absolute top-3 right-3">
-                <Badge variant="default" className="bg-gradient-to-r from-yellow-500 to-amber-600 shadow-sm border-0 font-bold tracking-wide">
+              <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '9999px', padding: '4px 10px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.025em', color: '#ffffff', background: 'linear-gradient(to right, #EAB308, #D97706)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
                   PREMIUM
-                </Badge>
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Details */}
-        <div className="min-w-0 space-y-6 w-full">
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
           <div>
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
               {book.genre.map((g) => (
-                <Badge key={g} variant="secondary" className="bg-primary/10 text-primary border-primary/20">{g}</Badge>
+                <div key={g} style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '9999px', border: '1px solid rgba(0, 24, 26, 0.2)', backgroundColor: 'rgba(0, 24, 26, 0.1)', padding: '2px 10px', fontSize: '12px', fontWeight: '600', color: '#00181A' }}>{g}</div>
               ))}
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-2 text-pretty">{book.title}</h1>
-            <p className="text-xl text-muted-foreground">Oleh <span className="text-foreground font-medium">{book.author}</span></p>
+            <h1 style={{ fontSize: '48px', fontWeight: '800', letterSpacing: '-0.025em', marginBottom: '8px', lineHeight: '1.1', color: '#111827' }}>{book.title}</h1>
+            <p style={{ fontSize: '20px', color: '#6B7280' }}>Oleh <span style={{ color: '#111827', fontWeight: '500' }}>{book.author}</span></p>
           </div>
 
-          <div className="flex flex-wrap gap-6 text-sm">
-            <div className="flex items-center">
-              <Star className="mr-2 h-5 w-5 text-yellow-500 fill-yellow-500" />
-              <span className="font-bold text-base mr-1">4.8</span>
-              <span className="text-muted-foreground">({(book.readCount / 1000).toFixed(1)}k ulasan)</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Star style={{ marginRight: '8px', height: '20px', width: '20px', color: '#EAB308', fill: '#EAB308' }} />
+              <span style={{ fontWeight: '700', fontSize: '16px', marginRight: '4px' }}>4.8</span>
+              <span style={{ color: '#6B7280' }}>({(book.readCount / 1000).toFixed(1)}k ulasan)</span>
             </div>
-            <div className="flex items-center text-muted-foreground">
-              <BookOpen className="mr-2 h-5 w-5" />
+            <div style={{ display: 'flex', alignItems: 'center', color: '#6B7280' }}>
+              <BookOpen style={{ marginRight: '8px', height: '20px', width: '20px' }} />
               <span>{book.pageCount} halaman</span>
             </div>
-            <div className="flex items-center text-muted-foreground">
-              <Globe className="mr-2 h-5 w-5" />
+            <div style={{ display: 'flex', alignItems: 'center', color: '#6B7280' }}>
+              <Globe style={{ marginRight: '8px', height: '20px', width: '20px' }} />
               <span>{book.language === 'ID' ? 'Indonesia' : 'Inggris'} ({book.year || '—'})</span>
             </div>
           </div>
 
-          <Separator />
+          <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%' }} />
 
-          <div className="space-y-4">
-            <h3 className="font-bold text-lg">Sinopsis</h3>
-            <p className="max-w-prose text-muted-foreground leading-relaxed text-pretty">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ fontWeight: '700', fontSize: '18px', margin: 0, color: '#111827' }}>Sinopsis</h3>
+            <p style={{ maxWidth: '65ch', color: '#6B7280', lineHeight: '1.625', margin: 0 }}>
               {book.description || '—'}
             </p>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row gap-4">
+          <div style={{ paddingTop: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Link
               href={`/book/${resolvedParams.id}/read`}
-              className="inline-flex h-14 shrink-0 items-center justify-center rounded-full bg-primary px-10 text-base font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 hover:shadow-xl w-full sm:w-auto text-center"
+              style={{ display: 'inline-flex', height: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', backgroundColor: '#00181A', padding: '0 40px', fontSize: '16px', fontWeight: '700', color: '#ffffff', textDecoration: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
             >
               Mulai Baca Sekarang
             </Link>
 
-            <div className="flex gap-4">
-              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0" type="button">
-                <BookmarkPlus className="h-5 w-5" />
-                <span className="sr-only">Simpan kelist</span>
-              </Button>
-              <Button size="lg" variant="outline" className="h-14 w-14 rounded-full p-0 flex-shrink-0" type="button">
-                <Share2 className="h-5 w-5" />
-                <span className="sr-only">Bagikan</span>
-              </Button>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <BookmarkPlus style={{ height: '20px', width: '20px', color: '#111827' }} />
+              </button>
+              <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <Share2 style={{ height: '20px', width: '20px', color: '#111827' }} />
+              </button>
             </div>
           </div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 1024px) {
+          div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+          div[style*="position: sticky"] {
+            position: relative !important;
+            top: 0 !important;
+            max-width: 240px !important;
+            margin: 0 auto !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
