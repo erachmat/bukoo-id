@@ -10,6 +10,10 @@ export const proxy = auth((req) => {
     if (!user) {
       return NextResponse.redirect(new URL("/login", req.url))
     }
+    // Redirect ADMINs to the admin dashboard if they try to access the library
+    if (pathname === "/library" && (user as any).role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", req.url))
+    }
   }
 
   // Admin routes: require ADMIN role
