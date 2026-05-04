@@ -7,7 +7,23 @@ export function AccountSignOut() {
     <button
       type="button"
       onClick={() => signOut({ callbackUrl: '/' })}
-      className="rounded-full bg-[#C9952A] px-6 py-2.5 text-sm font-bold text-[#00181A] shadow transition hover:brightness-105"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '9999px',
+        backgroundColor: '#C9952A',
+        padding: '10px 24px',
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#00181A',
+        border: 'none',
+        cursor: 'pointer',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        transition: 'filter 0.2s',
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.filter = 'brightness(1.05)')}
+      onMouseOut={(e) => (e.currentTarget.style.filter = 'brightness(1)')}
     >
       Keluar
     </button>
