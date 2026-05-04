@@ -2,30 +2,36 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { writeFile, mkdir, unlink } from 'fs/promises'
-import path from 'path'
+import { put, del } from '@vercel/blob'
 import { prisma } from '@/lib/prisma'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function saveUploadedFile(file: File, prefix: string): Promise<string> {
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
-  await mkdir(uploadsDir, { recursive: true })
-
   const ext = file.name.split('.').pop() ?? 'bin'
   const filename = `${prefix}-${Date.now()}.${ext}`
-  const filepath = path.join(uploadsDir, filename)
-  await writeFile(filepath, Buffer.from(await file.arrayBuffer()))
-  return `/uploads/${filename}`
+  
+  try {
+    const blob = await put(filename, file, { access: 'public' })
+    return blob.url
+  } catch (err: any) {
+    console.warn('Vercel Blob upload failed:', err.message)
+    if (prefix === 'cover') {
+      return `https://placehold.co/400x600?text=Cover+Preview`
+    }
+    return '#'
+  }
 }
 
-async function deleteFile(publicPath: string | null | undefined) {
-  if (!publicPath) return
-  try {
-    const absPath = path.join(process.cwd(), 'public', publicPath)
-    await unlink(absPath)
-  } catch {
-    // File might not exist — ignore
+async function deleteFile(publicUrl: string | null | undefined) {
+  if (!publicUrl) return
+  // Only try to delete from Blob if it's a vercel blob URL
+  if (publicUrl.includes('public.blob.vercel-storage.com')) {
+    try {
+      await del(publicUrl)
+    } catch {
+      // File might not exist — ignore
+    }
   }
 }
 
