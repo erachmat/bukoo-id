@@ -1,6 +1,18 @@
-import React from 'react';
+'use client'
+
+import React, { useState, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function Hero() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    router.push(`/register?email=${encodeURIComponent(email.trim())}`);
+  }
+
   return (
     <section className="hero">
       <div className="hero-bg"></div>
@@ -23,10 +35,17 @@ export function Hero() {
           Harga mulai <strong style={{ color: 'var(--amber)' }}>Rp 19.900/bulan</strong>.
         </p>
 
-        <div className="hero-input-row">
-          <input className="hero-input" type="email" placeholder="Masukkan email kamu untuk memulai" />
-          <button className="hero-btn">Mulai Gratis →</button>
-        </div>
+        <form className="hero-input-row" onSubmit={handleSubmit}>
+          <input
+            className="hero-input"
+            type="email"
+            placeholder="Masukkan email kamu untuk memulai"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <button className="hero-btn" type="submit">Mulai Gratis →</button>
+        </form>
         <div className="hero-fine">Coba 7 hari gratis · Tanpa kartu kredit · Batalkan kapan saja</div>
       </div>
 
