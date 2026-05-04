@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 
 const GENRES = ['Fiksi', 'Non-Fiksi', 'Pengembangan Diri', 'Roman', 'Sastra', 'Bisnis', 'Sejarah', 'Klasik']
 
@@ -24,11 +24,24 @@ type BookFormProps = {
 
 export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & Terbitkan' }: BookFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  
+  const [coverName, setCoverName] = useState<string | null>(null)
+  const [epubName, setEpubName] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setErrorMsg(null)
     const fd = new FormData(e.currentTarget)
-    startTransition(() => action(fd))
+    
+    startTransition(async () => {
+      try {
+        await action(fd)
+      } catch (err: any) {
+        console.error(err)
+        setErrorMsg(err.message || 'Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
+      }
+    })
   }
 
   const inputStyle: React.CSSProperties = {
@@ -42,6 +55,11 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
 
   return (
     <form onSubmit={handleSubmit}>
+      {errorMsg && (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 10, marginBottom: 24, fontSize: 14, fontWeight: 600 }}>
+          {errorMsg}
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'flex-start' }}>
 
         {/* Left: Metadata */}
@@ -116,30 +134,34 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
           {/* Cover */}
           <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8ECF0', padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
             <label style={labelStyle}>Cover Buku</label>
-            {defaultValues.coverUrl && (
+            {defaultValues.coverUrl && !coverName && (
               <img src={defaultValues.coverUrl} alt="Current cover" style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', borderRadius: 8, marginBottom: 12, border: '1px solid #E8ECF0' }} />
             )}
-            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: '#F8FAFB', textAlign: 'center' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: coverName ? '#ECFDF5' : '#F8FAFB', textAlign: 'center' }}>
               <span style={{ fontSize: 28 }}>🖼️</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#6B7A8D' }}>{defaultValues.coverUrl ? 'Ganti cover' : 'Upload Cover'}</span>
-              <span style={{ fontSize: 11, color: '#AAB4C0' }}>JPG / PNG · Rasio 2:3</span>
-              <input type="file" name="cover" accept="image/*" style={{ display: 'none' }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: coverName ? '#047857' : '#6B7A8D' }}>
+                {coverName ? coverName : (defaultValues.coverUrl ? 'Ganti cover' : 'Upload Cover')}
+              </span>
+              {!coverName && <span style={{ fontSize: 11, color: '#AAB4C0' }}>JPG / PNG · Rasio 2:3</span>}
+              <input type="file" name="cover" accept="image/*" style={{ display: 'none' }} onChange={(e) => setCoverName(e.target.files?.[0]?.name ?? null)} />
             </label>
           </div>
 
           {/* File */}
           <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8ECF0', padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
             <label style={labelStyle}>File Buku (EPUB/PDF)</label>
-            {defaultValues.fileUrl && (
+            {defaultValues.fileUrl && !epubName && (
               <div style={{ marginBottom: 10, fontSize: 12, color: '#00856F', padding: '6px 12px', background: 'rgba(0,201,167,0.08)', borderRadius: 8, wordBreak: 'break-all' }}>
                 ✓ {defaultValues.fileUrl.split('/').pop()}
               </div>
             )}
-            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: '#F8FAFB', textAlign: 'center' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: epubName ? '#ECFDF5' : '#F8FAFB', textAlign: 'center' }}>
               <span style={{ fontSize: 28 }}>📄</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#6B7A8D' }}>{defaultValues.fileUrl ? 'Ganti file' : 'Upload File'}</span>
-              <span style={{ fontSize: 11, color: '#AAB4C0' }}>EPUB atau PDF · Maks 50MB</span>
-              <input type="file" name="epub" accept=".epub,.pdf" style={{ display: 'none' }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: epubName ? '#047857' : '#6B7A8D' }}>
+                {epubName ? epubName : (defaultValues.fileUrl ? 'Ganti file' : 'Upload File')}
+              </span>
+              {!epubName && <span style={{ fontSize: 11, color: '#AAB4C0' }}>EPUB atau PDF · Maks 50MB</span>}
+              <input type="file" name="epub" accept=".epub,.pdf" style={{ display: 'none' }} onChange={(e) => setEpubName(e.target.files?.[0]?.name ?? null)} />
             </label>
           </div>
 
@@ -154,7 +176,7 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
               transition: 'all 0.2s',
             }}
           >
-            {isPending ? 'Menyimpan...' : submitLabel}
+            {isPending ? 'Menyimpan... (Mohon tunggu)' : submitLabel}
           </button>
         </div>
       </div>
