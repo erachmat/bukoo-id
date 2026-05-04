@@ -7,7 +7,7 @@ import { PasswordInput } from '@/components/auth/password-input'
 import { SubmitButton } from '@/components/auth/submit-button'
 
 export default async function RegisterPage(props: {
-  searchParams: Promise<{ error?: string; success?: string }>
+  searchParams: Promise<{ error?: string; success?: string; email?: string }>
 }) {
   const session = await auth()
   if (session) {
@@ -56,7 +56,7 @@ export default async function RegisterPage(props: {
 
         <div>
           <label htmlFor="email" className="auth-label">Email</label>
-          <input id="email" name="email" type="email" placeholder="nama@email.com" required className="auth-input" />
+          <input id="email" name="email" type="email" placeholder="nama@email.com" required className="auth-input" defaultValue={params.email ?? ''} />
         </div>
 
         <div>
