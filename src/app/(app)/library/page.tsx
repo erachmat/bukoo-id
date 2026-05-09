@@ -16,8 +16,24 @@ export default async function LibraryPage(props: {
   const filters = parseLibraryCatalogParams(raw)
   const { q, genre } = filters
 
-  const books = await findBooksForLibraryCatalog(filters)
+  const limit = raw.limit ? Number(raw.limit) : 6
+  const books = await findBooksForLibraryCatalog(filters, limit)
   const catalogBooks = books.map(prismaBookToCatalogBook)
+
+  const hasMore = catalogBooks.length === limit
+  const nextLimit = limit + 6
+  const queryParams = new URLSearchParams()
+  Object.entries(raw).forEach(([key, val]) => {
+    if (val !== undefined) {
+      if (Array.isArray(val)) {
+        val.forEach(v => queryParams.append(key, v))
+      } else {
+        queryParams.set(key, val as string)
+      }
+    }
+  })
+  queryParams.set('limit', String(nextLimit))
+  const loadMoreHref = `/library?${queryParams.toString()}`
 
   return (
     <div style={{ minHeight: '100vh', background: '#F0F2F5', fontFamily: 'var(--font-geist-sans), Inter, system-ui, sans-serif' }}>
@@ -125,25 +141,33 @@ export default async function LibraryPage(props: {
                 </div>
 
                 {/* Load More */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
-                  <button style={{
-                    height: 48,
-                    padding: '0 40px',
-                    borderRadius: 999,
-                    background: '#ffffff',
-                    border: '2px solid #E8ECF0',
-                    fontSize: 14,
-                    fontWeight: 800,
-                    color: '#1A2332',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                    fontFamily: 'inherit',
-                  }}
-                  type="button"
-                  >
-                    Muat Lebih Banyak →
-                  </button>
-                </div>
+                {hasMore && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
+                    <Link
+                      href={loadMoreHref}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 48,
+                        padding: '0 40px',
+                        borderRadius: 999,
+                        background: '#ffffff',
+                        border: '2px solid #E8ECF0',
+                        fontSize: 14,
+                        fontWeight: 800,
+                        color: '#1A2332',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                        fontFamily: 'inherit',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Muat Lebih Banyak →
+                    </Link>
+                  </div>
+                )}
               </>
             )}
           </div>

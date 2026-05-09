@@ -5,6 +5,7 @@ import type { LibraryCatalogParams } from '@/lib/library/catalog-params'
 
 export async function findBooksForLibraryCatalog(
   filters: LibraryCatalogParams,
+  limit?: number,
 ): Promise<Book[]> {
   const { q, genre, access, lang, sort } = filters
 
@@ -50,6 +51,15 @@ export async function findBooksForLibraryCatalog(
     sort === 'newest'
       ? Prisma.raw('"createdAt" DESC')
       : Prisma.raw('"readCount" DESC')
+
+  if (limit) {
+    return prisma.$queryRaw<Book[]>`
+      SELECT * FROM "Book"
+      WHERE ${whereClause}
+      ORDER BY ${orderBySql}
+      LIMIT ${limit}
+    `
+  }
 
   return prisma.$queryRaw<Book[]>`
     SELECT * FROM "Book"
