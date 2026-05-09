@@ -21,9 +21,15 @@ export async function findBooksForLibraryCatalog(
 
   if (genre && genre !== 'Semua') {
     const pattern = `%${genre}%`
-    conditions.push(Prisma.sql`EXISTS (
-      SELECT 1 FROM unnest("genre") AS g WHERE g ILIKE ${pattern}
-    )`)
+    if (genre.toLowerCase() === 'fiksi') {
+      conditions.push(Prisma.sql`EXISTS (
+        SELECT 1 FROM unnest("genre") AS g WHERE g ILIKE ${pattern} AND g NOT ILIKE '%Non-Fiksi%'
+      )`)
+    } else {
+      conditions.push(Prisma.sql`EXISTS (
+        SELECT 1 FROM unnest("genre") AS g WHERE g ILIKE ${pattern}
+      )`)
+    }
   }
 
   if (access === 'free') {
