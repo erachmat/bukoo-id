@@ -89,48 +89,63 @@ export default async function LibraryPage(props: {
               </Suspense>
             </div>
 
-            {/* Book Grid */}
-            <div
-              className="lib-book-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                gap: 20,
-              }}
-            >
-              {catalogBooks.map((book) => (
-                <BookCatalogCard key={book.id} book={book} />
-              ))}
-            </div>
-            <style>{`
-              @media (max-width: 480px) {
-                .lib-book-grid {
-                  grid-template-columns: repeat(2, 1fr) !important;
-                  gap: 14px !important;
-                }
-              }
-            `}</style>
-
-            {/* Load More */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
-              <button style={{
-                height: 48,
-                padding: '0 40px',
-                borderRadius: 999,
+            {catalogBooks.length === 0 ? (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '80px 24px',
                 background: '#ffffff',
-                border: '2px solid #E8ECF0',
-                fontSize: 14,
-                fontWeight: 800,
-                color: '#1A2332',
-                cursor: 'pointer',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                fontFamily: 'inherit',
-              }}
-              type="button"
-              >
-                Muat Lebih Banyak →
-              </button>
-            </div>
+                borderRadius: 24,
+                border: '1px solid #E8ECF0',
+                textAlign: 'center',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+              }}>
+                <span style={{ fontSize: 52, marginBottom: 16 }}>📚</span>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1A2332', margin: 0 }}>Belum Ada Buku</h3>
+                <p style={{ color: '#6B7A8D', fontSize: 14, marginTop: 8, maxWidth: 360, lineHeight: 1.5 }}>
+                  Maaf, tidak ada buku yang cocok dengan pilihan filter atau pencarian Anda saat ini.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Book Grid */}
+                <div
+                  className="lib-book-grid"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                    gap: 20,
+                  }}
+                >
+                  {catalogBooks.map((book) => (
+                    <BookCatalogCard key={book.id} book={book} />
+                  ))}
+                </div>
+
+                {/* Load More */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
+                  <button style={{
+                    height: 48,
+                    padding: '0 40px',
+                    borderRadius: 999,
+                    background: '#ffffff',
+                    border: '2px solid #E8ECF0',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: '#1A2332',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                    fontFamily: 'inherit',
+                  }}
+                  type="button"
+                  >
+                    Muat Lebih Banyak →
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
