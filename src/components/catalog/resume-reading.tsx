@@ -27,7 +27,7 @@ export default async function ResumeReading() {
   return (
     <div style={{ marginBottom: 48 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1A2332', letterSpacing: '-0.01em', margin: 0 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em', margin: 0 }}>
           Lanjutkan Membaca ⚡️
         </h2>
       </div>
@@ -39,6 +39,7 @@ export default async function ResumeReading() {
           gap: 20, 
           overflowX: 'auto', 
           paddingBottom: 16,
+          paddingLeft: 2, // to avoid clipping shadows
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
@@ -50,62 +51,104 @@ export default async function ResumeReading() {
             style={{ textDecoration: 'none', flexShrink: 0 }}
           >
             <div style={{ 
-              display: 'flex', 
-              background: '#ffffff', 
-              borderRadius: 16, 
-              border: '1px solid #EAEEF2', 
-              padding: '14px', 
-              width: 320,
-              gap: 16,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
+              position: 'relative',
+              background: 'linear-gradient(135deg, #15456b 0%, #0a1a21 100%)', 
+              borderRadius: 24, 
+              border: '1px solid rgba(255,255,255,0.08)', 
+              padding: '24px', 
+              width: 340,
+              height: 170,
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+              transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+              cursor: 'pointer',
+              overflow: 'hidden'
             }} className="resume-card-item">
-              {/* Book Cover Thumbnail */}
+              
+              {/* Ambient Light Effect Background */}
+              <div style={{
+                position: 'absolute', top: '-50%', right: '-20%', width: '70%', height: '100%', 
+                background: 'radial-gradient(circle, rgba(0,201,167,0.15) 0%, transparent 70%)',
+                pointerEvents: 'none', zIndex: 0
+              }}></div>
+
+              {/* Badge */}
               <div style={{ 
-                width: 64, 
-                height: 92, 
+                background: '#F59E0B', 
+                color: '#00181A', 
+                display: 'inline-flex', 
+                padding: '6px 12px', 
                 borderRadius: 8, 
-                overflow: 'hidden', 
-                flexShrink: 0,
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                backgroundColor: '#F0F2F5'
+                fontSize: 11, 
+                fontWeight: 800, 
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                width: 'fit-content',
+                marginBottom: 16,
+                zIndex: 1
               }}>
-                <img 
-                  src={book.coverUrl || ''} 
-                  alt={book.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                Sedang Dibaca
               </div>
 
-              {/* Metadata Info */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ 
-                  fontSize: 15, 
-                  fontWeight: 800, 
-                  color: '#1A2332', 
-                  marginBottom: 4,
+              {/* Content */}
+              <div style={{ flex: 1, zIndex: 1 }}>
+                <h3 style={{ 
+                  fontSize: '22px', 
+                  fontWeight: 900, 
+                  color: '#FFFFFF', 
+                  margin: '0 0 4px 0',
+                  lineHeight: 1.2,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}>
+                  {book.title}
+                </h3>
+                <p style={{ 
+                  fontSize: '14px', 
+                  color: 'rgba(255,255,255,0.6)', 
+                  margin: 0,
+                  fontWeight: 500,
                   display: '-webkit-box',
                   WebkitLineClamp: 1,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden'
                 }}>
-                  {book.title}
-                </div>
-                <div style={{ fontSize: 12, color: '#8896A5', marginBottom: 12 }}>
                   {book.author}
+                </p>
+              </div>
+
+              {/* Footer layout */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 'auto', zIndex: 1 }}>
+                {/* Progress and Bar */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+                  <div style={{ height: 6, flex: 1, background: 'rgba(255,255,255,0.15)', borderRadius: 4, overflow: 'hidden', maxWidth: '100px' }}>
+                    <div style={{ height: '100%', width: `${Math.round(progress * 100)}%`, backgroundColor: '#F59E0B', borderRadius: 4 }}></div>
+                  </div>
+                  <span style={{ color: '#F59E0B', fontSize: 14, fontWeight: 800 }}>
+                    {Math.round(progress * 100)}%
+                  </span>
                 </div>
-                
-                {/* Small Progress Tracker */}
-                <div style={{ marginTop: 'auto' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, marginBottom: 6 }}>
-                    <span style={{ color: '#00C9A7' }}>{Math.round(progress * 100)}% selesai</span>
-                  </div>
-                  <div style={{ height: 5, width: '100%', background: '#F0F2F5', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.round(progress * 100)}%`, backgroundColor: '#00C9A7', borderRadius: 3 }}></div>
-                  </div>
+
+                {/* Call to action button style */}
+                <div style={{
+                  background: '#F59E0B',
+                  color: '#00181A',
+                  padding: '10px 20px',
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  fontSize: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
+                }}>
+                  Lanjut <span style={{ fontSize: 16, lineHeight: 0 }}>→</span>
                 </div>
               </div>
+
             </div>
           </Link>
         ))}
@@ -116,9 +159,9 @@ export default async function ResumeReading() {
           display: none;
         }
         .resume-card-item:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
-          border-color: #00C9A7 !important;
+          transform: translateY(-6px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.35) !important;
+          border-color: rgba(255, 255, 255, 0.2) !important;
         }
       `}</style>
     </div>
