@@ -11,10 +11,10 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
     <Link href={`/book/${book.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         style={{
-          background: '#ffffff',
-          borderRadius: 18,
+          background: 'transparent',
+          borderRadius: 16,
           overflow: 'hidden',
-          border: '1px solid #EAEEF2',
+          border: '1px solid rgba(255,255,255,0.05)',
           boxShadow: hovered ? '0 20px 48px rgba(0,0,0,0.14)' : '0 2px 12px rgba(0,0,0,0.05)',
           transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
           transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -92,7 +92,7 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
             {book.genre[0]}
           </div>
           <div style={{
-            fontSize: 15, fontWeight: 800, color: hovered ? '#00C9A7' : '#1A2332',
+            fontSize: 15, fontWeight: 800, color: hovered ? '#00C9A7' : '#ffffff',
             lineHeight: 1.3, marginBottom: 6,
             display: '-webkit-box', WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -100,15 +100,15 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
           }}>
             {book.title}
           </div>
-          <div style={{ fontSize: 12, color: '#8896A5', fontWeight: 600, marginBottom: 12, fontStyle: 'italic' }}>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 12, fontStyle: 'italic' }}>
             {book.author}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#F59E0B', fontSize: 13 }}>★</span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: '#3D4A5C' }}>4.8</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>4.8</span>
             </div>
-            <div style={{ fontSize: 11, color: '#AAB4C0', fontWeight: 600 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
               {(book.readCount / 1000).toFixed(0)}k dibaca
             </div>
           </div>

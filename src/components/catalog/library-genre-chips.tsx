@@ -4,6 +4,18 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { LIBRARY_GENRES, mergeLibraryPath } from '@/lib/library/catalog-params'
 
+const genreDisplayMap: Record<string, string> = {
+  'Semua': '🔥 Trending',
+  'Fiksi': 'Novel 🇮🇩',
+  'Non-Fiksi': 'Non-Fiksi 🧠',
+  'Sastra': 'Sastra 🖋️',
+  'Pengembangan Diri': 'Self-Dev 🌱',
+  'Bisnis': 'Bisnis 💼',
+  'Sejarah': 'Sejarah 🏛️',
+  'Roman': 'Roman 💖',
+  'Klasik': 'Klasik 📜',
+}
+
 export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
   const searchParams = useSearchParams()
 
@@ -17,6 +29,16 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
             : activeGenre.toLowerCase() === g.toLowerCase()
 
         const href = mergeLibraryPath(searchParams, { genre: g })
+        const display = genreDisplayMap[g] || g
+        
+        let bg = selected ? '#00C9A7' : 'rgba(255,255,255,0.05)'
+        let color = selected ? '#00181A' : 'rgba(255,255,255,0.75)'
+        let border = selected ? 'none' : '1px solid rgba(255,255,255,0.1)'
+        
+        // Special styling for 'Semua' / Trending when active
+        if (selected && g === 'Semua') {
+          bg = 'linear-gradient(135deg, #F59E0B, #FBBF24)'
+        }
 
         return (
           <Link
@@ -25,12 +47,12 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
             style={{
               padding: '7px 18px',
               borderRadius: 999,
-              background: selected ? '#00C9A7' : 'rgba(255,255,255,0.1)',
-              color: selected ? '#00181A' : 'rgba(255,255,255,0.75)',
+              background: bg,
+              color: color,
               fontSize: 13,
               fontWeight: 700,
               cursor: 'pointer',
-              border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.15)',
+              border: border,
               transition: 'all 0.2s',
               letterSpacing: '0.01em',
               textDecoration: 'none',
@@ -38,7 +60,7 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
               whiteSpace: 'nowrap',
             }}
           >
-            {g}
+            {display}
           </Link>
         )
       })}

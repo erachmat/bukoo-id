@@ -44,7 +44,7 @@ export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
           alignItems: 'center',
           justifyContent: 'center',
           pointerEvents: 'none',
-          color: '#ffffff',
+          color: '#6B7A8D',
         }}
       >
         <Search strokeWidth={2.5} size={22} />
@@ -62,8 +62,8 @@ export function LibrarySearch({ initialQuery }: { initialQuery: string }) {
           width: '100%',
           height: 52,
           borderRadius: 999,
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(255,255,255,0.05)',
           color: '#ffffff',
           fontSize: 15,
           paddingLeft: 54,

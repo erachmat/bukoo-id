@@ -37,11 +37,11 @@ export default async function LibraryPage(props: {
   const loadMoreHref = `/library?${queryParams.toString()}`
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F0F2F5', fontFamily: 'var(--font-geist-sans), Inter, system-ui, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#0E1117', fontFamily: 'var(--font-geist-sans), Inter, system-ui, sans-serif' }}>
       {/* Hero Header Band */}
       <div style={{
-        background: 'linear-gradient(135deg, #00181A 0%, #00302E 60%, #004D4A 100%)',
-        padding: 'clamp(28px, 6vw, 64px) clamp(16px, 4vw, 48px) clamp(40px, 6vw, 80px)',
+        background: '#0E1117',
+        padding: 'clamp(28px, 6vw, 64px) clamp(16px, 4vw, 48px) clamp(24px, 6vw, 40px)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -87,7 +87,7 @@ export default async function LibraryPage(props: {
 
           <div className="lib-sidebar-wrap">
             <Suspense fallback={(
-              <aside style={{ width: 240, flexShrink: 0, height: 400, borderRadius: 20, background: '#ffffff', border: '1px solid #E8ECF0' }} aria-hidden />
+              <aside style={{ width: 240, flexShrink: 0, height: 400, borderRadius: 20, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }} aria-hidden />
             )}
             >
               <LibrarySidebarFilters />
@@ -106,8 +106,8 @@ export default async function LibraryPage(props: {
 
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
-              <span style={{ fontSize: 14, color: '#6B7A8D', fontWeight: 600 }}>
-                Menampilkan <strong style={{ color: '#1A2332' }}>{catalogBooks.length}</strong> buku
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+                Menampilkan <strong style={{ color: '#ffffff' }}>{catalogBooks.length}</strong> buku
               </span>
               <Suspense fallback={<div style={{ height: 40, width: 200 }} aria-hidden />}>
                 <LibrarySort sort={filters.sort} />
@@ -121,15 +121,14 @@ export default async function LibraryPage(props: {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '80px 24px',
-                background: '#ffffff',
+                background: 'rgba(255,255,255,0.02)',
                 borderRadius: 24,
-                border: '1px solid #E8ECF0',
+                border: '1px solid rgba(255,255,255,0.05)',
                 textAlign: 'center',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
               }}>
                 <span style={{ fontSize: 52, marginBottom: 16 }}>📚</span>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1A2332', margin: 0 }}>Belum Ada Buku</h3>
-                <p style={{ color: '#6B7A8D', fontSize: 14, marginTop: 8, maxWidth: 360, lineHeight: 1.5 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: 0 }}>Belum Ada Buku</h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 8, maxWidth: 360, lineHeight: 1.5 }}>
                   Maaf, tidak ada buku yang cocok dengan pilihan filter atau pencarian Anda saat ini.
                 </p>
               </div>
@@ -140,8 +139,8 @@ export default async function LibraryPage(props: {
                   className="lib-book-grid"
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                    gap: 20,
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                    gap: '24px 16px',
                   }}
                 >
                   {catalogBooks.map((book) => (
@@ -161,13 +160,12 @@ export default async function LibraryPage(props: {
                         height: 48,
                         padding: '0 40px',
                         borderRadius: 999,
-                        background: '#ffffff',
-                        border: '2px solid #E8ECF0',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
                         fontSize: 14,
                         fontWeight: 800,
-                        color: '#1A2332',
+                        color: '#ffffff',
                         cursor: 'pointer',
-                        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                         fontFamily: 'inherit',
                         textDecoration: 'none',
                         transition: 'all 0.2s'

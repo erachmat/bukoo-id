@@ -16,9 +16,10 @@ interface PdfViewerProps {
   fileUrl: string
   initialLocation?: string | null
   theme: 'light' | 'dark' | 'sepia'
+  onChapterChange?: (title: string) => void
 }
 
-export default function PdfViewer({ bookId, fileUrl, initialLocation, theme }: PdfViewerProps) {
+export default function PdfViewer({ bookId, fileUrl, initialLocation, theme, onChapterChange }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(
     initialLocation ? parseInt(initialLocation, 10) || 1 : 1
@@ -26,6 +27,7 @@ export default function PdfViewer({ bookId, fileUrl, initialLocation, theme }: P
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages)
+    if (onChapterChange) onChapterChange('Dokumen PDF')
   }
 
   // Update remote storage whenever page changes
@@ -88,32 +90,41 @@ export default function PdfViewer({ bookId, fileUrl, initialLocation, theme }: P
       </div>
 
       {/* Bottom Persistent Control Sticky Bar */}
-      <div className="h-16 w-full bg-background/95 backdrop-blur border-t flex items-center justify-center gap-6 px-4 z-10">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={previousPage}
-          disabled={pageNumber <= 1}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-
-        <div className="text-sm font-medium flex items-center gap-1">
-          <span>Halaman</span>
-          <span className="inline-flex h-8 px-2 items-center border rounded-md bg-muted/50 min-w-[40px] justify-center">
-            {pageNumber}
-          </span>
-          <span className="text-muted-foreground">dari {numPages || '...'}</span>
+      <div className="h-20 w-full bg-[#0f172a] text-white flex flex-col z-10 shrink-0 relative">
+        {/* Progress Bar Track */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-white/10">
+          <div 
+            className="h-full bg-[#00C9A7] transition-all duration-300" 
+            style={{ width: `${numPages > 0 ? (pageNumber / numPages) * 100 : 0}%` }} 
+          />
         </div>
+        
+        <div className="flex-1 flex items-center justify-between px-6">
+          <button
+            onClick={previousPage}
+            disabled={pageNumber <= 1}
+            className="text-[15px] font-medium text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white transition-colors"
+          >
+            ← Prev
+          </button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={nextPage}
-          disabled={pageNumber >= numPages}
-        >
-          <ChevronRight className="h-5 w-5" />
-        </Button>
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-[15px] font-bold text-white tracking-wide">
+              Hal. {pageNumber} / {numPages || '...'}
+            </div>
+            <div className="text-[11px] font-medium text-slate-400 mt-0.5">
+              {numPages > 0 ? Math.round((pageNumber / numPages) * 100) : 0}% selesai
+            </div>
+          </div>
+
+          <button
+            onClick={nextPage}
+            disabled={pageNumber >= numPages}
+            className="text-[15px] font-bold text-[#00C9A7] disabled:opacity-30 disabled:cursor-not-allowed hover:text-[#34d399] transition-colors"
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </div>
   )

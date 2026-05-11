@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Settings, Moon, Sun, FileWarning } from 'lucide-react'
+import { ArrowLeft, Settings, Moon, Sun, FileWarning, Bookmark } from 'lucide-react'
 import EpubViewer from './epub-viewer'
 import PdfViewer from './pdf-viewer'
 
@@ -19,7 +19,8 @@ interface ReaderShellProps {
 
 export default function ReaderShell({ book, initialLocation }: ReaderShellProps) {
   const [showSettings, setShowSettings] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light')
+  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('sepia')
+  const [chapter, setChapter] = useState<string>('Memuat...')
 
   if (!book.fileUrl) {
     return (
@@ -36,28 +37,37 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
     )
   }
 
+  const shellBg = theme === 'dark' ? 'bg-[#0f172a] text-white border-slate-800' : theme === 'sepia' ? 'bg-[#fbf0d9] text-[#43302b] border-[#e8dcc3]' : 'bg-white text-slate-900 border-slate-200'
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+    <div className={`fixed inset-0 z-50 flex flex-col ${shellBg} transition-colors duration-300`}>
       {/* Top Navigation Bar */}
-      <div className="h-14 border-b bg-background/95 backdrop-blur flex items-center justify-between px-4 z-10 shrink-0">
+      <div className={`h-16 border-b flex items-center justify-between px-4 z-10 shrink-0 ${shellBg}`}>
         <Link href={`/book/${book.id}`}>
-          <Button variant="ghost" size="sm" className="text-muted-foreground mr-2">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tutup
+          <Button variant="ghost" size="icon" className="shrink-0 text-inherit hover:bg-black/5 dark:hover:bg-white/10">
+            <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
-        <div className="font-medium text-sm text-center flex-1 truncate px-4">
-          {book.title}
+        
+        <div className="flex-1 flex flex-col items-center justify-center truncate px-4">
+          <div className="font-bold text-[15px] truncate max-w-full">{book.title}</div>
+          <div className="text-xs opacity-60 truncate max-w-full">{chapter}</div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setShowSettings(!showSettings)}>
-          <Settings className="w-5 h-5 text-muted-foreground" />
-        </Button>
+        
+        <div className="flex items-center shrink-0">
+          <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-black/5 dark:hover:bg-white/10">
+            <Bookmark className="w-5 h-5 fill-current" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(!showSettings)} className="text-inherit hover:bg-black/5 dark:hover:bg-white/10">
+            <Sun className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Settings Dropdown */}
       {showSettings && (
-        <div className="absolute top-16 right-4 w-64 bg-background border rounded-lg shadow-xl p-4 z-20 animate-in slide-in-from-top-2">
-          <h4 className="font-semibold text-sm mb-3">Tampilan</h4>
+        <div className={`absolute top-16 right-4 w-64 border rounded-lg shadow-xl p-4 z-20 animate-in slide-in-from-top-2 ${theme === 'dark' ? 'bg-[#1e293b] border-slate-700' : 'bg-white border-slate-200'}`}>
+          <h4 className={`font-semibold text-sm mb-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Tampilan</h4>
           <div className="flex gap-2">
             <Button 
               variant={theme === 'light' ? 'default' : 'outline'} 
@@ -95,6 +105,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
             fileUrl={book.fileUrl} 
             initialLocation={initialLocation}
             theme={theme}
+            onChapterChange={setChapter}
           />
         ) : (
           <EpubViewer 
@@ -102,6 +113,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
             fileUrl={book.fileUrl} 
             initialLocation={initialLocation}
             theme={theme}
+            onChapterChange={setChapter}
           />
         )}
       </div>
