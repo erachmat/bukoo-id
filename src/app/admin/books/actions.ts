@@ -54,11 +54,16 @@ export async function createBook(formData: FormData) {
   let coverUrl: string | undefined
   let fileUrl: string | undefined
 
+  let fileType: 'EPUB' | 'PDF' = 'EPUB'
+
   if (coverFile && coverFile.size > 0) {
     coverUrl = await saveUploadedFile(coverFile, 'cover')
   }
   if (epubFile && epubFile.size > 0) {
     fileUrl = await saveUploadedFile(epubFile, 'epub')
+    if (epubFile.name.toLowerCase().endsWith('.pdf')) {
+      fileType = 'PDF'
+    }
   }
 
   await prisma.book.create({
@@ -68,6 +73,7 @@ export async function createBook(formData: FormData) {
       description: description || null,
       coverUrl: coverUrl ?? null,
       fileUrl: fileUrl ?? null,
+      fileType,
       genre: genre ? [genre] : [],
       language,
       isPremium,
@@ -103,6 +109,7 @@ export async function updateBook(id: string, formData: FormData) {
 
   let coverUrl = existing.coverUrl
   let fileUrl = existing.fileUrl
+  let fileType = existing.fileType
 
   if (coverFile && coverFile.size > 0) {
     await deleteFile(existing.coverUrl)
@@ -111,6 +118,7 @@ export async function updateBook(id: string, formData: FormData) {
   if (epubFile && epubFile.size > 0) {
     await deleteFile(existing.fileUrl)
     fileUrl = await saveUploadedFile(epubFile, 'epub')
+    fileType = epubFile.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'EPUB'
   }
 
   await prisma.book.update({
@@ -121,6 +129,7 @@ export async function updateBook(id: string, formData: FormData) {
       description: description || null,
       coverUrl,
       fileUrl,
+      fileType,
       genre: genre ? [genre] : [],
       language,
       isPremium,
