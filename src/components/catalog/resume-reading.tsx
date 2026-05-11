@@ -38,6 +38,7 @@ export default async function ResumeReading() {
           display: 'flex', 
           gap: 20, 
           overflowX: 'auto', 
+          paddingTop: 12, // added to prevent clipping hover translate animation
           paddingBottom: 16,
           paddingLeft: 2, // to avoid clipping shadows
           scrollbarWidth: 'none',
