@@ -69,30 +69,29 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
         <div className={`absolute top-16 right-4 w-64 border rounded-lg shadow-xl p-4 z-20 animate-in slide-in-from-top-2 ${theme === 'dark' ? 'bg-[#1e293b] border-slate-700' : 'bg-white border-slate-200'}`}>
           <h4 className={`font-semibold text-sm mb-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Tampilan</h4>
           <div className="flex gap-2">
-            <Button 
-              variant={theme === 'light' ? 'default' : 'outline'} 
-              size="sm" 
-              className="flex-1"
+            <button 
+              className={`flex-1 h-9 inline-flex items-center justify-center rounded-md text-xs font-medium border transition-colors
+                ${theme === 'light' ? 'bg-white text-slate-900 border-[#00C9A7] ring-1 ring-[#00C9A7]' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'}`}
               onClick={() => setTheme('light')}
             >
-              <Sun className="w-4 h-4 mr-1" /> Terang
-            </Button>
-            <Button 
-              variant={theme === 'sepia' ? 'default' : 'outline'} 
-              size="sm" 
-              className="flex-1 bg-[#fbf0d9] text-amber-900 border-amber-200 hover:bg-[#f3e3c3] hover:text-amber-900"
+              <Sun className="w-3.5 h-3.5 mr-1.5" /> Terang
+            </button>
+
+            <button 
+              className={`flex-1 h-9 inline-flex items-center justify-center rounded-md text-xs font-medium border transition-colors
+                ${theme === 'sepia' ? 'bg-[#fbf0d9] text-amber-900 border-[#00C9A7] ring-1 ring-[#00C9A7]' : 'bg-[#fbf0d9] text-amber-900 border-amber-200 hover:bg-[#f3e3c3]'}`}
               onClick={() => setTheme('sepia')}
             >
               Sepia
-            </Button>
-            <Button 
-              variant={theme === 'dark' ? 'default' : 'outline'} 
-              size="sm" 
-              className="flex-1"
+            </button>
+
+            <button 
+              className={`flex-1 h-9 inline-flex items-center justify-center rounded-md text-xs font-medium border transition-colors
+                ${theme === 'dark' ? 'bg-slate-900 text-white border-[#00C9A7] ring-1 ring-[#00C9A7]' : 'bg-slate-900 text-white border-slate-800 hover:bg-slate-950'}`}
               onClick={() => setTheme('dark')}
             >
-              <Moon className="w-4 h-4 mr-1" /> Gelap
-            </Button>
+              <Moon className="w-3.5 h-3.5 mr-1.5" /> Gelap
+            </button>
           </div>
         </div>
       )}
