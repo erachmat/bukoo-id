@@ -8,7 +8,7 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <Link href={`/book/${book.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/book/${book.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }}>
       <div
         style={{
           background: 'transparent',
@@ -19,6 +19,10 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
           transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
           transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          width: '100%',
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -84,7 +88,7 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
         </div>
 
         {/* Info */}
-        <div style={{ padding: '14px 16px 16px' }}>
+        <div style={{ padding: '14px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{
             fontSize: 10, fontWeight: 800, color: '#00C9A7',
             letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6,
@@ -103,7 +107,7 @@ export function BookCatalogCard({ book }: { book: MockBook }) {
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 12, fontStyle: 'italic' }}>
             {book.author}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#F59E0B', fontSize: 13 }}>★</span>
               <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.8)' }}>4.8</span>
