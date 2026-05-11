@@ -8,6 +8,7 @@ import { LibraryGenreChips } from '@/components/catalog/library-genre-chips'
 import { LibrarySearch } from '@/components/catalog/library-search'
 import { LibrarySidebarFilters } from '@/components/catalog/library-sidebar-filters'
 import { LibrarySort } from '@/components/catalog/library-sort'
+import ResumeReading from '@/components/catalog/resume-reading'
 
 export default async function LibraryPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -95,6 +96,14 @@ export default async function LibraryPage(props: {
 
           {/* Content */}
           <div style={{ flex: 1, minWidth: 0 }}>
+            
+            {/* Conditionally show recently read only on standard non-filtered view */}
+            {!q && filters.genre === 'Semua' && (
+              <Suspense fallback={<div style={{ height: 140, marginBottom: 48, background: '#fff', borderRadius: 16, opacity: 0.5, border: '1px dashed #ccc' }} />}>
+                <ResumeReading />
+              </Suspense>
+            )}
+
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
               <span style={{ fontSize: 14, color: '#6B7A8D', fontWeight: 600 }}>

@@ -7,14 +7,44 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Star, BookOpen, Globe, ArrowLeft, BookmarkPlus, Share2 } from 'lucide-react'
 
+import { auth } from '@/lib/auth'
+import { Lock } from 'lucide-react'
+
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
+  const session = await auth()
+  
   const row = await prisma.book.findUnique({
     where: { id: resolvedParams.id },
   })
   if (!row || !row.isPublished) notFound()
 
+  // Fetch user model to double check subscription tier and reading progress
+  let userProgress = null
+  let canRead = true
+  let userTier = 'FREE'
+
+  if (session?.user?.id) {
+    const userDb = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        readingProgress: {
+          where: { bookId: resolvedParams.id }
+        }
+      }
+    })
+    
+    userTier = userDb?.subscriptionTier || 'FREE'
+    userProgress = userDb?.readingProgress[0] || null
+    
+    // Access Check
+    if (row.isPremium && userTier === 'FREE') {
+      canRead = false
+    }
+  }
+
   const book = prismaBookToCatalogBook(row)
+  const hasStarted = userProgress && userProgress.progress > 0
 
   return (
     <div style={{ width: '100%', maxWidth: '1152px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box' }}>
@@ -75,6 +105,17 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
           <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%' }} />
 
+          {userProgress && userProgress.progress > 0 && (
+            <div style={{ padding: '16px', backgroundColor: '#F3F4F6', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', margin: '0 0 6px 0' }}>Progres Membaca: {Math.round(userProgress.progress * 100)}%</p>
+                <div style={{ height: '6px', background: '#D1D5DB', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.round(userProgress.progress * 100)}%`, backgroundColor: '#00C9A7' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 style={{ fontWeight: '700', fontSize: '18px', margin: 0, color: '#111827' }}>Sinopsis</h3>
             <p style={{ maxWidth: '65ch', color: '#6B7280', lineHeight: '1.625', margin: 0 }}>
@@ -83,21 +124,36 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           <div style={{ paddingTop: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <Link
-              href={`/book/${resolvedParams.id}/read`}
-              style={{ display: 'inline-flex', height: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', backgroundColor: '#00181A', padding: '0 40px', fontSize: '16px', fontWeight: '700', color: '#ffffff', textDecoration: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-            >
-              Mulai Baca Sekarang
-            </Link>
+            {!canRead ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '360px' }}>
+                <button
+                  disabled
+                  style={{ display: 'inline-flex', height: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', backgroundColor: '#9CA3AF', padding: '0 40px', fontSize: '16px', fontWeight: '700', color: '#ffffff', border: 'none', cursor: 'not-allowed', opacity: 0.8 }}
+                >
+                  <Lock style={{ height: '18px', width: '18px', marginRight: '8px' }} />
+                  Khusus Premium
+                </button>
+                <p style={{ fontSize: '13px', color: '#EF4444', fontWeight: '500', margin: 0 }}>Berlangganan PRO untuk membuka buku ini.</p>
+              </div>
+            ) : (
+              <Link
+                href={`/book/${resolvedParams.id}/read`}
+                style={{ display: 'inline-flex', height: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', backgroundColor: '#00181A', padding: '0 40px', fontSize: '16px', fontWeight: '700', color: '#ffffff', textDecoration: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+              >
+                {hasStarted ? 'Lanjutkan Membaca' : 'Mulai Baca Sekarang'}
+              </Link>
+            )}
 
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <BookmarkPlus style={{ height: '20px', width: '20px', color: '#111827' }} />
-              </button>
-              <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <Share2 style={{ height: '20px', width: '20px', color: '#111827' }} />
-              </button>
-            </div>
+            {canRead && (
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <BookmarkPlus style={{ height: '20px', width: '20px', color: '#111827' }} />
+                </button>
+                <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <Share2 style={{ height: '20px', width: '20px', color: '#111827' }} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
