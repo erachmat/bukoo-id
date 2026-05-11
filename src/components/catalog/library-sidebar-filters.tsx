@@ -42,20 +42,20 @@ export function LibrarySidebarFilters() {
     <aside style={{
       width: 240,
       flexShrink: 0,
-      background: '#ffffff',
-      borderRadius: 20,
-      border: '1px solid #E8ECF0',
+      background: 'rgba(255,255,255,0.03)',
+      borderRadius: 24,
+      border: '1px solid rgba(255,255,255,0.06)',
       padding: '28px 24px',
       position: 'sticky',
       top: 84,
-      boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
+      backdropFilter: 'blur(12px)',
     }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="20" y2="12" /><line x1="12" y1="18" x2="20" y2="18" />
         </svg>
-        <span style={{ fontWeight: 800, fontSize: 15, color: '#1A2332' }}>Filter</span>
+        <span style={{ fontWeight: 800, fontSize: 15, color: '#FFFFFF' }}>Filter</span>
       </div>
 
       <FilterSection title="Kategori">
@@ -70,7 +70,7 @@ export function LibrarySidebarFilters() {
         ))}
       </FilterSection>
 
-      <div style={{ height: 1, background: '#F0F2F5', margin: '24px 0' }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
 
       <FilterSection title="Tipe Akses">
         <RadioRow name="catalog-access" checked={accessDraft === 'all'} label="Semua" onChange={() => setAccessDraft('all')} />
@@ -78,7 +78,7 @@ export function LibrarySidebarFilters() {
         <RadioRow name="catalog-access" checked={accessDraft === 'premium'} label="Premium" badge onChange={() => setAccessDraft('premium')} />
       </FilterSection>
 
-      <div style={{ height: 1, background: '#F0F2F5', margin: '24px 0' }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
 
       <FilterSection title="Bahasa">
         <RadioRow name="catalog-lang" checked={langDraft === 'all'} label="Semua bahasa" onChange={() => setLangDraft('all')} />
@@ -115,7 +115,7 @@ function FilterSection({ title, children }: { title: string, children: React.Rea
       <div style={{
         fontSize: 10,
         fontWeight: 900,
-        color: '#AAB4C0',
+        color: 'rgba(255,255,255,0.4)',
         letterSpacing: '0.12em',
         textTransform: 'uppercase',
         marginBottom: 14,
@@ -150,9 +150,9 @@ function RadioRow({
         name={name}
         checked={checked}
         onChange={onChange}
-        style={{ accentColor: '#00C9A7', width: 18, height: 18, flexShrink: 0, cursor: 'pointer' }}
+        style={{ accentColor: '#00C9A7', width: 18, height: 18, flexShrink: 0, cursor: 'pointer', opacity: 0.8 }}
       />
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#3D4A5C' }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: checked ? '#00C9A7' : 'rgba(255,255,255,0.7)' }}>{label}</span>
       {badge && (
         <span style={{
           fontSize: 9,

@@ -16,7 +16,7 @@ export function LibrarySort({ sort }: { sort: LibrarySort }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: 13, color: '#6B7A8D', fontWeight: 700 }}>Urutkan:</span>
+      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Urutkan:</span>
       <select
         title="Urutkan"
         value={sort}
@@ -30,22 +30,21 @@ export function LibrarySort({ sort }: { sort: LibrarySort }) {
         style={{
           height: 40,
           borderRadius: 12,
-          border: '1.5px solid #E8ECF0',
-          background: '#ffffff',
+          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(255,255,255,0.05)',
           paddingLeft: 16,
           paddingRight: 36,
           fontSize: 13,
           fontWeight: 700,
-          color: '#1A2332',
+          color: '#FFFFFF',
           appearance: 'none',
           cursor: 'pointer',
           outline: 'none',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
           fontFamily: 'inherit',
         }}
       >
         {SORT_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
+          <option key={o.value} value={o.value} style={{ background: '#0E1117', color: '#FFFFFF' }}>
             {o.label}
           </option>
         ))}
