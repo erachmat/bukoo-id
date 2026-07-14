@@ -1,11 +1,14 @@
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
 import ReadingGoalsWidget from './ReadingGoalsWidget';
+import { readingSync } from '../../services/readingSync';
+import { bookDownloadService } from '../../services/bookDownload';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -14,6 +17,28 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<NavigationProp>();
+  const isFocused = useIsFocused();
+
+  const [unsyncedCount, setUnsyncedCount] = useState(0);
+  const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!isFocused) return;
+
+    bookDownloadService.getDownloadedBooks()
+      .then(setDownloadedBookIds)
+      .catch(err => console.error('[HomeScreen] Failed to load downloaded books:', err));
+
+    const checkSync = async () => {
+      const count = await readingSync.getUnsyncedCount();
+      setUnsyncedCount(count);
+    };
+
+    checkSync();
+    const interval = setInterval(checkSync, 3000);
+
+    return () => clearInterval(interval);
+  }, [isFocused]);
 
   // Fetch recent reading session
   const { data: recentReading, isLoading: isLoadingRecent } = useQuery({
@@ -94,6 +119,17 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Beranda</Text>
           <View style={styles.headerRight}>
+            {/* Cloud Sync Status */}
+            <View style={styles.syncStatusContainer}>
+              {unsyncedCount > 0 ? (
+                <>
+                  <Ionicons name="cloud-upload-outline" size={22} color="#C8541F" />
+                  <Text style={styles.syncStatusText}>{unsyncedCount}</Text>
+                </>
+              ) : (
+                <Ionicons name="cloud-done-outline" size={22} color="#34C759" />
+              )}
+            </View>
             
             {/* Profile Avatar */}
             <TouchableOpacity 
@@ -123,7 +159,14 @@ export default function HomeScreen() {
               activeOpacity={0.9}
               onPress={handleContinueReading}
             >
-              <Image source={{ uri: recentReading[0].book.coverUrl }} style={styles.continueCover} />
+              <View style={{ position: 'relative' }}>
+                <Image source={{ uri: recentReading[0].book.coverUrl }} style={styles.continueCover} />
+                {downloadedBookIds.includes(recentReading[0].bookId) && (
+                  <View style={styles.downloadBadge}>
+                    <Text style={styles.downloadBadgeText}>⬇️</Text>
+                  </View>
+                )}
+              </View>
               <View style={styles.continueInfo}>
                 <View style={styles.continueTextRow}>
                   <View style={{ flex: 1 }}>
@@ -144,10 +187,17 @@ export default function HomeScreen() {
               activeOpacity={0.9}
               onPress={() => navigation.navigate('Search')}
             >
-              <Image 
-                source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }} 
-                style={styles.continueCover} 
-              />
+              <View style={{ position: 'relative' }}>
+                <Image 
+                  source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }} 
+                  style={styles.continueCover} 
+                />
+                {downloadedBookIds.includes('art-of-war') && (
+                  <View style={styles.downloadBadge}>
+                    <Text style={styles.downloadBadgeText}>⬇️</Text>
+                  </View>
+                )}
+              </View>
               <View style={styles.continueInfo}>
                 <View style={styles.continueTextRow}>
                   <View style={{ flex: 1 }}>
@@ -240,7 +290,14 @@ export default function HomeScreen() {
                 onPress={() => navigation.navigate('Search')}
                 activeOpacity={0.8}
               >
-                <Image source={{ uri: item.coverUrl }} style={styles.bestsellerCover} />
+                <View style={{ position: 'relative' }}>
+                  <Image source={{ uri: item.coverUrl }} style={styles.bestsellerCover} />
+                  {downloadedBookIds.includes(item.id.replace('-bestseller', '')) && (
+                    <View style={styles.downloadBadge}>
+                      <Text style={styles.downloadBadgeText}>⬇️</Text>
+                    </View>
+                  )}
+                </View>
               </TouchableOpacity>
             )}
           />
@@ -462,5 +519,42 @@ const styles = StyleSheet.create({
     height: 210,
     borderRadius: 8,
     backgroundColor: '#1C1C1E',
+  },
+  syncStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+    backgroundColor: '#1C1C1E',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  syncStatusText: {
+    color: '#C8541F',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  downloadBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#1B3A2D',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F4F1E8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  downloadBadgeText: {
+    fontSize: 9,
+    lineHeight: 11,
   },
 });

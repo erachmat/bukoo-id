@@ -10,9 +10,10 @@ interface BookCoverCardProps {
   onPress: () => void;
   size?: 'small' | 'large';
   dark?: boolean;
+  isDownloaded?: boolean;
 }
 
-export default function BookCoverCard({ book, onPress, size = 'small', dark = false }: BookCoverCardProps) {
+export default function BookCoverCard({ book, onPress, size = 'small', dark = false, isDownloaded = false }: BookCoverCardProps) {
   const isLarge = size === 'large';
   
   return (
@@ -27,6 +28,11 @@ export default function BookCoverCard({ book, onPress, size = 'small', dark = fa
           style={styles.image} 
           resizeMode="cover"
         />
+        {isDownloaded && (
+          <View style={styles.downloadBadge}>
+            <Text style={styles.downloadBadgeText}>⬇️</Text>
+          </View>
+        )}
       </View>
       <View style={styles.textContainer}>
         <Text style={[styles.title, dark && styles.titleDark]} numberOfLines={2}>{book.title}</Text>
@@ -55,6 +61,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     marginBottom: 12,
+    position: 'relative',
   },
   imageContainerSmall: {
     width: 120,
@@ -68,6 +75,28 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 8,
+  },
+  downloadBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#1B3A2D',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#F4F1E8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  downloadBadgeText: {
+    fontSize: 10,
+    lineHeight: 12,
   },
   textContainer: {
     paddingHorizontal: 4,

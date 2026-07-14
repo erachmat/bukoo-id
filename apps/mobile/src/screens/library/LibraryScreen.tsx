@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import BookCoverCard from '../../components/BookCoverCard';
+import { bookDownloadService } from '../../services/bookDownload';
 import { RootStackParamList, MainTabParamList, ReadingStackParamList } from '../../navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList & ReadingStackParamList>;
@@ -53,7 +54,17 @@ const SAMPLE_LIBRARY_BOOKS = [
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState<TabFilter>('Semua');
+  const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isFocused) {
+      bookDownloadService.getDownloadedBooks()
+        .then(setDownloadedBookIds)
+        .catch(err => console.error('Failed to load downloaded books:', err));
+    }
+  }, [isFocused]);
 
   const { data: books, isLoading } = useQuery({
     queryKey: ['books', 'library'],
@@ -119,6 +130,7 @@ export default function LibraryScreen() {
                 book={item}
                 size="large"
                 dark={true}
+                isDownloaded={downloadedBookIds.includes(item.id)}
                 onPress={() => navigation.navigate('ReadingStack', {
                   screen: 'BookDetail',
                   params: { bookId: item.id }

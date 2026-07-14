@@ -347,6 +347,22 @@ export class ReadingSync {
     );
   }
 
+  async getUnsyncedCount(): Promise<number> {
+    try {
+      const db = await getDb();
+      const result = await db.getFirstAsync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM pending_syncs'
+      );
+      const dirtyResult = await db.getFirstAsync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM reading_progress WHERE isDirty = 1'
+      );
+      return (result?.count ?? 0) + (dirtyResult?.count ?? 0);
+    } catch (e) {
+      console.error('[ReadingSync] Failed to get unsynced count', e);
+      return 0;
+    }
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private async _queuePendingSync(
