@@ -132,10 +132,11 @@ async function main() {
 
     // 3. Migrate Users (New only)
     for (const u of usersToInsert) {
+      const normalizedRole = (u.role || 'USER').trim().toUpperCase();
       await neon.query(
         `INSERT INTO "User" (id, email, name, "password", "avatar", role, "createdAt", "updatedAt")
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [u.id, u.email, u.name, u.passwordHash, u.avatarUrl, u.role || 'USER', u.createdAt, u.updatedAt]
+        [u.id, u.email, u.name, u.passwordHash, u.avatarUrl, normalizedRole, u.createdAt, u.updatedAt]
       );
     }
     console.log(`✔ Migrated ${usersToInsert.length} new users.`);
@@ -159,13 +160,15 @@ async function main() {
     for (const sub of sSubscriptions) {
       // Remap userId if colliding
       const targetUserId = collidingIdMapping.get(sub.userId) || sub.userId;
+      const normalizedStatus = (sub.status || 'ACTIVE').trim().toUpperCase();
+      const normalizedGateway = sub.paymentGateway ? sub.paymentGateway.trim().toUpperCase() : null;
       
       await neon.query(
         `INSERT INTO "Subscription" (id, "userId", "planId", status, "trialEndsAt", "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd", "paymentGateway", "externalSubscriptionId", "createdAt", "updatedAt")
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          ON CONFLICT ("userId") DO UPDATE 
          SET "planId" = EXCLUDED."planId", status = EXCLUDED.status, "currentPeriodEnd" = EXCLUDED."currentPeriodEnd"`,
-        [sub.id, targetUserId, sub.planId, sub.status, sub.trialEndsAt, sub.currentPeriodStart, sub.currentPeriodEnd, sub.cancelAtPeriodEnd, sub.paymentGateway, sub.externalSubscriptionId, sub.createdAt, sub.updatedAt]
+        [sub.id, targetUserId, sub.planId, normalizedStatus, sub.trialEndsAt, sub.currentPeriodStart, sub.currentPeriodEnd, sub.cancelAtPeriodEnd, normalizedGateway, sub.externalSubscriptionId, sub.createdAt, sub.updatedAt]
       );
       migratedSubsCount++;
     }
@@ -200,10 +203,16 @@ async function main() {
         continue; // do NOT auto-insert, this needs human review
       }
 
+      const normalizedLanguage = (b.language || 'ID').trim().toUpperCase();
+      let normalizedGating = (b.subscriptionRequired || 'FREE').trim().toUpperCase();
+      if (normalizedGating === 'PERSONAL') {
+        normalizedGating = 'PREMIUM';
+      }
+
       await neon.query(
         `INSERT INTO "Book" (id, title, author, publisher, isbn, synopsis, "coverUrl", genre, tags, language, "publishedYear", "totalPages", "ratingAverage", "ratingCount", "readTimeMinutes", "isPublished", "isAvailableOffline", "subscriptionRequired", "createdAt", "updatedAt")
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
-        [b.id, b.title, b.author, b.publisher, b.isbn, b.synopsis, b.coverUrl, b.genre, b.tags, b.language, b.publishedYear, b.totalPages, b.ratingAverage, b.ratingCount, b.readTimeMinutes, b.isPublished, b.isAvailableOffline, b.subscriptionRequired, b.createdAt, b.updatedAt]
+        [b.id, b.title, b.author, b.publisher, b.isbn, b.synopsis, b.coverUrl, b.genre, b.tags, normalizedLanguage, b.publishedYear, b.totalPages, b.ratingAverage, b.ratingCount, b.readTimeMinutes, b.isPublished, b.isAvailableOffline, normalizedGating, b.createdAt, b.updatedAt]
       );
       migratedBooksCount++;
     }
