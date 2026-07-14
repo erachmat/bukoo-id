@@ -23,6 +23,7 @@ model User {
   // NextAuth Relationships (Web-only)
   accounts            Account[]
   sessions            Session[]
+  publishedBooks      Book[]            @relation("PublisherBooks")
 
   // Mobile-only Relationships
   refreshTokens       RefreshToken[]
@@ -104,6 +105,8 @@ model Book {
   // Shared Relationships
   readingProgress      ReadingProgress[]
   shelves              ShelfBook[]
+  publisherUserId      String?
+  publisherUser        User?             @relation("PublisherBooks", fields: [publisherUserId], references: [id])
 }
 
 // --- Reading Progress Syncing ---
