@@ -76,3 +76,25 @@ export async function signIn(formData: FormData) {
 export async function signOut() {
   await nextAuthSignOut({ redirectTo: "/" })
 }
+
+export async function resetPassword(formData: FormData) {
+  const email = formData.get('email') as string
+  const newPassword = formData.get('password') as string
+
+  const existing = await prisma.user.findUnique({
+    where: { email }
+  })
+
+  if (!existing) {
+    return redirect(`/forgot-password?error=${encodeURIComponent('Email tidak ditemukan.')}`)
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12)
+  await prisma.user.update({
+    where: { email },
+    data: { password: hashedPassword }
+  })
+
+  return redirect(`/login?message=${encodeURIComponent('Kata sandi berhasil diperbarui. Silakan masuk.')}`)
+}
+

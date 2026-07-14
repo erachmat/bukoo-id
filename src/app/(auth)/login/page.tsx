@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth'
 import { PasswordInput } from '@/components/auth/password-input'
 import { SubmitButton } from '@/components/auth/submit-button'
 
-export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
+export default async function LoginPage(props: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const session = await auth()
   if (session) {
     redirect('/library')
@@ -24,6 +24,12 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
       {params.error && (
         <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
           {params.error}
+        </div>
+      )}
+
+      {params.message && (
+        <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10B981', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
+          {params.message}
         </div>
       )}
 
