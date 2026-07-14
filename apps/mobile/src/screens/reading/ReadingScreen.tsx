@@ -9,7 +9,9 @@ import {
   Animated,
   Platform,
   Modal,
-  FlatList
+  FlatList,
+  TextInput,
+  ScrollView
 } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +19,7 @@ import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useReadingSession } from '../../hooks/useReadingSession';
 import { bookmarkService, Bookmark } from '../../services/bookmarkService';
+import { highlightService, Highlight } from '../../services/highlightService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,7 +36,7 @@ interface TocItem {
 }
 
 interface EpubMessage {
-  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC';
+  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED';
   page?: number;
   cfi?: string;
   percent?: number;
@@ -43,6 +46,7 @@ interface EpubMessage {
   chapterTitle?: string;
   chapterCurrentPage?: number;
   chapterTotalPages?: number;
+  text?: string;
 }
 
 // ─── JavaScript injected into the WebView ────────────────────────────────────
@@ -134,18 +138,65 @@ const EPUB_JS_BRIDGE = `
           chapterCurrentPage: page,
           chapterTotalPages: total
         });
+
+        // Re-apply highlights on relocation
+        if (window.__currentHighlights && window.__bukooApplyHighlights) {
+          window.__bukooApplyHighlights(window.__currentHighlights);
+        }
       } catch (e) {
         sendMessage({ type: 'ERROR', error: String(e) });
       }
     });
 
-    // Expose navigation helpers for React Native to call
+    // Expose navigation and highlighting helpers for React Native
     window.__bukooPrev = function () { rendition.prev(); };
     window.__bukooNext = function () { rendition.next(); };
     window.__bukooDisplay = function (target) { rendition.display(target); };
     window.__bukooSetTheme = function (themeObj) { 
       rendition.themes.default(themeObj);
     };
+
+    window.__bukooApplyHighlights = function (hlList) {
+      window.__currentHighlights = hlList;
+      if (window.__renderedHighlights) {
+        window.__renderedHighlights.forEach(function (cfiRange) {
+          try { rendition.annotations.remove(cfiRange, 'highlight'); } catch (e) {}
+        });
+      }
+      window.__renderedHighlights = [];
+
+      hlList.forEach(function (hl) {
+        try {
+          rendition.annotations.add(
+            'highlight',
+            hl.cfiRange,
+            {},
+            function () {},
+            'epubjs-hl',
+            { fill: hl.color || 'rgba(250,204,21,0.4)' }
+          );
+          window.__renderedHighlights.push(hl.cfiRange);
+        } catch (e) {
+          sendMessage({ type: 'ERROR', error: 'Render HL error: ' + String(e) });
+        }
+      });
+    };
+
+    rendition.on('selected', function (cfiRange) {
+      try {
+        var range = rendition.getRange(cfiRange);
+        var text = range.toString();
+        if (text && text.trim().length > 0) {
+          sendMessage({
+            type: 'TEXT_SELECTED',
+            cfi: cfiRange,
+            text: text
+          });
+        }
+      } catch (e) {
+        sendMessage({ type: 'ERROR', error: String(e) });
+      }
+    });
 
     window.__bukooBook = book;
     window.__bukooRendition = rendition;
@@ -235,19 +286,54 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showHighlights, setShowHighlights] = useState(false);
+  const [showHighlightModal, setShowHighlightModal] = useState(false);
 
   const [toc, setToc] = useState<TocItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  
   const [currentCfi, setCurrentCfi] = useState<string>('');
   const [chapterTitle, setChapterTitle] = useState<string>('');
   const [chapterCurrentPage, setChapterCurrentPage] = useState<number>(0);
   const [chapterTotalPages, setChapterTotalPages] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
 
+  const [selectedText, setSelectedText] = useState('');
+  const [selectedCfiRange, setSelectedCfiRange] = useState('');
+  const [highlightNote, setHighlightNote] = useState('');
+  const [highlightColor, setHighlightColor] = useState('rgba(250,204,21,0.4)'); // Default Yellow
+
   const [theme, setTheme] = useState<'Light' | 'Cream' | 'Dark' | 'Sepia'>('Cream');
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('Default');
   const [epubJsContent, setEpubJsContent] = useState<string>('');
+
+  const loadHighlights = useCallback(async () => {
+    const hls = await highlightService.getHighlights(bookId);
+    setHighlights(hls);
+  }, [bookId]);
+
+  const handleSaveHighlight = async () => {
+    if (!selectedCfiRange || !selectedText) return;
+    await highlightService.addHighlight(
+      bookId,
+      selectedCfiRange,
+      selectedText,
+      highlightColor,
+      highlightNote
+    );
+    setShowHighlightModal(false);
+    setSelectedText('');
+    setSelectedCfiRange('');
+    setHighlightNote('');
+    loadHighlights();
+  };
+
+  const handleDeleteHighlight = async (id: number) => {
+    await highlightService.removeHighlight(id);
+    loadHighlights();
+  };
 
   // Load the bundled epubjs asset on mount (avoids CDN/CORS issues)
   useEffect(() => {
@@ -292,7 +378,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   useEffect(() => {
     loadBookmarks();
-  }, [loadBookmarks]);
+    loadHighlights();
+  }, [loadBookmarks, loadHighlights]);
+
+  useEffect(() => {
+    if (isReady && webViewRef.current) {
+      const js = `if (window.__bukooApplyHighlights) window.__bukooApplyHighlights(${JSON.stringify(highlights)}); true;`;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, [highlights, isReady]);
 
   useEffect(() => {
     if (isReady && webViewRef.current) {
@@ -328,6 +422,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
     setShowToc(false);
     setShowBookmarks(false);
+    setShowHighlights(false);
   };
 
   // ── Auto-hide controls after 3 seconds of inactivity ─────────────────────
@@ -383,6 +478,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               if (msg.chapterCurrentPage !== undefined) setChapterCurrentPage(msg.chapterCurrentPage);
               if (msg.chapterTotalPages !== undefined) setChapterTotalPages(msg.chapterTotalPages);
               updateProgress(msg.page, msg.cfi, msg.percent);
+            }
+            break;
+          case 'TEXT_SELECTED':
+            if (msg.text && msg.cfi) {
+              setSelectedText(msg.text);
+              setSelectedCfiRange(msg.cfi);
+              setHighlightNote('');
+              setHighlightColor('rgba(250,204,21,0.4)');
+              setShowHighlightModal(true);
             }
             break;
           case 'ERROR':
@@ -559,6 +663,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)}>
             <Text style={styles.navIconText}>📑</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)}>
+            <Text style={styles.navIconText}>✍️</Text>
+          </TouchableOpacity>
         </Animated.View>
       )}
 
@@ -658,6 +766,112 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                   <Text style={styles.bookmarkDateText}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                 </TouchableOpacity>
               )}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Highlight/Note Creation Modal */}
+      <Modal visible={showHighlightModal} animationType="fade" transparent={true}>
+        <View style={[styles.modalOverlay, { justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }]}>
+          <View style={[styles.modalContent, { borderRadius: 16, marginHorizontal: 20 }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Tambah Sorotan</Text>
+              <TouchableOpacity onPress={() => { setShowHighlightModal(false); setSelectedText(''); }}>
+                <Text style={styles.modalClose}>Batal</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={{ width: '100%', maxHeight: 300 }} keyboardShouldPersistTaps="handled">
+              <Text style={styles.selectedSnippet}>"{selectedText}"</Text>
+              
+              <Text style={styles.settingsLabel}>Warna Sorotan</Text>
+              <View style={[styles.themeRow, { justifyContent: 'flex-start', marginVertical: 8 }]}>
+                {[
+                  { name: 'Kuning', color: 'rgba(250,204,21,0.4)', bg: '#facc15' },
+                  { name: 'Hijau', color: 'rgba(74,222,128,0.4)', bg: '#4ade80' },
+                  { name: 'Biru', color: 'rgba(96,165,250,0.4)', bg: '#60a5fa' },
+                  { name: 'Merah Muda', color: 'rgba(244,114,182,0.4)', bg: '#f472b6' }
+                ].map(c => (
+                  <TouchableOpacity
+                    key={c.name}
+                    style={[
+                      styles.themeCircle,
+                      { backgroundColor: c.bg, marginRight: 15 },
+                      highlightColor === c.color && { borderColor: COLORS.ember, borderWidth: 3 }
+                    ]}
+                    onPress={() => setHighlightColor(c.color)}
+                  />
+                ))}
+              </View>
+
+              <Text style={styles.settingsLabel}>Catatan Margin (Opsional)</Text>
+              <TextInput
+                style={styles.noteInput}
+                placeholder="Tulis catatan Anda di sini..."
+                placeholderTextColor={COLORS.muted}
+                value={highlightNote}
+                onChangeText={setHighlightNote}
+                multiline
+              />
+            </ScrollView>
+
+            <TouchableOpacity style={styles.saveHighlightButton} onPress={handleSaveHighlight}>
+              <Text style={styles.saveHighlightButtonText}>Simpan Sorotan</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Highlights List Modal */}
+      <Modal visible={showHighlights} animationType="slide" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Sorotan & Catatan</Text>
+              <TouchableOpacity onPress={() => setShowHighlights(false)}>
+                <Text style={styles.modalClose}>Tutup</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={highlights}
+              keyExtractor={(item) => String(item.id)}
+              ListEmptyComponent={<Text style={styles.emptyText}>Belum ada sorotan atau catatan.</Text>}
+              renderItem={({ item }) => {
+                const colorMap: Record<string, string> = {
+                  'rgba(250,204,21,0.4)': '#facc15',
+                  'rgba(74,222,128,0.4)': '#4ade80',
+                  'rgba(96,165,250,0.4)': '#60a5fa',
+                  'rgba(244,114,182,0.4)': '#f472b6'
+                };
+                const indicatorColor = colorMap[item.color] || '#facc15';
+                return (
+                  <View style={styles.highlightListItem}>
+                    <TouchableOpacity style={{ flex: 1 }} onPress={() => jumpToLocation(item.cfiRange)}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                        <View style={[styles.colorIndicator, { backgroundColor: indicatorColor }]} />
+                        <Text style={styles.highlightListText} numberOfLines={2}>
+                          "{item.text}"
+                        </Text>
+                      </View>
+                      {item.note ? (
+                        <Text style={styles.highlightListNote}>
+                          📝 {item.note}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.bookmarkDateText}>
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.deleteHighlightAction} 
+                      onPress={() => handleDeleteHighlight(item.id)}
+                    >
+                      <Text style={styles.deleteHighlightText}>Hapus</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              }}
             />
           </View>
         </View>
@@ -938,5 +1152,78 @@ const styles = StyleSheet.create({
   },
   fontFamilyTextActive: {
     color: COLORS.creamLight,
+  },
+  selectedSnippet: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: COLORS.forest,
+    backgroundColor: COLORS.cream,
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.ember,
+    marginVertical: 10,
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderColor: COLORS.sand,
+    borderRadius: 8,
+    padding: 10,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    color: COLORS.forest,
+    backgroundColor: COLORS.creamLight,
+    marginTop: 5,
+  },
+  saveHighlightButton: {
+    backgroundColor: COLORS.forest,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 15,
+    width: '100%',
+  },
+  saveHighlightButtonText: {
+    color: COLORS.creamLight,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  highlightListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.sand,
+  },
+  colorIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  highlightListText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.forest,
+    flex: 1,
+  },
+  highlightListNote: {
+    fontSize: 14,
+    color: COLORS.forest,
+    backgroundColor: COLORS.cream,
+    padding: 6,
+    borderRadius: 4,
+    marginVertical: 4,
+  },
+  deleteHighlightAction: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: 'rgba(200, 84, 31, 0.1)',
+  },
+  deleteHighlightText: {
+    fontSize: 13,
+    color: COLORS.ember,
+    fontWeight: '600',
   },
 });
