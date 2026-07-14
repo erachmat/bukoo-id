@@ -1,27 +1,40 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { ReactReader, ReactReaderStyle } from 'react-reader'
+import { useState, useEffect, useRef } from 'react'
+import { ReactReader } from 'react-reader'
 import { updateReadingProgress } from '@/app/(app)/book/actions'
-
-import { useRef } from 'react'
 
 interface EpubViewerProps {
   bookId: string
   fileUrl: string
-  initialLocation?: string | null
+  location: string | number
+  onLocationChange: (loc: string) => void
   theme: 'light' | 'dark' | 'sepia'
+  fontSize: string
+  fontFamily: string
+  highlights: any[]
+  onTextSelected: (cfiRange: string, text: string) => void
   onChapterChange?: (title: string) => void
 }
 
-export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, onChapterChange }: EpubViewerProps) {
-  const [location, setLocation] = useState<string | number>(initialLocation || 0)
+export default function EpubViewer({ 
+  bookId, 
+  fileUrl, 
+  location, 
+  onLocationChange, 
+  theme, 
+  fontSize,
+  fontFamily,
+  highlights,
+  onTextSelected,
+  onChapterChange 
+}: EpubViewerProps) {
   const [progress, setProgress] = useState<number>(0)
   const renditionRef = useRef<any>(null)
   
-  // Simple debounce hook logic or timer ref
+  // Debounce syncing progress to DB
   useEffect(() => {
-    if (!location || location === initialLocation) return
+    if (!location) return
 
     const timer = setTimeout(() => {
       updateReadingProgress(bookId, location.toString(), progress).catch(console.error)
@@ -30,8 +43,8 @@ export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, on
     return () => clearTimeout(timer)
   }, [location, bookId, progress])
 
-  const onLocationChange = (epubcifi: string) => {
-    setLocation(epubcifi)
+  const handleLocationChanged = (epubcifi: string) => {
+    onLocationChange(epubcifi)
     if (renditionRef.current) {
       const locationInfo = renditionRef.current.location
       if (locationInfo && locationInfo.start) {
@@ -40,6 +53,50 @@ export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, on
       }
     }
   }
+
+  // Handle highlights rendering
+  useEffect(() => {
+    const rendition = renditionRef.current
+    if (!rendition) return
+
+    // Clean previous highlights (standard epubjs pattern)
+    highlights.forEach((hl) => {
+      try {
+        rendition.annotations.remove(hl.cfiRange, 'highlight')
+      } catch (e) {}
+    })
+
+    // Apply new highlights
+    highlights.forEach((hl) => {
+      try {
+        rendition.annotations.add(
+          'highlight',
+          hl.cfiRange,
+          {},
+          () => {},
+          'epubjs-hl',
+          { fill: hl.color || 'rgba(250,204,21,0.4)' }
+        )
+      } catch (e) {
+        console.error('Failed to render highlight:', e)
+      }
+    })
+  }, [highlights, location])
+
+  // Handle dynamic font size & font family changes
+  useEffect(() => {
+    const rendition = renditionRef.current
+    if (rendition) {
+      rendition.themes.fontSize(fontSize)
+    }
+  }, [fontSize])
+
+  useEffect(() => {
+    const rendition = renditionRef.current
+    if (rendition) {
+      rendition.themes.font(fontFamily)
+    }
+  }, [fontFamily])
 
   const previousPage = () => {
     if (renditionRef.current) renditionRef.current.prev()
@@ -60,10 +117,10 @@ export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, on
         <ReactReader
           url={fileUrl}
           location={location}
-          locationChanged={onLocationChange}
+          locationChanged={handleLocationChanged}
           tocChanged={(toc) => {
             if (onChapterChange && toc.length > 0) {
-              onChapterChange('Dokumen EPUB') // For better toc integration, we'd find the current chapter
+              onChapterChange('Dokumen EPUB')
             }
           }}
           epubOptions={{
@@ -71,31 +128,45 @@ export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, on
           }}
           getRendition={(rendition) => {
             renditionRef.current = rendition
-          // Inject styles dynamically to the iframe contents whenever theme changes
-          const applyTheme = () => {
-            if (theme === 'dark') {
-              rendition.themes.register('dark', { body: { background: '#0f172a', color: '#f8fafc' } })
-              rendition.themes.select('dark')
-            } else if (theme === 'sepia') {
-              rendition.themes.register('sepia', { body: { background: '#fbf0d9', color: '#43302b' } })
-              rendition.themes.select('sepia')
-            } else {
-              rendition.themes.register('light', { body: { background: '#ffffff', color: '#0f172a' } })
-              rendition.themes.select('light')
+            
+            // Set dynamic typography
+            rendition.themes.fontSize(fontSize)
+            rendition.themes.font(fontFamily)
+
+            // Setup Theme configuration
+            const applyTheme = () => {
+              if (theme === 'dark') {
+                rendition.themes.register('dark', { body: { background: '#0f172a', color: '#f8fafc' } })
+                rendition.themes.select('dark')
+              } else if (theme === 'sepia') {
+                rendition.themes.register('sepia', { body: { background: '#fbf0d9', color: '#43302b' } })
+                rendition.themes.select('sepia')
+              } else {
+                rendition.themes.register('light', { body: { background: '#ffffff', color: '#0f172a' } })
+                rendition.themes.select('light')
+              }
             }
-          }
-          applyTheme()
-          
-          // Re-apply theme specifically on orientation/location jumps
-          rendition.on('relocated', applyTheme)
-        }}
-      />
-      
-      {/* Hide React-Reader default nav via absolute overlay or we can just let it exist since it's on sides. 
-          But we will add our bottom bar matching PDF viewer. */}
+            applyTheme()
+            
+            rendition.on('relocated', applyTheme)
+
+            // Selection handler
+            rendition.on('selected', (cfiRange: string) => {
+              try {
+                const range = rendition.getRange(cfiRange)
+                const text = range.toString()
+                if (text && text.trim().length > 0) {
+                  onTextSelected(cfiRange, text)
+                }
+              } catch (e) {
+                console.error('Error on selecting text:', e)
+              }
+            })
+          }}
+        />
       </div>
 
-      {/* Bottom Persistent Control Sticky Bar */}
+      {/* Bottom Control Bar */}
       <div className="h-20 w-full bg-[#0f172a] text-white flex flex-col z-10 shrink-0 relative">
         {/* Progress Bar Track */}
         <div className="absolute top-0 left-0 w-full h-1 bg-white/10">
@@ -133,3 +204,4 @@ export default function EpubViewer({ bookId, fileUrl, initialLocation, theme, on
     </div>
   )
 }
+

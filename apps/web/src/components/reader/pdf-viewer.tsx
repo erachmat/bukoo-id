@@ -14,25 +14,38 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 interface PdfViewerProps {
   bookId: string
   fileUrl: string
-  initialLocation?: string | null
+  location: string | number
+  onLocationChange: (loc: string) => void
   theme: 'light' | 'dark' | 'sepia'
   onChapterChange?: (title: string) => void
 }
 
-export default function PdfViewer({ bookId, fileUrl, initialLocation, theme, onChapterChange }: PdfViewerProps) {
+export default function PdfViewer({ bookId, fileUrl, location, onLocationChange, theme, onChapterChange }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(
-    initialLocation ? parseInt(initialLocation, 10) || 1 : 1
+    location ? parseInt(location.toString(), 10) || 1 : 1
   )
+
+  // Handle location changes from parent (e.g. clicking a bookmark)
+  useEffect(() => {
+    if (location) {
+      const p = parseInt(location.toString(), 10)
+      if (!isNaN(p) && p !== pageNumber) {
+        setPageNumber(p)
+      }
+    }
+  }, [location])
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages)
     if (onChapterChange) onChapterChange('Dokumen PDF')
   }
 
-  // Update remote storage whenever page changes
+  // Update remote storage and parent state whenever page changes
   useEffect(() => {
     if (!numPages) return
+    
+    onLocationChange(pageNumber.toString())
     
     const syncTimer = setTimeout(() => {
       const currentProgress = numPages > 0 ? pageNumber / numPages : 0
