@@ -1,0 +1,11 @@
+{
+  "name": "@bukoo/config",
+  "version": "1.0.0",
+  "private": true,
+  "main": "",
+  "files": [
+    "tsconfig.base.json",
+    "eslint.base.json",
+    "prettier.base.json"
+  ]
+}

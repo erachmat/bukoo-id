@@ -1,0 +1,15 @@
+{
+  "extends": "@bukoo/config/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src/**/*",
+    "App.tsx",
+    "index.js"
+  ]
+}

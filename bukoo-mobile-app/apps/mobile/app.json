@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "BUKOO",
+    "slug": "bukoo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.erachmat.bukoo"
+    },
+    "android": {
+      "package": "com.erachmat.bukoo"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a2c42730-2fc3-4a3c-bc70-007233308be5"
+      }
+    },
+    "owner": "erachmat"
+  }
+}
