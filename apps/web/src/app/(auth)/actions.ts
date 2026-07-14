@@ -98,3 +98,16 @@ export async function resetPassword(formData: FormData) {
   return redirect(`/login?message=${encodeURIComponent('Kata sandi berhasil diperbarui. Silakan masuk.')}`)
 }
 
+export async function signInWithGoogle() {
+  try {
+    await nextAuthSignIn("google", { redirectTo: "/library" })
+  } catch (error: any) {
+    if (error.message === "NEXT_REDIRECT") {
+      revalidatePath('/', 'layout')
+      throw error
+    }
+    throw error
+  }
+}
+
+
