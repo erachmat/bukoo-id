@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import BookCoverCard from '../../components/BookCoverCard';
 import { bookDownloadService } from '../../services/bookDownload';
+import { COLORS } from '../../constants/COLORS';
 import { RootStackParamList, MainTabParamList, ReadingStackParamList } from '../../navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList & ReadingStackParamList>;
@@ -147,7 +148,7 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   header: {
     flexDirection: 'row',
@@ -161,11 +162,11 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
   },
   sortButton: {
     fontSize: 16,
-    color: '#C8541F',
+    color: COLORS.ember,
     fontWeight: '600',
   },
   tabsContainer: {
@@ -179,21 +180,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   tabButtonActive: {
-    backgroundColor: '#C8541F',
-    borderColor: '#C8541F',
+    backgroundColor: COLORS.ember,
+    borderColor: COLORS.ember,
   },
   tabText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: COLORS.muted,
     fontWeight: '600',
   },
   tabTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
   },
   loader: {
     marginTop: 40,

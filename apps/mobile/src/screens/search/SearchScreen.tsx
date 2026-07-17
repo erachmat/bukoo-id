@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import BookCoverCard from '../../components/BookCoverCard';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
+import { COLORS } from '../../constants/COLORS';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -111,7 +112,7 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   header: {
     paddingHorizontal: 20,
@@ -122,18 +123,18 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     marginBottom: 16,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   searchIcon: {
     fontSize: 16,
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     height: '100%',
   },
   genresContainer: {
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     marginBottom: 16,
   },
   genreGrid: {
@@ -162,18 +163,18 @@ const styles = StyleSheet.create({
   },
   genreCard: {
     width: '48%',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   genreText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
   },
   loader: {
     marginTop: 40,
@@ -196,17 +197,17 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     marginBottom: 4,
   },
   resultAuthor: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: COLORS.muted,
     marginBottom: 8,
   },
   resultRating: {
     fontSize: 13,
-    color: '#C8541F',
+    color: COLORS.ember,
     fontWeight: '600',
   },
   emptyContainer: {
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: COLORS.muted,
     textAlign: 'center',
   },
 });

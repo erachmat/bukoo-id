@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import { useBookDownload } from '../../hooks/useBookDownload';
 import { RootStackParamList, ReadingStackParamList } from '../../navigation/types';
+import { COLORS } from '../../constants/COLORS';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -489,7 +490,7 @@ export default function BookDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F1E8',
+    backgroundColor: COLORS.cream,
   },
   loader: {
     flex: 1,
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     fontSize: 16,
-    color: '#1B3A2D',
+    color: COLORS.forest,
   },
   scrollContent: {
     paddingBottom: 40,
@@ -528,13 +529,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1B3A2D',
+    color: COLORS.forest,
     textAlign: 'center',
     marginBottom: 8,
   },
   author: {
     fontSize: 18,
-    color: '#9A978E',
+    color: COLORS.muted,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -551,12 +552,12 @@ const styles = StyleSheet.create({
   ratingScore: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1B3A2D',
+    color: COLORS.forest,
     marginRight: 6,
   },
   ratingCount: {
     fontSize: 14,
-    color: '#9A978E',
+    color: COLORS.muted,
   },
   tagsScroll: {
     marginBottom: 24,
@@ -570,7 +571,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   tagText: {
-    color: '#1B3A2D',
+    color: COLORS.forest,
     fontWeight: '600',
     fontSize: 13,
   },
@@ -578,11 +579,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#FAF8F5',
+    backgroundColor: COLORS.creamLight,
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#D4CEB8',
+    borderColor: COLORS.sand,
     marginBottom: 24,
   },
   metadataItem: {
@@ -591,11 +592,11 @@ const styles = StyleSheet.create({
   metadataDivider: {
     width: 1,
     height: 30,
-    backgroundColor: '#D4CEB8',
+    backgroundColor: COLORS.sand,
   },
   metadataLabel: {
     fontSize: 12,
-    color: '#9A978E',
+    color: COLORS.muted,
     marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -603,7 +604,7 @@ const styles = StyleSheet.create({
   metadataValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1B3A2D',
+    color: COLORS.forest,
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -611,7 +612,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     flex: 2,
-    backgroundColor: '#C8541F',
+    backgroundColor: COLORS.ember,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -623,7 +624,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   primaryButtonDisabled: {
-    backgroundColor: '#9A978E',
+    backgroundColor: COLORS.muted,
   },
   downloadingContainer: {
     flexDirection: 'row',
@@ -643,19 +644,19 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#C8541F',
+    backgroundColor: COLORS.ember,
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: COLORS.creamLight,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D4CEB8',
+    borderColor: COLORS.sand,
   },
   secondaryButtonText: {
-    color: '#1B3A2D',
+    color: COLORS.forest,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -665,17 +666,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1B3A2D',
+    color: COLORS.forest,
     marginBottom: 12,
   },
   synopsisText: {
     fontSize: 15,
     lineHeight: 24,
-    color: '#4A4A4A',
+    color: COLORS.forest,
+    opacity: 0.85,
   },
   readMoreText: {
     marginTop: 8,
-    color: '#C8541F',
+    color: COLORS.ember,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -697,7 +699,7 @@ const styles = StyleSheet.create({
   backIcon: {
     fontSize: 32,
     lineHeight: 36,
-    color: '#1B3A2D',
+    color: COLORS.forest,
     marginLeft: -2,
   },
 });

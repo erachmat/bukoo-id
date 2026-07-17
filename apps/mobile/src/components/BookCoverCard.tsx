@@ -1,4 +1,5 @@
 import { TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
+import { COLORS } from '../constants/COLORS';
 
 interface BookCoverCardProps {
   book: {
@@ -80,14 +81,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 6,
     right: 6,
-    backgroundColor: '#1B3A2D',
+    backgroundColor: COLORS.forest,
     width: 22,
     height: 22,
     borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#F4F1E8',
+    borderColor: COLORS.cream,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -104,17 +105,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1B3A2D',
+    color: COLORS.forest,
     marginBottom: 4,
   },
   titleDark: {
-    color: '#FFFFFF',
+    color: COLORS.cream,
   },
   author: {
     fontSize: 12,
-    color: '#9A978E',
+    color: COLORS.muted,
   },
   authorDark: {
-    color: '#8E8E93',
+    color: COLORS.sand,
   },
 });

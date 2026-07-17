@@ -9,6 +9,7 @@ import { api } from '../../services/api';
 import ReadingGoalsWidget from './ReadingGoalsWidget';
 import { readingSync } from '../../services/readingSync';
 import { bookDownloadService } from '../../services/bookDownload';
+import { COLORS } from '../../constants/COLORS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -317,7 +318,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   scrollContent: {
     paddingBottom: 100, // Padding for floating bottom tab bar
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
   },
   headerRight: {
     flexDirection: 'row',
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     marginVertical: 1,
   },
   miniTextBottom: {
-    color: '#8E8E93',
+    color: COLORS.muted,
     fontSize: 8,
     lineHeight: 8,
   },
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.gold,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#3A3A3C',
+    backgroundColor: COLORS.forestCard,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     paddingHorizontal: 20,
     marginBottom: 15,
   },
@@ -416,11 +417,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
   },
   continueCard: {
     flexDirection: 'row',
-    backgroundColor: '#C8541F', // Orange highlight theme card from Apple Books
+    backgroundColor: COLORS.ember, // Orange highlight theme card from Apple Books
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 16,
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 6,
     marginRight: 16,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
   },
   continueInfo: {
     flex: 1,
@@ -470,7 +471,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 20,
@@ -478,10 +479,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   exploreCardTitle: {
-    color: '#FFFFFF',
+    color: COLORS.cream,
     fontSize: 20,
     fontWeight: 'bold',
     fontFamily: 'serif',
@@ -500,7 +501,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   listContent: {
     paddingHorizontal: 20,
@@ -518,19 +519,19 @@ const styles = StyleSheet.create({
     width: 140,
     height: 210,
     borderRadius: 8,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
   },
   syncStatusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 10,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   syncStatusText: {
-    color: '#C8541F',
+    color: COLORS.ember,
     fontSize: 12,
     fontWeight: 'bold',
     marginLeft: 4,
@@ -539,14 +540,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 6,
     right: 6,
-    backgroundColor: '#1B3A2D',
+    backgroundColor: COLORS.forest,
     width: 20,
     height: 20,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F4F1E8',
+    borderColor: COLORS.cream,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,

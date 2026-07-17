@@ -2,6 +2,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './types';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../constants/COLORS';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import SearchScreen from '../screens/search/SearchScreen';
@@ -16,8 +17,8 @@ export default function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#FFFFFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: COLORS.gold,
+        tabBarInactiveTintColor: COLORS.muted,
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
@@ -37,7 +38,7 @@ export default function MainTabs() {
           right: 0,
           marginHorizontal: 20,
           height: Platform.OS === 'ios' ? 68 : 62,
-          backgroundColor: 'rgba(28, 28, 30, 0.96)',
+          backgroundColor: 'rgba(10, 26, 21, 0.98)',
           borderRadius: 34,
           borderTopWidth: 0,
           paddingBottom: 0,
@@ -115,6 +116,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(201, 149, 42, 0.18)',
   },
 });

@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
+import { COLORS } from '../../constants/COLORS';
 import { Ionicons } from '@expo/vector-icons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
@@ -357,7 +358,7 @@ export default function StoreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   scrollContent: {
     paddingBottom: 100, // Account for floating tab bar
@@ -374,14 +375,14 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
   },
   avatarButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.gold,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#3A3A3C',
+    backgroundColor: COLORS.forestCard,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -405,24 +406,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryPill: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   categoryPillActive: {
-    backgroundColor: '#C8541F',
-    borderColor: '#C8541F',
+    backgroundColor: COLORS.ember,
+    borderColor: COLORS.ember,
   },
   categoryText: {
-    color: '#8E8E93',
+    color: COLORS.muted,
     fontSize: 14,
     fontWeight: '600',
   },
   categoryTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
   },
   loader: {
     marginVertical: 50,
@@ -434,7 +435,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     paddingHorizontal: 20,
     marginBottom: 15,
   },
@@ -449,17 +450,17 @@ const styles = StyleSheet.create({
     width: 120,
     height: 180,
     borderRadius: 8,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     marginBottom: 8,
   },
   bookTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     marginBottom: 2,
   },
   bookAuthor: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: COLORS.muted,
   },
 });

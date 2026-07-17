@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../services/api';
+import { COLORS } from '../../constants/COLORS';
 import axios from 'axios';
 
 interface ForgotPasswordScreenProps {
@@ -186,7 +187,7 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   innerContainer: {
     flex: 1,
@@ -200,12 +201,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: COLORS.muted,
     marginTop: 12,
     textAlign: 'center',
     lineHeight: 20,
@@ -215,25 +216,25 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#2C2C2E',
-    backgroundColor: '#1C1C1E',
+    borderColor: COLORS.forestBorder,
+    backgroundColor: COLORS.forestCard,
     paddingHorizontal: 16,
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     fontSize: 15,
     marginBottom: 24,
   },
   inputFocused: {
-    borderColor: '#C8541F',
+    borderColor: COLORS.gold,
   },
   primaryButton: {
     width: '100%',
     height: 52,
     borderRadius: 12,
-    backgroundColor: '#C8541F',
+    backgroundColor: COLORS.ember,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    shadowColor: '#C8541F',
+    shadowColor: COLORS.ember,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -250,12 +251,12 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: '#C8541F',
+    color: COLORS.gold,
     fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -263,10 +264,10 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     maxWidth: 320,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
@@ -281,13 +282,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     marginBottom: 8,
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: COLORS.muted,
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalButton: {
-    backgroundColor: '#C8541F',
+    backgroundColor: COLORS.ember,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 25,
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
   modalButtonCancel: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   modalButtonText: {
     color: '#FFFFFF',
@@ -317,7 +318,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   modalButtonTextCancel: {
-    color: '#8E8E93',
+    color: COLORS.muted,
     fontWeight: '500',
   },
 });

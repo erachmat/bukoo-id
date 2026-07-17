@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useLogout } from '../../hooks/useAuth';
+import { COLORS } from '../../constants/COLORS';
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
@@ -76,7 +77,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestDark,
   },
   scrollContent: {
     paddingBottom: 40,
@@ -90,18 +91,18 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color: '#FFFFFF',
+    color: COLORS.cream,
   },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 20,
     marginBottom: 30,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   avatar: {
     width: 70,
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#C8541F',
+    backgroundColor: COLORS.ember,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -129,12 +130,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: COLORS.muted,
     marginBottom: 8,
   },
   badgeContainer: {
@@ -147,15 +148,15 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#C8541F',
+    color: COLORS.ember,
   },
   menuContainer: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     marginHorizontal: 20,
     borderRadius: 16,
     marginBottom: 30,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   menuItem: {
     flexDirection: 'row',
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
   },
   menuDivider: {
     borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
+    borderBottomColor: COLORS.forestBorder,
   },
   menuIcon: {
     fontSize: 20,
@@ -174,20 +175,20 @@ const styles = StyleSheet.create({
   menuText: {
     flex: 1,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: COLORS.creamLight,
   },
   chevron: {
     fontSize: 24,
-    color: '#8E8E93',
+    color: COLORS.muted,
   },
   logoutButton: {
     marginHorizontal: 20,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.forestCard,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: COLORS.forestBorder,
   },
   logoutText: {
     fontSize: 16,
