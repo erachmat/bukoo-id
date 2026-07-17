@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, Animated, Easing, TouchableOpacity } from 'react-native';
-import { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Easing, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/COLORS';
@@ -24,6 +24,20 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
   });
 
   const animatedValue = useRef(new Animated.Value(0)).current;
+  const queryClient = useQueryClient();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newGoalMinutes, setNewGoalMinutes] = useState('');
+
+  const editGoalMutation = useMutation({
+    mutationFn: async (minutes: number) => {
+      const response = await api.put('/goals', { dailyGoalMinutes: minutes });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reading', 'goals'] });
+      setIsModalVisible(false);
+    },
+  });
 
   // Semi-circle path length: Radius = 90, length = PI * 90 ≈ 282.74
   const arcLength = 282.74;
@@ -94,7 +108,14 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
           <Text style={styles.archValue}>
             {todayProgress.minutesRead.toFixed(2)}
           </Text>
-          <TouchableOpacity style={styles.goalLinkRow} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.goalLinkRow} 
+            activeOpacity={0.7}
+            onPress={() => {
+              setIsModalVisible(true);
+              setNewGoalMinutes(goal.dailyGoalMinutes.toString());
+            }}
+          >
             <Text style={styles.goalLinkText}>
               dari {goal.dailyGoalMinutes} menit target Anda
             </Text>
@@ -112,6 +133,60 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
         <Text style={styles.continueButtonText}>Terus Membaca</Text>
         <Text style={styles.continueButtonSubtext}>{activeBookTitle}</Text>
       </TouchableOpacity>
+
+      {/* Goal Edit Modal */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Ubah Target Bacaan</Text>
+            <Text style={styles.modalSubtitle}>Tentukan target membaca harian Anda dalam menit:</Text>
+            
+            <View style={styles.presetsRow}>
+              {[10, 15, 30, 45, 60].map((mins) => (
+                <TouchableOpacity
+                  key={mins}
+                  style={[styles.presetButton, newGoalMinutes === mins.toString() && styles.presetButtonActive]}
+                  onPress={() => setNewGoalMinutes(mins.toString())}
+                >
+                  <Text style={[styles.presetText, newGoalMinutes === mins.toString() && styles.presetTextActive]}>{mins}m</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              style={styles.customInput}
+              keyboardType="numeric"
+              placeholder="Menit kustom"
+              placeholderTextColor={COLORS.muted}
+              value={newGoalMinutes}
+              onChangeText={setNewGoalMinutes}
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
+                <Text style={styles.cancelButtonText}>Batal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                disabled={editGoalMutation.isPending}
+                onPress={() => {
+                  const mins = parseInt(newGoalMinutes, 10);
+                  if (mins > 0) {
+                    editGoalMutation.mutate(mins);
+                  }
+                }}
+              >
+                <Text style={styles.saveButtonText}>Simpan</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -209,5 +284,115 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: FONTS.sansRegular,
     marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: COLORS.forestCard,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  presetsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 6,
+  },
+  presetButton: {
+    flex: 1,
+    backgroundColor: COLORS.forestDark,
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  presetButtonActive: {
+    backgroundColor: COLORS.gold,
+    borderColor: COLORS.gold,
+  },
+  presetText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.creamLight,
+  },
+  presetTextActive: {
+    color: COLORS.forest,
+  },
+  customInput: {
+    backgroundColor: COLORS.forestDark,
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    color: COLORS.cream,
+    fontSize: 16,
+    fontFamily: FONTS.sansRegular,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.muted,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: COLORS.ember,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.sansBold,
+    color: '#FFFFFF',
   },
 });
