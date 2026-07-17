@@ -4,6 +4,8 @@ import Svg, { Path } from 'react-native-svg';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -69,7 +71,7 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
           {/* Gray Track Arc */}
           <Path
             d="M 20 125 A 90 90 0 0 1 200 125"
-            stroke="#1C1C1E"
+            stroke={COLORS.forestBorder}
             strokeWidth={4}
             strokeLinecap="round"
             fill="none"
@@ -77,7 +79,7 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
           {/* Animated Progress Arc */}
           <AnimatedPath
             d="M 20 125 A 90 90 0 0 1 200 125"
-            stroke="#FFFFFF" // White progress color matching Apple Books theme
+            stroke={COLORS.gold} // Gold progress color matching premium theme
             strokeWidth={4}
             strokeLinecap="round"
             fill="none"
@@ -96,7 +98,7 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
             <Text style={styles.goalLinkText}>
               dari {goal.dailyGoalMinutes} menit target Anda
             </Text>
-            <Ionicons name="chevron-forward" size={12} color="#8E8E93" style={{ marginLeft: 2, marginTop: 1 }} />
+            <Ionicons name="chevron-forward" size={12} color={COLORS.muted} style={{ marginLeft: 2, marginTop: 1 }} />
           </TouchableOpacity>
         </View>
       </View>
@@ -116,12 +118,12 @@ export default function ReadingGoalsWidget({ activeBookTitle = 'The Art of War',
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.forestCard,
     paddingHorizontal: 20,
     paddingVertical: 30,
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#1C1C1E',
+    borderTopColor: COLORS.forestBorder,
     marginTop: 20,
   },
   loaderContainer: {
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loaderText: {
-    color: '#8E8E93',
+    color: COLORS.muted,
     fontSize: 14,
   },
   header: {
@@ -139,12 +141,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'serif',
-    color: '#FFFFFF',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
   },
   description: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
     textAlign: 'center',
     paddingHorizontal: 30,
     marginBottom: 25,
@@ -165,16 +168,16 @@ const styles = StyleSheet.create({
   },
   archLabel: {
     fontSize: 13,
-    color: '#E5E5EA',
+    color: COLORS.creamLight,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.sansBold,
     marginBottom: 0,
   },
   archValue: {
     fontSize: 44,
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.cream,
     marginBottom: 0,
     lineHeight: 48,
   },
@@ -184,26 +187,27 @@ const styles = StyleSheet.create({
   },
   goalLinkText: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
   },
   continueButton: {
     width: '100%',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.ember,
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2C2C2E',
     marginTop: 15,
   },
   continueButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
   continueButtonSubtext: {
-    color: '#8E8E93',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 12,
+    fontFamily: FONTS.sansRegular,
     marginTop: 2,
   },
 });

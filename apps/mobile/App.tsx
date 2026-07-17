@@ -5,15 +5,35 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthHydration } from './src/hooks/useAuth';
 import AppNavigator from './src/navigation/AppNavigator';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { COLORS } from './src/constants/COLORS';
+import { 
+  useFonts, 
+  PlayfairDisplay_400Regular, 
+  PlayfairDisplay_600SemiBold, 
+  PlayfairDisplay_700Bold 
+} from '@expo-google-fonts/playfair-display';
+import { 
+  DMSans_400Regular, 
+  DMSans_500Medium, 
+  DMSans_700Bold 
+} from '@expo-google-fonts/dm-sans';
 
 export default function App(): React.JSX.Element {
   const queryClient = new QueryClient();
   const isReady = useAuthHydration();
+  const [fontsLoaded] = useFonts({
+    'PlayfairDisplay-Regular': PlayfairDisplay_400Regular,
+    'PlayfairDisplay-SemiBold': PlayfairDisplay_600SemiBold,
+    'PlayfairDisplay-Bold': PlayfairDisplay_700Bold,
+    'DMSans-Regular': DMSans_400Regular,
+    'DMSans-Medium': DMSans_500Medium,
+    'DMSans-Bold': DMSans_700Bold,
+  });
 
-  if (!isReady) {
+  if (!isReady || !fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1B3A2D" />
+        <ActivityIndicator size="large" color={COLORS.gold} />
       </View>
     );
   }
@@ -32,7 +52,7 @@ export default function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#F4F1E8', // BUKOO cream design system
+    backgroundColor: COLORS.forestDark, // Unified Dark Forest branding
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -10,6 +10,7 @@ import ReadingGoalsWidget from './ReadingGoalsWidget';
 import { readingSync } from '../../services/readingSync';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
   headerRight: {
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.creamLight,
     paddingHorizontal: 20,
     marginBottom: 15,
@@ -416,7 +417,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.creamLight,
   },
   continueCard: {
@@ -451,16 +452,19 @@ const styles = StyleSheet.create({
   continueBookTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
     color: '#FFFFFF',
     marginBottom: 4,
   },
   continueAuthor: {
     fontSize: 14,
+    fontFamily: FONTS.sansMedium,
     color: 'rgba(255, 255, 255, 0.8)',
     marginBottom: 8,
   },
   continueMeta: {
     fontSize: 12,
+    fontFamily: FONTS.sansRegular,
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '600',
   },
@@ -485,7 +489,7 @@ const styles = StyleSheet.create({
     color: COLORS.cream,
     fontSize: 20,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     flex: 1,
   },
   stackContainer: {

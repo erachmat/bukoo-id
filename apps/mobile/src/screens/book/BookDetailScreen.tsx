@@ -8,6 +8,7 @@ import { api } from '../../services/api';
 import { useBookDownload } from '../../hooks/useBookDownload';
 import { RootStackParamList, ReadingStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -529,12 +530,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
     color: COLORS.forest,
     textAlign: 'center',
     marginBottom: 8,
   },
   author: {
     fontSize: 18,
+    fontFamily: FONTS.sansMedium,
     color: COLORS.muted,
     textAlign: 'center',
     marginBottom: 16,
@@ -552,11 +555,13 @@ const styles = StyleSheet.create({
   ratingScore: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
     color: COLORS.forest,
     marginRight: 6,
   },
   ratingCount: {
     fontSize: 14,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
   },
   tagsScroll: {
@@ -573,6 +578,7 @@ const styles = StyleSheet.create({
   tagText: {
     color: COLORS.forest,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
     fontSize: 13,
   },
   metadataRow: {
@@ -596,6 +602,7 @@ const styles = StyleSheet.create({
   },
   metadataLabel: {
     fontSize: 12,
+    fontFamily: FONTS.sansMedium,
     color: COLORS.muted,
     marginBottom: 4,
     textTransform: 'uppercase',
@@ -604,6 +611,7 @@ const styles = StyleSheet.create({
   metadataValue: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
     color: COLORS.forest,
   },
   actionsContainer: {
@@ -622,6 +630,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
   primaryButtonDisabled: {
     backgroundColor: COLORS.muted,
@@ -659,6 +668,7 @@ const styles = StyleSheet.create({
     color: COLORS.forest,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   synopsisContainer: {
     marginBottom: 20,
@@ -666,12 +676,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
     color: COLORS.forest,
     marginBottom: 12,
   },
   synopsisText: {
     fontSize: 15,
     lineHeight: 24,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.forest,
     opacity: 0.85,
   },
@@ -679,6 +691,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: COLORS.ember,
     fontWeight: '600',
+    fontFamily: FONTS.sansBold,
     fontSize: 14,
   },
   backButton: {
