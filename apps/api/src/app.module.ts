@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -12,10 +11,18 @@ import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      store: redisStore,
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
+      useFactory: async () => {
+        if (process.env.REDIS_URL) {
+          const { redisStore } = await import('cache-manager-redis-yet');
+          return {
+            store: redisStore as any,
+            url: process.env.REDIS_URL,
+          };
+        }
+        return {}; // Local in-memory caching fallback
+      },
     }),
     PrismaModule,
     MailModule,
