@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useLogout } from '../../hooks/useAuth';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
   profileCard: {
@@ -123,6 +124,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 28,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
   userInfo: {
     flex: 1,
@@ -130,11 +132,13 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
     color: COLORS.creamLight,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
     marginBottom: 8,
   },
@@ -148,6 +152,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
     color: COLORS.ember,
   },
   menuContainer: {
@@ -175,6 +180,7 @@ const styles = StyleSheet.create({
   menuText: {
     flex: 1,
     fontSize: 16,
+    fontFamily: FONTS.sansMedium,
     color: COLORS.creamLight,
   },
   chevron: {
@@ -193,6 +199,7 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: FONTS.sansBold,
     color: '#FF453A',
   },
 });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -8,50 +8,15 @@ import { api } from '../../services/api';
 import BookCoverCard from '../../components/BookCoverCard';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
+import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, MainTabParamList, ReadingStackParamList } from '../../navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList & ReadingStackParamList>;
 
 type TabFilter = 'Semua' | 'Sedang Dibaca' | 'Selesai' | 'Ingin Dibaca';
 
-const SAMPLE_LIBRARY_BOOKS = [
-  {
-    id: 'book_laskar_pelangi',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-  },
-  {
-    id: 'book_bumi_manusia',
-    title: 'Bumi Manusia',
-    author: 'Pramoedya Ananta Toer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-  },
-  {
-    id: 'book_cantik_itu_luka',
-    title: 'Cantik Itu Luka',
-    author: 'Eka Kurniawan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-  },
-  {
-    id: 'book_laut_bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-  },
-  {
-    id: 'book_saman',
-    title: 'Saman',
-    author: 'Ayu Utami',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-  },
-  {
-    id: 'art-of-war',
-    title: 'The Art of War',
-    author: 'Sun Tzu',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-  }
-];
+
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -67,13 +32,28 @@ export default function LibraryScreen() {
     }
   }, [isFocused]);
 
-  const { data: books, isLoading } = useQuery({
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { data: books, isLoading, refetch: refetchBooks } = useQuery({
     queryKey: ['books', 'library'],
     queryFn: async () => {
       const response = await api.get('/books');
       return response.data.items || [];
     },
   });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetchBooks();
+      const ids = await bookDownloadService.getDownloadedBooks();
+      setDownloadedBookIds(ids);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const tabs: TabFilter[] = ['Semua', 'Sedang Dibaca', 'Selesai', 'Ingin Dibaca'];
 
@@ -90,7 +70,11 @@ export default function LibraryScreen() {
     );
   };
 
-  const displayBooks = (books && books.length > 0 ? books : SAMPLE_LIBRARY_BOOKS).map((book: any, idx: number) => ({
+  // We can let books query run, but if the user has no books we can still support an empty library instead of force falling back,
+  // or we can fallback but show empty when filtered. Let's make it so if books is empty or undefined, we default to empty array
+  // so the empty state actually works. Let's do that!
+  const hasBooks = books && books.length > 0;
+  const displayBooks = (hasBooks ? books : []).map((book: any, idx: number) => ({
     ...book,
     status: (book as any).status || (idx % 3 === 0 ? 'Sedang Dibaca' : idx % 3 === 1 ? 'Selesai' : 'Ingin Dibaca'),
   }));
@@ -99,6 +83,24 @@ export default function LibraryScreen() {
     if (activeTab === 'Semua') return true;
     return book.status === activeTab;
   });
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyStateContainer}>
+      <Ionicons name="book-outline" size={64} color={COLORS.muted} style={styles.emptyIcon} />
+      <Text style={styles.emptyTitle}>Rak Buku Kosong</Text>
+      <Text style={styles.emptyDescription}>
+        {activeTab === 'Semua'
+          ? 'Belum ada buku di perpustakaan Anda. Temukan buku menarik di Toko Buku.'
+          : `Tidak ada buku dengan status "${activeTab}".`}
+      </Text>
+      <TouchableOpacity
+        style={styles.emptyButton}
+        onPress={() => navigation.navigate('Store')}
+      >
+        <Text style={styles.emptyButtonText}>Cari Buku</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -123,8 +125,17 @@ export default function LibraryScreen() {
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}
-          columnWrapperStyle={styles.columnWrapper}
+          columnWrapperStyle={filteredBooks.length > 0 ? styles.columnWrapper : undefined}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.gold]}
+              tintColor={COLORS.gold}
+            />
+          }
           renderItem={({ item }) => (
             <View style={styles.cardWrapper}>
               <BookCoverCard
@@ -161,13 +172,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
   sortButton: {
     fontSize: 16,
     color: COLORS.ember,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   tabsContainer: {
     marginBottom: 20,
@@ -192,6 +204,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.muted,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   tabTextActive: {
     color: COLORS.creamLight,
@@ -202,6 +215,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    flexGrow: 1,
   },
   columnWrapper: {
     justifyContent: 'space-between',
@@ -210,5 +224,49 @@ const styles = StyleSheet.create({
   cardWrapper: {
     width: '48%',
     alignItems: 'center',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  emptyIcon: {
+    marginBottom: 16,
+    opacity: 0.8,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  emptyButton: {
+    backgroundColor: COLORS.ember,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  emptyButtonText: {
+    color: COLORS.creamLight,
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
 });

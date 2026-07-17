@@ -8,6 +8,8 @@ import { api } from '../../services/api';
 import BookCoverCard from '../../components/BookCoverCard';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
+import { Ionicons } from '@expo/vector-icons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -82,7 +84,9 @@ export default function SearchScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
+              <Ionicons name="search-outline" size={64} color={COLORS.muted} style={styles.emptyIcon} />
               <Text style={styles.emptyText}>Tidak ada hasil untuk "{debouncedQuery}"</Text>
+              <Text style={styles.emptySubtext}>Coba kata kunci lain atau periksa ejaan kata.</Text>
             </View>
           }
           renderItem={({ item }) => (
@@ -122,7 +126,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
     marginBottom: 16,
   },
@@ -143,6 +147,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.creamLight,
     height: '100%',
   },
@@ -153,6 +158,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
     marginBottom: 16,
   },
@@ -174,6 +180,7 @@ const styles = StyleSheet.create({
   genreText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
     color: COLORS.creamLight,
   },
   loader: {
@@ -197,11 +204,13 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
     color: COLORS.creamLight,
     marginBottom: 4,
   },
   resultAuthor: {
     fontSize: 14,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
     marginBottom: 8,
   },
@@ -209,13 +218,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.ember,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   emptyContainer: {
-    padding: 40,
+    paddingVertical: 60,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIcon: {
+    marginBottom: 16,
+    opacity: 0.8,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: COLORS.cream,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
     textAlign: 'center',
   },

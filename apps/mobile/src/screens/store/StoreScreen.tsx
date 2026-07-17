@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { api } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
@@ -220,13 +221,26 @@ export default function StoreScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [activeCategory, setActiveCategory] = useState('Fiksi');
 
-  const { data: featuredBooks, isLoading } = useQuery({
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { data: featuredBooks, isLoading, refetch: refetchFeatured } = useQuery({
     queryKey: ['featured'],
     queryFn: async () => {
       const response = await api.get('/books/featured');
       return response.data;
     },
   });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetchFeatured();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const categories = ['Fiksi', 'Non-fiksi', 'Komik', 'Audiobook', 'Anak-anak', 'Sains'];
 
@@ -262,7 +276,18 @@ export default function StoreScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.gold]}
+            tintColor={COLORS.gold}
+          />
+        }
+      >
         
         {/* Header */}
         <View style={styles.header}>
@@ -374,7 +399,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
   avatarButton: {
@@ -421,6 +446,7 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   categoryTextActive: {
     color: COLORS.creamLight,
@@ -434,7 +460,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'serif',
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
     paddingHorizontal: 20,
     marginBottom: 15,
@@ -456,11 +482,13 @@ const styles = StyleSheet.create({
   bookTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: FONTS.sansBold,
     color: COLORS.creamLight,
     marginBottom: 2,
   },
   bookAuthor: {
     fontSize: 12,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
   },
 });

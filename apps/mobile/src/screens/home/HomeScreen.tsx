@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -41,15 +41,29 @@ export default function HomeScreen() {
 
     return () => clearInterval(interval);
   }, [isFocused]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch recent reading session
-  const { data: recentReading, isLoading: isLoadingRecent } = useQuery({
+  const { data: recentReading, isLoading: isLoadingRecent, refetch: refetchRecent } = useQuery({
     queryKey: ['reading', 'recent'],
     queryFn: async () => {
       const response = await api.get('/reading/recent');
       return response.data;
     },
   });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetchRecent();
+      const ids = await bookDownloadService.getDownloadedBooks();
+      setDownloadedBookIds(ids);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Static mockup covers for the explore stacks (More to Explore)
   const fictionCovers = [
@@ -115,7 +129,18 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.gold]}
+            tintColor={COLORS.gold}
+          />
+        }
+      >
         
         {/* Header */}
         <View style={styles.header}>
