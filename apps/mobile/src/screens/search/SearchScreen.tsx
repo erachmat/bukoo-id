@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -75,7 +76,20 @@ export default function SearchScreen() {
       {!debouncedQuery.trim() ? (
         renderGenreGrid()
       ) : isLoading ? (
-        <ActivityIndicator size="large" color="#FFFFFF" style={styles.loader} />
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={styles.resultItem}>
+              <View style={styles.resultCoverWrapper}>
+                <ShimmerPlaceholder width={120} height={180} borderRadius={8} />
+              </View>
+              <View style={styles.resultInfo}>
+                <ShimmerPlaceholder width="80%" height={18} borderRadius={4} style={{ marginBottom: 8 }} />
+                <ShimmerPlaceholder width="50%" height={14} borderRadius={4} style={{ marginBottom: 12 }} />
+                <ShimmerPlaceholder width="30%" height={14} borderRadius={4} />
+              </View>
+            </View>
+          ))}
+        </View>
       ) : (
         <FlatList
           data={searchResults}

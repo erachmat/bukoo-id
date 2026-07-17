@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -326,7 +327,35 @@ export default function StoreScreen() {
 
         {/* Main Content */}
         {isLoading ? (
-          <ActivityIndicator size="large" color="#FFFFFF" style={styles.loader} />
+          <View style={{ flex: 1 }}>
+            {/* Spotlight Banner Skeleton */}
+            <View style={styles.section}>
+              <ShimmerPlaceholder width={180} height={26} borderRadius={4} style={{ marginLeft: 20, marginBottom: 15 }} />
+              <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 12 }}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.bookCard}>
+                    <ShimmerPlaceholder width={120} height={180} borderRadius={8} style={{ marginBottom: 8 }} />
+                    <ShimmerPlaceholder width={100} height={14} borderRadius={4} style={{ marginBottom: 4 }} />
+                    <ShimmerPlaceholder width={70} height={12} borderRadius={4} />
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Bestsellers Section Skeleton */}
+            <View style={styles.section}>
+              <ShimmerPlaceholder width={150} height={26} borderRadius={4} style={{ marginLeft: 20, marginBottom: 15 }} />
+              <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 12 }}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.bookCard}>
+                    <ShimmerPlaceholder width={120} height={180} borderRadius={8} style={{ marginBottom: 8 }} />
+                    <ShimmerPlaceholder width={100} height={14} borderRadius={4} style={{ marginBottom: 4 }} />
+                    <ShimmerPlaceholder width={70} height={12} borderRadius={4} />
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
         ) : (
           <>
             {/* Spotlight Banner */}

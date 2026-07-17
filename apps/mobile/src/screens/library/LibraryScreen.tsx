@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, MainTabParamList, ReadingStackParamList } from '../../navigation/types';
+import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList & ReadingStackParamList>;
 
@@ -118,7 +119,32 @@ export default function LibraryScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#FFFFFF" style={styles.loader} />
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+            <View style={{ width: '48%' }}>
+              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
+              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
+            </View>
+            <View style={{ width: '48%' }}>
+              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
+              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+            <View style={{ width: '48%' }}>
+              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
+              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
+            </View>
+            <View style={{ width: '48%' }}>
+              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
+              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
+            </View>
+          </View>
+        </View>
       ) : (
         <FlatList
           data={filteredBooks}

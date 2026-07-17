@@ -10,6 +10,7 @@ import { RootStackParamList, ReadingStackParamList } from '../../navigation/type
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -339,9 +340,42 @@ export default function BookDetailScreen() {
   const insets = useSafeAreaInsets();
 
   if (isLoading || isLoadingProgress) {
+    const shimmerColors = { color1: '#EFECE2', color2: '#DFDAC9' };
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#1B3A2D" style={styles.loader} />
+      <SafeAreaView style={[styles.container, { backgroundColor: '#F4F1E8' }]}>
+        <View style={{ flex: 1, paddingHorizontal: 24, alignItems: 'center', paddingTop: 40 }}>
+          {/* Header Back Icon Placeholder */}
+          <View style={{ alignSelf: 'flex-start', marginBottom: 20 }}>
+            <ShimmerPlaceholder width={40} height={40} borderRadius={20} {...shimmerColors} />
+          </View>
+
+          {/* Book Cover Placeholder */}
+          <ShimmerPlaceholder width={180} height={270} borderRadius={12} style={{ marginBottom: 24 }} {...shimmerColors} />
+
+          {/* Title & Author Placeholders */}
+          <ShimmerPlaceholder width={240} height={24} borderRadius={4} style={{ marginBottom: 8 }} {...shimmerColors} />
+          <ShimmerPlaceholder width={140} height={16} borderRadius={4} style={{ marginBottom: 24 }} {...shimmerColors} />
+
+          {/* Metadata Row Placeholders */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20, marginBottom: 32 }}>
+            <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
+            <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
+            <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
+          </View>
+
+          {/* Synopsis Text Placeholder lines */}
+          <View style={{ width: '100%', gap: 8, marginBottom: 40 }}>
+            <ShimmerPlaceholder width="100%" height={14} borderRadius={4} {...shimmerColors} />
+            <ShimmerPlaceholder width="100%" height={14} borderRadius={4} {...shimmerColors} />
+            <ShimmerPlaceholder width="95%" height={14} borderRadius={4} {...shimmerColors} />
+            <ShimmerPlaceholder width="70%" height={14} borderRadius={4} {...shimmerColors} />
+          </View>
+        </View>
+
+        {/* Sticky bottom CTA Placeholder */}
+        <View style={{ paddingHorizontal: 24, paddingBottom: Math.max(16, insets.bottom + 10) }}>
+          <ShimmerPlaceholder width="100%" height={54} borderRadius={27} {...shimmerColors} />
+        </View>
       </SafeAreaView>
     );
   }
