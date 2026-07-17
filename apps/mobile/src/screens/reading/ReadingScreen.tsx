@@ -20,6 +20,9 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useReadingSession } from '../../hooks/useReadingSession';
 import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
+import { COLORS } from '../../constants/COLORS';
+import { FONTS } from '../../constants/FONTS';
+import { Ionicons } from '@expo/vector-icons';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -268,6 +271,39 @@ function formatReadingTime(totalSeconds: number): string {
   if (m > 0) return `${m}m ${s}d`;
   return `${s}d`;
 }
+
+// ─── Theme Colors Map ─────────────────────────────────────────────────────────
+
+const themeColors = {
+  Light: {
+    bg: '#FFFFFF',
+    bgHeader: '#F7F7F7',
+    text: '#000000',
+    border: '#E2E8F0',
+    statusBarStyle: 'dark-content' as const,
+  },
+  Cream: {
+    bg: '#F4F1E8',
+    bgHeader: '#EFECE2',
+    text: '#1B3A2D',
+    border: '#E0DACB',
+    statusBarStyle: 'dark-content' as const,
+  },
+  Dark: {
+    bg: '#1A1A1A',
+    bgHeader: '#242424',
+    text: '#CCCCCC',
+    border: '#2A2A2A',
+    statusBarStyle: 'light-content' as const,
+  },
+  Sepia: {
+    bg: '#F5E6C8',
+    bgHeader: '#EDE0C0',
+    text: '#5B4636',
+    border: '#E8D5B3',
+    statusBarStyle: 'dark-content' as const,
+  },
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -544,50 +580,52 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const WebViewComponent = WebView as any;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors[theme].bg }]}>
       <StatusBar
-        barStyle="dark-content"
-        backgroundColor={COLORS.cream}
+        barStyle={themeColors[theme].statusBarStyle}
+        backgroundColor={themeColors[theme].bgHeader}
         translucent={false}
       />
 
       {/* ── Progress bar (always visible, 2px) ── */}
-      <View style={styles.progressBarTrack}>
+      <View style={[styles.progressBarTrack, { backgroundColor: themeColors[theme].border }]}>
         <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
       </View>
 
       {/* ── Header (animated show/hide) ── */}
       {controlsVisible && (
-        <Animated.View style={[styles.header, { opacity: controlsOpacity }]}>
+        <Animated.View style={[styles.header, { opacity: controlsOpacity, backgroundColor: themeColors[theme].bgHeader, borderBottomColor: themeColors[theme].border }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
             accessibilityLabel="Kembali"
           >
-            <Text style={styles.backIcon}>‹</Text>
+            <Ionicons name="chevron-back" size={28} color={themeColors[theme].text} />
           </TouchableOpacity>
 
           <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle} numberOfLines={1}>
+            <Text style={[styles.headerTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]} numberOfLines={1}>
               {chapterTitle || title}
             </Text>
             <View style={styles.headerMeta}>
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
+              <Text style={[styles.headerSubtitle, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]} numberOfLines={1}>
                 {isReady && chapterTotalPages > 0 
                   ? `${chapterTotalPages - chapterCurrentPage} hal. tersisa` 
                   : '…'}
               </Text>
-              <Text style={styles.headerMetaDivider}>·</Text>
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
+              <Text style={[styles.headerMetaDivider, { color: themeColors[theme].text + '77' }]}>·</Text>
+              <Text style={[styles.headerSubtitle, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]} numberOfLines={1}>
                 {formatReadingTime(readingTimeSeconds)}
               </Text>
             </View>
           </View>
 
           <TouchableOpacity style={styles.headerAction} onPress={toggleBookmark}>
-            <Text style={[styles.bookmarkIcon, bookmarks.some(b => b.cfi === currentCfi) && styles.bookmarkIconActive]}>
-              🔖
-            </Text>
+            <Ionicons 
+              name={bookmarks.some(b => b.cfi === currentCfi) ? "bookmark" : "bookmark-outline"} 
+              size={24} 
+              color={bookmarks.some(b => b.cfi === currentCfi) ? COLORS.ember : themeColors[theme].text} 
+            />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -648,27 +686,27 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
       {/* ── Bottom bar (animated show/hide) ── */}
       {controlsVisible && (
-        <Animated.View style={[styles.bottomBar, { opacity: controlsOpacity }]}>
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowToc(true)}>
-            <Text style={styles.navIconText}>☰</Text>
+        <Animated.View style={[styles.bottomBar, { opacity: controlsOpacity, backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border }]}>
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowToc(true)} accessibilityLabel="Daftar Isi">
+            <Ionicons name="menu-outline" size={26} color={themeColors[theme].text} />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowSettings(true)}>
-            <Text style={styles.navIconText}>Aa</Text>
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowSettings(true)} accessibilityLabel="Pengaturan Tampilan">
+            <Text style={[styles.navIconText, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium, fontSize: 20 }]}>Aa</Text>
           </TouchableOpacity>
 
           <View style={styles.pageCounter}>
-            <Text style={styles.pageCounterText}>
-              {currentPage} of {totalPages > 0 ? totalPages : '...'}
+            <Text style={[styles.pageCounterText, { color: themeColors[theme].text + 'AA', fontFamily: FONTS.sansMedium }]}>
+              {currentPage} dari {totalPages > 0 ? totalPages : '...'}
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)}>
-            <Text style={styles.navIconText}>📑</Text>
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)} accessibilityLabel="Bookmark">
+            <Ionicons name="bookmark-outline" size={22} color={themeColors[theme].text} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)}>
-            <Text style={styles.navIconText}>✍️</Text>
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)} accessibilityLabel="Sorotan & Catatan">
+            <Ionicons name="create-outline" size={22} color={themeColors[theme].text} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -678,17 +716,19 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* TOC Modal */}
       <Modal visible={showToc} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Daftar Isi</Text>
-              <TouchableOpacity onPress={() => setShowToc(false)}><Text style={styles.modalClose}>Tutup</Text></TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Daftar Isi</Text>
+              <TouchableOpacity onPress={() => setShowToc(false)}>
+                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
+              </TouchableOpacity>
             </View>
             <FlatList
               data={toc}
               keyExtractor={(item, index) => item.id || String(index)}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.tocItem} onPress={() => jumpToLocation(item.href)}>
-                  <Text style={styles.tocItemText}>{item.label}</Text>
+                <TouchableOpacity style={[styles.tocItem, { borderBottomColor: themeColors[theme].border }]} onPress={() => jumpToLocation(item.href)}>
+                  <Text style={[styles.tocItemText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]}>{item.label}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -699,13 +739,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* Settings Modal */}
       <Modal visible={showSettings} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Tampilan</Text>
-              <TouchableOpacity onPress={() => setShowSettings(false)}><Text style={styles.modalClose}>Tutup</Text></TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Tampilan</Text>
+              <TouchableOpacity onPress={() => setShowSettings(false)}>
+                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
+              </TouchableOpacity>
             </View>
             
-            <Text style={styles.settingsLabel}>Tema</Text>
+            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Tema</Text>
             <View style={styles.themeRow}>
               {(['Light', 'Cream', 'Dark', 'Sepia'] as const).map(t => {
                 const themeStyles = {
@@ -728,22 +770,40 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               })}
             </View>
 
-            <Text style={styles.settingsLabel}>Ukuran Font</Text>
+            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Ukuran Font</Text>
             <View style={styles.fontRow}>
-              <TouchableOpacity style={styles.fontButton} onPress={() => setFontSize(Math.max(14, fontSize - 2))}>
-                <Text style={styles.fontButtonText}>A-</Text>
+              <TouchableOpacity 
+                style={[styles.fontButton, { backgroundColor: theme === 'Dark' ? 'rgba(255,255,255,0.08)' : 'rgba(27, 58, 45, 0.08)' }]} 
+                onPress={() => setFontSize(Math.max(14, fontSize - 2))}
+              >
+                <Text style={[styles.fontButtonText, { color: themeColors[theme].text }]}>A-</Text>
               </TouchableOpacity>
-              <Text style={styles.fontSizeText}>{fontSize}</Text>
-              <TouchableOpacity style={styles.fontButton} onPress={() => setFontSize(Math.min(28, fontSize + 2))}>
-                <Text style={styles.fontButtonText}>A+</Text>
+              <Text style={[styles.fontSizeText, { color: themeColors[theme].text }]}>{fontSize}</Text>
+              <TouchableOpacity 
+                style={[styles.fontButton, { backgroundColor: theme === 'Dark' ? 'rgba(255,255,255,0.08)' : 'rgba(27, 58, 45, 0.08)' }]} 
+                onPress={() => setFontSize(Math.min(28, fontSize + 2))}
+              >
+                <Text style={[styles.fontButtonText, { color: themeColors[theme].text }]}>A+</Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.settingsLabel}>Jenis Font</Text>
+            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Jenis Font</Text>
             <View style={styles.fontFamilyRow}>
               {['DM Sans', 'Playfair Display', 'Georgia', 'Palatino'].map(f => (
-                <TouchableOpacity key={f} style={[styles.fontFamilyButton, fontFamily === f && styles.fontFamilyButtonActive]} onPress={() => setFontFamily(f)}>
-                  <Text style={[styles.fontFamilyText, fontFamily === f && styles.fontFamilyTextActive]}>{f}</Text>
+                <TouchableOpacity 
+                  key={f} 
+                  style={[
+                    styles.fontFamilyButton, 
+                    { borderColor: themeColors[theme].border },
+                    fontFamily === f && styles.fontFamilyButtonActive
+                  ]} 
+                  onPress={() => setFontFamily(f)}
+                >
+                  <Text style={[
+                    styles.fontFamilyText, 
+                    { color: themeColors[theme].text },
+                    fontFamily === f && styles.fontFamilyTextActive
+                  ]}>{f}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -754,19 +814,21 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* Bookmarks Modal */}
       <Modal visible={showBookmarks} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Markah Buku</Text>
-              <TouchableOpacity onPress={() => setShowBookmarks(false)}><Text style={styles.modalClose}>Tutup</Text></TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Markah Buku</Text>
+              <TouchableOpacity onPress={() => setShowBookmarks(false)}>
+                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
+              </TouchableOpacity>
             </View>
             <FlatList
               data={bookmarks}
               keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text style={styles.emptyText}>Belum ada markah buku.</Text>}
+              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Belum ada markah buku.</Text>}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.tocItem} onPress={() => jumpToLocation(item.cfi)}>
-                  <Text style={styles.tocItemText}>{item.chapterTitle}</Text>
-                  <Text style={styles.bookmarkDateText}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                <TouchableOpacity style={[styles.tocItem, { borderBottomColor: themeColors[theme].border }]} onPress={() => jumpToLocation(item.cfi)}>
+                  <Text style={[styles.tocItemText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]}>{item.chapterTitle}</Text>
+                  <Text style={[styles.bookmarkDateText, { color: themeColors[theme].text + '88', fontFamily: FONTS.sansRegular }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -777,18 +839,18 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* Highlight/Note Creation Modal */}
       <Modal visible={showHighlightModal} animationType="fade" transparent={true}>
         <View style={[styles.modalOverlay, { justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }]}>
-          <View style={[styles.modalContent, { borderRadius: 16, marginHorizontal: 20 }]}>
+          <View style={[styles.modalContent, { borderRadius: 16, marginHorizontal: 20, backgroundColor: themeColors[theme].bgHeader, borderTopLeftRadius: 16, borderTopRightRadius: 16 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Tambah Sorotan</Text>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Tambah Sorotan</Text>
               <TouchableOpacity onPress={() => { setShowHighlightModal(false); setSelectedText(''); }}>
-                <Text style={styles.modalClose}>Batal</Text>
+                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Batal</Text>
               </TouchableOpacity>
             </View>
             
             <ScrollView style={{ width: '100%', maxHeight: 300 }} keyboardShouldPersistTaps="handled">
-              <Text style={styles.selectedSnippet}>"{selectedText}"</Text>
+              <Text style={[styles.selectedSnippet, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, borderLeftColor: COLORS.ember, fontFamily: FONTS.serifBold || 'serif' }]}>"{selectedText}"</Text>
               
-              <Text style={styles.settingsLabel}>Warna Sorotan</Text>
+              <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Warna Sorotan</Text>
               <View style={[styles.themeRow, { justifyContent: 'flex-start', marginVertical: 8 }]}>
                 {[
                   { name: 'Kuning', color: 'rgba(250,204,21,0.4)', bg: '#facc15' },
@@ -808,11 +870,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 ))}
               </View>
 
-              <Text style={styles.settingsLabel}>Catatan Margin (Opsional)</Text>
+              <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Catatan Margin (Opsional)</Text>
               <TextInput
-                style={styles.noteInput}
+                style={[styles.noteInput, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, borderColor: themeColors[theme].border, fontFamily: FONTS.sansRegular }]}
                 placeholder="Tulis catatan Anda di sini..."
-                placeholderTextColor={COLORS.muted}
+                placeholderTextColor={theme === 'Dark' ? '#666666' : COLORS.muted}
                 value={highlightNote}
                 onChangeText={setHighlightNote}
                 multiline
@@ -829,17 +891,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* Highlights List Modal */}
       <Modal visible={showHighlights} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sorotan & Catatan</Text>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Sorotan & Catatan</Text>
               <TouchableOpacity onPress={() => setShowHighlights(false)}>
-                <Text style={styles.modalClose}>Tutup</Text>
+                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
               </TouchableOpacity>
             </View>
             <FlatList
               data={highlights}
               keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text style={styles.emptyText}>Belum ada sorotan atau catatan.</Text>}
+              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Belum ada sorotan atau catatan.</Text>}
               renderItem={({ item }) => {
                 const colorMap: Record<string, string> = {
                   'rgba(250,204,21,0.4)': '#facc15',
@@ -849,20 +911,20 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 };
                 const indicatorColor = colorMap[item.color] || '#facc15';
                 return (
-                  <View style={styles.highlightListItem}>
+                  <View style={[styles.highlightListItem, { borderBottomColor: themeColors[theme].border }]}>
                     <TouchableOpacity style={{ flex: 1 }} onPress={() => jumpToLocation(item.cfiRange)}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                         <View style={[styles.colorIndicator, { backgroundColor: indicatorColor }]} />
-                        <Text style={styles.highlightListText} numberOfLines={2}>
+                        <Text style={[styles.highlightListText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]} numberOfLines={2}>
                           "{item.text}"
                         </Text>
                       </View>
                       {item.note ? (
-                        <Text style={styles.highlightListNote}>
+                        <Text style={[styles.highlightListNote, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, fontFamily: FONTS.sansRegular }]}>
                           📝 {item.note}
                         </Text>
                       ) : null}
-                      <Text style={styles.bookmarkDateText}>
+                      <Text style={[styles.bookmarkDateText, { color: themeColors[theme].text + '88', fontFamily: FONTS.sansRegular }]}>
                         {new Date(item.createdAt).toLocaleDateString()}
                       </Text>
                     </TouchableOpacity>
@@ -885,15 +947,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
-const COLORS = {
-  cream: '#F4F1E8',
-  creamLight: '#FAF8F5',
-  forest: '#1B3A2D',
-  forestMuted: 'rgba(27,58,45,0.08)',
-  ember: '#C8541F',
-  sand: '#D4CEB8',
-  muted: '#9A978E',
-};
+
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -1119,7 +1173,7 @@ const styles = StyleSheet.create({
   },
   fontButton: {
     padding: 10,
-    backgroundColor: COLORS.forestMuted,
+    backgroundColor: 'rgba(27, 58, 45, 0.08)',
     borderRadius: 8,
     marginHorizontal: 16,
   },

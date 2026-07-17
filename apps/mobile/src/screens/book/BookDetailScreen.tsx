@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { useBookDownload } from '../../hooks/useBookDownload';
 import { RootStackParamList, ReadingStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
+import { Ionicons } from '@expo/vector-icons';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -335,6 +336,7 @@ export default function BookDetailScreen() {
   });
 
   const displayBook = book || MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
+  const insets = useSafeAreaInsets();
 
   if (isLoading || isLoadingProgress) {
     return (
@@ -479,10 +481,11 @@ export default function BookDetailScreen() {
       
       {/* Back Button */}
       <TouchableOpacity 
-        style={styles.backButton}
+        style={[styles.backButton, { top: Math.max(16, insets.top + 10) }]}
         onPress={() => navigation.goBack()}
+        accessibilityLabel="Kembali"
       >
-        <Text style={styles.backIcon}>‹</Text>
+        <Ionicons name="chevron-back" size={24} color={COLORS.forest} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -696,23 +699,19 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 50,
     left: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(244, 241, 232, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
-  },
-  backIcon: {
-    fontSize: 32,
-    lineHeight: 36,
-    color: COLORS.forest,
-    marginLeft: -2,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(27, 58, 45, 0.1)',
   },
 });
