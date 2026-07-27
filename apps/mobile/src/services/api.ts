@@ -175,27 +175,60 @@ api.interceptors.response.use(
 
 export const authApi = {
   register: async (data: RegisterData): Promise<RegisterResponseDto> => {
-    const response = await api.post<RegisterResponseDto>('/auth/register', data);
-    return response.data;
+    try {
+      const response = await api.post<RegisterResponseDto>('/auth/register', data);
+      return response.data;
+    } catch (error: unknown) {
+      const e = error as { response?: { status?: number; data?: unknown }; message?: string };
+      console.error('[authApi.register] FAILED', {
+        status: e?.response?.status,
+        data: JSON.stringify(e?.response?.data),
+        message: e?.message,
+        url: `${API_URL}/auth/register`,
+      });
+      throw error;
+    }
   },
 
   login: async (data: LoginData): Promise<AuthResponseDto> => {
     const deviceId = data.deviceId || (await getOrCreateDeviceId());
-    const response = await api.post<AuthResponseDto>('/auth/login', {
-      ...data,
-      deviceId,
-    });
-    return response.data;
+    try {
+      const response = await api.post<AuthResponseDto>('/auth/login', {
+        ...data,
+        deviceId,
+      });
+      return response.data;
+    } catch (error: unknown) {
+      const e = error as { response?: { status?: number; data?: unknown }; message?: string };
+      console.error('[authApi.login] FAILED', {
+        status: e?.response?.status,
+        data: JSON.stringify(e?.response?.data),
+        message: e?.message,
+        url: `${API_URL}/auth/login`,
+      });
+      throw error;
+    }
   },
 
   loginSocial: async (data: SocialLoginData): Promise<AuthResponseDto> => {
     const deviceId = data.deviceId || (await getOrCreateDeviceId());
-    const response = await api.post<AuthResponseDto>('/auth/social', {
-      provider: data.provider.toLowerCase() as 'google' | 'apple',
-      idToken: data.token,
-      deviceId,
-    });
-    return response.data;
+    try {
+      const response = await api.post<AuthResponseDto>('/auth/social', {
+        provider: data.provider.toLowerCase() as 'google' | 'apple',
+        idToken: data.token,
+        deviceId,
+      });
+      return response.data;
+    } catch (error: unknown) {
+      const e = error as { response?: { status?: number; data?: unknown }; message?: string };
+      console.error('[authApi.loginSocial] FAILED', {
+        status: e?.response?.status,
+        data: JSON.stringify(e?.response?.data),
+        message: e?.message,
+        url: `${API_URL}/auth/social`,
+      });
+      throw error;
+    }
   },
 
   refresh: async (refreshToken: string): Promise<AuthResponseDto> => {
