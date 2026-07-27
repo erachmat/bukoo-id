@@ -20,6 +20,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useReadingSession } from '../../hooks/useReadingSession';
 import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
+import { bookDownloadService } from '../../services/bookDownload';
+import { MASTER_SAMPLE_BOOKS } from '../book/BookDetailScreen';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -275,7 +277,7 @@ const themeColors = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ReadingScreen({ navigation, route }: ReadingScreenProps) {
-  const { bookId, title, localEpubUri } = route.params;
+  const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as any;
 
   const { currentPage, progressPercent, readingTimeSeconds, updateProgress } =
     useReadingSession(bookId);
@@ -393,23 +395,40 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     return () => { isMounted = false; };
   }, []);
 
-  // Load the EPUB file as base64 so it can be passed to the WebView as a data URI.
+  // Load the EPUB/PDF file as base64 so it can be passed to the WebView.
+  // Automatically resolves local path or downloads on-the-fly if localEpubUri is missing.
   useEffect(() => {
     let isMounted = true;
-    const loadEpubBase64 = async () => {
-      if (!localEpubUri) return;
+    const resolveAndLoadBook = async () => {
       try {
-        const b64 = await FileSystem.readAsStringAsync(localEpubUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        if (isMounted) setEpubBase64(b64);
+        let uri = localEpubUri;
+        
+        // 1. Check local download directory if localEpubUri wasn't passed directly
+        if (!uri && bookId) {
+          uri = await bookDownloadService.getLocalBookPath(bookId);
+        }
+
+        // 2. If still not downloaded, auto-download on-the-fly using epubUrl parameter or sample dictionary
+        if (!uri && bookId) {
+          const sampleBook = (MASTER_SAMPLE_BOOKS as any)[bookId];
+          const targetUrl = epubUrl || sampleBook?.epubUrl || 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub';
+          uri = await bookDownloadService.downloadBook(bookId, targetUrl);
+        }
+
+        if (uri && isMounted) {
+          const b64 = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          if (isMounted) setEpubBase64(b64);
+        }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to read EPUB as base64:', e);
+        console.error('[ReadingScreen] Failed to resolve or read book as base64:', e);
       }
     };
-    loadEpubBase64();
+
+    resolveAndLoadBook();
     return () => { isMounted = false; };
-  }, [localEpubUri]);
+  }, [bookId, localEpubUri, epubUrl]);
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -597,7 +616,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // When everything is ready, inject the EPUB data into the already-loaded WebView
   const webViewShellReady = useRef(false);
 
-  const isPdf = localEpubUri?.toLowerCase().endsWith('.pdf') || title?.toLowerCase().endsWith('.pdf');
+  const isPdf = (localEpubUri || '').toLowerCase().endsWith('.pdf') ||
+                (epubUrl || '').toLowerCase().endsWith('.pdf') ||
+                (title || '').toLowerCase().endsWith('.pdf') ||
+                (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
+                (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf');
 
   const injectEpubData = useCallback(() => {
     if (!webViewRef.current || !epubBase64) return;

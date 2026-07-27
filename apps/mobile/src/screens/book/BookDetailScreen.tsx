@@ -521,7 +521,7 @@ export default function BookDetailScreen() {
             ) : (
               <TouchableOpacity 
                 style={styles.primaryButton}
-                onPress={() => navigation.navigate('ReadingStack', { screen: 'Reading', params: { bookId: displayBook.id, localEpubUri: localUri! } })}
+                onPress={() => navigation.navigate('ReadingStack', { screen: 'Reading', params: { bookId: displayBook.id, title: displayBook.title, localEpubUri: localUri, epubUrl: displayBook.epubUrl } })}
               >
                 <Text style={styles.primaryButtonText}>{buttonText}</Text>
               </TouchableOpacity>
