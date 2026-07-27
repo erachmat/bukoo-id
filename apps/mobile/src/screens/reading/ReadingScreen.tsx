@@ -41,7 +41,7 @@ interface TocItem {
 }
 
 interface EpubMessage {
-  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED';
+  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY';
   page?: number;
   cfi?: string;
   percent?: number;
@@ -97,7 +97,66 @@ const EPUB_JS_BRIDGE = `
     return Promise.resolve(buf.buffer);
   }
 
-  // ── This is the main entry point called by React Native after WebView loads ──
+  // ── PDF loader — top-level, available immediately after shell loads ──
+  window.__bukooLoadPdf = function (pdfB64) {
+    var viewer = document.getElementById('viewer');
+    var loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'none';
+
+    // For very large PDFs, render page-by-page using pdf.js canvas
+    if (typeof pdfjsLib !== 'undefined') {
+      viewer.innerHTML = '';
+      viewer.style.overflow = 'auto';
+      viewer.style.webkitOverflowScrolling = 'touch';
+
+      var loadingTask;
+      if (pdfB64.startsWith('http') || pdfB64.startsWith('file')) {
+        loadingTask = pdfjsLib.getDocument(pdfB64);
+      } else {
+        var bin = window.atob(pdfB64);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        loadingTask = pdfjsLib.getDocument({ data: arr });
+      }
+
+      loadingTask.promise.then(function (pdf) {
+        sendMessage({ type: 'TOTAL_PAGES', totalPages: pdf.numPages });
+        var renderPage = function (num) {
+          if (num > pdf.numPages) {
+            sendMessage({ type: 'READY' });
+            return;
+          }
+          pdf.getPage(num).then(function (page) {
+            var scale = (window.innerWidth - 16) / page.getViewport({ scale: 1 }).width;
+            var viewport = page.getViewport({ scale: Math.max(scale, 1) });
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            canvas.style.display = 'block';
+            canvas.style.margin = '8px auto';
+            canvas.style.maxWidth = '100%';
+            viewer.appendChild(canvas);
+            page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function () {
+              renderPage(num + 1);
+            });
+          });
+        };
+        renderPage(1);
+      }).catch(function (err) {
+        sendMessage({ type: 'ERROR', error: 'PDF load failed: ' + String(err) });
+      });
+    } else {
+      // Fallback: embed as iframe (may not work on all Android WebViews)
+      var pdfSrc = (pdfB64.startsWith('http') || pdfB64.startsWith('file'))
+        ? pdfB64
+        : 'data:application/pdf;base64,' + pdfB64;
+      viewer.innerHTML = '<iframe id="pdf-frame" src="' + pdfSrc + '" style="width:100%;height:100%;border:none;"></iframe>';
+      sendMessage({ type: 'TOTAL_PAGES', totalPages: 1 });
+      sendMessage({ type: 'READY' });
+    }
+  };
+
+  // ── EPUB loader ──
   window.__bukooLoadBook = function (epubB64, cachedLocs) {
     if (typeof ePub === 'undefined') {
       sendMessage({ type: 'ERROR', error: 'epubjs not ready' });
@@ -113,6 +172,8 @@ const EPUB_JS_BRIDGE = `
       window.__bukooCurrentBook = null;
     }
     document.getElementById('viewer').innerHTML = '';
+    var loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'none';
 
     loadBookBuffer(epubB64).then(function (arrayBuffer) {
       var book = ePub(arrayBuffer);
@@ -183,21 +244,16 @@ const EPUB_JS_BRIDGE = `
           } catch (e) {}
         });
       };
-  window.__bukooLoadPdf = function (pdfB64) {
-    var viewer = document.getElementById('viewer');
-    var isDataUri = pdfB64.startsWith('http') || pdfB64.startsWith('file');
-    var pdfSrc = isDataUri ? pdfB64 : 'data:application/pdf;base64,' + pdfB64;
-    
-    // Embed PDF directly inside iframe/embed canvas viewer for maximum mobile compatibility
-    viewer.innerHTML = '<iframe id="pdf-frame" src="' + pdfSrc + '" style="width:100%;height:100%;border:none;"></iframe>';
-    sendMessage({ type: 'TOTAL_PAGES', totalPages: 1 });
-    sendMessage({ type: 'READY' });
+    }).catch(function (err) {
+      sendMessage({ type: 'ERROR', error: 'EPUB load failed: ' + String(err) });
+    });
   };
 
   sendMessage({ type: 'SHELL_READY' });
 })();
 true;
 `;
+
 
 // Static HTML shell: contains only the JS libraries, no EPUB data.
 // This NEVER changes between books — the WebView loads it once and stays alive.
@@ -395,8 +451,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     return () => { isMounted = false; };
   }, []);
 
-  // Load the EPUB/PDF file as base64 so it can be passed to the WebView.
+  // Load the EPUB/PDF file so it can be passed to the WebView.
+  // For EPUBs: reads as base64 and injects into the WebView JS bridge.
+  // For PDFs: passes the local file:// URI directly to pdf.js (avoids 50MB+ base64 strings).
   // Automatically resolves local path or downloads on-the-fly if localEpubUri is missing.
+  const [localFileUri, setLocalFileUri] = useState<string>('');
+
   useEffect(() => {
     let isMounted = true;
     const resolveAndLoadBook = async () => {
@@ -415,14 +475,25 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           uri = await bookDownloadService.downloadBook(bookId, targetUrl);
         }
 
-        if (uri && isMounted) {
+        if (!uri || !isMounted) return;
+
+        // Determine if this is a PDF
+        const uriIsPdf = uri.toLowerCase().endsWith('.pdf') ||
+          (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
+          (epubUrl || '').toLowerCase().endsWith('.pdf');
+
+        if (uriIsPdf) {
+          // For PDFs: pass the file URI directly — no base64 needed
+          if (isMounted) setLocalFileUri(uri);
+        } else {
+          // For EPUBs: convert to base64 (typically < 5MB, safe for injectJavaScript)
           const b64 = await FileSystem.readAsStringAsync(uri, {
             encoding: FileSystem.EncodingType.Base64,
           });
           if (isMounted) setEpubBase64(b64);
         }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to resolve or read book as base64:', e);
+        console.error('[ReadingScreen] Failed to resolve or read book:', e);
       }
     };
 
@@ -573,6 +644,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           case 'ERROR':
             console.warn('[ReadingScreen] epubjs error:', msg.error);
             break;
+          case 'SHELL_READY':
+            // Bridge script is ready — try injecting book data if available
+            webViewShellReady.current = true;
+            break;
           default:
             break;
         }
@@ -622,43 +697,46 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
                 (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf');
 
-  const injectEpubData = useCallback(() => {
-    if (!webViewRef.current || !epubBase64) return;
-    const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
-    if (isPdf) {
+  // True when we have data ready to inject (either base64 for EPUB or file URI for PDF)
+  const hasBookData = isPdf ? !!localFileUri : !!epubBase64;
+
+  const injectBookData = useCallback(() => {
+    if (!webViewRef.current) return;
+    if (isPdf && localFileUri) {
+      // PDF: pass the file:// URI directly — pdf.js handles it natively
+      // No base64 needed, avoids Android's ~20MB injectJavaScript limit
       webViewRef.current.injectJavaScript(
         `(function(){
-          var b64 = ${JSON.stringify(epubBase64)};
           if (window.__bukooLoadPdf) {
-            document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
-            window.__bukooLoadPdf(b64);
+            window.__bukooLoadPdf(${JSON.stringify(localFileUri)});
           }
         })(); true;`
       );
-    } else {
+    } else if (!isPdf && epubBase64) {
+      // EPUB: inject base64 data (typically < 5MB)
+      const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
       webViewRef.current.injectJavaScript(
         `(function(){
           var b64 = ${JSON.stringify(epubBase64)};
           var locs = ${locsArg};
           if (window.__bukooLoadBook) {
-            document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
             window.__bukooLoadBook(b64, locs);
           }
         })(); true;`
       );
     }
-  }, [epubBase64, cachedLocations, isPdf]);
+  }, [isPdf, localFileUri, epubBase64, cachedLocations]);
 
   // Called when the WebView's initial HTML has fully loaded and executed
   const handleWebViewLoad = useCallback(() => {
     webViewShellReady.current = true;
-    if (epubBase64) injectEpubData();
-  }, [epubBase64, injectEpubData]);
+    if (hasBookData) injectBookData();
+  }, [hasBookData, injectBookData]);
 
-  // Re-inject when EPUB base64 or locations arrive after the shell is ready
+  // Re-inject when book data arrives after the shell is ready
   useEffect(() => {
-    if (webViewShellReady.current && epubBase64) injectEpubData();
-  }, [epubBase64, injectEpubData]);
+    if (webViewShellReady.current && hasBookData) injectBookData();
+  }, [hasBookData, injectBookData]);
 
   // Hide the in-WebView loader once epubjs fires READY
   useEffect(() => {
