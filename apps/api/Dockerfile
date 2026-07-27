@@ -13,8 +13,8 @@ COPY apps/api/package.json ./apps/api/
 # Copy shared packages (workspace deps)
 COPY packages/ ./packages/
 
-# Install ALL deps (including devDependencies needed for build) ignoring postinstall scripts until source files are copied
-RUN npm ci --workspace=apps/api --include-workspace-root --ignore-scripts
+# Install ALL deps (including devDependencies needed for build)
+RUN npm ci --workspace=apps/api --include-workspace-root
 
 # Copy full source
 COPY apps/api/ ./apps/api/
