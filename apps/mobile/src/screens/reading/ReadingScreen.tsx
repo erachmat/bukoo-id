@@ -181,9 +181,15 @@ const EPUB_JS_BRIDGE = `
           } catch (e) {}
         });
       };
-    }).catch(function (err) {
-      sendMessage({ type: 'ERROR', error: 'Failed to load: ' + String(err) });
-    });
+  window.__bukooLoadPdf = function (pdfB64) {
+    var viewer = document.getElementById('viewer');
+    var isDataUri = pdfB64.startsWith('http') || pdfB64.startsWith('file');
+    var pdfSrc = isDataUri ? pdfB64 : 'data:application/pdf;base64,' + pdfB64;
+    
+    // Embed PDF directly inside iframe/embed canvas viewer for maximum mobile compatibility
+    viewer.innerHTML = '<iframe id="pdf-frame" src="' + pdfSrc + '" style="width:100%;height:100%;border:none;"></iframe>';
+    sendMessage({ type: 'TOTAL_PAGES', totalPages: 1 });
+    sendMessage({ type: 'READY' });
   };
 
   sendMessage({ type: 'SHELL_READY' });
@@ -193,7 +199,7 @@ true;
 
 // Static HTML shell: contains only the JS libraries, no EPUB data.
 // This NEVER changes between books — the WebView loads it once and stays alive.
-// EPUB data is pushed in via injectJavaScript after the shell is ready.
+// EPUB/PDF data is pushed in via injectJavaScript after the shell is ready.
 function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -212,6 +218,7 @@ function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string
     if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
   <\/script>
   <script>${epubJsContent}<\/script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
   <div id="loader">Memuat buku\u2026</div>
@@ -590,21 +597,34 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // When everything is ready, inject the EPUB data into the already-loaded WebView
   const webViewShellReady = useRef(false);
 
+  const isPdf = localEpubUri?.toLowerCase().endsWith('.pdf') || title?.toLowerCase().endsWith('.pdf');
+
   const injectEpubData = useCallback(() => {
     if (!webViewRef.current || !epubBase64) return;
     const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
-    // Pass b64 via a global to avoid string-escape issues with very large payloads
-    webViewRef.current.injectJavaScript(
-      `(function(){
-        var b64 = ${JSON.stringify(epubBase64)};
-        var locs = ${locsArg};
-        if (window.__bukooLoadBook) {
-          document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
-          window.__bukooLoadBook(b64, locs);
-        }
-      })(); true;`
-    );
-  }, [epubBase64, cachedLocations]);
+    if (isPdf) {
+      webViewRef.current.injectJavaScript(
+        `(function(){
+          var b64 = ${JSON.stringify(epubBase64)};
+          if (window.__bukooLoadPdf) {
+            document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
+            window.__bukooLoadPdf(b64);
+          }
+        })(); true;`
+      );
+    } else {
+      webViewRef.current.injectJavaScript(
+        `(function(){
+          var b64 = ${JSON.stringify(epubBase64)};
+          var locs = ${locsArg};
+          if (window.__bukooLoadBook) {
+            document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
+            window.__bukooLoadBook(b64, locs);
+          }
+        })(); true;`
+      );
+    }
+  }, [epubBase64, cachedLocations, isPdf]);
 
   // Called when the WebView's initial HTML has fully loaded and executed
   const handleWebViewLoad = useCallback(() => {

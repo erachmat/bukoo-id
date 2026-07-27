@@ -10,13 +10,18 @@ class BookDownloadService {
     }
   }
 
+  private getExtension(remoteUrl: string): string {
+    return remoteUrl.toLowerCase().endsWith('.pdf') ? '.pdf' : '.epub';
+  }
+
   async downloadBook(
     bookId: string, 
     remoteUrl: string, 
     onProgress?: (percent: number) => void
   ): Promise<string> {
     await this.ensureDirectoryExists();
-    const localUri = this.DOWNLOAD_DIR + bookId + '.epub';
+    const ext = this.getExtension(remoteUrl);
+    const localUri = this.DOWNLOAD_DIR + bookId + ext;
 
     const fileInfo = await FileSystem.getInfoAsync(localUri);
     if (fileInfo.exists) {
@@ -43,7 +48,6 @@ class BookDownloadService {
       if (!result) throw new Error('Download failed: No result returned');
       return result.uri;
     } catch (e) {
-      // Clean up partial file on failure
       const partialInfo = await FileSystem.getInfoAsync(localUri);
       if (partialInfo.exists) {
          await FileSystem.deleteAsync(localUri, { idempotent: true });
@@ -53,22 +57,29 @@ class BookDownloadService {
   }
 
   async getLocalBookPath(bookId: string): Promise<string | null> {
-    const localUri = this.DOWNLOAD_DIR + bookId + '.epub';
-    const fileInfo = await FileSystem.getInfoAsync(localUri);
-    return fileInfo.exists ? localUri : null;
+    const epubUri = this.DOWNLOAD_DIR + bookId + '.epub';
+    const pdfUri = this.DOWNLOAD_DIR + bookId + '.pdf';
+    
+    const epubInfo = await FileSystem.getInfoAsync(epubUri);
+    if (epubInfo.exists) return epubUri;
+
+    const pdfInfo = await FileSystem.getInfoAsync(pdfUri);
+    if (pdfInfo.exists) return pdfUri;
+
+    return null;
   }
 
   async deleteBook(bookId: string): Promise<void> {
-    const localUri = this.DOWNLOAD_DIR + bookId + '.epub';
-    await FileSystem.deleteAsync(localUri, { idempotent: true });
+    await FileSystem.deleteAsync(this.DOWNLOAD_DIR + bookId + '.epub', { idempotent: true });
+    await FileSystem.deleteAsync(this.DOWNLOAD_DIR + bookId + '.pdf', { idempotent: true });
   }
 
   async getDownloadedBooks(): Promise<string[]> {
     await this.ensureDirectoryExists();
     const files = await FileSystem.readDirectoryAsync(this.DOWNLOAD_DIR);
     return files
-      .filter((file) => file.endsWith('.epub'))
-      .map((file) => file.replace('.epub', ''));
+      .filter((file) => file.endsWith('.epub') || file.endsWith('.pdf'))
+      .map((file) => file.replace(/\.(epub|pdf)$/, ''));
   }
 
   async getStorageUsed(): Promise<number> {
@@ -77,7 +88,7 @@ class BookDownloadService {
     let totalSize = 0;
     
     for (const file of files) {
-      if (file.endsWith('.epub')) {
+      if (file.endsWith('.epub') || file.endsWith('.pdf')) {
         const fileInfo = await FileSystem.getInfoAsync(this.DOWNLOAD_DIR + file);
         if (fileInfo.exists && !fileInfo.isDirectory && fileInfo.size) {
           totalSize += fileInfo.size;

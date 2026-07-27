@@ -2,20 +2,24 @@ import { setDefaultResultOrder } from 'dns';
 setDefaultResultOrder('ipv4first');
 
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { join } from 'path';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // Suppress verbose startup logs in production
     logger: process.env.NODE_ENV === 'production'
       ? ['error', 'warn', 'log']
       : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/public' });
 
   // ── Security headers ───────────────────────────────────────────────────────
   // helmet sets Content-Security-Policy, X-Frame-Options, HSTS, etc.
