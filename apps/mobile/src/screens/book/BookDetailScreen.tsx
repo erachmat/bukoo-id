@@ -98,7 +98,7 @@ const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2025,
     synopsis: 'Buku karya monumental yang menjelaskan secara mendalam tentang filsafat ajaran Islam, tujuan hidup manusia, keadaan fisik, moral, dan kerohanian manusia.',
-    epubUrl: 'http://10.0.2.2:3000/public/books/filsafat-ajaran-islam.pdf',
+    epubUrl: 'https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.pdf',
     fileType: 'PDF',
   },
   book_perlunya_seorang_imam: {
@@ -113,7 +113,7 @@ const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2024,
     synopsis: 'Membahas pentingnya kepemimpinan rohani dan keberadaan seorang Imam pada setiap zaman untuk membimbing umat manusia menuju kebenaran.',
-    epubUrl: 'http://10.0.2.2:3000/public/books/perlunya-seorang-imam.pdf',
+    epubUrl: 'https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.pdf',
     fileType: 'PDF',
   },
   book_riwayat_rasulullah: {
@@ -128,7 +128,7 @@ const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2023,
     synopsis: 'Riwayat lengkap dan agung perjalanan hidup Nabi Besar Muhammad SAW dari masa kelahiran, kerasulan, hingga akhir hayat beliau.',
-    epubUrl: 'http://10.0.2.2:3000/public/books/riwayat-rasulullah.pdf',
+    epubUrl: 'https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf',
     fileType: 'PDF',
   },
   'art-of-war': {
