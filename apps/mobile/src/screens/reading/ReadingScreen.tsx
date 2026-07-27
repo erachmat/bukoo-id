@@ -276,7 +276,13 @@ function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string
     if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
   <\/script>
   <script>${epubJsContent}<\/script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>
+  <script>
+    // Must set workerSrc for pdf.js to function
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  <\/script>
 </head>
 <body>
   <div id="loader">Memuat buku\u2026</div>
@@ -453,44 +459,53 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   // Load the EPUB/PDF file so it can be passed to the WebView.
   // For EPUBs: reads as base64 and injects into the WebView JS bridge.
-  // For PDFs: passes the local file:// URI directly to pdf.js (avoids 50MB+ base64 strings).
-  // Automatically resolves local path or downloads on-the-fly if localEpubUri is missing.
+  // For PDFs: passes the HTTPS remote URL to pdf.js — Android WebView cannot access
+  //   file:///data/user/0/... (app private storage) via XHR due to security restrictions.
+  //   The local download still runs in the background for future offline caching.
+  // Automatically downloads on-the-fly if localEpubUri is missing.
   const [localFileUri, setLocalFileUri] = useState<string>('');
 
   useEffect(() => {
     let isMounted = true;
     const resolveAndLoadBook = async () => {
       try {
-        let uri = localEpubUri;
-        
-        // 1. Check local download directory if localEpubUri wasn't passed directly
-        if (!uri && bookId) {
-          uri = await bookDownloadService.getLocalBookPath(bookId);
-        }
-
-        // 2. If still not downloaded, auto-download on-the-fly using epubUrl parameter or sample dictionary
-        if (!uri && bookId) {
-          const sampleBook = (MASTER_SAMPLE_BOOKS as any)[bookId];
-          const targetUrl = epubUrl || sampleBook?.epubUrl || 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub';
-          uri = await bookDownloadService.downloadBook(bookId, targetUrl);
-        }
-
-        if (!uri || !isMounted) return;
+        // Determine the remote URL for this book
+        const sampleBook = (MASTER_SAMPLE_BOOKS as any)[bookId];
+        const remoteUrl = epubUrl || sampleBook?.epubUrl || '';
 
         // Determine if this is a PDF
-        const uriIsPdf = uri.toLowerCase().endsWith('.pdf') ||
-          (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
-          (epubUrl || '').toLowerCase().endsWith('.pdf');
+        const bookIsPdf = remoteUrl.toLowerCase().endsWith('.pdf') ||
+          sampleBook?.fileType === 'PDF' ||
+          (localEpubUri || '').toLowerCase().endsWith('.pdf');
 
-        if (uriIsPdf) {
-          // For PDFs: pass the file URI directly — no base64 needed
-          if (isMounted) setLocalFileUri(uri);
+        if (bookIsPdf) {
+          // For PDFs: use the remote HTTPS URL directly for pdf.js rendering.
+          // Android WebView cannot XHR-fetch file:///data/user/0/... (private storage).
+          // Kick off a background download for future offline caching (fire and forget).
+          if (remoteUrl && isMounted) {
+            setLocalFileUri(remoteUrl);
+          }
+          // Background local download (non-blocking)
+          if (remoteUrl) {
+            bookDownloadService.downloadBook(bookId, remoteUrl).catch(() => {});
+          }
         } else {
-          // For EPUBs: convert to base64 (typically < 5MB, safe for injectJavaScript)
-          const b64 = await FileSystem.readAsStringAsync(uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          if (isMounted) setEpubBase64(b64);
+          // For EPUBs: resolve local path, download if needed, then convert to base64.
+          let uri: string | null = localEpubUri || null;
+
+          if (!uri && bookId) {
+            uri = await bookDownloadService.getLocalBookPath(bookId);
+          }
+          if (!uri && bookId && remoteUrl) {
+            uri = await bookDownloadService.downloadBook(bookId, remoteUrl);
+          }
+
+          if (uri && isMounted) {
+            const b64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            if (isMounted) setEpubBase64(b64);
+          }
         }
       } catch (e) {
         console.error('[ReadingScreen] Failed to resolve or read book:', e);
@@ -691,11 +706,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // When everything is ready, inject the EPUB data into the already-loaded WebView
   const webViewShellReady = useRef(false);
 
-  const isPdf = (localEpubUri || '').toLowerCase().endsWith('.pdf') ||
-                (epubUrl || '').toLowerCase().endsWith('.pdf') ||
-                (title || '').toLowerCase().endsWith('.pdf') ||
+  const isPdf = (epubUrl || '').toLowerCase().endsWith('.pdf') ||
                 (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
-                (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf');
+                (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf') ||
+                (localEpubUri || '').toLowerCase().endsWith('.pdf');
 
   // True when we have data ready to inject (either base64 for EPUB or file URI for PDF)
   const hasBookData = isPdf ? !!localFileUri : !!epubBase64;
