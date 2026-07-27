@@ -24,7 +24,33 @@ interface Book {
 }
 
 const SAMPLE_STORE_BOOKS: (Book & { section: string })[] = [
-  // Fiksi
+  {
+    id: 'book_filsafat_ajaran_islam',
+    title: 'Filsafat Ajaran Islam (Edisi 2025)',
+    author: 'Hadhrat Mirza Ghulam Ahmad',
+    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
+    category: 'Fiksi',
+    genre: ['Filsafat', 'Islam', 'Agama'],
+    section: 'editors_choice'
+  },
+  {
+    id: 'book_perlunya_seorang_imam',
+    title: 'Perlunya Seorang Imam',
+    author: 'Hadhrat Mirza Ghulam Ahmad',
+    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
+    category: 'Fiksi',
+    genre: ['Agama', 'Islam', 'Kerohanian'],
+    section: 'editors_choice'
+  },
+  {
+    id: 'book_riwayat_rasulullah',
+    title: 'Riwayat Rasulullah SAW',
+    author: 'Tim Penulis Kiram',
+    coverUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400',
+    category: 'Fiksi',
+    genre: ['Sejarah', 'Biografi', 'Islam'],
+    section: 'editors_choice'
+  },
   {
     id: 'book_laskar_pelangi',
     title: 'Laskar Pelangi',
@@ -201,9 +227,9 @@ const isCategoryMatch = (book: Book, category: string) => {
   
   switch(category) {
     case 'Fiksi':
-      return lowerGenres.some(g => g.includes('fiction') || g.includes('fiksi') || g.includes('classic') || g.includes('magical') || g.includes('drama'));
+      return lowerGenres.some(g => g.includes('fiction') || g.includes('fiksi') || g.includes('classic') || g.includes('magical') || g.includes('drama') || g.includes('filsafat') || g.includes('islam') || g.includes('agama') || g.includes('sejarah') || g.includes('kerohanian'));
     case 'Non-fiksi':
-      return lowerGenres.some(g => g.includes('non') || g.includes('history') || g.includes('social') || g.includes('politic') || g.includes('biography') || g.includes('business'));
+      return lowerGenres.some(g => g.includes('non') || g.includes('history') || g.includes('social') || g.includes('politic') || g.includes('biography') || g.includes('business') || g.includes('filsafat') || g.includes('islam') || g.includes('agama') || g.includes('sejarah') || g.includes('kerohanian'));
     case 'Komik':
       return lowerGenres.some(g => g.includes('komik') || g.includes('comic') || g.includes('manga'));
     case 'Audiobook':
