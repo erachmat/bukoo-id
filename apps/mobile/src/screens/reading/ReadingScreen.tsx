@@ -60,6 +60,10 @@ interface EpubMessage {
 //  4. Exposes prevPage() / nextPage() helpers that React Native can call via
 //     injectJavaScript.
 
+// Module-level caching for loaded library code (survives screen unmounts)
+let cachedEpubJsContent: string | null = null;
+let cachedJsZipContent: string | null = null;
+
 const EPUB_JS_BRIDGE = `
 (function () {
   'use strict';
@@ -112,10 +116,18 @@ const EPUB_JS_BRIDGE = `
       rendition.display();
 
       book.ready.then(function () {
+        var cachedLocs = window.__BUKOO_CACHED_LOCATIONS__;
+        if (cachedLocs) {
+          try {
+            book.locations.load(cachedLocs);
+            return Promise.resolve();
+          } catch (e) {}
+        }
         return book.locations.generate(1024);
       }).then(function () {
         var total = book.spine.items ? book.spine.items.length : 0;
-        sendMessage({ type: 'TOTAL_PAGES', totalPages: total });
+        var savedLocs = book.locations.save();
+        sendMessage({ type: 'TOTAL_PAGES', totalPages: total, cachedLocations: savedLocs });
         sendMessage({ type: 'READY' });
       }).catch(function (err) {
         sendMessage({ type: 'ERROR', error: String(err) });
@@ -194,16 +206,13 @@ true; // required for injected scripts on Android
 
 // HTML shell with epubjs and JSZip bundled inline (no CDN dependency).
 // The EPUB is passed as raw base64 and parsed in-memory as ArrayBuffer using JSZip.
-function buildEpubHtml(epubBase64: string, epubJsContent: string, jsZipContent: string): string {
+function buildEpubHtml(epubBase64: string, epubJsContent: string, jsZipContent: string, cachedLocations?: string | null): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>BUKOO Reader</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <script>
     // Redirect console logs to React Native
     (function() {
@@ -222,11 +231,12 @@ function buildEpubHtml(epubBase64: string, epubJsContent: string, jsZipContent: 
   </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; }
-    #viewer { width: 100%; height: 100%; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #viewer { width: 100%; height: 100%; transition: opacity 0.15s ease; }
   </style>
   <script>
     window.__BUKOO_EPUB_B64__ = ${JSON.stringify(epubBase64)};
+    window.__BUKOO_CACHED_LOCATIONS__ = ${cachedLocations ? JSON.stringify(cachedLocations) : 'null'};
   </script>
   <script>${jsZipContent}</script>
   <script>
@@ -316,11 +326,14 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   
-  const [currentCfi, setCurrentCfi] = useState<string>('');
-  const [chapterTitle, setChapterTitle] = useState<string>('');
-  const [chapterCurrentPage, setChapterCurrentPage] = useState<number>(0);
-  const [chapterTotalPages, setChapterTotalPages] = useState<number>(1);
+  const [chapterInfo, setChapterInfo] = useState({
+    cfi: '',
+    title: '',
+    currentPage: 0,
+    totalPages: 1,
+  });
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [cachedLocations, setCachedLocations] = useState<string | null>(null);
 
   const [selectedText, setSelectedText] = useState('');
   const [selectedCfiRange, setSelectedCfiRange] = useState('');
@@ -330,9 +343,21 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [theme, setTheme] = useState<'Light' | 'Cream' | 'Dark' | 'Sepia'>('Cream');
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
-  const [epubJsContent, setEpubJsContent] = useState<string>('');
-  const [jsZipContent, setJsZipContent] = useState<string>('');
+  const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
+  const [jsZipContent, setJsZipContent] = useState<string>(cachedJsZipContent || '');
   const [epubBase64, setEpubBase64] = useState<string>('');
+
+  const currentCfi = chapterInfo.cfi;
+  const chapterTitle = chapterInfo.title;
+  const chapterCurrentPage = chapterInfo.currentPage;
+  const chapterTotalPages = chapterInfo.totalPages;
+
+  // Load cached book locations (makes book.locations.generate Instant on 2nd+ open)
+  useEffect(() => {
+    AsyncStorage.getItem(`epub_locations_${bookId}`).then((locs) => {
+      if (locs) setCachedLocations(locs);
+    }).catch(() => {});
+  }, [bookId]);
 
   const loadHighlights = useCallback(async () => {
     const hls = await highlightService.getHighlights(bookId);
@@ -360,9 +385,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     loadHighlights();
   };
 
-  // Load the bundled epubjs and jszip assets on mount (avoids CDN/CORS issues)
+  // Load the bundled epubjs and jszip assets on mount (reuses module cache if available)
   useEffect(() => {
     let isMounted = true;
+    if (cachedEpubJsContent && cachedJsZipContent) {
+      setEpubJsContent(cachedEpubJsContent);
+      setJsZipContent(cachedJsZipContent);
+      return;
+    }
+
     const loadAssets = async () => {
       try {
         const epubAsset = Asset.fromModule(require('../../assets/epub.min.txt'));
@@ -374,6 +405,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             FileSystem.readAsStringAsync(epubAsset.localUri),
             FileSystem.readAsStringAsync(zipAsset.localUri),
           ]);
+          cachedEpubJsContent = epubContent;
+          cachedJsZipContent = zipContent;
           if (isMounted) {
             setEpubJsContent(epubContent);
             setJsZipContent(zipContent);
@@ -388,7 +421,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, []);
 
   // Load the EPUB file as base64 so it can be passed to the WebView as a data URI.
-  // On Android, file:// URIs to app-private storage are blocked by the WebView sandbox.
   useEffect(() => {
     let isMounted = true;
     const loadEpubBase64 = async () => {
@@ -512,23 +544,28 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
       try {
-        const msg: EpubMessage = JSON.parse(event.nativeEvent.data);
+        const msg: EpubMessage & { cachedLocations?: string } = JSON.parse(event.nativeEvent.data);
         switch (msg.type) {
           case 'READY':
             setIsReady(true);
             break;
           case 'TOTAL_PAGES':
             if (msg.totalPages !== undefined) setTotalPages(msg.totalPages);
+            if (msg.cachedLocations) {
+              AsyncStorage.setItem(`epub_locations_${bookId}`, msg.cachedLocations).catch(() => {});
+            }
             break;
           case 'TOC':
             if (msg.toc) setToc(msg.toc);
             break;
           case 'PAGE_CHANGED':
             if (msg.page !== undefined && msg.cfi !== undefined) {
-              setCurrentCfi(msg.cfi);
-              if (msg.chapterTitle) setChapterTitle(msg.chapterTitle);
-              if (msg.chapterCurrentPage !== undefined) setChapterCurrentPage(msg.chapterCurrentPage);
-              if (msg.chapterTotalPages !== undefined) setChapterTotalPages(msg.chapterTotalPages);
+              setChapterInfo({
+                cfi: msg.cfi,
+                title: msg.chapterTitle || '',
+                currentPage: msg.chapterCurrentPage ?? 0,
+                totalPages: msg.chapterTotalPages ?? 1,
+              });
               updateProgress(msg.page, msg.cfi, msg.percent);
             }
             break;
@@ -544,15 +581,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           case 'ERROR':
             console.warn('[ReadingScreen] epubjs error:', msg.error);
             break;
-          case 'CONSOLE_LOG' as any:
-            console.log('[WebView LOG]', (msg as any).data);
-            break;
-          case 'CONSOLE_WARN' as any:
-            console.warn('[WebView WARN]', (msg as any).data);
-            break;
-          case 'CONSOLE_ERROR' as any:
-            console.error('[WebView ERROR]', (msg as any).data);
-            break;
           default:
             break;
         }
@@ -560,7 +588,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [updateProgress]
+    [bookId, updateProgress]
   );
 
   // ── Tap-zone handlers ─────────────────────────────────────────────────────
@@ -577,7 +605,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const handleCenterTap = useCallback(() => {
     if (controlsVisible) {
-      // Already visible — hide immediately
       if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
       Animated.timing(controlsOpacity, {
         toValue: 0,
@@ -589,10 +616,13 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [controlsVisible, controlsOpacity, showControls]);
 
-  // Only build HTML once epubjs, jszip, and EPUB base64 data are all loaded
-  const epubHtml = (epubJsContent && jsZipContent && epubBase64) 
-    ? buildEpubHtml(epubBase64, epubJsContent, jsZipContent) 
-    : '';
+  // Stable HTML string memoization prevents WebView reloads when toggling UI controls
+  const epubHtml = useMemo(
+    () => (epubJsContent && jsZipContent && epubBase64) 
+      ? buildEpubHtml(epubBase64, epubJsContent, jsZipContent, cachedLocations) 
+      : '',
+    [epubBase64, epubJsContent, jsZipContent, cachedLocations]
+  );
   const WebViewComponent = WebView as any;
 
   return (
@@ -647,7 +677,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       )}
 
       {/* ── WebView ── */}
-      <View style={styles.webViewContainer}>
+      <View style={styles.webViewContainer} renderToHardwareTextureAndroid={true}>
         {!epubHtml ? (
           <View style={styles.loaderContainer}>
             <Text style={styles.loaderText}>

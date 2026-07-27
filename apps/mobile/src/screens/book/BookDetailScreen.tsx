@@ -336,7 +336,13 @@ export default function BookDetailScreen() {
     },
   });
 
-  const displayBook = book || MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
+  const sampleFallback = MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
+  const displayBook = book ? {
+    ...sampleFallback,
+    ...book,
+    synopsis: book.synopsis || sampleFallback.synopsis,
+    epubUrl: book.epubUrl || sampleFallback.epubUrl,
+  } : sampleFallback;
   const insets = useSafeAreaInsets();
 
   if (isLoading || isLoadingProgress) {
