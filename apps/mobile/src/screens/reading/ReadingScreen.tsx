@@ -73,6 +73,16 @@ const EPUB_JS_BRIDGE = `
     }
   }
 
+  function base64ToArrayBuffer(b64) {
+    var binaryString = window.atob(b64);
+    var len = binaryString.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
   function initBook() {
     if (typeof ePub === 'undefined') {
       if (++readyRetries < MAX_READY_RETRIES) {
@@ -83,140 +93,94 @@ const EPUB_JS_BRIDGE = `
       return;
     }
 
-    var epubUri = window.__BUKOO_EPUB_URI__;
-    if (!epubUri) {
-      sendMessage({ type: 'ERROR', error: 'No EPUB URI provided' });
+    var epubB64 = window.__BUKOO_EPUB_B64__;
+    if (!epubB64) {
+      sendMessage({ type: 'ERROR', error: 'No EPUB data provided' });
       return;
     }
 
-    var book = ePub(epubUri);
-    var rendition = book.renderTo('viewer', {
-      width: '100%',
-      height: '100%',
-      spread: 'none',
-      flow: 'paginated',
-    });
+    try {
+      var arrayBuffer = base64ToArrayBuffer(epubB64);
+      var book = ePub(arrayBuffer);
+      var rendition = book.renderTo('viewer', {
+        width: '100%',
+        height: '100%',
+        spread: 'none',
+        flow: 'paginated',
+      });
 
-    rendition.display();
+      rendition.display();
 
-    book.ready.then(function () {
-      return book.locations.generate(1024);
-    }).then(function () {
-      var total = book.spine.items ? book.spine.items.length : 0;
-      sendMessage({ type: 'TOTAL_PAGES', totalPages: total });
-      sendMessage({ type: 'READY' });
-    }).catch(function (err) {
-      sendMessage({ type: 'ERROR', error: String(err) });
-    });
+      book.ready.then(function () {
+        return book.locations.generate(1024);
+      }).then(function () {
+        var total = book.spine.items ? book.spine.items.length : 0;
+        sendMessage({ type: 'TOTAL_PAGES', totalPages: total });
+        sendMessage({ type: 'READY' });
+      }).catch(function (err) {
+        sendMessage({ type: 'ERROR', error: String(err) });
+      });
 
-    book.loaded.navigation.then(function (nav) {
-      sendMessage({ type: 'TOC', toc: nav.toc });
-    });
+      book.loaded.navigation.then(function (nav) {
+        sendMessage({ type: 'TOC', toc: nav.toc });
+      });
 
-    rendition.on('relocated', function (location) {
-      try {
-        var start  = location.start;
-        var cfi    = start.cfi || '';
-        var page   = (start.displayed && start.displayed.page)
-                       ? start.displayed.page
-                       : 0;
-        var total  = (start.displayed && start.displayed.total)
-                       ? start.displayed.total
-                       : 1;
-        var pct    = book.locations.percentageFromCfi(cfi);
-        var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
-
-        var chapterTitle = '';
-        var navItem = book.navigation.get(start.href);
-        if (navItem) {
-          chapterTitle = navItem.label;
-        }
-
-        sendMessage({
-          type: 'PAGE_CHANGED',
-          page: page,
-          cfi: cfi,
-          percent: percent,
-          chapterTitle: chapterTitle,
-          chapterCurrentPage: page,
-          chapterTotalPages: total
-        });
-
-        // Re-apply highlights on relocation
-        if (window.__currentHighlights && window.__bukooApplyHighlights) {
-          window.__bukooApplyHighlights(window.__currentHighlights);
-        }
-      } catch (e) {
-        sendMessage({ type: 'ERROR', error: String(e) });
-      }
-    });
-
-    // Expose navigation and highlighting helpers for React Native
-    window.__bukooPrev = function () {
-      if (rendition && typeof rendition.prev === 'function') {
-        try { rendition.prev(); } catch (e) { console.warn('prev error', e); }
-      }
-    };
-    window.__bukooNext = function () {
-      if (rendition && typeof rendition.next === 'function') {
-        try { rendition.next(); } catch (e) { console.warn('next error', e); }
-      }
-    };
-    window.__bukooDisplay = function (target) {
-      if (rendition && typeof rendition.display === 'function') {
-        try { rendition.display(target); } catch (e) { console.warn('display error', e); }
-      }
-    };
-    window.__bukooSetTheme = function (themeObj) { 
-      if (rendition && rendition.themes && typeof rendition.themes.default === 'function') {
-        try { rendition.themes.default(themeObj); } catch (e) { console.warn('theme error', e); }
-      }
-    };
-
-    window.__bukooApplyHighlights = function (hlList) {
-      window.__currentHighlights = hlList;
-      if (window.__renderedHighlights) {
-        window.__renderedHighlights.forEach(function (cfiRange) {
-          try { rendition.annotations.remove(cfiRange, 'highlight'); } catch (e) {}
-        });
-      }
-      window.__renderedHighlights = [];
-
-      hlList.forEach(function (hl) {
+      rendition.on('relocated', function (location) {
         try {
-          rendition.annotations.add(
-            'highlight',
-            hl.cfiRange,
-            {},
-            function () {},
-            'epubjs-hl',
-            { fill: hl.color || 'rgba(250,204,21,0.4)' }
-          );
-          window.__renderedHighlights.push(hl.cfiRange);
+          var start  = location.start;
+          var cfi    = start.cfi || '';
+          var page   = (start.displayed && start.displayed.page)
+                         ? start.displayed.page
+                         : 0;
+          var total  = (start.displayed && start.displayed.total)
+                         ? start.displayed.total
+                         : 1;
+          var pct    = book.locations.percentageFromCfi(cfi);
+          var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
+
+          var chapterTitle = '';
+          var navItem = book.navigation.get(start.href);
+          if (navItem && navItem.label) {
+            chapterTitle = navItem.label.trim();
+          }
+
+          sendMessage({
+            type: 'PAGE_CHANGED',
+            page: page,
+            cfi: cfi,
+            percent: percent,
+            chapterTitle: chapterTitle,
+            chapterCurrentPage: page,
+            chapterTotalPages: total,
+          });
         } catch (e) {
-          sendMessage({ type: 'ERROR', error: 'Render HL error: ' + String(e) });
+          console.error('[Bridge] Error in relocated handler:', e);
         }
       });
-    };
 
-    rendition.on('selected', function (cfiRange) {
-      try {
-        var range = rendition.getRange(cfiRange);
-        var text = range.toString();
-        if (text && text.trim().length > 0) {
-          sendMessage({
-            type: 'TEXT_SELECTED',
-            cfi: cfiRange,
-            text: text
-          });
+      // Expose controls to React Native safely
+      window.__bukooNext = function () { if (rendition && typeof rendition.next === 'function') rendition.next(); };
+      window.__bukooPrev = function () { if (rendition && typeof rendition.prev === 'function') rendition.prev(); };
+      window.__bukooDisplay = function (target) { if (rendition && typeof rendition.display === 'function') rendition.display(target); };
+      window.__bukooSetTheme = function (themeObj) {
+        if (rendition && rendition.themes && typeof rendition.themes.default === 'function') {
+          rendition.themes.default(themeObj);
         }
-      } catch (e) {
-        sendMessage({ type: 'ERROR', error: String(e) });
-      }
-    });
-
-    window.__bukooBook = book;
-    window.__bukooRendition = rendition;
+      };
+      window.__bukooApplyHighlights = function (highlights) {
+        if (!highlights || !Array.isArray(highlights)) return;
+        highlights.forEach(function (h) {
+          try {
+            rendition.annotations.highlight(h.cfiRange, {}, function () {}, 'bukoo-highlight', {
+              fill: h.color || 'yellow',
+              'fill-opacity': '0.3',
+            });
+          } catch (e) {}
+        });
+      };
+    } catch (err) {
+      sendMessage({ type: 'ERROR', error: 'Failed to init ePub: ' + String(err) });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', initBook);
@@ -229,13 +193,8 @@ true; // required for injected scripts on Android
 `;
 
 // HTML shell with epubjs bundled inline (no CDN dependency).
-// The EPUB is passed as a base64 data URI to bypass Android WebView file:// access restrictions.
+// The EPUB is passed as raw base64 and parsed in-memory as ArrayBuffer to bypass Android WebView file/XHR restrictions.
 function buildEpubHtml(epubBase64: string, epubJsContent: string): string {
-  // Build the data URI that epubjs can fetch directly
-  const epubDataUri = epubBase64
-    ? `data:application/epub+zip;base64,${epubBase64}`
-    : '';
-
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -267,7 +226,7 @@ function buildEpubHtml(epubBase64: string, epubJsContent: string): string {
     #viewer { width: 100%; height: 100%; }
   </style>
   <script>
-    window.__BUKOO_EPUB_URI__ = ${JSON.stringify(epubDataUri)};
+    window.__BUKOO_EPUB_B64__ = ${JSON.stringify(epubBase64)};
   </script>
   <script>${epubJsContent}</script>
 </head>
