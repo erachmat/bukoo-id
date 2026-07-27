@@ -479,15 +479,25 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           (localEpubUri || '').toLowerCase().endsWith('.pdf');
 
         if (bookIsPdf) {
-          // For PDFs: use the remote HTTPS URL directly for pdf.js rendering.
-          // Android WebView cannot XHR-fetch file:///data/user/0/... (private storage).
-          // Kick off a background download for future offline caching (fire and forget).
-          if (remoteUrl && isMounted) {
-            setLocalFileUri(remoteUrl);
+          let uri: string | null = localEpubUri || null;
+          if (!uri && bookId) {
+            uri = await bookDownloadService.getLocalBookPath(bookId);
           }
-          // Background local download (non-blocking)
-          if (remoteUrl) {
-            bookDownloadService.downloadBook(bookId, remoteUrl).catch(() => {});
+          if (!uri && bookId && remoteUrl) {
+            uri = await bookDownloadService.downloadBook(bookId, remoteUrl).catch(() => null);
+          }
+
+          if (uri && isMounted) {
+            try {
+              const b64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              if (isMounted) setEpubBase64(b64);
+            } catch {
+              if (remoteUrl && isMounted) setLocalFileUri(remoteUrl);
+            }
+          } else if (remoteUrl && isMounted) {
+            setLocalFileUri(remoteUrl);
           }
         } else {
           // For EPUBs: resolve local path, download if needed, then convert to base64.
@@ -711,18 +721,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf') ||
                 (localEpubUri || '').toLowerCase().endsWith('.pdf');
 
-  // True when we have data ready to inject (either base64 for EPUB or file URI for PDF)
-  const hasBookData = isPdf ? !!localFileUri : !!epubBase64;
+  // True when we have data ready to inject (either base64 or remote file URI)
+  const hasBookData = isPdf ? (!!epubBase64 || !!localFileUri) : !!epubBase64;
 
   const injectBookData = useCallback(() => {
     if (!webViewRef.current) return;
-    if (isPdf && localFileUri) {
-      // PDF: pass the file:// URI directly — pdf.js handles it natively
-      // No base64 needed, avoids Android's ~20MB injectJavaScript limit
+    if (isPdf && (epubBase64 || localFileUri)) {
+      const pdfSource = epubBase64 || localFileUri;
       webViewRef.current.injectJavaScript(
         `(function(){
           if (window.__bukooLoadPdf) {
-            window.__bukooLoadPdf(${JSON.stringify(localFileUri)});
+            window.__bukooLoadPdf(${JSON.stringify(pdfSource)});
           }
         })(); true;`
       );
