@@ -15,7 +15,7 @@ import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const MASTER_SAMPLE_BOOKS: Record<string, any> = {
+export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
   book_laskar_pelangi: {
     id: 'book_laskar_pelangi',
     title: 'Laskar Pelangi',
