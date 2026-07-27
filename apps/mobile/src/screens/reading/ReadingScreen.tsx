@@ -192,9 +192,9 @@ const EPUB_JS_BRIDGE = `
 true; // required for injected scripts on Android
 `;
 
-// HTML shell with epubjs bundled inline (no CDN dependency).
-// The EPUB is passed as raw base64 and parsed in-memory as ArrayBuffer to bypass Android WebView file/XHR restrictions.
-function buildEpubHtml(epubBase64: string, epubJsContent: string): string {
+// HTML shell with epubjs and JSZip bundled inline (no CDN dependency).
+// The EPUB is passed as raw base64 and parsed in-memory as ArrayBuffer using JSZip.
+function buildEpubHtml(epubBase64: string, epubJsContent: string, jsZipContent: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -227,6 +227,12 @@ function buildEpubHtml(epubBase64: string, epubJsContent: string): string {
   </style>
   <script>
     window.__BUKOO_EPUB_B64__ = ${JSON.stringify(epubBase64)};
+  </script>
+  <script>${jsZipContent}</script>
+  <script>
+    if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') {
+      window.JSZip = JSZip;
+    }
   </script>
   <script>${epubJsContent}</script>
 </head>
@@ -325,6 +331,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [epubJsContent, setEpubJsContent] = useState<string>('');
+  const [jsZipContent, setJsZipContent] = useState<string>('');
   const [epubBase64, setEpubBase64] = useState<string>('');
 
   const loadHighlights = useCallback(async () => {
@@ -353,22 +360,30 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     loadHighlights();
   };
 
-  // Load the bundled epubjs asset on mount (avoids CDN/CORS issues)
+  // Load the bundled epubjs and jszip assets on mount (avoids CDN/CORS issues)
   useEffect(() => {
     let isMounted = true;
-    const loadEpubJs = async () => {
+    const loadAssets = async () => {
       try {
-        const asset = Asset.fromModule(require('../../assets/epub.min.txt'));
-        await asset.downloadAsync();
-        if (asset.localUri) {
-          const content = await FileSystem.readAsStringAsync(asset.localUri);
-          if (isMounted) setEpubJsContent(content);
+        const epubAsset = Asset.fromModule(require('../../assets/epub.min.txt'));
+        const zipAsset = Asset.fromModule(require('../../assets/jszip.min.txt'));
+        await Promise.all([epubAsset.downloadAsync(), zipAsset.downloadAsync()]);
+        
+        if (epubAsset.localUri && zipAsset.localUri) {
+          const [epubContent, zipContent] = await Promise.all([
+            FileSystem.readAsStringAsync(epubAsset.localUri),
+            FileSystem.readAsStringAsync(zipAsset.localUri),
+          ]);
+          if (isMounted) {
+            setEpubJsContent(epubContent);
+            setJsZipContent(zipContent);
+          }
         }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to load epubjs asset:', e);
+        console.error('[ReadingScreen] Failed to load epubjs/jszip assets:', e);
       }
     };
-    loadEpubJs();
+    loadAssets();
     return () => { isMounted = false; };
   }, []);
 
@@ -574,8 +589,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [controlsVisible, controlsOpacity, showControls]);
 
-  // Only build HTML once both epubjs library and EPUB base64 data are loaded
-  const epubHtml = (epubJsContent && epubBase64) ? buildEpubHtml(epubBase64, epubJsContent) : '';
+  // Only build HTML once epubjs, jszip, and EPUB base64 data are all loaded
+  const epubHtml = (epubJsContent && jsZipContent && epubBase64) 
+    ? buildEpubHtml(epubBase64, epubJsContent, jsZipContent) 
+    : '';
   const WebViewComponent = WebView as any;
 
   return (
