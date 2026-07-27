@@ -77,14 +77,13 @@ const EPUB_JS_BRIDGE = `
     }
   }
 
-  function base64ToArrayBuffer(b64) {
-    var binaryString = window.atob(b64);
-    var len = binaryString.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+  function loadBookBuffer(epubB64) {
+    if (window.fetch) {
+      return fetch("data:application/epub+zip;base64," + epubB64)
+        .then(function (res) { return res.arrayBuffer(); })
+        .catch(function () { return base64ToArrayBuffer(epubB64); });
     }
-    return bytes.buffer;
+    return Promise.resolve(base64ToArrayBuffer(epubB64));
   }
 
   function initBook() {
@@ -103,8 +102,7 @@ const EPUB_JS_BRIDGE = `
       return;
     }
 
-    try {
-      var arrayBuffer = base64ToArrayBuffer(epubB64);
+    loadBookBuffer(epubB64).then(function (arrayBuffer) {
       var book = ePub(arrayBuffer);
       var rendition = book.renderTo('viewer', {
         width: '100%',
@@ -190,9 +188,9 @@ const EPUB_JS_BRIDGE = `
           } catch (e) {}
         });
       };
-    } catch (err) {
-      sendMessage({ type: 'ERROR', error: 'Failed to init ePub: ' + String(err) });
-    }
+    }).catch(function (err) {
+      sendMessage({ type: 'ERROR', error: 'Failed to load buffer: ' + String(err) });
+    });
   }
 
   document.addEventListener('DOMContentLoaded', initBook);
@@ -595,13 +593,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const handleLeftTap = useCallback(() => {
     webViewRef.current?.injectJavaScript('window.__bukooPrev && window.__bukooPrev(); true;');
-    showControls();
-  }, [showControls]);
+  }, []);
 
   const handleRightTap = useCallback(() => {
     webViewRef.current?.injectJavaScript('window.__bukooNext && window.__bukooNext(); true;');
-    showControls();
-  }, [showControls]);
+  }, []);
 
   const handleCenterTap = useCallback(() => {
     if (controlsVisible) {
