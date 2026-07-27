@@ -26,6 +26,7 @@ async function bootstrap() {
   // Relax CSP for Swagger UI in non-production environments.
   app.use(
     helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
       contentSecurityPolicy: process.env.NODE_ENV === 'production'
         ? undefined          // use helmet's strict default
         : false,             // disabled so Swagger UI loads its inline scripts
