@@ -25,9 +25,12 @@ RUN npm run --workspace=packages/shared-types build
 # Generate Prisma client (requires schema.prisma + native binaries)
 RUN npm run --workspace=apps/api db:generate
 
-# ✅ Verify .prisma ada di root node_modules (hoisted)
-RUN test -d /app/node_modules/.prisma || \
-    (echo "❌ .prisma tidak ditemukan di root node_modules" && exit 1)
+# Sync .prisma directory to both root node_modules and apps/api/node_modules
+RUN if [ -d /app/apps/api/node_modules/.prisma ]; then \
+      mkdir -p /app/node_modules && cp -r /app/apps/api/node_modules/.prisma /app/node_modules/.prisma; \
+    elif [ -d /app/node_modules/.prisma ]; then \
+      mkdir -p /app/apps/api/node_modules && cp -r /app/node_modules/.prisma /app/apps/api/node_modules/.prisma; \
+    fi
 
 # Compile TypeScript → dist/
 RUN npm run --workspace=apps/api build
@@ -35,13 +38,16 @@ RUN npm run --workspace=apps/api build
 RUN test -f /app/apps/api/dist/main.js || \
     (echo "❌ dist/main.js tidak ditemukan" && exit 1)
 
-# Backup dari ROOT node_modules (bukan apps/api)
-RUN cp -r /app/node_modules/.prisma /tmp/prisma-generated
+# Backup generated .prisma clients before npm prune
+RUN mkdir -p /tmp/prisma-generated && \
+    ( [ -d /app/node_modules/.prisma ] && cp -r /app/node_modules/.prisma /tmp/prisma-generated/root || true ) && \
+    ( [ -d /app/apps/api/node_modules/.prisma ] && cp -r /app/apps/api/node_modules/.prisma /tmp/prisma-generated/api || true )
 
 RUN npm prune --workspace=apps/api --omit=dev
 
-# Restore ke root node_modules setelah prune
-RUN cp -r /tmp/prisma-generated /app/node_modules/.prisma
+# Restore generated .prisma clients after npm prune
+RUN ( [ -d /tmp/prisma-generated/root ] && cp -r /tmp/prisma-generated/root /app/node_modules/.prisma || true ) && \
+    ( [ -d /tmp/prisma-generated/api ] && mkdir -p /app/apps/api/node_modules && cp -r /tmp/prisma-generated/api /app/apps/api/node_modules/.prisma || true )
 
 
 # ─── Stage 2: Production ──────────────────────────────────────────────────────
