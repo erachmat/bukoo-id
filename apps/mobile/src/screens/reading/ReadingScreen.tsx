@@ -64,12 +64,13 @@ interface EpubMessage {
 let cachedEpubJsContent: string | null = null;
 let cachedJsZipContent: string | null = null;
 
+// ── EPUB JS Bridge ────────────────────────────────────────────────────────────
+// This script is injected into the WebView ONCE via the static HTML shell.
+// It exposes window.__bukooLoadBook(b64, cachedLocs) which React Native calls
+// via injectJavaScript to load a book WITHOUT reloading the WebView.
 const EPUB_JS_BRIDGE = `
 (function () {
   'use strict';
-
-  var MAX_READY_RETRIES = 30;
-  var readyRetries = 0;
 
   function sendMessage(obj) {
     if (window.ReactNativeWebView) {
@@ -79,28 +80,37 @@ const EPUB_JS_BRIDGE = `
 
   function loadBookBuffer(epubB64) {
     if (window.fetch) {
-      return fetch("data:application/epub+zip;base64," + epubB64)
+      return fetch('data:application/epub+zip;base64,' + epubB64)
         .then(function (res) { return res.arrayBuffer(); })
-        .catch(function () { return base64ToArrayBuffer(epubB64); });
+        .catch(function () {
+          var bin = window.atob(epubB64);
+          var buf = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+          return buf.buffer;
+        });
     }
-    return Promise.resolve(base64ToArrayBuffer(epubB64));
+    var bin = window.atob(epubB64);
+    var buf = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return Promise.resolve(buf.buffer);
   }
 
-  function initBook() {
+  // ── This is the main entry point called by React Native after WebView loads ──
+  window.__bukooLoadBook = function (epubB64, cachedLocs) {
     if (typeof ePub === 'undefined') {
-      if (++readyRetries < MAX_READY_RETRIES) {
-        setTimeout(initBook, 300);
-      } else {
-        sendMessage({ type: 'ERROR', error: 'epubjs failed to load after retries' });
-      }
+      sendMessage({ type: 'ERROR', error: 'epubjs not ready' });
       return;
     }
-
-    var epubB64 = window.__BUKOO_EPUB_B64__;
-    if (!epubB64) {
-      sendMessage({ type: 'ERROR', error: 'No EPUB data provided' });
-      return;
+    // Destroy previous book/rendition if any
+    if (window.__bukooCurrentRendition) {
+      try { window.__bukooCurrentRendition.destroy(); } catch(e) {}
+      window.__bukooCurrentRendition = null;
     }
+    if (window.__bukooCurrentBook) {
+      try { window.__bukooCurrentBook.destroy(); } catch(e) {}
+      window.__bukooCurrentBook = null;
+    }
+    document.getElementById('viewer').innerHTML = '';
 
     loadBookBuffer(epubB64).then(function (arrayBuffer) {
       var book = ePub(arrayBuffer);
@@ -111,10 +121,12 @@ const EPUB_JS_BRIDGE = `
         flow: 'paginated',
       });
 
+      window.__bukooCurrentBook = book;
+      window.__bukooCurrentRendition = rendition;
+
       rendition.display();
 
       book.ready.then(function () {
-        var cachedLocs = window.__BUKOO_CACHED_LOCATIONS__;
         if (cachedLocs) {
           try {
             book.locations.load(cachedLocs);
@@ -139,116 +151,72 @@ const EPUB_JS_BRIDGE = `
         try {
           var start  = location.start;
           var cfi    = start.cfi || '';
-          var page   = (start.displayed && start.displayed.page)
-                         ? start.displayed.page
-                         : 0;
-          var total  = (start.displayed && start.displayed.total)
-                         ? start.displayed.total
-                         : 1;
+          var page   = (start.displayed && start.displayed.page) ? start.displayed.page : 0;
+          var total  = (start.displayed && start.displayed.total) ? start.displayed.total : 1;
           var pct    = book.locations.percentageFromCfi(cfi);
           var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
-
           var chapterTitle = '';
           var navItem = book.navigation.get(start.href);
-          if (navItem && navItem.label) {
-            chapterTitle = navItem.label.trim();
-          }
-
+          if (navItem && navItem.label) chapterTitle = navItem.label.trim();
           sendMessage({
-            type: 'PAGE_CHANGED',
-            page: page,
-            cfi: cfi,
-            percent: percent,
-            chapterTitle: chapterTitle,
-            chapterCurrentPage: page,
-            chapterTotalPages: total,
+            type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
+            chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
           });
-        } catch (e) {
-          console.error('[Bridge] Error in relocated handler:', e);
-        }
+        } catch (e) {}
       });
 
-      // Expose controls to React Native safely
-      window.__bukooNext = function () { if (rendition && typeof rendition.next === 'function') rendition.next(); };
-      window.__bukooPrev = function () { if (rendition && typeof rendition.prev === 'function') rendition.prev(); };
-      window.__bukooDisplay = function (target) { if (rendition && typeof rendition.display === 'function') rendition.display(target); };
+      window.__bukooNext    = function () { if (rendition) rendition.next(); };
+      window.__bukooPrev    = function () { if (rendition) rendition.prev(); };
+      window.__bukooDisplay = function (t) { if (rendition) rendition.display(t); };
       window.__bukooSetTheme = function (themeObj) {
-        if (rendition && rendition.themes && typeof rendition.themes.default === 'function') {
-          rendition.themes.default(themeObj);
-        }
+        if (rendition && rendition.themes) rendition.themes.default(themeObj);
       };
       window.__bukooApplyHighlights = function (highlights) {
         if (!highlights || !Array.isArray(highlights)) return;
         highlights.forEach(function (h) {
           try {
             rendition.annotations.highlight(h.cfiRange, {}, function () {}, 'bukoo-highlight', {
-              fill: h.color || 'yellow',
-              'fill-opacity': '0.3',
+              fill: h.color || 'yellow', 'fill-opacity': '0.3',
             });
           } catch (e) {}
         });
       };
     }).catch(function (err) {
-      sendMessage({ type: 'ERROR', error: 'Failed to load buffer: ' + String(err) });
+      sendMessage({ type: 'ERROR', error: 'Failed to load: ' + String(err) });
     });
-  }
+  };
 
-  document.addEventListener('DOMContentLoaded', initBook);
-  // Fallback in case DOMContentLoaded already fired
-  if (document.readyState !== 'loading') {
-    initBook();
-  }
+  sendMessage({ type: 'SHELL_READY' });
 })();
-true; // required for injected scripts on Android
+true;
 `;
 
-// HTML shell with epubjs and JSZip bundled inline (no CDN dependency).
-// The EPUB is passed as raw base64 and parsed in-memory as ArrayBuffer using JSZip.
-function buildEpubHtml(epubBase64: string, epubJsContent: string, jsZipContent: string, cachedLocations?: string | null): string {
+// Static HTML shell: contains only the JS libraries, no EPUB data.
+// This NEVER changes between books — the WebView loads it once and stays alive.
+// EPUB data is pushed in via injectJavaScript after the shell is ready.
+function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>BUKOO Reader</title>
-  <script>
-    // Redirect console logs to React Native
-    (function() {
-      var send = function(type, data) {
-        if (window.ReactNativeWebView) {
-          window.ReactNativeWebView.postMessage(JSON.stringify({ type: type, data: data }));
-        }
-      };
-      console.log = function() { send('CONSOLE_LOG', Array.prototype.slice.call(arguments).join(' ')); };
-      console.warn = function() { send('CONSOLE_WARN', Array.prototype.slice.call(arguments).join(' ')); };
-      console.error = function() { send('CONSOLE_ERROR', Array.prototype.slice.call(arguments).join(' ')); };
-      window.addEventListener('error', function(e) {
-        send('CONSOLE_ERROR', 'WINDOW ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
-      });
-    })();
-  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    #viewer { width: 100%; height: 100%; transition: opacity 0.15s ease; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; }
+    #viewer { width: 100%; height: 100%; }
+    #loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #F4F1E8; font-family: -apple-system, sans-serif; font-size: 15px; color: #888; }
   </style>
+  <script>${jsZipContent}<\/script>
   <script>
-    window.__BUKOO_EPUB_B64__ = ${JSON.stringify(epubBase64)};
-    window.__BUKOO_CACHED_LOCATIONS__ = ${cachedLocations ? JSON.stringify(cachedLocations) : 'null'};
-  </script>
-  <script>${jsZipContent}</script>
-  <script>
-    if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') {
-      window.JSZip = JSZip;
-    }
-  </script>
-  <script>${epubJsContent}</script>
+    if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
+  <\/script>
+  <script>${epubJsContent}<\/script>
 </head>
 <body>
+  <div id="loader">Memuat buku\u2026</div>
   <div id="viewer"></div>
-  <script>
-    ${EPUB_JS_BRIDGE}
-  </script>
+  <script>${EPUB_JS_BRIDGE}<\/script>
 </body>
 </html>`;
 }
@@ -612,13 +580,51 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [controlsVisible, controlsOpacity, showControls]);
 
-  // Stable HTML string memoization prevents WebView reloads when toggling UI controls
-  const epubHtml = useMemo(
-    () => (epubJsContent && jsZipContent && epubBase64) 
-      ? buildEpubHtml(epubBase64, epubJsContent, jsZipContent, cachedLocations) 
-      : '',
-    [epubBase64, epubJsContent, jsZipContent, cachedLocations]
+  // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
+  // This means the WebView loads ONCE — switching books just calls __bukooLoadBook().
+  const epubShellHtml = useMemo(
+    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent) : '',
+    [epubJsContent, jsZipContent]
   );
+
+  // When everything is ready, inject the EPUB data into the already-loaded WebView
+  const webViewShellReady = useRef(false);
+
+  const injectEpubData = useCallback(() => {
+    if (!webViewRef.current || !epubBase64) return;
+    const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
+    // Pass b64 via a global to avoid string-escape issues with very large payloads
+    webViewRef.current.injectJavaScript(
+      `(function(){
+        var b64 = ${JSON.stringify(epubBase64)};
+        var locs = ${locsArg};
+        if (window.__bukooLoadBook) {
+          document.getElementById('loader') && (document.getElementById('loader').style.display='flex');
+          window.__bukooLoadBook(b64, locs);
+        }
+      })(); true;`
+    );
+  }, [epubBase64, cachedLocations]);
+
+  // Called when the WebView's initial HTML has fully loaded and executed
+  const handleWebViewLoad = useCallback(() => {
+    webViewShellReady.current = true;
+    if (epubBase64) injectEpubData();
+  }, [epubBase64, injectEpubData]);
+
+  // Re-inject when EPUB base64 or locations arrive after the shell is ready
+  useEffect(() => {
+    if (webViewShellReady.current && epubBase64) injectEpubData();
+  }, [epubBase64, injectEpubData]);
+
+  // Hide the in-WebView loader once epubjs fires READY
+  useEffect(() => {
+    if (isReady && webViewRef.current) {
+      webViewRef.current.injectJavaScript(
+        `var l=document.getElementById('loader'); if(l) l.style.display='none'; true;`
+      );
+    }
+  }, [isReady]);
   const WebViewComponent = WebView as any;
 
   return (
@@ -674,25 +680,23 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
       {/* ── WebView ── */}
       <View style={styles.webViewContainer} renderToHardwareTextureAndroid={true}>
-        {!epubHtml ? (
+        {!epubShellHtml ? (
           <View style={styles.loaderContainer}>
-            <Text style={styles.loaderText}>
-              {!epubJsContent ? 'Memuat pembaca buku…' : 'Memuat berkas buku…'}
-            </Text>
+            <Text style={styles.loaderText}>Memuat pembaca buku…</Text>
           </View>
         ) : (
           <WebViewComponent
             ref={webViewRef}
             originWhitelist={['*']}
-            source={{ html: epubHtml, baseUrl: 'about:blank' }}
+            source={{ html: epubShellHtml, baseUrl: 'about:blank' }}
             onMessage={handleMessage}
+            onLoad={handleWebViewLoad}
             javaScriptEnabled
             domStorageEnabled
             allowFileAccess
             allowUniversalAccessFromFileURLs
             mixedContentMode="always"
             style={styles.webView}
-            // Allow the WebView to load the local EPUB file on Android
             allowFileAccessFromFileURLs={Platform.OS === 'android'}
             onError={(e: { nativeEvent: { description: string } }) =>
               console.error('[ReadingScreen] WebView error:', e.nativeEvent.description)
