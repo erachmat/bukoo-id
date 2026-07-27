@@ -1,5 +1,5 @@
 [build]
-# Use the Dockerfile for the API service
+# Build from monorepo root so Docker COPY commands can access apps/, packages/, etc.
 builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
 
