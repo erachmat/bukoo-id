@@ -25,8 +25,12 @@ class BookDownloadService {
 
     const fileInfo = await FileSystem.getInfoAsync(localUri);
     if (fileInfo.exists) {
-      if (onProgress) onProgress(100);
-      return localUri;
+      if (fileInfo.size && fileInfo.size < 1000) {
+        await FileSystem.deleteAsync(localUri, { idempotent: true });
+      } else {
+        if (onProgress) onProgress(100);
+        return localUri;
+      }
     }
 
     const downloadResumable = FileSystem.createDownloadResumable(
@@ -46,6 +50,10 @@ class BookDownloadService {
     try {
       const result = await downloadResumable.downloadAsync();
       if (!result) throw new Error('Download failed: No result returned');
+      if (result.status && result.status !== 200) {
+        await FileSystem.deleteAsync(localUri, { idempotent: true });
+        throw new Error(`Download failed with status ${result.status}`);
+      }
       return result.uri;
     } catch (e) {
       const partialInfo = await FileSystem.getInfoAsync(localUri);
@@ -61,10 +69,22 @@ class BookDownloadService {
     const pdfUri = this.DOWNLOAD_DIR + bookId + '.pdf';
     
     const epubInfo = await FileSystem.getInfoAsync(epubUri);
-    if (epubInfo.exists) return epubUri;
+    if (epubInfo.exists) {
+      if (epubInfo.size && epubInfo.size < 1000) {
+        await FileSystem.deleteAsync(epubUri, { idempotent: true });
+      } else {
+        return epubUri;
+      }
+    }
 
     const pdfInfo = await FileSystem.getInfoAsync(pdfUri);
-    if (pdfInfo.exists) return pdfUri;
+    if (pdfInfo.exists) {
+      if (pdfInfo.size && pdfInfo.size < 1000) {
+        await FileSystem.deleteAsync(pdfUri, { idempotent: true });
+      } else {
+        return pdfUri;
+      }
+    }
 
     return null;
   }
