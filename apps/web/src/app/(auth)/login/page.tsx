@@ -6,6 +6,16 @@ import { auth } from '@/lib/auth'
 import { PasswordInput } from '@/components/auth/password-input'
 import { SubmitButton } from '@/components/auth/submit-button'
 
+const ERROR_MESSAGES: Record<string, string> = {
+  OAuthAccountNotLinked: 'Email ini sebelumnya sudah terdaftar menggunakan password. Kami telah mengonfigurasi tautan otomatis akun, silakan coba masuk kembali dengan Google.',
+  OAuthSignin: 'Gagal mengawali login dengan Google. Silakan coba lagi.',
+  OAuthCallback: 'Gagal menyelesaikan otentikasi Google. Silakan coba lagi.',
+  OAuthCreateAccount: 'Gagal membuat akun baru dengan Google.',
+  CredentialsSignin: 'Email atau password yang Anda masukkan salah.',
+  AccessDenied: 'Akses ditolak.',
+  SessionRequired: 'Silakan masuk terlebih dahulu.',
+}
+
 export default async function LoginPage(props: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const session = await auth()
   if (session) {
@@ -13,6 +23,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
   }
 
   const params = await props.searchParams
+  const errorMessage = params.error ? (ERROR_MESSAGES[params.error] || params.error) : null
   
   return (
     <div>
@@ -21,9 +32,9 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
         Masukkan email dan password untuk melanjutkan membaca
       </p>
 
-      {params.error && (
+      {errorMessage && (
         <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
-          {params.error}
+          {errorMessage}
         </div>
       )}
 
