@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   Animated,
   Platform,
@@ -13,6 +12,7 @@ import {
   TextInput,
   ScrollView
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Asset } from 'expo-asset';
@@ -152,11 +152,25 @@ const EPUB_JS_BRIDGE = `
     });
 
     // Expose navigation and highlighting helpers for React Native
-    window.__bukooPrev = function () { rendition.prev(); };
-    window.__bukooNext = function () { rendition.next(); };
-    window.__bukooDisplay = function (target) { rendition.display(target); };
+    window.__bukooPrev = function () {
+      if (rendition && typeof rendition.prev === 'function') {
+        try { rendition.prev(); } catch (e) { console.warn('prev error', e); }
+      }
+    };
+    window.__bukooNext = function () {
+      if (rendition && typeof rendition.next === 'function') {
+        try { rendition.next(); } catch (e) { console.warn('next error', e); }
+      }
+    };
+    window.__bukooDisplay = function (target) {
+      if (rendition && typeof rendition.display === 'function') {
+        try { rendition.display(target); } catch (e) { console.warn('display error', e); }
+      }
+    };
     window.__bukooSetTheme = function (themeObj) { 
-      rendition.themes.default(themeObj);
+      if (rendition && rendition.themes && typeof rendition.themes.default === 'function') {
+        try { rendition.themes.default(themeObj); } catch (e) { console.warn('theme error', e); }
+      }
     };
 
     window.__bukooApplyHighlights = function (hlList) {
@@ -215,8 +229,13 @@ true; // required for injected scripts on Android
 `;
 
 // HTML shell with epubjs bundled inline (no CDN dependency).
-// epubJsContent is loaded from the local bundled asset at runtime.
-function buildEpubHtml(epubUri: string, epubJsContent: string): string {
+// The EPUB is passed as a base64 data URI to bypass Android WebView file:// access restrictions.
+function buildEpubHtml(epubBase64: string, epubJsContent: string): string {
+  // Build the data URI that epubjs can fetch directly
+  const epubDataUri = epubBase64
+    ? `data:application/epub+zip;base64,${epubBase64}`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,7 +267,7 @@ function buildEpubHtml(epubUri: string, epubJsContent: string): string {
     #viewer { width: 100%; height: 100%; }
   </style>
   <script>
-    window.__BUKOO_EPUB_URI__ = ${JSON.stringify(epubUri)};
+    window.__BUKOO_EPUB_URI__ = ${JSON.stringify(epubDataUri)};
   </script>
   <script>${epubJsContent}</script>
 </head>
@@ -347,6 +366,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [epubJsContent, setEpubJsContent] = useState<string>('');
+  const [epubBase64, setEpubBase64] = useState<string>('');
 
   const loadHighlights = useCallback(async () => {
     const hls = await highlightService.getHighlights(bookId);
@@ -392,6 +412,25 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     loadEpubJs();
     return () => { isMounted = false; };
   }, []);
+
+  // Load the EPUB file as base64 so it can be passed to the WebView as a data URI.
+  // On Android, file:// URIs to app-private storage are blocked by the WebView sandbox.
+  useEffect(() => {
+    let isMounted = true;
+    const loadEpubBase64 = async () => {
+      if (!localEpubUri) return;
+      try {
+        const b64 = await FileSystem.readAsStringAsync(localEpubUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        if (isMounted) setEpubBase64(b64);
+      } catch (e) {
+        console.error('[ReadingScreen] Failed to read EPUB as base64:', e);
+      }
+    };
+    loadEpubBase64();
+    return () => { isMounted = false; };
+  }, [localEpubUri]);
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -576,11 +615,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [controlsVisible, controlsOpacity, showControls]);
 
-  const epubHtml = epubJsContent ? buildEpubHtml(localEpubUri || '', epubJsContent) : '';
+  // Only build HTML once both epubjs library and EPUB base64 data are loaded
+  const epubHtml = (epubJsContent && epubBase64) ? buildEpubHtml(epubBase64, epubJsContent) : '';
   const WebViewComponent = WebView as any;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors[theme].bg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors[theme].bg }]} edges={['top', 'left', 'right']}>
       <StatusBar
         barStyle={themeColors[theme].statusBarStyle}
         backgroundColor={themeColors[theme].bgHeader}
@@ -632,15 +672,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
       {/* ── WebView ── */}
       <View style={styles.webViewContainer}>
-        {!epubJsContent ? (
+        {!epubHtml ? (
           <View style={styles.loaderContainer}>
-            <Text style={styles.loaderText}>Memuat pembaca buku…</Text>
+            <Text style={styles.loaderText}>
+              {!epubJsContent ? 'Memuat pembaca buku…' : 'Memuat berkas buku…'}
+            </Text>
           </View>
         ) : (
           <WebViewComponent
             ref={webViewRef}
             originWhitelist={['*']}
-            source={{ html: epubHtml, baseUrl: 'file:///' }}
+            source={{ html: epubHtml, baseUrl: 'about:blank' }}
             onMessage={handleMessage}
             javaScriptEnabled
             domStorageEnabled
