@@ -41,7 +41,7 @@ interface TocItem {
 }
 
 interface EpubMessage {
-  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY';
+  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY' | 'TOGGLE_CONTROLS';
   page?: number;
   cfi?: string;
   percent?: number;
@@ -52,6 +52,9 @@ interface EpubMessage {
   chapterCurrentPage?: number;
   chapterTotalPages?: number;
   text?: string;
+  bookLoadDurationMs?: number;
+  locationGenTimeMs?: number;
+  cachedLocsUsed?: boolean;
 }
 
 // ─── JavaScript injected into the WebView ────────────────────────────────────
@@ -65,10 +68,12 @@ interface EpubMessage {
 // Module-level caching for loaded library code (survives screen unmounts)
 let cachedEpubJsContent: string | null = null;
 let cachedJsZipContent: string | null = null;
+let cachedPdfJsContent: string | null = null;
+let cachedPdfWorkerContent: string | null = null;
 
 // ── EPUB JS Bridge ────────────────────────────────────────────────────────────
 // This script is injected into the WebView ONCE via the static HTML shell.
-// It exposes window.__bukooLoadBook(b64, cachedLocs) which React Native calls
+// It exposes window.__bukooLoadBook(bookUrl, cachedLocs) which React Native calls
 // via injectJavaScript to load a book WITHOUT reloading the WebView.
 const EPUB_JS_BRIDGE = `
 (function () {
@@ -80,50 +85,338 @@ const EPUB_JS_BRIDGE = `
     }
   }
 
-  function loadBookBuffer(epubB64) {
-    if (window.fetch) {
-      return fetch('data:application/epub+zip;base64,' + epubB64)
-        .then(function (res) { return res.arrayBuffer(); })
-        .catch(function () {
-          var bin = window.atob(epubB64);
-          var buf = new Uint8Array(bin.length);
-          for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-          return buf.buffer;
-        });
+  function loadBookBuffer(bookUrl) {
+    if (bookUrl.startsWith('data:')) {
+      var b64 = bookUrl.split(',')[1] || '';
+      var bin = window.atob(b64);
+      var buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return Promise.resolve(buf.buffer);
     }
-    var bin = window.atob(epubB64);
-    var buf = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-    return Promise.resolve(buf.buffer);
+    return fetch(bookUrl)
+      .then(function (res) { return res.arrayBuffer(); })
+      .catch(function () {
+        return new Promise(function (resolve, reject) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', bookUrl, true);
+          xhr.responseType = 'arraybuffer';
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 0) {
+              resolve(xhr.response);
+            } else {
+              reject(new Error('XHR load status ' + xhr.status));
+            }
+          };
+          xhr.onerror = function (e) { reject(e); };
+          xhr.send();
+        });
+      });
   }
 
+  var __bukooPdfState = {
+    currentNum: 1,
+    total: 0,
+    canvases: []
+  };
+
+  window.__bukooCurrentPageTurnStyle = 'horizontal';
+
+  function animatePageTurn(dir, callback) {
+    var viewer = document.getElementById('viewer');
+    if (!viewer) { callback(); return; }
+    var shift = dir === 'next' ? '-24px' : '24px';
+    viewer.style.transition = 'transform 120ms ease-out, opacity 120ms ease-out';
+    viewer.style.transform = 'translateX(' + shift + ')';
+    viewer.style.opacity = '0.75';
+    setTimeout(function () {
+      callback();
+      viewer.style.transition = 'none';
+      viewer.style.transform = 'translateX(0)';
+      viewer.style.opacity = '1';
+      setTimeout(function () {
+        viewer.style.transition = 'transform 120ms ease-out, opacity 120ms ease-out';
+      }, 50);
+    }, 120);
+  }
+
+  window.__bukooNext = function () {
+    if (__bukooPdfState.canvases.length > 0) {
+      var nextNum = Math.min(__bukooPdfState.currentNum + 1, __bukooPdfState.total);
+      window.__bukooGoToPdfPage(nextNum);
+    } else if (window.__bukooCurrentRendition) {
+      if (window.__bukooCurrentPageTurnStyle === 'animated') {
+        animatePageTurn('next', function () {
+          window.__bukooCurrentRendition.next();
+        });
+      } else {
+        window.__bukooCurrentRendition.next();
+      }
+    }
+  };
+
+  window.__bukooPrev = function () {
+    if (__bukooPdfState.canvases.length > 0) {
+      var prevNum = Math.max(__bukooPdfState.currentNum - 1, 1);
+      window.__bukooGoToPdfPage(prevNum);
+    } else if (window.__bukooCurrentRendition) {
+      if (window.__bukooCurrentPageTurnStyle === 'animated') {
+        animatePageTurn('prev', function () {
+          window.__bukooCurrentRendition.prev();
+        });
+      } else {
+        window.__bukooCurrentRendition.prev();
+      }
+    }
+  };
+
+  window.__bukooDisplay = function (t) {
+    if (window.__bukooCurrentRendition) {
+      window.__bukooCurrentRendition.display(t);
+    }
+  };
+
+  window.__bukooSetTheme = function (themeObj) {
+    window.__bukooCurrentTheme = themeObj;
+    if (window.__bukooCurrentRendition && window.__bukooCurrentRendition.themes) {
+      try { window.__bukooCurrentRendition.themes.default(themeObj); } catch (e) {}
+    }
+  };
+
+  window.__bukooGoToPdfPage = function (num) {
+    var targetCanvas = __bukooPdfState.canvases[num - 1];
+    if (targetCanvas) {
+      targetCanvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  function attachPdfListeners() {
+    var viewer = document.getElementById('viewer');
+    if (!viewer || viewer.__listenersAttached) return;
+    viewer.__listenersAttached = true;
+
+    var scrollTimeout = null;
+    viewer.addEventListener('scroll', function () {
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function () {
+        var viewerTop = viewer.scrollTop;
+        var viewerHeight = viewer.clientHeight;
+        var middle = viewerTop + viewerHeight / 3;
+
+        var current = 1;
+        for (var i = 0; i < __bukooPdfState.canvases.length; i++) {
+          var c = __bukooPdfState.canvases[i];
+          if (c.offsetTop <= middle) {
+            current = i + 1;
+          } else {
+            break;
+          }
+        }
+        if (current !== __bukooPdfState.currentNum) {
+          __bukooPdfState.currentNum = current;
+          var percent = Math.round((current / __bukooPdfState.total) * 100);
+          sendMessage({
+            type: 'PAGE_CHANGED',
+            page: current,
+            cfi: 'pdf-page-' + current,
+            percent: percent,
+            chapterTitle: '',
+            chapterCurrentPage: current,
+            chapterTotalPages: __bukooPdfState.total
+          });
+        }
+      }, 80);
+    }, { passive: true });
+
+    var startX = 0, startY = 0, startTime = 0;
+    viewer.addEventListener('touchstart', function (e) {
+      if (e.touches && e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+      }
+    }, { passive: true });
+
+    viewer.addEventListener('touchend', function (e) {
+      if (!e.changedTouches || e.changedTouches.length === 0) return;
+      var endX = e.changedTouches[0].clientX;
+      var endY = e.changedTouches[0].clientY;
+      var diffX = endX - startX;
+      var diffY = endY - startY;
+      var duration = Date.now() - startTime;
+
+      if (Math.abs(diffX) < 12 && Math.abs(diffY) < 12 && duration < 300) {
+        var screenWidth = window.innerWidth;
+        if (endX < screenWidth * 0.25) {
+          window.__bukooPrev();
+        } else if (endX > screenWidth * 0.75) {
+          window.__bukooNext();
+        } else {
+          sendMessage({ type: 'TOGGLE_CONTROLS' });
+        }
+      }
+    }, { passive: true });
+  }
+
+  function attachRenditionListeners(rendition, book) {
+    rendition.on('relocated', function (location) {
+      try {
+        var start  = location.start;
+        var cfi    = start.cfi || '';
+        var page   = (start.displayed && start.displayed.page) ? start.displayed.page : 0;
+        var total  = (start.displayed && start.displayed.total) ? start.displayed.total : 1;
+        var pct    = book ? book.locations.percentageFromCfi(cfi) : 0;
+        var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
+        var chapterTitle = '';
+        var navItem = (book && book.navigation) ? book.navigation.get(start.href) : null;
+        if (navItem && navItem.label) chapterTitle = navItem.label.trim();
+        sendMessage({
+          type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
+          chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
+        });
+      } catch (e) {}
+    });
+
+    rendition.on('rendered', function (section, view) {
+      if (!view || !view.document) return;
+      var doc = view.document;
+      var startX = 0;
+      var startY = 0;
+      var startTime = 0;
+
+      doc.addEventListener('touchstart', function (e) {
+        if (e.touches && e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          startTime = Date.now();
+        }
+      }, { passive: true });
+
+      doc.addEventListener('touchend', function (e) {
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+        var endX = e.changedTouches[0].clientX;
+        var endY = e.changedTouches[0].clientY;
+        var diffX = endX - startX;
+        var diffY = endY - startY;
+        var duration = Date.now() - startTime;
+
+        var sel = doc.getSelection();
+        if (sel && sel.toString() && sel.toString().trim().length > 0) {
+          var selectedText = sel.toString();
+          try {
+            var range = sel.getRangeAt(0);
+            var cfiRange = rendition.getRange(section.href).generateCfiRange(range);
+            sendMessage({ type: 'TEXT_SELECTED', text: selectedText, cfi: cfiRange });
+          } catch (err) {}
+          return;
+        }
+
+        // Horizontal swipe gesture — only in paginated / animated mode
+        if (window.__bukooCurrentPageTurnStyle !== 'vertical' && Math.abs(diffX) > 50 && Math.abs(diffY) < 60 && duration < 400) {
+          if (diffX < 0) {
+            window.__bukooNext();
+          } else {
+            window.__bukooPrev();
+          }
+          return;
+        }
+
+        // Tap gesture (< 12px move within 300ms)
+        if (Math.abs(diffX) < 12 && Math.abs(diffY) < 12 && duration < 300) {
+          var screenWidth = doc.documentElement.clientWidth || window.innerWidth;
+          if (window.__bukooCurrentPageTurnStyle !== 'vertical' && endX < screenWidth * 0.25) {
+            window.__bukooPrev();
+          } else if (window.__bukooCurrentPageTurnStyle !== 'vertical' && endX > screenWidth * 0.75) {
+            window.__bukooNext();
+          } else {
+            sendMessage({ type: 'TOGGLE_CONTROLS' });
+          }
+        }
+      }, { passive: true });
+    });
+  }
+
+  window.__bukooSetPageTurnStyle = function (style, currentCfi) {
+    if (window.__bukooCurrentPageTurnStyle === style && window.__bukooCurrentRendition) return;
+    window.__bukooCurrentPageTurnStyle = style || 'horizontal';
+    var book = window.__bukooCurrentBook;
+    if (!book) return;
+
+    var flow = (style === 'vertical') ? 'scrolled-doc' : 'paginated';
+
+    if (window.__bukooCurrentRendition) {
+      try { window.__bukooCurrentRendition.destroy(); } catch (e) {}
+      window.__bukooCurrentRendition = null;
+    }
+
+    var viewer = document.getElementById('viewer');
+    if (viewer) viewer.innerHTML = '';
+
+    var rendition = book.renderTo('viewer', {
+      width: '100%',
+      height: '100%',
+      spread: 'none',
+      flow: flow,
+    });
+
+    window.__bukooCurrentRendition = rendition;
+    attachRenditionListeners(rendition, book);
+
+    if (window.__bukooCurrentTheme) {
+      try { rendition.themes.default(window.__bukooCurrentTheme); } catch (e) {}
+    }
+
+    if (currentCfi) {
+      rendition.display(currentCfi);
+    } else {
+      rendition.display();
+    }
+  };
+
   // ── PDF loader — top-level, available immediately after shell loads ──
-  window.__bukooLoadPdf = function (pdfB64) {
+  window.__bukooLoadPdf = function (pdfUrl) {
     var viewer = document.getElementById('viewer');
     var loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
 
-    // For very large PDFs, render page-by-page using pdf.js canvas
     if (typeof pdfjsLib !== 'undefined') {
       viewer.innerHTML = '';
+      viewer.__listenersAttached = false;
       viewer.style.overflow = 'auto';
       viewer.style.webkitOverflowScrolling = 'touch';
+      __bukooPdfState.currentNum = 1;
+      __bukooPdfState.canvases = [];
 
-      var loadingTask;
-      if (pdfB64.startsWith('http') || pdfB64.startsWith('file')) {
-        loadingTask = pdfjsLib.getDocument(pdfB64);
-      } else {
-        var bin = window.atob(pdfB64);
+      var taskPromise;
+      if (pdfUrl.startsWith('data:')) {
+        var b64 = pdfUrl.split(',')[1] || '';
+        var bin = window.atob(b64);
         var arr = new Uint8Array(bin.length);
         for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        loadingTask = pdfjsLib.getDocument({ data: arr });
+        taskPromise = Promise.resolve({ data: arr });
+      } else if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
+        taskPromise = Promise.resolve({
+          url: pdfUrl,
+          withCredentials: false,
+          disableAutoFetch: false,
+          disableStream: false,
+        });
+      } else {
+        var bin = window.atob(pdfUrl);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        taskPromise = Promise.resolve({ data: arr });
       }
 
-      loadingTask.promise.then(function (pdf) {
+      taskPromise.then(function (config) {
+        var loadingTask = pdfjsLib.getDocument(config);
+        return loadingTask.promise;
+      }).then(function (pdf) {
+        __bukooPdfState.total = pdf.numPages;
         sendMessage({ type: 'TOTAL_PAGES', totalPages: pdf.numPages });
         var renderPage = function (num) {
           if (num > pdf.numPages) {
             sendMessage({ type: 'READY' });
+            attachPdfListeners();
             return;
           }
           pdf.getPage(num).then(function (page) {
@@ -135,33 +428,40 @@ const EPUB_JS_BRIDGE = `
             canvas.style.display = 'block';
             canvas.style.margin = '8px auto';
             canvas.style.maxWidth = '100%';
+            canvas.setAttribute('data-page-num', String(num));
             viewer.appendChild(canvas);
+            __bukooPdfState.canvases.push(canvas);
+
             page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function () {
+              if (num === 1) {
+                sendMessage({ type: 'READY' });
+              }
+              renderPage(num + 1);
+            }).catch(function (renderErr) {
+              console.error('[PDF.js] Render error:', renderErr);
               renderPage(num + 1);
             });
           });
         };
         renderPage(1);
       }).catch(function (err) {
-        sendMessage({ type: 'ERROR', error: 'PDF load failed: ' + String(err) });
+        console.error('[PDF.js] Loading error:', err);
+        var errStr = String(err && err.message ? err.message : err);
+        sendMessage({ type: 'ERROR', error: 'PDF load failed: ' + errStr });
       });
     } else {
-      // Fallback: embed as iframe (may not work on all Android WebViews)
-      var pdfSrc = (pdfB64.startsWith('http') || pdfB64.startsWith('file'))
-        ? pdfB64
-        : 'data:application/pdf;base64,' + pdfB64;
-      viewer.innerHTML = '<iframe id="pdf-frame" src="' + pdfSrc + '" style="width:100%;height:100%;border:none;"></iframe>';
-      sendMessage({ type: 'TOTAL_PAGES', totalPages: 1 });
-      sendMessage({ type: 'READY' });
+      sendMessage({ type: 'ERROR', error: 'PDF.js library unavailable' });
     }
   };
 
   // ── EPUB loader ──
-  window.__bukooLoadBook = function (epubB64, cachedLocs) {
+  window.__bukooLoadBook = function (bookUrl, cachedLocs) {
     if (typeof ePub === 'undefined') {
       sendMessage({ type: 'ERROR', error: 'epubjs not ready' });
       return;
     }
+    var loadStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    var isCachedLocs = !!cachedLocs;
     // Destroy previous book/rendition if any
     if (window.__bukooCurrentRendition) {
       try { window.__bukooCurrentRendition.destroy(); } catch(e) {}
@@ -175,13 +475,14 @@ const EPUB_JS_BRIDGE = `
     var loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
 
-    loadBookBuffer(epubB64).then(function (arrayBuffer) {
+    loadBookBuffer(bookUrl).then(function (arrayBuffer) {
       var book = ePub(arrayBuffer);
+      var flow = (window.__bukooCurrentPageTurnStyle === 'vertical') ? 'scrolled-doc' : 'paginated';
       var rendition = book.renderTo('viewer', {
         width: '100%',
         height: '100%',
         spread: 'none',
-        flow: 'paginated',
+        flow: flow,
       });
 
       window.__bukooCurrentBook = book;
@@ -189,6 +490,7 @@ const EPUB_JS_BRIDGE = `
 
       rendition.display();
 
+      var locStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
       book.ready.then(function () {
         if (cachedLocs) {
           try {
@@ -198,10 +500,18 @@ const EPUB_JS_BRIDGE = `
         }
         return book.locations.generate(1024);
       }).then(function () {
+        var locEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        var locDuration = Math.round(locEnd - locStart);
+        var totalLoadDuration = Math.round(locEnd - loadStart);
         var total = book.spine.items ? book.spine.items.length : 0;
         var savedLocs = book.locations.save();
         sendMessage({ type: 'TOTAL_PAGES', totalPages: total, cachedLocations: savedLocs });
-        sendMessage({ type: 'READY' });
+        sendMessage({
+          type: 'READY',
+          bookLoadDurationMs: totalLoadDuration,
+          locationGenTimeMs: locDuration,
+          cachedLocsUsed: isCachedLocs
+        });
       }).catch(function (err) {
         sendMessage({ type: 'ERROR', error: String(err) });
       });
@@ -210,30 +520,8 @@ const EPUB_JS_BRIDGE = `
         sendMessage({ type: 'TOC', toc: nav.toc });
       });
 
-      rendition.on('relocated', function (location) {
-        try {
-          var start  = location.start;
-          var cfi    = start.cfi || '';
-          var page   = (start.displayed && start.displayed.page) ? start.displayed.page : 0;
-          var total  = (start.displayed && start.displayed.total) ? start.displayed.total : 1;
-          var pct    = book.locations.percentageFromCfi(cfi);
-          var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
-          var chapterTitle = '';
-          var navItem = book.navigation.get(start.href);
-          if (navItem && navItem.label) chapterTitle = navItem.label.trim();
-          sendMessage({
-            type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
-            chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
-          });
-        } catch (e) {}
-      });
+      attachRenditionListeners(rendition, book);
 
-      window.__bukooNext    = function () { if (rendition) rendition.next(); };
-      window.__bukooPrev    = function () { if (rendition) rendition.prev(); };
-      window.__bukooDisplay = function (t) { if (rendition) rendition.display(t); };
-      window.__bukooSetTheme = function (themeObj) {
-        if (rendition && rendition.themes) rendition.themes.default(themeObj);
-      };
       window.__bukooApplyHighlights = function (highlights) {
         if (!highlights || !Array.isArray(highlights)) return;
         highlights.forEach(function (h) {
@@ -258,7 +546,12 @@ true;
 // Static HTML shell: contains only the JS libraries, no EPUB data.
 // This NEVER changes between books — the WebView loads it once and stays alive.
 // EPUB/PDF data is pushed in via injectJavaScript after the shell is ready.
-function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string {
+function buildEpubShellHtml(
+  epubJsContent: string,
+  jsZipContent: string,
+  pdfJsContent: string,
+  pdfWorkerContent: string
+): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -271,23 +564,33 @@ function buildEpubShellHtml(epubJsContent: string, jsZipContent: string): string
     #viewer { width: 100%; height: 100%; }
     #loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #F4F1E8; font-family: -apple-system, sans-serif; font-size: 15px; color: #888; }
   </style>
-  <script>${jsZipContent}<\/script>
+  <script>${jsZipContent}</script>
   <script>
     if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
-  <\/script>
-  <script>${epubJsContent}<\/script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>
+  </script>
+  <script>${epubJsContent}</script>
+  ${pdfJsContent ? `<script>${pdfJsContent}</script>` : ''}
   <script>
-    // Must set workerSrc for pdf.js to function
     if (typeof pdfjsLib !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      if (${JSON.stringify(!!pdfWorkerContent)}) {
+        try {
+          var workerBlob = new Blob([${JSON.stringify(pdfWorkerContent || '')}], { type: 'text/javascript' });
+          pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(workerBlob);
+        } catch (e) {
+          console.error('[PDF.js] Failed to create offline worker blob:', e);
+        }
+      } else {
+        console.error('[PDF.js] Bundled offline worker asset missing');
+      }
+    } else {
+      console.warn('[PDF.js] Bundled PDF.js core library asset missing');
     }
-  <\/script>
+  </script>
 </head>
 <body>
   <div id="loader">Memuat buku\u2026</div>
   <div id="viewer"></div>
-  <script>${EPUB_JS_BRIDGE}<\/script>
+  <script>${EPUB_JS_BRIDGE}</script>
 </body>
 </html>`;
 }
@@ -338,21 +641,31 @@ const themeColors = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+interface ReadingRouteParams {
+  bookId: string;
+  title?: string;
+  localEpubUri?: string;
+  epubUrl?: string;
+}
+
 export default function ReadingScreen({ navigation, route }: ReadingScreenProps) {
-  const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as any;
+  const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as ReadingRouteParams;
 
   const { currentPage, progressPercent, readingTimeSeconds, updateProgress } =
     useReadingSession(bookId);
 
-  const webViewRef = useRef<any>(null);
+  const webViewRef = useRef<WebView>(null);
   const controlsOpacity = useRef(new Animated.Value(1)).current;
   const controlsHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Performance metrics tracking refs
+  const mountTimeRef = useRef(performance.now());
+  const pageTurnStartTimeRef = useRef<number | null>(null);
+  const dataInjectTimeRef = useRef<number | null>(null);
 
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isReady, setIsReady] = useState(false);
 
-  // ── Advanced Features State ───────────────────────────────────────────────
-  
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -380,14 +693,22 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [theme, setTheme] = useState<'Light' | 'Cream' | 'Dark' | 'Sepia'>('Cream');
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
+  const [pageTurnStyle, setPageTurnStyle] = useState<'horizontal' | 'vertical' | 'animated'>('horizontal');
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
   const [jsZipContent, setJsZipContent] = useState<string>(cachedJsZipContent || '');
-  const [epubBase64, setEpubBase64] = useState<string>('');
+  const [pdfJsContent, setPdfJsContent] = useState<string>(cachedPdfJsContent || '');
+  const [pdfWorkerContent, setPdfWorkerContent] = useState<string>(cachedPdfWorkerContent || '');
 
   const currentCfi = chapterInfo.cfi;
   const chapterTitle = chapterInfo.title;
   const chapterCurrentPage = chapterInfo.currentPage;
   const chapterTotalPages = chapterInfo.totalPages;
+
+  const sampleBookItem = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
+  const isPdf = (epubUrl || '').toLowerCase().endsWith('.pdf') ||
+                sampleBookItem?.fileType === 'PDF' ||
+                sampleBookItem?.epubUrl?.toLowerCase().endsWith('.pdf') ||
+                (localEpubUri || '').toLowerCase().endsWith('.pdf');
 
   // Load cached book locations (makes book.locations.generate Instant on 2nd+ open)
   useEffect(() => {
@@ -422,31 +743,51 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     loadHighlights();
   };
 
-  // Load the bundled epubjs and jszip assets on mount (reuses module cache if available)
+  // Load the bundled epubjs, jszip, and pdfjs assets on mount (reuses module cache if available)
   useEffect(() => {
     let isMounted = true;
-    if (cachedEpubJsContent && cachedJsZipContent) {
+    if (cachedEpubJsContent && cachedJsZipContent && cachedPdfJsContent && cachedPdfWorkerContent) {
       setEpubJsContent(cachedEpubJsContent);
       setJsZipContent(cachedJsZipContent);
+      setPdfJsContent(cachedPdfJsContent);
+      setPdfWorkerContent(cachedPdfWorkerContent);
       return;
     }
 
     const loadAssets = async () => {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const epubAsset = Asset.fromModule(require('../../assets/epub.min.txt'));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const zipAsset = Asset.fromModule(require('../../assets/jszip.min.txt'));
-        await Promise.all([epubAsset.downloadAsync(), zipAsset.downloadAsync()]);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const pdfAsset = Asset.fromModule(require('../../assets/pdf.min.txt'));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const pdfWorkerAsset = Asset.fromModule(require('../../assets/pdf.worker.min.txt'));
+
+        await Promise.all([
+          epubAsset.downloadAsync(),
+          zipAsset.downloadAsync(),
+          pdfAsset.downloadAsync(),
+          pdfWorkerAsset.downloadAsync(),
+        ]);
         
-        if (epubAsset.localUri && zipAsset.localUri) {
-          const [epubContent, zipContent] = await Promise.all([
+        if (epubAsset.localUri && zipAsset.localUri && pdfAsset.localUri && pdfWorkerAsset.localUri) {
+          const [epubContent, zipContent, pdfContent, pdfWorkerContentStr] = await Promise.all([
             FileSystem.readAsStringAsync(epubAsset.localUri),
             FileSystem.readAsStringAsync(zipAsset.localUri),
+            FileSystem.readAsStringAsync(pdfAsset.localUri),
+            FileSystem.readAsStringAsync(pdfWorkerAsset.localUri),
           ]);
           cachedEpubJsContent = epubContent;
           cachedJsZipContent = zipContent;
+          cachedPdfJsContent = pdfContent;
+          cachedPdfWorkerContent = pdfWorkerContentStr;
           if (isMounted) {
             setEpubJsContent(epubContent);
             setJsZipContent(zipContent);
+            setPdfJsContent(pdfContent);
+            setPdfWorkerContent(pdfWorkerContentStr);
           }
         }
       } catch (e) {
@@ -457,68 +798,44 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     return () => { isMounted = false; };
   }, []);
 
-  // Load the EPUB/PDF file so it can be passed to the WebView.
-  // For EPUBs: reads as base64 and injects into the WebView JS bridge.
-  // For PDFs: passes the HTTPS remote URL to pdf.js — Android WebView cannot access
-  //   file:///data/user/0/... (app private storage) via XHR due to security restrictions.
-  //   The local download still runs in the background for future offline caching.
-  // Automatically downloads on-the-fly if localEpubUri is missing.
+  // Load the EPUB/PDF file URI so it can be passed directly to the WebView.
+  // Serves the file via direct file:// URL (or remote HTTPS URL if downloading).
+  // Zero Base64 string memory duplication!
   const [localFileUri, setLocalFileUri] = useState<string>('');
 
   useEffect(() => {
     let isMounted = true;
     const resolveAndLoadBook = async () => {
       try {
-        // Determine the remote URL for this book
-        const sampleBook = (MASTER_SAMPLE_BOOKS as any)[bookId];
+        const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
         const remoteUrl = epubUrl || sampleBook?.epubUrl || '';
 
-        // Determine if this is a PDF
-        const bookIsPdf = remoteUrl.toLowerCase().endsWith('.pdf') ||
-          sampleBook?.fileType === 'PDF' ||
-          (localEpubUri || '').toLowerCase().endsWith('.pdf');
+        // Check if file already exists locally on disk
+        let uri: string | null = localEpubUri || null;
+        if (!uri && bookId) {
+          uri = await bookDownloadService.getLocalBookPath(bookId);
+        }
 
-        if (bookIsPdf) {
-          let uri: string | null = localEpubUri || null;
-          if (!uri && bookId) {
-            uri = await bookDownloadService.getLocalBookPath(bookId);
-          }
-          if (!uri && bookId && remoteUrl) {
-            uri = await bookDownloadService.downloadBook(bookId, remoteUrl).catch(() => null);
-          }
+        // IMMEDIATELY set initialUri for streaming — zero blocking delay!
+        const initialUri = uri || remoteUrl;
+        if (initialUri && isMounted) {
+          console.log('[ReadingScreen] Immediate book URI for streaming:', initialUri);
+          setLocalFileUri(initialUri);
+        }
 
-          if (uri && isMounted) {
-            try {
-              const b64 = await FileSystem.readAsStringAsync(uri, {
-                encoding: FileSystem.EncodingType.Base64,
-              });
-              if (isMounted) setEpubBase64(b64);
-            } catch {
-              if (remoteUrl && isMounted) setLocalFileUri(remoteUrl);
-            }
-          } else if (remoteUrl && isMounted) {
-            setLocalFileUri(remoteUrl);
-          }
-        } else {
-          // For EPUBs: resolve local path, download if needed, then convert to base64.
-          let uri: string | null = localEpubUri || null;
-
-          if (!uri && bookId) {
-            uri = await bookDownloadService.getLocalBookPath(bookId);
-          }
-          if (!uri && bookId && remoteUrl) {
-            uri = await bookDownloadService.downloadBook(bookId, remoteUrl);
-          }
-
-          if (uri && isMounted) {
-            const b64 = await FileSystem.readAsStringAsync(uri, {
-              encoding: FileSystem.EncodingType.Base64,
-            });
-            if (isMounted) setEpubBase64(b64);
-          }
+        // Trigger background download for offline caching if not cached yet
+        if (!uri && bookId && remoteUrl) {
+          console.log('[ReadingScreen] Initiating background download for offline cache...');
+          bookDownloadService.downloadBook(bookId, remoteUrl)
+            .then((downloadedUri) => {
+              if (downloadedUri && isMounted) {
+                console.log('[ReadingScreen] Background download finished:', downloadedUri);
+              }
+            })
+            .catch((err) => console.warn('[ReadingScreen] Background download warning:', err));
         }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to resolve or read book:', e);
+        console.error('[ReadingScreen] Failed to resolve book:', e);
       }
     };
 
@@ -535,6 +852,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           if (parsed.theme) setTheme(parsed.theme);
           if (parsed.fontSize) setFontSize(parsed.fontSize);
           if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
+          if (parsed.pageTurnStyle) setPageTurnStyle(parsed.pageTurnStyle);
         }
       } catch (e) {
         console.error('Failed to load settings', e);
@@ -560,8 +878,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [highlights, isReady]);
 
+  // Sync typography, theme, and page turn style settings to WebView and AsyncStorage
   useEffect(() => {
-    if (isReady && webViewRef.current) {
+    if (!isReady || !webViewRef.current) return;
+
+    const timer = setTimeout(() => {
       const themes = {
         Light: { body: { background: '#FFFFFF', color: '#000000', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
         Cream: { body: { background: '#F4F1E8', color: '#1B3A2D', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
@@ -570,12 +891,18 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       };
       
       const themeObj = themes[theme];
-      const js = `if (window.__bukooSetTheme) window.__bukooSetTheme(${JSON.stringify(themeObj)}); true;`;
-      webViewRef.current.injectJavaScript(js);
+      const js = `
+        if (window.__bukooSetTheme) window.__bukooSetTheme(${JSON.stringify(themeObj)});
+        if (window.__bukooSetPageTurnStyle && !${isPdf}) window.__bukooSetPageTurnStyle(${JSON.stringify(pageTurnStyle)}, ${JSON.stringify(currentCfi)});
+        true;
+      `;
+      webViewRef.current?.injectJavaScript(js);
       
-      AsyncStorage.setItem('reader_settings', JSON.stringify({ theme, fontSize, fontFamily })).catch(console.error);
-    }
-  }, [theme, fontSize, fontFamily, isReady]);
+      AsyncStorage.setItem('reader_settings', JSON.stringify({ theme, fontSize, fontFamily, pageTurnStyle })).catch(console.error);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, isReady, isPdf, currentCfi]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
@@ -620,12 +947,41 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     scheduleHideControls();
   }, [controlsOpacity, scheduleHideControls]);
 
-  useEffect(() => {
-    scheduleHideControls();
-    return () => {
+  const handleLeftTap = useCallback(() => {
+    pageTurnStartTimeRef.current = performance.now();
+    webViewRef.current?.injectJavaScript('window.__bukooPrev && window.__bukooPrev(); true;');
+  }, []);
+
+  const handleRightTap = useCallback(() => {
+    pageTurnStartTimeRef.current = performance.now();
+    webViewRef.current?.injectJavaScript('window.__bukooNext && window.__bukooNext(); true;');
+  }, []);
+
+  const handleCenterTap = useCallback(() => {
+    if (controlsVisible) {
       if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
-    };
-  }, [scheduleHideControls]);
+      Animated.timing(controlsOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => setControlsVisible(false));
+    } else {
+      showControls();
+    }
+  }, [controlsVisible, controlsOpacity, showControls]);
+
+  // Suspend auto-hide timer when reader modals are open
+  const isAnyModalOpen = showToc || showSettings || showBookmarks || showHighlights || showHighlightModal;
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
+      setControlsVisible(true);
+      controlsOpacity.setValue(1);
+    } else {
+      scheduleHideControls();
+    }
+  }, [isAnyModalOpen, scheduleHideControls, controlsOpacity]);
 
   // ── WebView message handler ───────────────────────────────────────────────
 
@@ -634,9 +990,16 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       try {
         const msg: EpubMessage & { cachedLocations?: string } = JSON.parse(event.nativeEvent.data);
         switch (msg.type) {
-          case 'READY':
+          case 'READY': {
             setIsReady(true);
+            const totalTtff = Math.round(performance.now() - mountTimeRef.current);
+            console.log(
+              `[Perf] Total Time-to-First-Frame: ${totalTtff}ms` +
+              (msg.bookLoadDurationMs ? `, In-WebView load: ${msg.bookLoadDurationMs}ms` : '') +
+              (msg.locationGenTimeMs !== undefined ? `, Location gen (${msg.cachedLocsUsed ? 'cached' : 'generated'}): ${msg.locationGenTimeMs}ms` : '')
+            );
             break;
+          }
           case 'TOTAL_PAGES':
             if (msg.totalPages !== undefined) setTotalPages(msg.totalPages);
             if (msg.cachedLocations) {
@@ -647,6 +1010,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             if (msg.toc) setToc(msg.toc);
             break;
           case 'PAGE_CHANGED':
+            if (pageTurnStartTimeRef.current !== null) {
+              const latency = Math.round(performance.now() - pageTurnStartTimeRef.current);
+              console.log(`[Perf] Page turn latency: ${latency}ms`);
+              pageTurnStartTimeRef.current = null;
+            }
             if (msg.page !== undefined && msg.cfi !== undefined) {
               setChapterInfo({
                 cfi: msg.cfi,
@@ -666,12 +1034,16 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               setShowHighlightModal(true);
             }
             break;
+          case 'TOGGLE_CONTROLS':
+            handleCenterTap();
+            break;
           case 'ERROR':
             console.warn('[ReadingScreen] epubjs error:', msg.error);
             break;
           case 'SHELL_READY':
             // Bridge script is ready — try injecting book data if available
             webViewShellReady.current = true;
+            console.log(`[Perf] WebView shell ready duration: ${Math.round(performance.now() - mountTimeRef.current)}ms`);
             break;
           default:
             break;
@@ -680,75 +1052,68 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress]
+    [bookId, updateProgress, handleCenterTap]
   );
-
-  // ── Tap-zone handlers ─────────────────────────────────────────────────────
-
-  const handleLeftTap = useCallback(() => {
-    webViewRef.current?.injectJavaScript('window.__bukooPrev && window.__bukooPrev(); true;');
-  }, []);
-
-  const handleRightTap = useCallback(() => {
-    webViewRef.current?.injectJavaScript('window.__bukooNext && window.__bukooNext(); true;');
-  }, []);
-
-  const handleCenterTap = useCallback(() => {
-    if (controlsVisible) {
-      if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
-      Animated.timing(controlsOpacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }).start(() => setControlsVisible(false));
-    } else {
-      showControls();
-    }
-  }, [controlsVisible, controlsOpacity, showControls]);
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
   // This means the WebView loads ONCE — switching books just calls __bukooLoadBook().
   const epubShellHtml = useMemo(
-    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent) : '',
-    [epubJsContent, jsZipContent]
+    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent, pdfJsContent, pdfWorkerContent) : '',
+    [epubJsContent, jsZipContent, pdfJsContent, pdfWorkerContent]
   );
 
   // When everything is ready, inject the EPUB data into the already-loaded WebView
   const webViewShellReady = useRef(false);
 
-  const isPdf = (epubUrl || '').toLowerCase().endsWith('.pdf') ||
-                (MASTER_SAMPLE_BOOKS as any)[bookId]?.fileType === 'PDF' ||
-                (MASTER_SAMPLE_BOOKS as any)[bookId]?.epubUrl?.toLowerCase().endsWith('.pdf') ||
-                (localEpubUri || '').toLowerCase().endsWith('.pdf');
+  // True when we have a local or remote book URI ready to inject
+  const hasBookData = !!localFileUri;
 
-  // True when we have data ready to inject (either base64 or remote file URI)
-  const hasBookData = isPdf ? (!!epubBase64 || !!localFileUri) : !!epubBase64;
+  const injectBookData = useCallback(async () => {
+    if (!webViewRef.current || !localFileUri) return;
+    dataInjectTimeRef.current = performance.now();
 
-  const injectBookData = useCallback(() => {
-    if (!webViewRef.current) return;
-    if (isPdf && (epubBase64 || localFileUri)) {
-      const pdfSource = epubBase64 || localFileUri;
+    const isLocalFile = localFileUri.startsWith('file://') || localFileUri.startsWith('/');
+    let payloadUrl = localFileUri;
+
+    if (isLocalFile) {
+      try {
+        const readStart = performance.now();
+        const b64 = await FileSystem.readAsStringAsync(localFileUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const readDuration = Math.round(performance.now() - readStart);
+        console.log(`[Perf] RN Local disk Base64 read duration: ${readDuration}ms for ${localFileUri}`);
+        
+        const mimeType = isPdf ? 'application/pdf' : 'application/epub+zip';
+        payloadUrl = `data:${mimeType};base64,${b64}`;
+      } catch (err) {
+        console.error('[ReadingScreen] Failed to read local file as Base64 in RN:', err);
+      }
+    } else {
+      console.log('[Perf] Using remote URL for streaming directly:', localFileUri);
+    }
+
+    if (isPdf) {
       webViewRef.current.injectJavaScript(
         `(function(){
           if (window.__bukooLoadPdf) {
-            window.__bukooLoadPdf(${JSON.stringify(pdfSource)});
+            window.__bukooLoadPdf(${JSON.stringify(payloadUrl)});
           }
         })(); true;`
       );
-    } else if (!isPdf && epubBase64) {
-      // EPUB: inject base64 data (typically < 5MB)
+    } else {
       const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
       webViewRef.current.injectJavaScript(
         `(function(){
-          var b64 = ${JSON.stringify(epubBase64)};
+          var bookUrl = ${JSON.stringify(payloadUrl)};
           var locs = ${locsArg};
           if (window.__bukooLoadBook) {
-            window.__bukooLoadBook(b64, locs);
+            window.__bukooLoadBook(bookUrl, locs);
           }
         })(); true;`
       );
     }
-  }, [isPdf, localFileUri, epubBase64, cachedLocations]);
+  }, [isPdf, localFileUri, cachedLocations]);
 
   // Called when the WebView's initial HTML has fully loaded and executed
   const handleWebViewLoad = useCallback(() => {
@@ -769,7 +1134,9 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       );
     }
   }, [isReady]);
-  const WebViewComponent = WebView as any;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const WebViewComponent = WebView as unknown as React.ComponentType<any>;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors[theme].bg }]} edges={['top', 'left', 'right']}>
@@ -848,32 +1215,34 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           />
         )}
 
-        {/* ── Tap zones (invisible overlays) ── */}
-        <View style={styles.tapZoneRow} pointerEvents="box-none">
-          {/* Left 30% — previous page */}
-          <TouchableOpacity
-            style={styles.tapLeft}
-            activeOpacity={1}
-            onPress={handleLeftTap}
-            accessibilityLabel="Halaman sebelumnya"
-          />
+        {/* ── Tap zones (invisible overlays) — skipped in PDF mode and vertical EPUB mode to allow native WebView scrolling ── */}
+        {!isPdf && pageTurnStyle !== 'vertical' && (
+          <View style={styles.tapZoneRow} pointerEvents="box-none">
+            {/* Left 30% — previous page */}
+            <TouchableOpacity
+              style={styles.tapLeft}
+              activeOpacity={1}
+              onPress={handleLeftTap}
+              accessibilityLabel="Halaman sebelumnya"
+            />
 
-          {/* Center 40% — toggle controls */}
-          <TouchableOpacity
-            style={styles.tapCenter}
-            activeOpacity={1}
-            onPress={handleCenterTap}
-            accessibilityLabel="Tampilkan / sembunyikan kontrol"
-          />
+            {/* Center 40% — toggle controls */}
+            <TouchableOpacity
+              style={styles.tapCenter}
+              activeOpacity={1}
+              onPress={handleCenterTap}
+              accessibilityLabel="Tampilkan / sembunyikan kontrol"
+            />
 
-          {/* Right 30% — next page */}
-          <TouchableOpacity
-            style={styles.tapRight}
-            activeOpacity={1}
-            onPress={handleRightTap}
-            accessibilityLabel="Halaman berikutnya"
-          />
-        </View>
+            {/* Right 30% — next page */}
+            <TouchableOpacity
+              style={styles.tapRight}
+              activeOpacity={1}
+              onPress={handleRightTap}
+              accessibilityLabel="Halaman berikutnya"
+            />
+          </View>
+        )}
       </View>
 
       {/* ── Bottom bar (animated show/hide) ── */}
@@ -884,7 +1253,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.navIconButton} onPress={() => setShowSettings(true)} accessibilityLabel="Pengaturan Tampilan">
-            <Text style={[styles.navIconText, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium, fontSize: 20 }]}>Aa</Text>
+            <Ionicons name="options-outline" size={26} color={themeColors[theme].text} />
           </TouchableOpacity>
 
           <View style={styles.pageCounter}>
@@ -893,12 +1262,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)} accessibilityLabel="Bookmark">
-            <Ionicons name="bookmark-outline" size={22} color={themeColors[theme].text} />
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)} accessibilityLabel="Daftar Markah Buku">
+            <Ionicons name="bookmarks-outline" size={26} color={themeColors[theme].text} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)} accessibilityLabel="Sorotan & Catatan">
-            <Ionicons name="create-outline" size={22} color={themeColors[theme].text} />
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)} accessibilityLabel="Daftar Sorotan">
+            <Ionicons name="color-fill-outline" size={26} color={themeColors[theme].text} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -918,6 +1287,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             <FlatList
               data={toc}
               keyExtractor={(item, index) => item.id || String(index)}
+              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Daftar isi tidak tersedia.</Text>}
               renderItem={({ item }) => (
                 <TouchableOpacity style={[styles.tocItem, { borderBottomColor: themeColors[theme].border }]} onPress={() => jumpToLocation(item.href)}>
                   <Text style={[styles.tocItemText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]}>{item.label}</Text>
@@ -933,27 +1303,22 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Tampilan</Text>
+              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Pengaturan Tampilan</Text>
               <TouchableOpacity onPress={() => setShowSettings(false)}>
                 <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
               </TouchableOpacity>
             </View>
             
-            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Tema</Text>
+            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Tema Warna</Text>
             <View style={styles.themeRow}>
               {(['Light', 'Cream', 'Dark', 'Sepia'] as const).map(t => {
-                const themeStyles = {
-                  Light: { backgroundColor: '#FFFFFF', borderColor: '#DDDDDD' },
-                  Cream: { backgroundColor: '#F4F1E8', borderColor: 'transparent' },
-                  Dark: { backgroundColor: '#1A1A1A', borderColor: 'transparent' },
-                  Sepia: { backgroundColor: '#F5E6C8', borderColor: 'transparent' }
-                };
+                const bgColors: Record<string, string> = { Light: '#FFFFFF', Cream: '#F4F1E8', Dark: '#1A1A1A', Sepia: '#F5E6C8' };
                 return (
-                  <TouchableOpacity 
-                    key={t} 
+                  <TouchableOpacity
+                    key={t}
                     style={[
-                      styles.themeCircle, 
-                      themeStyles[t], 
+                      styles.themeCircle,
+                      { backgroundColor: bgColors[t], borderColor: themeColors[theme].border },
                       theme === t && styles.themeActive
                     ]}
                     onPress={() => setTheme(t)}
@@ -961,6 +1326,40 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 );
               })}
             </View>
+
+            {!isPdf && (
+              <>
+                <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Gaya Pembalikan Halaman</Text>
+                <View style={styles.fontFamilyRow}>
+                  {([
+                    { key: 'horizontal' as const, label: 'Horizontal', icon: 'phone-landscape-outline' as const },
+                    { key: 'vertical' as const, label: 'Vertikal', icon: 'swap-vertical-outline' as const },
+                    { key: 'animated' as const, label: 'Animasi', icon: 'sparkles-outline' as const },
+                  ]).map(({ key, label, icon }) => (
+                    <TouchableOpacity
+                      key={key}
+                      style={[
+                        styles.fontFamilyButton,
+                        { borderColor: themeColors[theme].border, flexDirection: 'row', gap: 6 },
+                        pageTurnStyle === key && styles.fontFamilyButtonActive,
+                      ]}
+                      onPress={() => setPageTurnStyle(key)}
+                    >
+                      <Ionicons
+                        name={icon}
+                        size={16}
+                        color={pageTurnStyle === key ? COLORS.creamLight : themeColors[theme].text}
+                      />
+                      <Text style={[
+                        styles.fontFamilyText,
+                        { color: themeColors[theme].text },
+                        pageTurnStyle === key && styles.fontFamilyTextActive,
+                      ]}>{label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
 
             <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Ukuran Font</Text>
             <View style={styles.fontRow}>

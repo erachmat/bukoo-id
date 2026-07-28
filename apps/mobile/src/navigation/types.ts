@@ -16,14 +16,14 @@ export type MainTabParamList = {
 
 export type ReadingStackParamList = {
   BookDetail: { bookId: string };
-  Reading: { bookId: string; localEpubUri?: string };
+  Reading: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null };
 };
 
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   AuthStack: NavigatorScreenParams<AuthStackParamList>;
   ReadingStack: NavigatorScreenParams<ReadingStackParamList>;
-  ReadingScreen: { bookId: string; localEpubUri?: string; title?: string; totalPages?: number };
+  ReadingScreen: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; totalPages?: number };
   Profile: undefined;
 };
 

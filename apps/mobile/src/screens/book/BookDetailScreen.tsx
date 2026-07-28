@@ -15,6 +15,7 @@ import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
   book_laskar_pelangi: {
     id: 'book_laskar_pelangi',
@@ -503,40 +504,50 @@ export default function BookDetailScreen() {
           </View>
 
           <View style={styles.actionsContainer}>
+            {/* Primary Read button — ALWAYS rendered, never blocked by download state */}
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={() => navigation.navigate('ReadingStack', {
+                screen: 'Reading',
+                params: {
+                  bookId: displayBook.id,
+                  title: displayBook.title,
+                  localEpubUri: localUri ?? undefined,
+                  epubUrl: displayBook.epubUrl ?? undefined,
+                }
+              })}
+              accessibilityRole="button"
+              accessibilityLabel={buttonText}
+            >
+              <Text style={styles.primaryButtonText}>{buttonText}</Text>
+            </TouchableOpacity>
+
+            {/* Offline download / remove action */}
             {!isDownloaded ? (
               <TouchableOpacity 
-                style={[styles.primaryButton, isDownloading && styles.primaryButtonDisabled]}
+                style={[styles.secondaryButton, isDownloading && styles.secondaryButtonDisabled]}
                 onPress={() => download(displayBook.epubUrl || 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub')}
                 disabled={isDownloading}
+                accessibilityRole="button"
+                accessibilityLabel="Unduh Offline"
               >
                 {isDownloading ? (
                   <View style={styles.downloadingContainer}>
-                    <ActivityIndicator size="small" color="#FFFFFF" style={styles.downloadSpinner} />
-                    <Text style={styles.primaryButtonText}>Unduh ({Math.round(downloadProgress)}%)</Text>
+                    <ActivityIndicator size="small" color={COLORS.forest} style={styles.downloadSpinner} />
+                    <Text style={styles.secondaryButtonText}>Mengunduh ({Math.round(downloadProgress)}%)</Text>
                   </View>
                 ) : (
-                  <Text style={styles.primaryButtonText}>Unduh Buku</Text>
+                  <Text style={styles.secondaryButtonText}>Unduh Offline</Text>
                 )}
               </TouchableOpacity>
             ) : (
               <TouchableOpacity 
-                style={styles.primaryButton}
-                onPress={() => navigation.navigate('ReadingStack', { screen: 'Reading', params: { bookId: displayBook.id, title: displayBook.title, localEpubUri: localUri, epubUrl: displayBook.epubUrl } })}
-              >
-                <Text style={styles.primaryButtonText}>{buttonText}</Text>
-              </TouchableOpacity>
-            )}
-
-            {isDownloaded ? (
-              <TouchableOpacity 
                 style={[styles.secondaryButton, { borderColor: '#E53E3E' }]}
                 onPress={() => remove()}
+                accessibilityRole="button"
+                accessibilityLabel="Hapus Unduhan"
               >
-                <Text style={[styles.secondaryButtonText, { color: '#E53E3E' }]}>Hapus Buku</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.secondaryButton}>
-                <Text style={styles.secondaryButtonText}>Tambah ke Rak</Text>
+                <Text style={[styles.secondaryButtonText, { color: '#E53E3E' }]}>Hapus Unduhan</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -751,6 +762,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.sand,
+  },
+  secondaryButtonDisabled: {
+    opacity: 0.7,
   },
   secondaryButtonText: {
     color: COLORS.forest,

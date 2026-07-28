@@ -74,13 +74,23 @@ export default function LibraryScreen() {
   // We can let books query run, but if the user has no books we can still support an empty library instead of force falling back,
   // or we can fallback but show empty when filtered. Let's make it so if books is empty or undefined, we default to empty array
   // so the empty state actually works. Let's do that!
+  interface LibraryBookItem {
+    id: string;
+    title: string;
+    author: string;
+    coverUrl?: string;
+    status?: string;
+    [key: string]: unknown;
+  }
+
   const hasBooks = books && books.length > 0;
-  const displayBooks = (hasBooks ? books : []).map((book: any, idx: number) => ({
+  const displayBooks = (hasBooks ? (books as LibraryBookItem[]) : []).map((book: LibraryBookItem, idx: number) => ({
     ...book,
-    status: (book as any).status || (idx % 3 === 0 ? 'Sedang Dibaca' : idx % 3 === 1 ? 'Selesai' : 'Ingin Dibaca'),
+    coverUrl: book.coverUrl || '',
+    status: book.status || (idx % 3 === 0 ? 'Sedang Dibaca' : idx % 3 === 1 ? 'Selesai' : 'Ingin Dibaca'),
   }));
 
-  const filteredBooks = displayBooks.filter((book: any) => {
+  const filteredBooks = displayBooks.filter((book: LibraryBookItem) => {
     if (activeTab === 'Semua') return true;
     return book.status === activeTab;
   });

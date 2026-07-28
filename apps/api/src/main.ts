@@ -19,7 +19,14 @@ async function bootstrap() {
       : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
-  app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/public' });
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    prefix: '/public',
+    setHeaders: (res) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Expose-Headers', 'Accept-Ranges, Content-Range, Content-Length');
+    },
+  });
 
   // ── Security headers ───────────────────────────────────────────────────────
   // helmet sets Content-Security-Policy, X-Frame-Options, HSTS, etc.

@@ -15,6 +15,7 @@ function ReadingStackNavigator() {
   return (
     <ReadingStack.Navigator screenOptions={{ headerShown: false }}>
       <ReadingStack.Screen name="BookDetail" component={BookDetailScreen} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <ReadingStack.Screen name="Reading" component={ReadingScreen as any} />
     </ReadingStack.Navigator>
   );

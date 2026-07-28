@@ -1,0 +1,14 @@
+# .antigravityignore — excluded from background indexing and context
+node_modules/
+**/node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+*.log
+package-lock.json
+.env
+.env.*
+*.zip
+*.tar.gz
