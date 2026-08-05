@@ -1,28 +1,22 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
-import BookCoverCard from '../../components/BookCoverCard';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
+import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
-import { RootStackParamList, MainTabParamList, ReadingStackParamList } from '../../navigation/types';
-import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList & ReadingStackParamList>;
-
-type TabFilter = 'Semua' | 'Sedang Dibaca' | 'Selesai' | 'Ingin Dibaca';
-
-
+type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const isFocused = useIsFocused();
-  const [activeTab, setActiveTab] = useState<TabFilter>('Semua');
+  const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -33,13 +27,15 @@ export default function LibraryScreen() {
     }
   }, [isFocused]);
 
-  const [refreshing, setRefreshing] = useState(false);
-
-  const { data: books, isLoading, refetch: refetchBooks } = useQuery({
+  const { data: books, refetch: refetchBooks } = useQuery({
     queryKey: ['books', 'library'],
     queryFn: async () => {
-      const response = await api.get('/books');
-      return response.data.items || [];
+      try {
+        const response = await api.get('/books');
+        return response.data.items || [];
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -56,138 +52,147 @@ export default function LibraryScreen() {
     }
   };
 
-  const tabs: TabFilter[] = ['Semua', 'Sedang Dibaca', 'Selesai', 'Ingin Dibaca'];
+  const wantToReadBooks = [
+    {
+      id: 'cage-the-raven',
+      title: 'CAGE THE',
+      author: 'AUTHOR NAME',
+      coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
+    },
+    {
+      id: 'moby-dick-library',
+      title: 'Moby Dick',
+      author: 'Herman Melville',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+    },
+    {
+      id: 'authority-library',
+      title: 'AUTHORITY',
+      author: 'Jeff Vandermeer',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+    },
+  ];
 
-  const renderTab = (tab: TabFilter) => {
-    const isActive = activeTab === tab;
-    return (
-      <TouchableOpacity
-        key={tab}
-        style={[styles.tabButton, isActive && styles.tabButtonActive]}
-        onPress={() => setActiveTab(tab)}
-      >
-        <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{tab}</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  // We can let books query run, but if the user has no books we can still support an empty library instead of force falling back,
-  // or we can fallback but show empty when filtered. Let's make it so if books is empty or undefined, we default to empty array
-  // so the empty state actually works. Let's do that!
-  interface LibraryBookItem {
-    id: string;
-    title: string;
-    author: string;
-    coverUrl?: string;
-    status?: string;
-    [key: string]: unknown;
-  }
-
-  const hasBooks = books && books.length > 0;
-  const displayBooks = (hasBooks ? (books as LibraryBookItem[]) : []).map((book: LibraryBookItem, idx: number) => ({
-    ...book,
-    coverUrl: book.coverUrl || '',
-    status: book.status || (idx % 3 === 0 ? 'Sedang Dibaca' : idx % 3 === 1 ? 'Selesai' : 'Ingin Dibaca'),
-  }));
-
-  const filteredBooks = displayBooks.filter((book: LibraryBookItem) => {
-    if (activeTab === 'Semua') return true;
-    return book.status === activeTab;
-  });
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyStateContainer}>
-      <Ionicons name="book-outline" size={64} color={COLORS.muted} style={styles.emptyIcon} />
-      <Text style={styles.emptyTitle}>Rak Buku Kosong</Text>
-      <Text style={styles.emptyDescription}>
-        {activeTab === 'Semua'
-          ? 'Belum ada buku di perpustakaan Anda. Temukan buku menarik di Toko Buku.'
-          : `Tidak ada buku dengan status "${activeTab}".`}
-      </Text>
-      <TouchableOpacity
-        style={styles.emptyButton}
-        onPress={() => navigation.navigate('Store')}
-      >
-        <Text style={styles.emptyButtonText}>Cari Buku</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const displayWantToRead = (books && books.length > 0) ? books : wantToReadBooks;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Perpustakaan</Text>
-        <TouchableOpacity>
-          <Text style={styles.sortButton}>Terbaru</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.tabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-          {tabs.map(renderTab)}
-        </ScrollView>
-      </View>
-
-      {isLoading ? (
-        <View style={{ flex: 1, paddingHorizontal: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-            <View style={{ width: '48%' }}>
-              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
-              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
-              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
-            </View>
-            <View style={{ width: '48%' }}>
-              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
-              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
-              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-            <View style={{ width: '48%' }}>
-              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
-              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
-              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
-            </View>
-            <View style={{ width: '48%' }}>
-              <ShimmerPlaceholder width="100%" height={240} borderRadius={8} style={{ marginBottom: 12 }} />
-              <ShimmerPlaceholder width="80%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
-              <ShimmerPlaceholder width="50%" height={12} borderRadius={4} />
-            </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.gold]}
+            tintColor={COLORS.gold}
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Rak Buku Saya</Text>
+          <View style={styles.bookCountBadge}>
+            <Ionicons name="book-outline" size={16} color="#6EE7B7" />
+            <Text style={styles.bookCountText}>12 Buku</Text>
           </View>
         </View>
-      ) : (
-        <FlatList
-          data={filteredBooks}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.listContent}
-          columnWrapperStyle={filteredBooks.length > 0 ? styles.columnWrapper : undefined}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={renderEmptyState}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[COLORS.gold]}
-              tintColor={COLORS.gold}
-            />
-          }
-          renderItem={({ item }) => (
-            <View style={styles.cardWrapper}>
-              <BookCoverCard
-                book={item}
-                size="large"
-                dark={true}
-                isDownloaded={downloadedBookIds.includes(item.id)}
-                onPress={() => navigation.navigate('ReadingStack', {
-                  screen: 'BookDetail',
-                  params: { bookId: item.id }
-                } as never)}
-              />
+
+        {/* Featured "Sedang dibaca" Card */}
+        <View style={styles.activeCard}>
+          <Image
+            source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }}
+            style={styles.activeCover}
+          />
+          <View style={styles.activeInfo}>
+            <View style={styles.readingStatusBadge}>
+              <Text style={styles.readingStatusText}>Sedang dibaca</Text>
             </View>
+            <Text style={styles.activeTitle}>Moby Dick</Text>
+            <Text style={styles.activeAuthor}>by herman melvile</Text>
+
+            <View style={styles.progressRow}>
+              <View style={styles.progressBarBackground}>
+                <View style={[styles.progressBarFill, { width: '40%' }]} />
+              </View>
+              <Text style={styles.progressText}>40%</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.continueButton}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('ReadingStack', {
+                screen: 'BookDetail',
+                params: { bookId: 'moby-dick' }
+              } as never)}
+            >
+              <Text style={styles.continueButtonText}>Lanjut Baca</Text>
+              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 3-Card Quick Stats Grid */}
+        <View style={styles.statsGrid}>
+          {/* Card 1: Buku Selesai */}
+          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+            <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>47</Text>
+            <Text style={styles.statLabel}>Buku selesai</Text>
+          </View>
+
+          {/* Card 2: Jam Membaca */}
+          <View style={[styles.statCard, { backgroundColor: '#0E2238', borderColor: '#1A3350' }]}>
+            <Ionicons name="time-outline" size={24} color="#60A5FA" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#60A5FA' }]}>312</Text>
+            <Text style={styles.statLabel}>Jam Membaca</Text>
+          </View>
+
+          {/* Card 3: Hari Streak */}
+          <View style={[styles.statCard, { backgroundColor: '#261C12', borderColor: '#3D2A19' }]}>
+            <Ionicons name="flame-outline" size={24} color="#F97316" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#F97316' }]}>21</Text>
+            <Text style={styles.statLabel}>Hari Streak</Text>
+          </View>
+        </View>
+
+        {/* Ingin dibaca Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>📌 Ingin dibaca</Text>
+          <View style={styles.wantCountBadge}>
+            <Ionicons name="book-outline" size={14} color="#6EE7B7" />
+            <Text style={styles.wantCountText}>4 Buku</Text>
+          </View>
+        </View>
+
+        {/* Horizontal Ingin Dibaca List */}
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.wantListContent}
+          data={displayWantToRead}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.wantBookCard}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('ReadingStack', {
+                screen: 'BookDetail',
+                params: { bookId: item.id }
+              } as never)}
+            >
+              <View style={{ position: 'relative' }}>
+                <Image source={{ uri: item.coverUrl }} style={styles.wantBookCover} />
+                {downloadedBookIds.includes(item.id) && (
+                  <View style={styles.downloadBadge}>
+                    <Text style={styles.downloadBadgeText}>⬇️</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
           )}
         />
-      )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -197,112 +202,208 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.forestDark,
   },
+  scrollContent: {
+    paddingBottom: 110,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 15,
+    paddingBottom: 20,
   },
   title: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
-  sortButton: {
-    fontSize: 16,
-    color: COLORS.ember,
-    fontWeight: '600',
-    fontFamily: FONTS.sansMedium,
-  },
-  tabsContainer: {
-    marginBottom: 20,
-  },
-  tabsScroll: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: COLORS.forestCard,
-    borderWidth: 1,
-    borderColor: COLORS.forestBorder,
-  },
-  tabButtonActive: {
-    backgroundColor: COLORS.ember,
-    borderColor: COLORS.ember,
-  },
-  tabText: {
-    fontSize: 14,
-    color: COLORS.muted,
-    fontWeight: '600',
-    fontFamily: FONTS.sansMedium,
-  },
-  tabTextActive: {
-    color: COLORS.creamLight,
-  },
-  loader: {
-    marginTop: 40,
-  },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    flexGrow: 1,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  cardWrapper: {
-    width: '48%',
+  bookCountBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(27, 85, 65, 0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 6,
   },
-  emptyStateContainer: {
+  bookCountText: {
+    color: '#6EE7B7',
+    fontSize: 13,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  activeCard: {
+    flexDirection: 'row',
+    backgroundColor: '#0F2922',
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#173E33',
+  },
+  activeCover: {
+    width: 100,
+    height: 145,
+    borderRadius: 10,
+    marginRight: 16,
+  },
+  activeInfo: {
     flex: 1,
     justifyContent: 'center',
+  },
+  readingStatusBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#13354C',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  readingStatusText: {
+    color: '#60A5FA',
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  activeTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 2,
+  },
+  activeAuthor: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    marginBottom: 14,
+  },
+  progressRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingVertical: 60,
-  },
-  emptyIcon: {
+    gap: 10,
     marginBottom: 16,
-    opacity: 0.8,
   },
-  emptyTitle: {
+  progressBarBackground: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4ADE80',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: COLORS.cream,
+  },
+  continueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 20,
+    gap: 6,
+  },
+  continueButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 30,
+    gap: 10,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  statIcon: {
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    textAlign: 'center',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
-    marginBottom: 8,
-    textAlign: 'center',
   },
-  emptyDescription: {
-    fontSize: 14,
-    fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
+  wantCountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(27, 85, 65, 0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    gap: 4,
   },
-  emptyButton: {
-    backgroundColor: COLORS.ember,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 24,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+  wantCountText: {
+    color: '#6EE7B7',
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
-  emptyButtonText: {
-    color: COLORS.creamLight,
-    fontSize: 15,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+  wantListContent: {
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+  wantBookCard: {
+    width: 150,
+  },
+  wantBookCover: {
+    width: 150,
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: COLORS.forestCard,
+  },
+  downloadBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: COLORS.forest,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  downloadBadgeText: {
+    fontSize: 10,
   },
 });

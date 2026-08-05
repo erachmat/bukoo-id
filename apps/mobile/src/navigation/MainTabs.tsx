@@ -7,7 +7,9 @@ import { COLORS } from '../constants/COLORS';
 import HomeScreen from '../screens/home/HomeScreen';
 import SearchScreen from '../screens/search/SearchScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
-import StoreScreen from '../screens/store/StoreScreen';
+import AiCompanionScreen from '../screens/ai/AiCompanionScreen';
+import CommunityScreen from '../screens/community/CommunityScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -23,20 +25,20 @@ export default function MainTabs() {
           fontSize: 10,
           fontWeight: '600',
           marginTop: 0,
-          marginBottom: Platform.OS === 'android' ? 6 : 0,
+          marginBottom: Platform.OS === 'android' ? 4 : 0,
         },
         tabBarItemStyle: {
           alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: 8,
-          paddingBottom: 4,
+          paddingTop: 6,
+          paddingBottom: 2,
         },
         tabBarStyle: {
           position: 'absolute',
-          bottom: Platform.OS === 'ios' ? 28 : 16,
+          bottom: Platform.OS === 'ios' ? 24 : 12,
           left: 0,
           right: 0,
-          marginHorizontal: 20,
+          marginHorizontal: 12,
           height: Platform.OS === 'ios' ? 68 : 62,
           backgroundColor: 'rgba(10, 26, 21, 0.98)',
           borderRadius: 34,
@@ -57,31 +59,7 @@ export default function MainTabs() {
           tabBarLabel: 'Beranda',
           tabBarIcon: ({ focused, color }) => (
             <View style={focused ? styles.iconPillActive : styles.iconPill}>
-              <Ionicons name={focused ? 'home' : 'home-outline'} size={20} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Library"
-        component={LibraryScreen}
-        options={{
-          tabBarLabel: 'Perpustakaan',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={focused ? styles.iconPillActive : styles.iconPill}>
-              <Ionicons name={focused ? 'library' : 'library-outline'} size={20} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Store"
-        component={StoreScreen}
-        options={{
-          tabBarLabel: 'Toko Buku',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={focused ? styles.iconPillActive : styles.iconPill}>
-              <Ionicons name={focused ? 'bag-handle' : 'bag-handle-outline'} size={20} color={color} />
+              <Ionicons name={focused ? 'book' : 'book-outline'} size={18} color={color} />
             </View>
           ),
         }}
@@ -93,7 +71,55 @@ export default function MainTabs() {
           tabBarLabel: 'Cari',
           tabBarIcon: ({ focused, color }) => (
             <View style={focused ? styles.iconPillActive : styles.iconPill}>
-              <Ionicons name={focused ? 'search' : 'search-outline'} size={20} color={color} />
+              <Ionicons name={focused ? 'search' : 'search-outline'} size={18} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Library"
+        component={LibraryScreen}
+        options={{
+          tabBarLabel: 'Rak',
+          tabBarIcon: ({ focused, color }) => (
+            <View style={focused ? styles.iconPillActive : styles.iconPill}>
+              <Ionicons name={focused ? 'library' : 'library-outline'} size={18} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Ai"
+        component={AiCompanionScreen}
+        options={{
+          tabBarLabel: 'Ai',
+          tabBarIcon: ({ focused, color }) => (
+            <View style={focused ? styles.iconPillActive : styles.iconPill}>
+              <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={18} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Community"
+        component={CommunityScreen}
+        options={{
+          tabBarLabel: 'Komunitas',
+          tabBarIcon: ({ focused, color }) => (
+            <View style={focused ? styles.iconPillActive : styles.iconPill}>
+              <Ionicons name={focused ? 'people' : 'people-outline'} size={18} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profil',
+          tabBarIcon: ({ focused, color }) => (
+            <View style={focused ? styles.iconPillActive : styles.iconPill}>
+              <Ionicons name={focused ? 'person' : 'person-outline'} size={18} color={color} />
             </View>
           ),
         }}
@@ -106,16 +132,16 @@ const styles = StyleSheet.create({
   iconPill: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
-    height: 28,
-    borderRadius: 14,
+    width: 36,
+    height: 26,
+    borderRadius: 13,
   },
   iconPillActive: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
-    height: 28,
-    borderRadius: 14,
+    width: 36,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: 'rgba(201, 149, 42, 0.18)',
   },
 });

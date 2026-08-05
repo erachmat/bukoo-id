@@ -9,9 +9,11 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
   Home: undefined;
-  Library: undefined;
-  Store: undefined;
   Search: undefined;
+  Library: undefined;
+  Ai: undefined;
+  Community: undefined;
+  Profile: undefined;
 };
 
 export type ReadingStackParamList = {
@@ -25,9 +27,11 @@ export type RootStackParamList = {
   ReadingStack: NavigatorScreenParams<ReadingStackParamList>;
   ReadingScreen: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; totalPages?: number };
   Profile: undefined;
+  Subscription: undefined;
 };
 
 // Global typing for React Navigation — use interface extension, not namespace
 declare module '@react-navigation/native' {
   interface RootParamList extends RootStackParamList {}
 }
+

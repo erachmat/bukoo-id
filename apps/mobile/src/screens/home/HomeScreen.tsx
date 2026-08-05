@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
-import ReadingGoalsWidget from './ReadingGoalsWidget';
-import { readingSync } from '../../services/readingSync';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -16,46 +14,40 @@ import { Ionicons } from '@expo/vector-icons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
+const CATEGORIES = ['Semua', 'Fiksi', 'Self Dev', 'Teknologi', 'Bisnis', 'Sejarah'];
+
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<NavigationProp>();
   const isFocused = useIsFocused();
 
-  const [unsyncedCount, setUnsyncedCount] = useState(0);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!isFocused) return;
-
     bookDownloadService.getDownloadedBooks()
       .then(setDownloadedBookIds)
       .catch(err => console.error('[HomeScreen] Failed to load downloaded books:', err));
-
-    const checkSync = async () => {
-      const count = await readingSync.getUnsyncedCount();
-      setUnsyncedCount(count);
-    };
-
-    checkSync();
-    const interval = setInterval(checkSync, 3000);
-
-    return () => clearInterval(interval);
   }, [isFocused]);
-  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch recent reading session
-  const { data: recentReading, isLoading: isLoadingRecent, refetch: refetchRecent } = useQuery({
-    queryKey: ['reading', 'recent'],
+  const { data: trendingBooks, refetch: refetchBooks } = useQuery({
+    queryKey: ['books', 'trending'],
     queryFn: async () => {
-      const response = await api.get('/reading/recent');
-      return response.data;
+      try {
+        const response = await api.get('/books');
+        return response.data.items || [];
+      } catch {
+        return [];
+      }
     },
   });
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refetchRecent();
+      await refetchBooks();
       const ids = await bookDownloadService.getDownloadedBooks();
       setDownloadedBookIds(ids);
     } catch (e) {
@@ -65,72 +57,33 @@ export default function HomeScreen() {
     }
   };
 
-  // Static mockup covers for the explore stacks (More to Explore)
-  const fictionCovers = [
-    'https://covers.openlibrary.org/b/id/12781440-L.jpg', // Pride and Prejudice
-    'https://covers.openlibrary.org/b/id/11100378-L.jpg', // A Tale of Two Cities
-    'https://covers.openlibrary.org/b/id/8431872-L.jpg',  // The Great Gatsby
-  ];
-
-  const nonFictionCovers = [
-    'https://covers.openlibrary.org/b/id/8301131-L.jpg',   // The Republic
-    'https://covers.openlibrary.org/b/id/12812239-L.jpg',  // A Treatise on Human Nature
-    'https://covers.openlibrary.org/b/id/12093551-L.jpg',  // The Art of War
-  ];
-
-  // Best Sellers list matching Apple Books reference
-  const bestSellers = [
+  const defaultTrending = [
     {
-      id: 'art-of-war-bestseller',
-      title: 'The Art of War',
-      author: 'Sun Tzu',
+      id: 'moby-dick',
+      title: 'Moby Dick',
+      author: 'by herman melvile',
       coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
     },
     {
-      id: 'pride-prejudice-bestseller',
-      title: 'Pride and Prejudice',
-      author: 'Jane Austen',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
+      id: 'authority',
+      title: 'BOOK 2 OF AUTHORITY',
+      author: 'Jeff Vandermeer',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
     },
     {
-      id: 'tale-two-cities-bestseller',
-      title: 'A Tale of Two Cities',
-      author: 'Charles Dickens',
-      coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    },
-    {
-      id: 'great-gatsby-bestseller',
+      id: 'great-gatsby',
       title: 'The Great Gatsby',
       author: 'F. Scott Fitzgerald',
       coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    }
+    },
   ];
 
-  const handleContinueReading = () => {
-    if (recentReading && recentReading.length > 0) {
-      navigation.navigate('ReadingScreen', { 
-        bookId: recentReading[0].bookId, 
-        title: recentReading[0].book.title 
-      });
-    } else {
-      // Mock alert or direct search if no active reading
-      navigation.navigate('Search');
-    }
-  };
-
-  const renderSectionHeader = (title: string, onSeeAll?: () => void) => (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {onSeeAll && (
-        <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
-      )}
-    </View>
-  );
+  const displayTrending = (trendingBooks && trendingBooks.length > 0) ? trendingBooks : defaultTrending;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -141,201 +94,114 @@ export default function HomeScreen() {
           />
         }
       >
-        
-        {/* Header */}
+        {/* Top Greeting Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Beranda</Text>
-          <View style={styles.headerRight}>
-            {/* Cloud Sync Status */}
-            <View style={styles.syncStatusContainer}>
-              {unsyncedCount > 0 ? (
-                <>
-                  <Ionicons name="cloud-upload-outline" size={22} color="#C8541F" />
-                  <Text style={styles.syncStatusText}>{unsyncedCount}</Text>
-                </>
-              ) : (
-                <Ionicons name="cloud-done-outline" size={22} color="#34C759" />
-              )}
-            </View>
-            
-            {/* Profile Avatar */}
-            <TouchableOpacity 
-              style={styles.avatarButton} 
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('Profile')}
-            >
-              {user?.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={20} color="#FFFFFF" />
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.greetingText}>
+            Hi, <Text style={styles.userName}>{user?.name || 'Baihaqi'}</Text>
+          </Text>
+          <TouchableOpacity style={styles.notificationButton} activeOpacity={0.7}>
+            <Ionicons name="notifications-outline" size={24} color={COLORS.gold} />
+            <View style={styles.notificationDot} />
+          </TouchableOpacity>
         </View>
 
-        {/* Lanjutkan (Continue Reading) Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>Lanjutkan</Text>
-          {isLoadingRecent ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : recentReading && recentReading.length > 0 ? (
-            <TouchableOpacity 
-              style={styles.continueCard} 
-              activeOpacity={0.9}
-              onPress={handleContinueReading}
+        {/* Search Bar Input */}
+        <TouchableOpacity
+          style={styles.searchBar}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Search')}
+        >
+          <Ionicons name="search-outline" size={20} color={COLORS.muted} style={{ marginRight: 10 }} />
+          <Text style={styles.searchPlaceholder}>Cari buku, Penulis, genre...</Text>
+        </TouchableOpacity>
+
+        {/* Category Pills Scroll */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesScroll}
+        >
+          {CATEGORIES.map((cat, idx) => {
+            const isSelected = selectedCategory === cat && idx !== 3; // match mockup with double Self Dev
+            return (
+              <TouchableOpacity
+                key={`${cat}-${idx}`}
+                style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <Text style={[styles.categoryText, isSelected && styles.categoryTextActive]}>
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Hero Featured Banner Card */}
+        <TouchableOpacity
+          style={styles.heroBanner}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Search')}
+        >
+          <View style={styles.heroContent}>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeText}>★ KOLEKSI TERBAIK</Text>
+            </View>
+            <Text style={styles.heroTitle}>
+              Buku <Text style={styles.heroTitleHighlight}>Atomic Habit</Text>
+            </Text>
+            <Text style={styles.heroSubtitle}>Perubahan Kecil, Hasil Luar Biasa.</Text>
+            <Text style={styles.heroDescription}>
+              Koleksi pilihan buku Atomic Habits untuk membangun kebiasaan baik, konsisten setiap hari, dan menjadi versi terbaik dirimu.
+            </Text>
+          </View>
+          <Image
+            source={{ uri: 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
+            style={styles.heroCoverImage}
+          />
+        </TouchableOpacity>
+
+        {/* Trending Minggu ini Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Trending Minggu ini🔥</Text>
+          <TouchableOpacity
+            style={styles.seeAllButton}
+            onPress={() => navigation.navigate('Search')}
+          >
+            <Text style={styles.seeAllText}>Lihat semua</Text>
+            <Ionicons name="arrow-forward" size={16} color={COLORS.gold} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Horizontal Trending Books List */}
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.trendingListContent}
+          data={displayTrending}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.bookCard}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('ReadingStack', {
+                screen: 'BookDetail',
+                params: { bookId: item.id }
+              } as never)}
             >
-              <View style={{ position: 'relative' }}>
-                <Image source={{ uri: recentReading[0].book.coverUrl }} style={styles.continueCover} />
-                {downloadedBookIds.includes(recentReading[0].bookId) && (
+              <View style={styles.coverWrapper}>
+                <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
+                {downloadedBookIds.includes(item.id) && (
                   <View style={styles.downloadBadge}>
                     <Text style={styles.downloadBadgeText}>⬇️</Text>
                   </View>
                 )}
               </View>
-              <View style={styles.continueInfo}>
-                <View style={styles.continueTextRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.continueBookTitle} numberOfLines={1}>{recentReading[0].book.title}</Text>
-                    <Text style={styles.continueAuthor} numberOfLines={1}>{recentReading[0].book.author}</Text>
-                    <Text style={styles.continueMeta}>Buku • {recentReading[0].progressPercent.toFixed(0)}% Selesai</Text>
-                  </View>
-                  <TouchableOpacity style={styles.moreButton} activeOpacity={0.7}>
-                    <Ionicons name="ellipsis-horizontal" size={20} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ) : (
-            /* Fallback Sample Card matching the Apple Books screenshot */
-            <TouchableOpacity 
-              style={styles.continueCard} 
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate('Search')}
-            >
-              <View style={{ position: 'relative' }}>
-                <Image 
-                  source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }} 
-                  style={styles.continueCover} 
-                />
-                {downloadedBookIds.includes('art-of-war') && (
-                  <View style={styles.downloadBadge}>
-                    <Text style={styles.downloadBadgeText}>⬇️</Text>
-                  </View>
-                )}
-              </View>
-              <View style={styles.continueInfo}>
-                <View style={styles.continueTextRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.continueBookTitle} numberOfLines={1}>The Art of War</Text>
-                    <Text style={styles.continueAuthor} numberOfLines={1}>Sun Tzu</Text>
-                    <Text style={styles.continueMeta}>Buku • Sampel</Text>
-                  </View>
-                  <TouchableOpacity style={styles.moreButton} activeOpacity={0.7}>
-                    <Ionicons name="ellipsis-horizontal" size={20} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
             </TouchableOpacity>
           )}
-        </View>
-
-        {/* Lainnya untuk Dijelajahi (More to Explore) Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>Lainnya untuk Dijelajahi</Text>
-          
-          {/* Fiction Explore Card */}
-          <TouchableOpacity 
-            style={styles.exploreCard} 
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Search')}
-          >
-            <Text style={styles.exploreCardTitle}>Fiksi & Literatur</Text>
-            <View style={styles.stackContainer}>
-              {fictionCovers.map((url, idx) => (
-                <Image
-                  key={idx}
-                  source={{ uri: url }}
-                  style={[
-                    styles.stackBook,
-                    {
-                      zIndex: 10 - idx,
-                      right: idx * 18,
-                      transform: [
-                        { rotate: `${(idx - 1) * -8}deg` },
-                        { translateY: idx * 4 }
-                      ]
-                    }
-                  ]}
-                />
-              ))}
-            </View>
-          </TouchableOpacity>
-
-          {/* Non-Fiction Explore Card */}
-          <TouchableOpacity 
-            style={styles.exploreCard} 
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Search')}
-          >
-            <Text style={styles.exploreCardTitle}>Non-fiksi</Text>
-            <View style={styles.stackContainer}>
-              {nonFictionCovers.map((url, idx) => (
-                <Image
-                  key={idx}
-                  source={{ uri: url }}
-                  style={[
-                    styles.stackBook,
-                    {
-                      zIndex: 10 - idx,
-                      right: idx * 18,
-                      transform: [
-                        { rotate: `${(idx - 1) * -8}deg` },
-                        { translateY: idx * 4 }
-                      ]
-                    }
-                  ]}
-                />
-              ))}
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Terlaris Sepanjang Masa (Best Sellers) Section */}
-        <View style={styles.section}>
-          {renderSectionHeader('Terlaris Sepanjang Masa', () => {})}
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-            data={bestSellers}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.bestsellerCard}
-                onPress={() => navigation.navigate('Search')}
-                activeOpacity={0.8}
-              >
-                <View style={{ position: 'relative' }}>
-                  <Image source={{ uri: item.coverUrl }} style={styles.bestsellerCover} />
-                  {downloadedBookIds.includes(item.id.replace('-bestseller', '')) && (
-                    <View style={styles.downloadBadge}>
-                      <Text style={styles.downloadBadgeText}>⬇️</Text>
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        {/* Target Bacaan (Reading Goals) Widget at the bottom */}
-        <ReadingGoalsWidget 
-          activeBookTitle={recentReading && recentReading.length > 0 ? recentReading[0].book.title : 'The Art of War'}
-          onContinueReading={handleContinueReading}
         />
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -347,244 +213,204 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.forestDark,
   },
   scrollContent: {
-    paddingBottom: 100, // Padding for floating bottom tab bar
-  },
-  loader: {
-    marginVertical: 20,
+    paddingBottom: 110,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 25,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
-  title: {
-    fontSize: 34,
+  greetingText: {
+    fontSize: 22,
+    fontFamily: FONTS.serifRegular,
+    color: COLORS.cream,
+  },
+  userName: {
+    fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
-  headerRight: {
+  notificationButton: {
+    position: 'relative',
+    padding: 6,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF453A',
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    backgroundColor: '#0F2922',
+    marginHorizontal: 20,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    height: 48,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#173E33',
   },
-  miniProgressContainer: {
-    position: 'relative',
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
+  searchPlaceholder: {
+    color: '#4D7A6E',
+    fontSize: 15,
+    fontFamily: FONTS.sansRegular,
+  },
+  categoriesScroll: {
+    paddingHorizontal: 20,
+    gap: 10,
+    marginBottom: 24,
+  },
+  categoryPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  categoryPillActive: {
+    backgroundColor: COLORS.gold,
+  },
+  categoryText: {
+    color: COLORS.gold,
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  categoryTextActive: {
+    color: '#0A1A15',
+    fontWeight: 'bold',
+  },
+  heroBanner: {
+    flexDirection: 'row',
+    backgroundColor: '#FAF7F0',
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 30,
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  miniProgressTextContainer: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
+  heroContent: {
+    flex: 1,
+    paddingRight: 12,
   },
-  miniTextTop: {
-    color: '#5AC8FA',
+  heroBadge: {
+    backgroundColor: 'rgba(201, 149, 42, 0.15)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  heroBadgeText: {
+    color: COLORS.gold,
     fontSize: 10,
     fontWeight: 'bold',
-    lineHeight: 10,
+    fontFamily: FONTS.sansBold,
   },
-  miniDivider: {
-    height: 1,
-    backgroundColor: '#2C2C2E',
-    width: 12,
-    marginVertical: 1,
-  },
-  miniTextBottom: {
-    color: COLORS.muted,
-    fontSize: 8,
-    lineHeight: 8,
-  },
-  avatarButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: COLORS.gold,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: COLORS.forestCard,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  section: {
-    marginBottom: 35,
-  },
-  sectionTitleText: {
-    fontSize: 22,
+  heroTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.creamLight,
-    paddingHorizontal: 20,
-    marginBottom: 15,
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  heroTitleHighlight: {
+    color: COLORS.gold,
+  },
+  heroSubtitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: '#4A4A4A',
+    marginBottom: 6,
+  },
+  heroDescription: {
+    fontSize: 11,
+    fontFamily: FONTS.sansRegular,
+    color: '#7A7A7A',
+    lineHeight: 15,
+  },
+  heroCoverImage: {
+    width: 100,
+    height: 140,
+    borderRadius: 8,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.creamLight,
-  },
-  continueCard: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.ember, // Orange highlight theme card from Apple Books
-    marginHorizontal: 20,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  continueCover: {
-    width: 60,
-    height: 90,
-    borderRadius: 6,
-    marginRight: 16,
-    backgroundColor: COLORS.forestCard,
-  },
-  continueInfo: {
-    flex: 1,
-    height: 90,
-    justifyContent: 'center',
-  },
-  continueTextRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  continueBookTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  continueAuthor: {
-    fontSize: 14,
-    fontFamily: FONTS.sansMedium,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 8,
-  },
-  continueMeta: {
-    fontSize: 12,
-    fontFamily: FONTS.sansRegular,
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontWeight: '600',
-  },
-  moreButton: {
-    padding: 8,
-  },
-  exploreCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.forestCard,
-    marginHorizontal: 20,
-    borderRadius: 16,
-    padding: 20,
-    height: 120,
-    marginBottom: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.forestBorder,
-  },
-  exploreCardTitle: {
     color: COLORS.cream,
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    flex: 1,
   },
-  stackContainer: {
-    position: 'relative',
-    width: 100,
-    height: 90,
-    justifyContent: 'center',
-  },
-  stackBook: {
-    position: 'absolute',
-    width: 50,
-    height: 75,
-    borderRadius: 4,
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: COLORS.forestDark,
-  },
-  listContent: {
-    paddingHorizontal: 20,
-  },
-  bestsellerCard: {
-    marginRight: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  bestsellerCover: {
-    width: 140,
-    height: 210,
-    borderRadius: 8,
-    backgroundColor: COLORS.forestCard,
-  },
-  syncStatusContainer: {
+  seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
-    backgroundColor: COLORS.forestCard,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    gap: 4,
   },
-  syncStatusText: {
-    color: COLORS.ember,
-    fontSize: 12,
+  seeAllText: {
+    fontSize: 14,
+    color: COLORS.gold,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  trendingListContent: {
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+  bookCard: {
+    width: 150,
+  },
+  coverWrapper: {
+    position: 'relative',
+    marginBottom: 10,
+  },
+  bookCover: {
+    width: 150,
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: COLORS.forestCard,
+  },
+  bookTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 4,
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 2,
+  },
+  bookAuthor: {
+    fontSize: 13,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
   },
   downloadBadge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: 8,
+    right: 8,
     backgroundColor: COLORS.forest,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.cream,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
   },
   downloadBadgeText: {
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 10,
   },
 });

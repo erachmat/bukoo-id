@@ -35,3 +35,15 @@
 - [ ] 4. Structural Changes (Rendering Strategy Overhaul) — *Requires Explicit Go-Ahead*
   - [ ] Evaluate moving from single-WebView epubjs rendition to virtualized multi-page or custom paginator engine for sub-16ms native page turns benchmarked against Apple Books.
 
+# Mobile Application UI Redesign
+- `[x]` 1. Implement Mobile UI/UX based on reference design screenshots
+  - `[x]` Update `MainTabs.tsx` and `types.ts` to support 6 bottom navigation tabs (Beranda, Cari, Rak, Ai, Komunitas, Profil).
+  - `[x]` Redesign `HomeScreen.tsx` (greeting, search input, category tags, featured hero banner, trending carousel).
+  - `[x]` Redesign `LibraryScreen.tsx` (header count, active reading card, 3-card stats grid, want-to-read list).
+  - `[x]` Implement `AiCompanionScreen.tsx` (AI header, PLUS badge, reading progress card, AI insight, recommendations).
+  - `[x]` Implement `CommunityScreen.tsx` (active user count, posting button, feed card, Baca Bareng event card).
+  - `[x]` Redesign `SearchScreen.tsx` (Jelajahi header, filter funnel, trending pills, BUKOO original carousel).
+  - `[x]` Implement `SubscriptionScreen.tsx` (Pilih Paket Bukoo, monthly/yearly toggle, tier cards).
+  - `[x]` Pass `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`, and `npm run test --workspace=@bukoo/mobile`.
+
+

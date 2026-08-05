@@ -3604,3 +3604,848 @@
 {"_e":"metro:client_log","_t":1785246938834,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: timeout]"]}
 {"_e":"metro:bundling:failed","_t":1785247084182,"id":null,"message":"SyntaxError: /home/erachmat/Downloads/bukoo/apps/mobile/src/screens/reading/ReadingScreen.tsx: Identifier 'sampleBookItem' has already been declared. (1068:8)\n\n  1066 |   const webViewShellReady = useRef(false);\n  1067 |\n> 1068 |   const sampleBookItem = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];\n       |         ^\n  1069 |\n  1070 |   // True when we have a local or remote book URI ready to inject\n  1071 |   const hasBookData = !!localFileUri;","importStack":null,"filename":"src/screens/reading/ReadingScreen.tsx","targetModuleName":null,"originModulePath":null}
 {"_e":"metro:server_log","_t":1785247158976,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"root:init","_t":1785247426297,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1785247426312,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1785247427552,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1785247429597,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[59999:0728/210347.738347:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1785247439812,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1785247446877,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785247446878,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785247446883,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785247446983,"id":"1","progress":0.01835587929240375,"total":155,"current":21}
+{"_e":"metro:bundling:progress","_t":1785247447083,"id":"1","progress":0.055925858290723156,"total":296,"current":70}
+{"_e":"metro:bundling:progress","_t":1785247447183,"id":"1","progress":0.20410214125589426,"total":394,"current":178}
+{"_e":"metro:bundling:progress","_t":1785247447283,"id":"1","progress":0.3581310868681342,"total":513,"current":307}
+{"_e":"metro:bundling:progress","_t":1785247447383,"id":"1","progress":0.44584537169074334,"total":635,"current":424}
+{"_e":"metro:bundling:progress","_t":1785247447483,"id":"1","progress":0.49172047073362746,"total":733,"current":514}
+{"_e":"metro:bundling:progress","_t":1785247447583,"id":"1","progress":0.7118470572469724,"total":787,"current":664}
+{"_e":"metro:bundling:progress","_t":1785247447683,"id":"1","progress":0.7118470572469724,"total":898,"current":753}
+{"_e":"metro:bundling:progress","_t":1785247447783,"id":"1","progress":0.7118470572469724,"total":988,"current":796}
+{"_e":"metro:bundling:progress","_t":1785247447883,"id":"1","progress":0.7524248163452709,"total":1056,"current":916}
+{"_e":"metro:bundling:progress","_t":1785247447983,"id":"1","progress":0.7524248163452709,"total":1139,"current":975}
+{"_e":"metro:bundling:progress","_t":1785247448083,"id":"1","progress":0.8931288491728052,"total":1183,"current":1118}
+{"_e":"metro:bundling:progress","_t":1785247448183,"id":"1","progress":0.9792088843167462,"total":1244,"current":1231}
+{"_e":"metro:bundling:progress","_t":1785247448284,"id":"1","progress":0.999,"total":1352,"current":1352}
+{"_e":"metro:bundling:done","_t":1785247448376,"id":"1","total":1352,"ms":1499.346462}
+{"_e":"metro:client_log","_t":1785247455959,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:server_log","_t":1785247466556,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:bundling:started","_t":1785247471333,"id":"3","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:client_log","_t":1785247482212,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247482256,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785247483953,"level":"log","data":["[Perf] WebView shell ready duration: 2521ms"]}
+{"_e":"metro:client_log","_t":1785247483993,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247559821,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: timeout]"]}
+{"_e":"metro:client_log","_t":1785247576416,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247576632,"level":"log","data":["[Perf] WebView shell ready duration: 898ms"]}
+{"_e":"metro:client_log","_t":1785247576665,"level":"log","data":["[Perf] RN Local disk Base64 read duration: 35ms for file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247576675,"level":"log","data":["[Perf] RN Local disk Base64 read duration: 15ms for file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247577235,"level":"warn","data":["[ReadingScreen] epubjs error:","PDF load failed: Invalid PDF structure."]}
+{"_e":"metro:client_log","_t":1785247577240,"level":"warn","data":["[ReadingScreen] epubjs error:","PDF load failed: Invalid PDF structure."]}
+{"_e":"metro:client_log","_t":1785247654948,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785247654991,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785247655143,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785247655147,"level":"log","data":["[Perf] WebView shell ready duration: 932ms"]}
+{"_e":"metro:client_log","_t":1785247655165,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785247664220,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1785247664526,"level":"log","data":["[Perf] WebView shell ready duration: 841ms"]}
+{"_e":"metro:client_log","_t":1785247664581,"level":"log","data":["[Perf] RN Local disk Base64 read duration: 50ms for file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1785247665116,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1431ms, In-WebView load: 330ms, Location gen (generated): 296ms"]}
+{"_e":"metro:client_log","_t":1785247666917,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1785247667938,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785247668727,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785247670312,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785247671532,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785247672918,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785247672922,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247673679,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247673693,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247674285,"level":"log","data":["[Perf] Page turn latency: 73ms"]}
+{"_e":"metro:client_log","_t":1785247674288,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247674487,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247674488,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247674698,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785247674704,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247674915,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247674918,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247675128,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1785247675131,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247675205,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: Unable to resolve host \"github.com\": No address associated with hostname]"]}
+{"_e":"metro:client_log","_t":1785247675503,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247675504,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247675695,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247675697,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247676259,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1785247676300,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247676564,"level":"log","data":["[Perf] Page turn latency: 59ms"]}
+{"_e":"metro:client_log","_t":1785247676570,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247676764,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785247676767,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247678149,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247678152,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247680193,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247686524,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247690844,"level":"log","data":["[Perf] Page turn latency: 195ms"]}
+{"_e":"metro:client_log","_t":1785247690850,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247690962,"level":"error","data":["Download failed:","[Error: timeout]"]}
+{"_e":"metro:client_log","_t":1785247692288,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1785247692290,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247692374,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247695961,"level":"log","data":["[Perf] Page turn latency: 199ms"]}
+{"_e":"metro:client_log","_t":1785247695963,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247696853,"level":"log","data":["[Perf] Page turn latency: 178ms"]}
+{"_e":"metro:client_log","_t":1785247696900,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247697579,"level":"log","data":["[Perf] Page turn latency: 185ms"]}
+{"_e":"metro:client_log","_t":1785247697581,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247698148,"level":"log","data":["[Perf] Page turn latency: 178ms"]}
+{"_e":"metro:client_log","_t":1785247698153,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247698697,"level":"log","data":["[Perf] Page turn latency: 181ms"]}
+{"_e":"metro:client_log","_t":1785247698701,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247699256,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1785247699258,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247699719,"level":"log","data":["[Perf] Page turn latency: 196ms"]}
+{"_e":"metro:client_log","_t":1785247699720,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247700361,"level":"log","data":["[Perf] Page turn latency: 179ms"]}
+{"_e":"metro:client_log","_t":1785247700363,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247700941,"level":"log","data":["[Perf] Page turn latency: 3ms"]}
+{"_e":"metro:client_log","_t":1785247700943,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247701134,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247701817,"level":"log","data":["[Perf] Page turn latency: 185ms"]}
+{"_e":"metro:client_log","_t":1785247701818,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247702628,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247706525,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712490,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712648,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712650,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712650,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712650,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712807,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712809,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712964,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247712967,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713107,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713271,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713434,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713437,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713441,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713442,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713624,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713626,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713631,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713637,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713657,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713768,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713770,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713924,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713927,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713930,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713934,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247713951,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714080,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714083,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714097,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714382,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714385,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714399,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714664,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247714857,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715009,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715011,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715121,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715126,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715229,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247715401,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716148,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716389,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716459,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716533,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716792,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247716874,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717125,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717241,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717439,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717441,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717447,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717453,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717455,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717529,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717532,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717603,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717683,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247717947,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718062,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718206,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718282,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718365,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718396,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718399,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718568,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718572,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718698,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718701,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718781,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718784,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718854,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247718982,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247719901,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247723092,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247726476,"level":"log","data":["[Perf] Page turn latency: 209ms"]}
+{"_e":"metro:client_log","_t":1785247726477,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247727342,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247728173,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247728175,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247728666,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1785247728668,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247729995,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247729997,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247730704,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247730705,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247731263,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247731264,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247731821,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247731822,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247732221,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247732223,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247732621,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1785247732622,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247732928,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247732932,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247733187,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1785247733188,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247733449,"level":"log","data":["[Perf] Page turn latency: 127ms"]}
+{"_e":"metro:client_log","_t":1785247733450,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247733640,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1785247733643,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247733902,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247733905,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247735270,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247735271,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247735541,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247735542,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247736082,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247736084,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247736520,"level":"log","data":["[Perf] Page turn latency: 69ms"]}
+{"_e":"metro:client_log","_t":1785247736563,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247736731,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247736734,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247737013,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1785247737014,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247737270,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247737271,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247737552,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247737553,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247737804,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247737807,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247738067,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247738073,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247738485,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247738488,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247738714,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247738717,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247739253,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247739256,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247739552,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785247739553,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247743137,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247743143,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247743824,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247743826,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247744435,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1785247744437,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247744751,"level":"log","data":["[Perf] Page turn latency: 67ms"]}
+{"_e":"metro:client_log","_t":1785247744757,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247744996,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247744997,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247745210,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247745213,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247745441,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1785247745445,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247745716,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785247745722,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247745969,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247745972,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247746194,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785247746196,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247746705,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785247746710,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247747519,"level":"log","data":["[Perf] Page turn latency: 97ms"]}
+{"_e":"metro:client_log","_t":1785247747520,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247748189,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247748191,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247749128,"level":"log","data":["[Perf] Page turn latency: 73ms"]}
+{"_e":"metro:client_log","_t":1785247749132,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247749569,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1785247749570,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247749877,"level":"log","data":["[Perf] Page turn latency: 63ms"]}
+{"_e":"metro:client_log","_t":1785247749879,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247750154,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247750155,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247750471,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247750473,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247750667,"level":"log","data":["[Perf] Page turn latency: 71ms"]}
+{"_e":"metro:client_log","_t":1785247750669,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247750919,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247750920,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247751127,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247751129,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247751327,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247751328,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247751560,"level":"log","data":["[Perf] Page turn latency: 114ms"]}
+{"_e":"metro:client_log","_t":1785247751563,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247751742,"level":"log","data":["[Perf] Page turn latency: 63ms"]}
+{"_e":"metro:client_log","_t":1785247751744,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247751989,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247751994,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247752563,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247752564,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247752780,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247752782,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247752995,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247752997,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247753225,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247753226,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247754722,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247754724,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247755010,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247755011,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247755243,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1785247755247,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247755451,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247755454,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247755680,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247755684,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247755916,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247755917,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247756164,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247756166,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247756394,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247756436,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247756672,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247756676,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247756937,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247756939,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247757233,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247757235,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247757530,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1785247757532,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247757767,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1785247757769,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247758010,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1785247758012,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247758276,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247758277,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247758520,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247758521,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247758750,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247758751,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247759310,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247759313,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247759475,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247759476,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247759690,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247759691,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247759962,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1785247759963,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247760181,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247760185,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247760379,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247760380,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247760610,"level":"log","data":["[Perf] Page turn latency: 112ms"]}
+{"_e":"metro:client_log","_t":1785247760611,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247760812,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1785247760815,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247761213,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247761216,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247761494,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1785247761500,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247761957,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1785247761958,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247762696,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1785247762698,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247762876,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1785247762877,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247763076,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1785247763077,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247763281,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1785247763282,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247763467,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247763469,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247763704,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247763706,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247763850,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1785247763855,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247764048,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247764052,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247764245,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247764246,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247764464,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1785247764467,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247764720,"level":"log","data":["[Perf] Page turn latency: 100ms"]}
+{"_e":"metro:client_log","_t":1785247764721,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247764882,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247764885,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247765084,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247765086,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247765283,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247765284,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247765478,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1785247765480,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247765708,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247765715,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247765868,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247765869,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247766124,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247766126,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247766324,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785247766326,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247766514,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247766517,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247766713,"level":"log","data":["[Perf] Page turn latency: 67ms"]}
+{"_e":"metro:client_log","_t":1785247766716,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247766906,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785247766910,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247769291,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1785247769291,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247769471,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247769471,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247769665,"level":"log","data":["[Perf] Page turn latency: 102ms"]}
+{"_e":"metro:client_log","_t":1785247769668,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247769823,"level":"log","data":["[Perf] Page turn latency: 59ms"]}
+{"_e":"metro:client_log","_t":1785247769825,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247770063,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247770064,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247770251,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247770253,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247770474,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247770475,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247770668,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247770671,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247770987,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1785247770997,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247771219,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785247771222,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247771378,"level":"log","data":["[Perf] Page turn latency: 53ms"]}
+{"_e":"metro:client_log","_t":1785247771380,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247771675,"level":"log","data":["[Perf] Page turn latency: 133ms"]}
+{"_e":"metro:client_log","_t":1785247771678,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247771829,"level":"log","data":["[Perf] Page turn latency: 71ms"]}
+{"_e":"metro:client_log","_t":1785247771830,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247772022,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785247772026,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247772303,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247772329,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247772559,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785247772561,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247772805,"level":"log","data":["[Perf] Page turn latency: 73ms"]}
+{"_e":"metro:client_log","_t":1785247772806,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247773367,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247773369,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247774096,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247774097,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247774305,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785247774306,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247774528,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247774530,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247774765,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247774766,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247774937,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247774939,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247775152,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247775155,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247775385,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247775386,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247775601,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785247775602,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247775829,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785247775831,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247776024,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247776026,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247776240,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1785247776285,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247776476,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785247776479,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247776695,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1785247776697,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247776899,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785247776906,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247777385,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785247777385,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247778770,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1785247788736,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247788738,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785247789111,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247789120,"level":"log","data":["[Perf] WebView shell ready duration: 912ms"]}
+{"_e":"metro:client_log","_t":1785247846032,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247846680,"level":"log","data":["[Perf] WebView shell ready duration: 940ms"]}
+{"_e":"metro:client_log","_t":1785247846707,"level":"log","data":["[Perf] RN Local disk Base64 read duration: 29ms for file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785247847029,"level":"warn","data":["[ReadingScreen] epubjs error:","PDF load failed: Invalid PDF structure."]}
+{"_e":"metro:client_log","_t":1785247860091,"level":"warn","data":["[useReadingSession] stopSession on unmount failed:","[Error: Call to function 'NativeStatement.finalizeAsync' has been rejected.\n→ Caused by: Error code \u0013: NOT NULL constraint failed: pending_syncs.bookId]"]}
+{"_e":"metro:client_log","_t":1785247866422,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: timeout]"]}
+{"_e":"metro:bundling:started","_t":1785247917191,"id":"5","platform":"android","environment":null,"entry":"apps/mobile/src/screens/reading/ReadingScreen.tsx"}
+{"_e":"metro:bundling:started","_t":1785247924912,"id":"6","platform":"android","environment":null,"entry":"apps/mobile/src/screens/reading/ReadingScreen.tsx"}
+{"_e":"metro:client_log","_t":1785248004481,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248004523,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785248005320,"level":"log","data":["[Perf] WebView shell ready duration: 1489ms"]}
+{"_e":"metro:client_log","_t":1785248005332,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248024881,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: Unable to resolve host \"bukooapi-production.up.railway.app\": No address associated with hostname]"]}
+{"_e":"metro:client_log","_t":1785248091552,"level":"error","data":["Download failed:","[Error: timeout]"]}
+{"_e":"metro:server_log","_t":1785248387016,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"root:init","_t":1785248561293,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1785248561322,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1785248562821,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1785248565055,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[65137:0728/212243.116820:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1785248575076,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1785248582699,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785248582700,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785248582705,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785248582816,"id":"1","progress":0.019739088860050543,"total":121,"current":17}
+{"_e":"metro:bundling:progress","_t":1785248582916,"id":"1","progress":0.13888353072798115,"total":322,"current":120}
+{"_e":"metro:bundling:progress","_t":1785248583016,"id":"1","progress":0.1808940874859798,"total":395,"current":168}
+{"_e":"metro:bundling:progress","_t":1785248583116,"id":"1","progress":0.36152058964909467,"total":474,"current":285}
+{"_e":"metro:bundling:progress","_t":1785248583216,"id":"1","progress":0.4128115424387093,"total":607,"current":390}
+{"_e":"metro:bundling:progress","_t":1785248583319,"id":"1","progress":0.5608588630188076,"total":685,"current":513}
+{"_e":"metro:bundling:progress","_t":1785248583419,"id":"1","progress":0.735983379501385,"total":760,"current":652}
+{"_e":"metro:bundling:progress","_t":1785248583519,"id":"1","progress":0.7780571377714489,"total":848,"current":748}
+{"_e":"metro:bundling:progress","_t":1785248583638,"id":"1","progress":0.7780571377714489,"total":936,"current":769}
+{"_e":"metro:bundling:progress","_t":1785248583738,"id":"1","progress":0.7780571377714489,"total":1052,"current":890}
+{"_e":"metro:bundling:progress","_t":1785248583838,"id":"1","progress":0.7780571377714489,"total":1133,"current":965}
+{"_e":"metro:bundling:progress","_t":1785248583950,"id":"1","progress":0.8854343128480908,"total":1169,"current":1100}
+{"_e":"metro:bundling:progress","_t":1785248584050,"id":"1","progress":0.9465901191215652,"total":1219,"current":1186}
+{"_e":"metro:bundling:progress","_t":1785248584150,"id":"1","progress":0.9926172271629143,"total":1352,"current":1347}
+{"_e":"metro:bundling:done","_t":1785248584288,"id":"1","total":1352,"ms":1589.132654}
+{"_e":"metro:client_log","_t":1785248591867,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1785248593800,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:server_log","_t":1785248612860,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:bundling:started","_t":1785248614168,"id":"b","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:started","_t":1785248618057,"id":"c","platform":"android","environment":null,"entry":"apps/mobile/src/services/bookDownload.ts"}
+{"_e":"metro:client_log","_t":1785248622996,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248623037,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785248624858,"level":"log","data":["[Perf] WebView shell ready duration: 2821ms"]}
+{"_e":"metro:client_log","_t":1785248624905,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248718131,"level":"warn","data":["[ReadingScreen] Background download warning:","[Error: timeout]"]}
+{"_e":"metro:bundling:started","_t":1785248725301,"id":"h","platform":"android","environment":null,"entry":"apps/mobile/src/screens/reading/ReadingScreen.tsx"}
+{"_e":"root:init","_t":1785248870748,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1785248870763,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1785248871923,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1785248873990,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[66847:0728/212752.114631:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1785248883872,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1785248890045,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785248890046,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785248890052,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785248890151,"id":"1","progress":0.02957523631790336,"total":157,"current":27}
+{"_e":"metro:bundling:progress","_t":1785248890252,"id":"1","progress":0.06536378965448623,"total":309,"current":79}
+{"_e":"metro:bundling:progress","_t":1785248890352,"id":"1","progress":0.19889549478134497,"total":435,"current":194}
+{"_e":"metro:bundling:progress","_t":1785248890452,"id":"1","progress":0.36429846938775506,"total":560,"current":338}
+{"_e":"metro:bundling:progress","_t":1785248890552,"id":"1","progress":0.46846419753086416,"total":675,"current":462}
+{"_e":"metro:bundling:progress","_t":1785248890652,"id":"1","progress":0.5719766676900137,"total":755,"current":571}
+{"_e":"metro:bundling:progress","_t":1785248890752,"id":"1","progress":0.6697769955564691,"total":837,"current":685}
+{"_e":"metro:bundling:progress","_t":1785248890880,"id":"1","progress":0.6988606142045295,"total":945,"current":790}
+{"_e":"metro:bundling:progress","_t":1785248890980,"id":"1","progress":0.7026384083044983,"total":1020,"current":855}
+{"_e":"metro:bundling:progress","_t":1785248891109,"id":"1","progress":0.7476166197113856,"total":1123,"current":971}
+{"_e":"metro:bundling:progress","_t":1785248891209,"id":"1","progress":0.9028264900036607,"total":1164,"current":1106}
+{"_e":"metro:bundling:progress","_t":1785248891309,"id":"1","progress":0.973685364676988,"total":1208,"current":1192}
+{"_e":"metro:bundling:progress","_t":1785248891409,"id":"1","progress":0.9984968059245858,"total":1330,"current":1329}
+{"_e":"metro:bundling:progress","_t":1785248892055,"id":"1","progress":0.999,"total":1330,"current":1330}
+{"_e":"metro:bundling:done","_t":1785248892198,"id":"1","total":1330,"ms":2153.200947}
+{"_e":"metro:client_log","_t":1785248897692,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1785248899330,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:server_log","_t":1785248900827,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:bundling:started","_t":1785248902138,"id":"b","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:started","_t":1785248925446,"id":"c","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785248925446,"id":"c","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1785248925519,"id":"c","total":1,"ms":72.809273}
+{"_e":"metro:client_log","_t":1785248933892,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1785248936074,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:server_log","_t":1785248938436,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:bundling:started","_t":1785248939585,"id":"e","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:client_log","_t":1785248953359,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248953376,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785248954767,"level":"log","data":["[Perf] WebView shell ready duration: 2246ms"]}
+{"_e":"metro:client_log","_t":1785248954814,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1785248997402,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785248997449,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785248997985,"level":"log","data":["[Perf] WebView shell ready duration: 1175ms"]}
+{"_e":"metro:client_log","_t":1785248998004,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785248998637,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785248999403,"level":"log","data":["[ReadingScreen] Background download finished:","file:///data/user/0/com.erachmat.bukoo/files/books/book-6.epub"]}
+{"_e":"metro:client_log","_t":1785249002309,"level":"log","data":["[Perf] WebView shell ready duration: 5495ms"]}
+{"_e":"metro:client_log","_t":1785249002310,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785249002485,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785249004850,"level":"log","data":["[Perf] WebView shell ready duration: 8038ms"]}
+{"_e":"metro:client_log","_t":1785249004863,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785249005027,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785249008030,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785249008035,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785249008599,"level":"log","data":["[Perf] WebView shell ready duration: 1123ms"]}
+{"_e":"metro:client_log","_t":1785249008612,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785249009161,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785249010081,"level":"log","data":["[ReadingScreen] Background download finished:","file:///data/user/0/com.erachmat.bukoo/files/books/book-6.epub"]}
+{"_e":"metro:client_log","_t":1785249015417,"level":"log","data":["[Perf] WebView shell ready duration: 7941ms"]}
+{"_e":"metro:client_log","_t":1785249015457,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785249015656,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785249020232,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book-6.epub"]}
+{"_e":"metro:client_log","_t":1785249021123,"level":"log","data":["[Perf] WebView shell ready duration: 1197ms"]}
+{"_e":"metro:client_log","_t":1785249021181,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 54ms"]}
+{"_e":"metro:client_log","_t":1785249021186,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785249021610,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1683ms, In-WebView load: 355ms, Location gen (generated): 309ms"]}
+{"_e":"metro:client_log","_t":1785249024990,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1785249027130,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785249027891,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785249031072,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785249033497,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1785249058050,"level":"log","data":["[Perf] Page turn latency: 71ms"]}
+{"_e":"metro:client_log","_t":1785249058747,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785249059335,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1785249059900,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1785249060385,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785249061030,"level":"log","data":["[Perf] Page turn latency: 244ms"]}
+{"_e":"metro:client_log","_t":1785249061357,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1785249061989,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1785249062548,"level":"log","data":["[Perf] Page turn latency: 138ms"]}
+{"_e":"metro:client_log","_t":1785249063091,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1785249063654,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785249078770,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1785249079697,"level":"log","data":["[Perf] Page turn latency: 252ms"]}
+{"_e":"metro:client_log","_t":1785249080438,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785249080488,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:bundling:started","_t":1785249089756,"id":"k","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785249089756,"id":"k","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1785249089832,"id":"k","total":1,"ms":76.187151}
+{"_e":"metro:client_log","_t":1785249096703,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:server_log","_t":1785249098940,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:bundling:started","_t":1785249100092,"id":"m","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:client_log","_t":1785249147213,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.pdf"]}
+{"_e":"metro:client_log","_t":1785249147257,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785249148524,"level":"log","data":["[Perf] WebView shell ready duration: 2184ms"]}
+{"_e":"metro:client_log","_t":1785249148537,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.pdf"]}
+{"_e":"metro:client_log","_t":1785249165064,"level":"log","data":["[Perf] Total Time-to-First-Frame: 18725ms"]}
+{"_e":"metro:client_log","_t":1785249166399,"level":"log","data":["[ReadingScreen] Background download finished:","file:///data/user/0/com.erachmat.bukoo/files/books/book_perlunya_seorang_imam.pdf"]}
+{"_e":"metro:client_log","_t":1785249172922,"level":"log","data":["[Perf] Total Time-to-First-Frame: 26580ms"]}
+{"_e":"metro:client_log","_t":1785249186742,"level":"log","data":["[Perf] WebView shell ready duration: 933ms"]}
+{"_e":"metro:client_log","_t":1785249186789,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book_perlunya_seorang_imam.pdf"]}
+{"_e":"metro:client_log","_t":1785249187054,"level":"log","data":["[RN Diagnostic] Disk size: 2236235 bytes | b64 length: 2981648 chars | RN Read duration: 144ms"]}
+{"_e":"metro:client_log","_t":1785249187056,"level":"log","data":["[Chunking] Transferring 12 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785249187787,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1979ms"]}
+{"_e":"metro:client_log","_t":1785249228397,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book-6.epub"]}
+{"_e":"metro:client_log","_t":1785249228988,"level":"log","data":["[Perf] WebView shell ready duration: 895ms"]}
+{"_e":"metro:client_log","_t":1785249229297,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 316ms"]}
+{"_e":"metro:client_log","_t":1785249229300,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785249229413,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 384ms"]}
+{"_e":"metro:client_log","_t":1785249229415,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785249229595,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1504ms, In-WebView load: 74ms, Location gen (cached): 64ms"]}
+{"_e":"metro:client_log","_t":1785249236887,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1785249237768,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785249238634,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1785249239416,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785249262041,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1785249262798,"level":"log","data":["[Perf] Page turn latency: 178ms"]}
+{"_e":"metro:client_log","_t":1785249263439,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1785249264084,"level":"log","data":["[Perf] Page turn latency: 181ms"]}
+{"_e":"metro:client_log","_t":1785249265336,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1785249265976,"level":"log","data":["[Perf] Page turn latency: 179ms"]}
+{"_e":"metro:client_log","_t":1785249272012,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1785249272953,"level":"log","data":["[Perf] Page turn latency: 178ms"]}
+{"_e":"metro:client_log","_t":1785249273813,"level":"log","data":["[Perf] Page turn latency: 201ms"]}
+{"_e":"metro:client_log","_t":1785249274656,"level":"log","data":["[Perf] Page turn latency: 217ms"]}
+{"_e":"metro:client_log","_t":1785249283366,"level":"log","data":["[Perf] Page turn latency: 7ms"]}
+{"_e":"metro:client_log","_t":1785249284262,"level":"log","data":["[Perf] Page turn latency: 176ms"]}
+{"_e":"metro:client_log","_t":1785249284916,"level":"log","data":["[Perf] Page turn latency: 190ms"]}
+{"_e":"metro:client_log","_t":1785249285939,"level":"log","data":["[Perf] Page turn latency: 191ms"]}
+{"_e":"metro:client_log","_t":1785249290693,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785249290785,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785249302694,"level":"log","data":["[Perf] Page turn latency: 176ms"]}
+{"_e":"metro:client_log","_t":1785249303975,"level":"log","data":["[Perf] Page turn latency: 235ms"]}
+{"_e":"metro:client_log","_t":1785249304935,"level":"log","data":["[Perf] Page turn latency: 465ms"]}
+{"_e":"metro:client_log","_t":1785249306106,"level":"log","data":["[Perf] Page turn latency: 175ms"]}
+{"_e":"metro:client_log","_t":1785249318637,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785249318678,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:bundling:started","_t":1785249323573,"id":"p","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785249323573,"id":"p","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1785249323645,"id":"p","total":1,"ms":71.909507}
+{"_e":"metro:client_log","_t":1785249330356,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1785249396070,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book_perlunya_seorang_imam.pdf"]}
+{"_e":"metro:client_log","_t":1785249397710,"level":"log","data":["[Perf] WebView shell ready duration: 1972ms"]}
+{"_e":"metro:client_log","_t":1785249397874,"level":"log","data":["[RN Diagnostic] Disk size: 2236235 bytes | b64 length: 2981648 chars | RN Read duration: 136ms"]}
+{"_e":"metro:client_log","_t":1785249397874,"level":"log","data":["[Chunking] Transferring 12 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785249398758,"level":"log","data":["[Perf] Total Time-to-First-Frame: 3019ms"]}
+{"_e":"metro:client_log","_t":1785249406158,"level":"log","data":["[Perf] Total Time-to-First-Frame: 10416ms"]}
+{"_e":"metro:server_log","_t":1785250921379,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"metro:client_log","_t":1785251199862,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","file:///data/user/0/com.erachmat.bukoo/files/books/book-6.epub"]}
+{"_e":"metro:client_log","_t":1785251200619,"level":"log","data":["[Perf] WebView shell ready duration: 1064ms"]}
+{"_e":"metro:client_log","_t":1785251200672,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 48ms"]}
+{"_e":"metro:client_log","_t":1785251200674,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1785251201087,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1531ms, In-WebView load: 211ms, Location gen (cached): 151ms"]}
+{"_e":"metro:client_log","_t":1785251260066,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251260145,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251320116,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251320120,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251410154,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251410197,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251500214,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251500222,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251530194,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251530236,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251590226,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251590269,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251680243,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251680248,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251740884,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251740889,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251765507,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1785251766294,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1785251766774,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1785251767695,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785251768077,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1785251770274,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251770318,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251802269,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251802271,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251830256,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251830300,"level":"warn","data":["[ReadingSync] Periodic sync failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:client_log","_t":1785251831859,"level":"error","data":["[ReadingSync] Server sync error:","{\"error\": \"Forbidden\", \"message\": \"Subscription required to access this book\", \"statusCode\": 403}"]}
+{"_e":"metro:client_log","_t":1785251831863,"level":"warn","data":["[useReadingSession] stopSession on background failed:","[AxiosError: Request failed with status code 403]"]}
+{"_e":"metro:server_log","_t":1785251930921,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"metro:bundling:started","_t":1785252184814,"id":"w","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785252184814,"id":"w","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1785252184883,"id":"w","total":1,"ms":68.41973}
+{"_e":"metro:server_log","_t":1785252265023,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"metro:server_log","_t":1785252414434,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"root:init","_t":1785898163878,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1785898163920,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1785898165518,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1785898179070,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1785898185769,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1785898185770,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785898185776,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1785898186399,"id":"1","progress":0.010000000000000002,"total":1,"current":1}
+{"_e":"metro:bundling:progress","_t":1785898186499,"id":"1","progress":0.04000000000000001,"total":10,"current":2}
+{"_e":"metro:bundling:progress","_t":1785898186619,"id":"1","progress":0.05536332179930796,"total":17,"current":4}
+{"_e":"metro:bundling:progress","_t":1785898186719,"id":"1","progress":0.05536332179930796,"total":19,"current":4}
+{"_e":"metro:bundling:progress","_t":1785898186727,"id":"1","progress":0.06925207756232686,"total":19,"current":5}
+{"_e":"metro:bundling:progress","_t":1785898186828,"id":"1","progress":0.06925207756232686,"total":44,"current":8}
+{"_e":"metro:bundling:progress","_t":1785898186928,"id":"1","progress":0.06925207756232686,"total":49,"current":11}
+{"_e":"metro:bundling:progress","_t":1785898187131,"id":"1","progress":0.06925207756232686,"total":49,"current":12}
+{"_e":"metro:bundling:progress","_t":1785898187233,"id":"1","progress":0.06925207756232686,"total":143,"current":13}
+{"_e":"metro:bundling:progress","_t":1785898187332,"id":"1","progress":0.06925207756232686,"total":152,"current":19}
+{"_e":"metro:bundling:progress","_t":1785898187432,"id":"1","progress":0.06925207756232686,"total":154,"current":25}
+{"_e":"metro:bundling:progress","_t":1785898187535,"id":"1","progress":0.06925207756232686,"total":170,"current":35}
+{"_e":"metro:bundling:progress","_t":1785898187646,"id":"1","progress":0.06925207756232686,"total":188,"current":46}
+{"_e":"metro:bundling:progress","_t":1785898187753,"id":"1","progress":0.07204986149584487,"total":190,"current":51}
+{"_e":"metro:bundling:progress","_t":1785898187853,"id":"1","progress":0.07438016528925619,"total":198,"current":54}
+{"_e":"metro:bundling:progress","_t":1785898187953,"id":"1","progress":0.07962454661307714,"total":202,"current":57}
+{"_e":"metro:bundling:progress","_t":1785898188069,"id":"1","progress":0.08768498444716749,"total":206,"current":61}
+{"_e":"metro:bundling:progress","_t":1785898188175,"id":"1","progress":0.09400587397650409,"total":212,"current":65}
+{"_e":"metro:bundling:progress","_t":1785898188278,"id":"1","progress":0.09400587397650409,"total":228,"current":69}
+{"_e":"metro:bundling:progress","_t":1785898188377,"id":"1","progress":0.09631391200951249,"total":232,"current":72}
+{"_e":"metro:bundling:progress","_t":1785898188468,"id":"1","progress":0.09900787752675386,"total":232,"current":73}
+{"_e":"metro:bundling:progress","_t":1785898188573,"id":"1","progress":0.10835069444444444,"total":240,"current":79}
+{"_e":"metro:bundling:progress","_t":1785898188679,"id":"1","progress":0.12321532694710537,"total":245,"current":86}
+{"_e":"metro:bundling:progress","_t":1785898188782,"id":"1","progress":0.1449852071005917,"total":260,"current":99}
+{"_e":"metro:bundling:progress","_t":1785898188883,"id":"1","progress":0.16231043941824957,"total":278,"current":112}
+{"_e":"metro:bundling:progress","_t":1785898188989,"id":"1","progress":0.18787638761080502,"total":293,"current":127}
+{"_e":"metro:bundling:progress","_t":1785898189089,"id":"1","progress":0.22421165738344806,"total":302,"current":143}
+{"_e":"metro:bundling:progress","_t":1785898189190,"id":"1","progress":0.25653567212008765,"total":308,"current":156}
+{"_e":"metro:bundling:progress","_t":1785898189290,"id":"1","progress":0.25653567212008765,"total":395,"current":171}
+{"_e":"metro:bundling:progress","_t":1785898189394,"id":"1","progress":0.25653567212008765,"total":410,"current":183}
+{"_e":"metro:bundling:progress","_t":1785898189498,"id":"1","progress":0.25653567212008765,"total":415,"current":203}
+{"_e":"metro:bundling:progress","_t":1785898189598,"id":"1","progress":0.25705847672285786,"total":428,"current":217}
+{"_e":"metro:bundling:progress","_t":1785898189698,"id":"1","progress":0.27404170983289045,"total":447,"current":234}
+{"_e":"metro:bundling:progress","_t":1785898189800,"id":"1","progress":0.2966570312462918,"total":459,"current":250}
+{"_e":"metro:bundling:progress","_t":1785898189900,"id":"1","progress":0.30527946472706735,"total":476,"current":263}
+{"_e":"metro:bundling:progress","_t":1785898189999,"id":"1","progress":0.32921257726417624,"total":488,"current":280}
+{"_e":"metro:bundling:progress","_t":1785898190101,"id":"1","progress":0.32921257726417624,"total":519,"current":289}
+{"_e":"metro:bundling:progress","_t":1785898190201,"id":"1","progress":0.32921257726417624,"total":538,"current":305}
+{"_e":"metro:bundling:progress","_t":1785898190302,"id":"1","progress":0.32921257726417624,"total":563,"current":320}
+{"_e":"metro:bundling:progress","_t":1785898190403,"id":"1","progress":0.3578978147122191,"total":570,"current":341}
+{"_e":"metro:bundling:progress","_t":1785898190503,"id":"1","progress":0.3578978147122191,"total":623,"current":352}
+{"_e":"metro:bundling:progress","_t":1785898190603,"id":"1","progress":0.3578978147122191,"total":624,"current":365}
+{"_e":"metro:bundling:progress","_t":1785898190704,"id":"1","progress":0.389376,"total":625,"current":390}
+{"_e":"metro:bundling:progress","_t":1785898190806,"id":"1","progress":0.38964291365056763,"total":636,"current":397}
+{"_e":"metro:bundling:progress","_t":1785898190908,"id":"1","progress":0.38964291365056763,"total":661,"current":408}
+{"_e":"metro:bundling:progress","_t":1785898191008,"id":"1","progress":0.38964291365056763,"total":673,"current":416}
+{"_e":"metro:bundling:progress","_t":1785898191108,"id":"1","progress":0.38964291365056763,"total":673,"current":420}
+{"_e":"metro:bundling:progress","_t":1785898191212,"id":"1","progress":0.4032438429501009,"total":674,"current":428}
+{"_e":"metro:bundling:progress","_t":1785898191316,"id":"1","progress":0.41299524221453293,"total":680,"current":437}
+{"_e":"metro:bundling:progress","_t":1785898191419,"id":"1","progress":0.42714881697738627,"total":687,"current":449}
+{"_e":"metro:bundling:progress","_t":1785898191519,"id":"1","progress":0.4528820477285019,"total":688,"current":463}
+{"_e":"metro:bundling:progress","_t":1785898191623,"id":"1","progress":0.46389268900091407,"total":693,"current":472}
+{"_e":"metro:bundling:progress","_t":1785898191735,"id":"1","progress":0.4731418972836669,"total":708,"current":487}
+{"_e":"metro:bundling:progress","_t":1785898191838,"id":"1","progress":0.47325239832948923,"total":721,"current":496}
+{"_e":"metro:bundling:progress","_t":1785898191938,"id":"1","progress":0.48864171929493827,"total":721,"current":504}
+{"_e":"metro:bundling:progress","_t":1785898192038,"id":"1","progress":0.5133137820935896,"total":723,"current":518}
+{"_e":"metro:bundling:progress","_t":1785898192138,"id":"1","progress":0.5365713221223052,"total":729,"current":534}
+{"_e":"metro:bundling:progress","_t":1785898192238,"id":"1","progress":0.5548522303639196,"total":733,"current":546}
+{"_e":"metro:bundling:progress","_t":1785898192338,"id":"1","progress":0.5655695713829637,"total":734,"current":552}
+{"_e":"metro:bundling:progress","_t":1785898192439,"id":"1","progress":0.5804988662131518,"total":735,"current":560}
+{"_e":"metro:bundling:progress","_t":1785898192539,"id":"1","progress":0.5949231031218356,"total":739,"current":570}
+{"_e":"metro:bundling:progress","_t":1785898192640,"id":"1","progress":0.5979609565801767,"total":741,"current":573}
+{"_e":"metro:bundling:progress","_t":1785898192690,"id":"1","progress":0.600049901562793,"total":741,"current":574}
+{"_e":"metro:bundling:progress","_t":1785898192793,"id":"1","progress":0.600049901562793,"total":757,"current":579}
+{"_e":"metro:bundling:progress","_t":1785898192893,"id":"1","progress":0.600049901562793,"total":776,"current":582}
+{"_e":"metro:bundling:progress","_t":1785898192996,"id":"1","progress":0.600049901562793,"total":785,"current":598}
+{"_e":"metro:bundling:progress","_t":1785898193096,"id":"1","progress":0.600049901562793,"total":789,"current":610}
+{"_e":"metro:bundling:progress","_t":1785898193203,"id":"1","progress":0.600049901562793,"total":815,"current":630}
+{"_e":"metro:bundling:progress","_t":1785898193305,"id":"1","progress":0.600049901562793,"total":857,"current":651}
+{"_e":"metro:bundling:progress","_t":1785898193411,"id":"1","progress":0.600049901562793,"total":884,"current":665}
+{"_e":"metro:bundling:progress","_t":1785898193510,"id":"1","progress":0.600049901562793,"total":893,"current":677}
+{"_e":"metro:bundling:progress","_t":1785898193612,"id":"1","progress":0.600049901562793,"total":898,"current":686}
+{"_e":"metro:bundling:progress","_t":1785898193713,"id":"1","progress":0.600049901562793,"total":913,"current":699}
+{"_e":"metro:bundling:progress","_t":1785898193813,"id":"1","progress":0.6004132700289646,"total":915,"current":709}
+{"_e":"metro:bundling:progress","_t":1785898193913,"id":"1","progress":0.6058820865353445,"total":916,"current":713}
+{"_e":"metro:bundling:progress","_t":1785898194014,"id":"1","progress":0.6100324661454996,"total":918,"current":717}
+{"_e":"metro:bundling:progress","_t":1785898194119,"id":"1","progress":0.6183212482531139,"total":922,"current":725}
+{"_e":"metro:bundling:progress","_t":1785898194219,"id":"1","progress":0.6310273420663032,"total":924,"current":734}
+{"_e":"metro:bundling:progress","_t":1785898194319,"id":"1","progress":0.6310273420663032,"total":973,"current":742}
+{"_e":"metro:bundling:progress","_t":1785898194419,"id":"1","progress":0.6310273420663032,"total":973,"current":748}
+{"_e":"metro:bundling:progress","_t":1785898194519,"id":"1","progress":0.6310273420663032,"total":981,"current":755}
+{"_e":"metro:bundling:progress","_t":1785898194620,"id":"1","progress":0.6310273420663032,"total":1013,"current":768}
+{"_e":"metro:bundling:progress","_t":1785898194721,"id":"1","progress":0.6310273420663032,"total":1021,"current":773}
+{"_e":"metro:bundling:progress","_t":1785898194821,"id":"1","progress":0.6310273420663032,"total":1031,"current":780}
+{"_e":"metro:bundling:progress","_t":1785898194924,"id":"1","progress":0.6310273420663032,"total":1033,"current":792}
+{"_e":"metro:bundling:progress","_t":1785898195024,"id":"1","progress":0.6310273420663032,"total":1037,"current":801}
+{"_e":"metro:bundling:progress","_t":1785898195147,"id":"1","progress":0.6310273420663032,"total":1037,"current":811}
+{"_e":"metro:bundling:progress","_t":1785898195248,"id":"1","progress":0.6310273420663032,"total":1050,"current":824}
+{"_e":"metro:bundling:progress","_t":1785898195350,"id":"1","progress":0.6310273420663032,"total":1059,"current":830}
+{"_e":"metro:bundling:progress","_t":1785898195450,"id":"1","progress":0.6310273420663032,"total":1066,"current":840}
+{"_e":"metro:bundling:progress","_t":1785898195550,"id":"1","progress":0.6310273420663032,"total":1071,"current":847}
+{"_e":"metro:bundling:progress","_t":1785898195650,"id":"1","progress":0.6388109617058914,"total":1076,"current":860}
+{"_e":"metro:bundling:progress","_t":1785898195754,"id":"1","progress":0.6561150139876537,"total":1079,"current":874}
+{"_e":"metro:bundling:progress","_t":1785898195854,"id":"1","progress":0.6596865717750293,"total":1081,"current":878}
+{"_e":"metro:bundling:progress","_t":1785898195955,"id":"1","progress":0.6658680110937237,"total":1087,"current":887}
+{"_e":"metro:bundling:progress","_t":1785898196055,"id":"1","progress":0.6729713403809688,"total":1091,"current":895}
+{"_e":"metro:bundling:progress","_t":1785898196158,"id":"1","progress":0.6780234194311466,"total":1093,"current":900}
+{"_e":"metro:bundling:progress","_t":1785898196258,"id":"1","progress":0.6780234194311466,"total":1101,"current":906}
+{"_e":"metro:bundling:progress","_t":1785898196358,"id":"1","progress":0.6780234194311466,"total":1113,"current":910}
+{"_e":"metro:bundling:progress","_t":1785898196469,"id":"1","progress":0.6780234194311466,"total":1113,"current":911}
+{"_e":"metro:bundling:progress","_t":1785898196568,"id":"1","progress":0.6780234194311466,"total":1120,"current":920}
+{"_e":"metro:bundling:progress","_t":1785898196780,"id":"1","progress":0.6823555812678402,"total":1121,"current":926}
+{"_e":"metro:bundling:progress","_t":1785898196957,"id":"1","progress":0.6823555812678402,"total":1130,"current":930}
+{"_e":"metro:bundling:progress","_t":1785898197056,"id":"1","progress":0.690578372931564,"total":1148,"current":954}
+{"_e":"metro:bundling:progress","_t":1785898197156,"id":"1","progress":0.7085247637051041,"total":1150,"current":968}
+{"_e":"metro:bundling:progress","_t":1785898197259,"id":"1","progress":0.7445053288966049,"total":1152,"current":994}
+{"_e":"metro:bundling:progress","_t":1785898197359,"id":"1","progress":0.7722681359044995,"total":1155,"current":1015}
+{"_e":"metro:bundling:progress","_t":1785898197461,"id":"1","progress":0.8022599583828776,"total":1160,"current":1039}
+{"_e":"metro:bundling:progress","_t":1785898197564,"id":"1","progress":0.8090724306515039,"total":1164,"current":1047}
+{"_e":"metro:bundling:progress","_t":1785898197670,"id":"1","progress":0.8194037371986399,"total":1171,"current":1060}
+{"_e":"metro:bundling:progress","_t":1785898197772,"id":"1","progress":0.8433985839233653,"total":1176,"current":1080}
+{"_e":"metro:bundling:progress","_t":1785898197873,"id":"1","progress":0.8554298634478094,"total":1185,"current":1096}
+{"_e":"metro:bundling:progress","_t":1785898197973,"id":"1","progress":0.8634746399672384,"total":1187,"current":1103}
+{"_e":"metro:bundling:progress","_t":1785898198074,"id":"1","progress":0.8673630576107786,"total":1194,"current":1112}
+{"_e":"metro:server_log","_t":1785898198173,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[52811:0805/094956.713893:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:bundling:progress","_t":1785898198174,"id":"1","progress":0.8673630576107786,"total":1194,"current":1112}
+{"_e":"metro:bundling:progress","_t":1785898198174,"id":"1","progress":0.8740220902394364,"total":1198,"current":1120}
+{"_e":"metro:bundling:progress","_t":1785898198277,"id":"1","progress":0.8948562370742581,"total":1203,"current":1138}
+{"_e":"metro:bundling:progress","_t":1785898198380,"id":"1","progress":0.9174789973362476,"total":1210,"current":1159}
+{"_e":"metro:bundling:progress","_t":1785898198510,"id":"1","progress":0.9223605528869718,"total":1212,"current":1164}
+{"_e":"metro:bundling:progress","_t":1785898198610,"id":"1","progress":0.957659570864875,"total":1215,"current":1189}
+{"_e":"metro:bundling:progress","_t":1785898198721,"id":"1","progress":0.9787153042388524,"total":1215,"current":1202}
+{"_e":"metro:bundling:progress","_t":1785898198821,"id":"1","progress":0.9934959522116945,"total":1228,"current":1224}
+{"_e":"metro:bundling:progress","_t":1785898198921,"id":"1","progress":0.996776795005203,"total":1240,"current":1238}
+{"_e":"metro:bundling:progress","_t":1785898199022,"id":"1","progress":0.999,"total":1240,"current":1240}
+{"_e":"metro:bundling:done","_t":1785898199333,"id":"1","total":1240,"ms":13563.773085}
+{"_e":"metro:client_log","_t":1785898204516,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1785898282931,"level":"log","data":["[ReadingScreen] Immediate book URI for streaming:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785898282972,"level":"log","data":["[ReadingScreen] Initiating background download for offline cache..."]}
+{"_e":"metro:client_log","_t":1785898284237,"level":"log","data":["[Perf] WebView shell ready duration: 2208ms"]}
+{"_e":"metro:client_log","_t":1785898284251,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1785898285179,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: [object ProgressEvent]"]}
+{"_e":"metro:client_log","_t":1785898286331,"level":"log","data":["[ReadingScreen] Background download finished:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}

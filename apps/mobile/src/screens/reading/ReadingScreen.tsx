@@ -119,6 +119,32 @@ const EPUB_JS_BRIDGE = `
     canvases: []
   };
 
+  var __bukooChunkBuffer = [];
+
+  window.__bukooResetChunks = function () {
+    __bukooChunkBuffer = [];
+  };
+
+  window.__bukooPushChunk = function (chunk) {
+    __bukooChunkBuffer.push(chunk);
+  };
+
+  window.__bukooLoadPdfFromChunks = function (mimeType) {
+    var fullB64 = __bukooChunkBuffer.join('');
+    __bukooChunkBuffer = [];
+    var payloadUrl = 'data:' + mimeType + ';base64,' + fullB64;
+    console.log('[WebView Diagnostic] Assembled PDF payload length:', payloadUrl.length, 'b64 length:', fullB64.length);
+    window.__bukooLoadPdf(payloadUrl);
+  };
+
+  window.__bukooLoadBookFromChunks = function (mimeType, cachedLocs) {
+    var fullB64 = __bukooChunkBuffer.join('');
+    __bukooChunkBuffer = [];
+    var payloadUrl = 'data:' + mimeType + ';base64,' + fullB64;
+    console.log('[WebView Diagnostic] Assembled EPUB payload length:', payloadUrl.length);
+    window.__bukooLoadBook(payloadUrl, cachedLocs);
+  };
+
   window.__bukooCurrentPageTurnStyle = 'horizontal';
 
   function animatePageTurn(dir, callback) {
@@ -694,10 +720,30 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [pageTurnStyle, setPageTurnStyle] = useState<'horizontal' | 'vertical' | 'animated'>('horizontal');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [offlineCacheWarning, setOfflineCacheWarning] = useState<string | null>(null);
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
   const [jsZipContent, setJsZipContent] = useState<string>(cachedJsZipContent || '');
   const [pdfJsContent, setPdfJsContent] = useState<string>(cachedPdfJsContent || '');
   const [pdfWorkerContent, setPdfWorkerContent] = useState<string>(cachedPdfWorkerContent || '');
+
+  const handleRetryLoad = useCallback(async () => {
+    setLoadError(null);
+    setIsReady(false);
+
+    // Delete local cached file if it exists so we don't re-attempt loading corrupt cache
+    if (bookId) {
+      await bookDownloadService.deleteBook(bookId).catch(() => {});
+    }
+
+    // Force re-resolution of book to stream remotely
+    setLocalFileUri('');
+    const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
+    const remoteUrl = epubUrl || sampleBook?.epubUrl || '';
+    if (remoteUrl) {
+      setLocalFileUri(remoteUrl);
+    }
+  }, [bookId, epubUrl]);
 
   const currentCfi = chapterInfo.cfi;
   const chapterTitle = chapterInfo.title;
@@ -832,7 +878,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 console.log('[ReadingScreen] Background download finished:', downloadedUri);
               }
             })
-            .catch((err) => console.warn('[ReadingScreen] Background download warning:', err));
+            .catch((err) => {
+              console.warn('[ReadingScreen] Background download warning:', err);
+              if (isMounted) {
+                setOfflineCacheWarning('Gagal mengunduh versi offline. Membaca melalui streaming.');
+                setTimeout(() => {
+                  if (isMounted) setOfflineCacheWarning(null);
+                }, 5000);
+              }
+            });
         }
       } catch (e) {
         console.error('[ReadingScreen] Failed to resolve book:', e);
@@ -1037,9 +1091,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           case 'TOGGLE_CONTROLS':
             handleCenterTap();
             break;
-          case 'ERROR':
-            console.warn('[ReadingScreen] epubjs error:', msg.error);
+          case 'ERROR': {
+            console.warn('[ReadingScreen] WebView error:', msg.error);
+            const errStr = msg.error || 'Gagal memuat buku';
+            setLoadError(errStr);
             break;
+          }
           case 'SHELL_READY':
             // Bridge script is ready — try injecting book data if available
             webViewShellReady.current = true;
@@ -1073,31 +1130,62 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     dataInjectTimeRef.current = performance.now();
 
     const isLocalFile = localFileUri.startsWith('file://') || localFileUri.startsWith('/');
-    let payloadUrl = localFileUri;
 
     if (isLocalFile) {
       try {
         const readStart = performance.now();
+        const fileInfo = await FileSystem.getInfoAsync(localFileUri);
+        const diskFileSize = fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0;
+
         const b64 = await FileSystem.readAsStringAsync(localFileUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
         const readDuration = Math.round(performance.now() - readStart);
-        console.log(`[Perf] RN Local disk Base64 read duration: ${readDuration}ms for ${localFileUri}`);
-        
+
+        console.log(`[RN Diagnostic] Disk size: ${diskFileSize} bytes | b64 length: ${b64.length} chars | RN Read duration: ${readDuration}ms`);
+
+        const CHUNK_SIZE = 256 * 1024; // 256KB per chunk
+        const totalChunks = Math.ceil(b64.length / CHUNK_SIZE);
         const mimeType = isPdf ? 'application/pdf' : 'application/epub+zip';
-        payloadUrl = `data:${mimeType};base64,${b64}`;
+
+        console.log(`[Chunking] Transferring ${totalChunks} chunks (${CHUNK_SIZE}B each) to WebView bridge...`);
+
+        // Reset WebView chunk buffer
+        webViewRef.current.injectJavaScript('if (window.__bukooResetChunks) window.__bukooResetChunks(); true;');
+
+        // Push chunks sequentially
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = b64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+          webViewRef.current.injectJavaScript(
+            `if (window.__bukooPushChunk) window.__bukooPushChunk(${JSON.stringify(chunk)}); true;`
+          );
+        }
+
+        // Finalize load from chunk buffer
+        const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
+        if (isPdf) {
+          webViewRef.current.injectJavaScript(
+            `if (window.__bukooLoadPdfFromChunks) window.__bukooLoadPdfFromChunks(${JSON.stringify(mimeType)}); true;`
+          );
+        } else {
+          webViewRef.current.injectJavaScript(
+            `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}); true;`
+          );
+        }
+        return;
       } catch (err) {
-        console.error('[ReadingScreen] Failed to read local file as Base64 in RN:', err);
+        console.error('[ReadingScreen] Failed to read or chunk local file in RN:', err);
       }
     } else {
       console.log('[Perf] Using remote URL for streaming directly:', localFileUri);
     }
 
+    // Remote HTTP/HTTPS URL path
     if (isPdf) {
       webViewRef.current.injectJavaScript(
         `(function(){
           if (window.__bukooLoadPdf) {
-            window.__bukooLoadPdf(${JSON.stringify(payloadUrl)});
+            window.__bukooLoadPdf(${JSON.stringify(localFileUri)});
           }
         })(); true;`
       );
@@ -1105,7 +1193,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
       webViewRef.current.injectJavaScript(
         `(function(){
-          var bookUrl = ${JSON.stringify(payloadUrl)};
+          var bookUrl = ${JSON.stringify(localFileUri)};
           var locs = ${locsArg};
           if (window.__bukooLoadBook) {
             window.__bukooLoadBook(bookUrl, locs);
@@ -1189,9 +1277,39 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         </Animated.View>
       )}
 
+      {/* ── Offline cache warning banner ── */}
+      {offlineCacheWarning && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={18} color="#FFFFFF" />
+          <Text style={styles.offlineBannerText}>{offlineCacheWarning}</Text>
+        </View>
+      )}
+
       {/* ── WebView ── */}
       <View style={styles.webViewContainer} renderToHardwareTextureAndroid={true}>
-        {!epubShellHtml ? (
+        {loadError ? (
+          <View style={[styles.errorContainer, { backgroundColor: themeColors[theme].bg }]}>
+            <Ionicons name="alert-circle-outline" size={56} color={COLORS.ember} />
+            <Text style={[styles.errorTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>
+              Gagal Memuat Buku
+            </Text>
+            <Text style={[styles.errorMessage, { color: themeColors[theme].text + 'BB', fontFamily: FONTS.sansRegular }]}>
+              {loadError.toLowerCase().includes('pdf') || loadError.toLowerCase().includes('zip') || loadError.toLowerCase().includes('invalid') || loadError.toLowerCase().includes('corrupt')
+                ? 'Berkas buku lokal tidak valid atau mengalami kerusakan. Silakan tekan Coba Lagi untuk menghapus cache dan membaca ulang.'
+                : loadError.toLowerCase().includes('network') || loadError.toLowerCase().includes('host') || loadError.toLowerCase().includes('connect') || loadError.toLowerCase().includes('timeout')
+                ? 'Koneksi internet bermasalah. Periksa jaringan Anda dan coba lagi.'
+                : loadError}
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleRetryLoad}
+              accessibilityRole="button"
+              accessibilityLabel="Coba Lagi"
+            >
+              <Text style={styles.retryButtonText}>Coba Lagi</Text>
+            </TouchableOpacity>
+          </View>
+        ) : !epubShellHtml ? (
           <View style={styles.loaderContainer}>
             <Text style={styles.loaderText}>Memuat pembaca buku…</Text>
           </View>
@@ -1209,9 +1327,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             mixedContentMode="always"
             style={styles.webView}
             allowFileAccessFromFileURLs={Platform.OS === 'android'}
-            onError={(e: { nativeEvent: { description: string } }) =>
-              console.error('[ReadingScreen] WebView error:', e.nativeEvent.description)
-            }
+            onError={(e: { nativeEvent: { description: string } }) => {
+              console.error('[ReadingScreen] WebView error:', e.nativeEvent.description);
+              setLoadError(e.nativeEvent.description || 'Gagal memuat WebView');
+            }}
           />
         )}
 
@@ -1873,5 +1992,60 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.ember,
     fontWeight: '600',
+  },
+  offlineBanner: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
+    right: 16,
+    zIndex: 99,
+    backgroundColor: '#DC2626',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  offlineBannerText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontFamily: FONTS.sansMedium,
+    flex: 1,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    zIndex: 10,
+  },
+  errorTitle: {
+    fontSize: 20,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: COLORS.ember,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontFamily: FONTS.sansBold,
   },
 });
