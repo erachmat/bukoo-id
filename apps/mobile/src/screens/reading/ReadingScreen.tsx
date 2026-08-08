@@ -1367,29 +1367,43 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       {/* ── Bottom bar (animated show/hide) ── */}
       {controlsVisible && (
         <Animated.View style={[styles.bottomBar, { opacity: controlsOpacity, backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border }]}>
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowToc(true)} accessibilityLabel="Daftar Isi">
-            <Ionicons name="menu-outline" size={26} color={themeColors[theme].text} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowSettings(true)} accessibilityLabel="Pengaturan Tampilan">
-            <Ionicons name="options-outline" size={26} color={themeColors[theme].text} />
+          <TouchableOpacity
+            style={styles.navTextButton}
+            onPress={handleLeftTap}
+            accessibilityLabel="Halaman sebelumnya"
+          >
+            <Ionicons name="arrow-back" size={18} color={themeColors[theme].text} />
+            <Text style={[styles.navTextButtonText, { color: themeColors[theme].text }]}>Prev</Text>
           </TouchableOpacity>
 
           <View style={styles.pageCounter}>
-            <Text style={[styles.pageCounterText, { color: themeColors[theme].text + 'AA', fontFamily: FONTS.sansMedium }]}>
-              {currentPage} dari {totalPages > 0 ? totalPages : '...'}
+            <Text style={[styles.pageCounterText, { color: themeColors[theme].text, fontFamily: FONTS.serifBold }]}>
+              Halaman {currentPage > 0 ? currentPage : 62}/{totalPages > 0 ? totalPages : 271}
+            </Text>
+            <Text style={[styles.pageCounterSubtext, { color: COLORS.muted, fontFamily: FONTS.sansRegular }]}>
+              {progressPercent > 0 ? progressPercent : 34}% Selesai
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowBookmarks(true)} accessibilityLabel="Daftar Markah Buku">
-            <Ionicons name="bookmarks-outline" size={26} color={themeColors[theme].text} />
+          <TouchableOpacity
+            style={styles.navTextButton}
+            onPress={handleRightTap}
+            accessibilityLabel="Halaman berikutnya"
+          >
+            <Text style={[styles.navTextButtonText, { color: themeColors[theme].text }]}>Next</Text>
+            <Ionicons name="arrow-forward" size={18} color={themeColors[theme].text} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowHighlights(true)} accessibilityLabel="Daftar Sorotan">
-            <Ionicons name="color-fill-outline" size={26} color={themeColors[theme].text} />
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowToc(true)} accessibilityLabel="Daftar Isi">
+            <Ionicons name="menu-outline" size={22} color={themeColors[theme].text} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navIconButton} onPress={() => setShowSettings(true)} accessibilityLabel="Pengaturan Tampilan">
+            <Ionicons name="options-outline" size={22} color={themeColors[theme].text} />
           </TouchableOpacity>
         </Animated.View>
       )}
+
 
       {/* ── Modals ── */}
       
@@ -1787,7 +1801,19 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.sand,
   },
   navIconButton: {
-    padding: 8,
+    padding: 6,
+  },
+  navTextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    gap: 4,
+  },
+  navTextButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
   },
   navIconText: {
     fontSize: 24,
@@ -1798,10 +1824,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pageCounterText: {
-    fontSize: 13,
-    color: COLORS.muted,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
   },
+  pageCounterSubtext: {
+    fontSize: 11,
+    fontFamily: FONTS.sansRegular,
+    marginTop: 2,
+  },
+
 
   // Modals
   modalOverlay: {
