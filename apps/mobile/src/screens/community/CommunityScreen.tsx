@@ -439,13 +439,14 @@ const styles = StyleSheet.create({
   joinButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.ember,
+    backgroundColor: COLORS.gold,
     alignSelf: 'flex-start',
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
   },
+
   joinButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
