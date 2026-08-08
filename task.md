@@ -37,13 +37,17 @@
 
 # Mobile Application UI Redesign
 - `[x]` 1. Implement Mobile UI/UX based on reference design screenshots
-  - `[x]` Update `MainTabs.tsx` and `types.ts` to support 6 bottom navigation tabs (Beranda, Cari, Rak, Ai, Komunitas, Profil).
-  - `[x]` Redesign `HomeScreen.tsx` (greeting, search input, category tags, featured hero banner, trending carousel).
-  - `[x]` Redesign `LibraryScreen.tsx` (header count, active reading card, 3-card stats grid, want-to-read list).
-  - `[x]` Implement `AiCompanionScreen.tsx` (AI header, PLUS badge, reading progress card, AI insight, recommendations).
-  - `[x]` Implement `CommunityScreen.tsx` (active user count, posting button, feed card, Baca Bareng event card).
-  - `[x]` Redesign `SearchScreen.tsx` (Jelajahi header, filter funnel, trending pills, BUKOO original carousel).
-  - `[x]` Implement `SubscriptionScreen.tsx` (Pilih Paket Bukoo, monthly/yearly toggle, tier cards).
-  - `[x]` Pass `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`, and `npm run test --workspace=@bukoo/mobile`.
+  - `[x]` Brand assets & theme tokens (`LogoBukoo.tsx`, `COLORS.ts`).
+  - `[x]` Bottom Navigation Bar (`MainTabs.tsx`) with active gold pill indicators.
+  - `[x]` `HomeScreen.tsx` (greeting, search input pill, category tags, Atomic Habits hero banner, trending carousel).
+  - `[x]` `LibraryScreen.tsx` (header count, active reading card Laut Bercerita, AI companion insight card, 3-card stats summary grid).
+  - `[x]` `AiCompanionScreen.tsx` (AI top bar, PLUS badge, active reading ETA card, 90% progress recommendation list).
+  - `[x]` `ReadingScreen.tsx` Mode Baca (chapter header bar, cream reader surface, bottom pagination bar with Prev/Next buttons).
+  - `[x]` `CommunityScreen.tsx` (active user count, posting button, feed card, Baca Bareng event card).
+  - `[x]` `ProfileScreen.tsx` (brand logo header, avatar frame, quick stats row, weekly streak calendar bar, achievements grid).
+  - `[x]` `SubscriptionScreen.tsx` (Pilih Paket Bukoo, monthly/yearly toggle, tier cards with dynamic pricing).
+  - `[x]` `SearchScreen.tsx` (Jelajahi header, filter funnel, trending pills, BUKOO original carousel).
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`, `npm run test --workspace=@bukoo/mobile` passed cleanly.
+
 
 
