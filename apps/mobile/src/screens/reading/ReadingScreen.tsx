@@ -106,7 +106,7 @@ const EPUB_JS_BRIDGE = `
               reject(new Error('XHR load status ' + xhr.status));
             }
           };
-          xhr.onerror = function (e) { reject(e); };
+          xhr.onerror = function () { reject(new Error('Network or CORS error loading EPUB URL')); };
           xhr.send();
         });
       });
@@ -202,8 +202,42 @@ const EPUB_JS_BRIDGE = `
 
   window.__bukooSetTheme = function (themeObj) {
     window.__bukooCurrentTheme = themeObj;
+    if (themeObj && themeObj.body && themeObj.body.background) {
+      var bg = themeObj.body.background;
+      document.documentElement.style.backgroundColor = bg;
+      document.body.style.backgroundColor = bg;
+      var viewer = document.getElementById('viewer');
+      if (viewer) viewer.style.backgroundColor = bg;
+    }
     if (window.__bukooCurrentRendition && window.__bukooCurrentRendition.themes) {
       try { window.__bukooCurrentRendition.themes.default(themeObj); } catch (e) {}
+    }
+  };
+
+  window.__bukooGoToPage = function (targetPage) {
+    var book = window.__bukooCurrentBook;
+    var rendition = window.__bukooCurrentRendition;
+    if (!book || !rendition) return;
+
+    try {
+      if (book.locations && typeof book.locations.cfiFromLocation === 'function') {
+        var cfi = book.locations.cfiFromLocation(targetPage);
+        if (cfi) {
+          rendition.display(cfi);
+          return;
+        }
+      }
+      if (book.spine && book.spine.items && book.spine.items.length > 0) {
+        var totalLocs = (book.locations && book.locations.total > 0) ? book.locations.total : book.spine.items.length;
+        var ratio = Math.min(Math.max((targetPage - 1) / Math.max(totalLocs - 1, 1), 0), 1);
+        var spineIndex = Math.min(Math.floor(ratio * book.spine.items.length), book.spine.items.length - 1);
+        var item = book.spine.items[spineIndex];
+        if (item && item.href) {
+          rendition.display(item.href);
+        }
+      }
+    } catch (e) {
+      console.error('[WebView] __bukooGoToPage error:', e);
     }
   };
 
@@ -287,8 +321,15 @@ const EPUB_JS_BRIDGE = `
       try {
         var start  = location.start;
         var cfi    = start.cfi || '';
-        var page   = (start.displayed && start.displayed.page) ? start.displayed.page : 0;
-        var total  = (start.displayed && start.displayed.total) ? start.displayed.total : 1;
+        var page   = 1;
+        var total  = (book && book.locations && book.locations.total > 0) ? book.locations.total : 1;
+        if (book && book.locations && book.locations.total > 0) {
+          var loc = book.locations.locationFromCfi(cfi);
+          if (typeof loc === 'number' && loc > 0) page = loc;
+        } else if (start.displayed) {
+          page = start.displayed.page || 1;
+          total = start.displayed.total || 1;
+        }
         var pct    = book ? book.locations.percentageFromCfi(cfi) : 0;
         var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
         var chapterTitle = '';
@@ -528,7 +569,7 @@ const EPUB_JS_BRIDGE = `
         var locEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
         var locDuration = Math.round(locEnd - locStart);
         var totalLoadDuration = Math.round(locEnd - loadStart);
-        var total = book.spine.items ? book.spine.items.length : 0;
+        var total = (book.locations && book.locations.total > 0) ? book.locations.total : (book.spine.items ? book.spine.items.length : 1);
         var savedLocs = book.locations.save();
         sendMessage({ type: 'TOTAL_PAGES', totalPages: total, cachedLocations: savedLocs });
         sendMessage({
@@ -573,7 +614,8 @@ true;
 // EPUB/PDF data is pushed in via injectJavaScript after the shell is ready.
 function buildEpubShellHtml(
   epubJsContent: string,
-  jsZipContent: string
+  jsZipContent: string,
+  bgColor: string = '#F4F1E8'
 ): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -581,11 +623,15 @@ function buildEpubShellHtml(
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>BUKOO Reader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; }
-    #viewer { width: 100%; height: 100%; }
-    #loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #F4F1E8; font-family: -apple-system, sans-serif; font-size: 15px; color: #888; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: ${bgColor}; }
+    #viewer { width: 100%; height: 100%; background: ${bgColor}; }
+    #loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: ${bgColor}; font-family: -apple-system, sans-serif; font-size: 15px; color: #888; }
+  </style>
   <script>${jsZipContent}</script>
   <script>
     if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
@@ -609,6 +655,20 @@ function formatReadingTime(totalSeconds: number): string {
   if (h > 0) return `${h}j ${m}m`;
   if (m > 0) return `${m}m ${s}d`;
   return `${s}d`;
+}
+
+function getCssFontFamily(font: string): string {
+  if (!font) return "'Playfair Display', Georgia, serif";
+  if (font.includes('Playfair') || font.includes('serif') || font === FONTS.serifRegular) {
+    return "'Playfair Display', Georgia, 'Times New Roman', serif";
+  }
+  if (font.includes('DMSans') || font.includes('DM') || font.includes('sans') || font === FONTS.sansRegular) {
+    return "'DM Sans', -apple-system, BlinkMacSystemFont, Roboto, sans-serif";
+  }
+  if (font === 'monospace') {
+    return "monospace, 'Courier New', Courier";
+  }
+  return font;
 }
 
 // ─── Theme Colors Map ─────────────────────────────────────────────────────────
@@ -661,7 +721,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const webViewRef = useRef<WebView>(null);
   const controlsOpacity = useRef(new Animated.Value(1)).current;
-  const controlsHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Performance metrics tracking refs
   const mountTimeRef = useRef(performance.now());
@@ -716,10 +775,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [pageTurnStyle, setPageTurnStyle] = useState<'horizontal' | 'vertical' | 'animated'>('horizontal');
   const [lineHeight, setLineHeight] = useState<number>(1.6);
-  const [marginHorizontal, setMarginHorizontal] = useState<number>(20);
   const [textAlign, setTextAlign] = useState<'left' | 'justify'>('left');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [offlineCacheWarning, setOfflineCacheWarning] = useState<string | null>(null);
+  const [showQuickJump, setShowQuickJump] = useState<boolean>(false);
+  const [localFileUri, setLocalFileUri] = useState<string>('');
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
   const [jsZipContent, setJsZipContent] = useState<string>(cachedJsZipContent || '');
 
@@ -804,11 +864,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     return () => { isMounted = false; };
   }, []);
 
-  // Load the EPUB/PDF file URI so it can be passed directly to the WebView.
-  // Serves the file via direct file:// URL (or remote HTTPS URL if downloading).
-  // Zero Base64 string memory duplication!
-  const [localFileUri, setLocalFileUri] = useState<string>('');
-
   useEffect(() => {
     let isMounted = true;
     const resolveAndLoadBook = async () => {
@@ -822,31 +877,24 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           uri = await bookDownloadService.getLocalBookPath(bookId);
         }
 
-        // IMMEDIATELY set initialUri for streaming — zero blocking delay!
-        const initialUri = uri || remoteUrl;
-        if (initialUri && isMounted) {
-          console.log('[ReadingScreen] Immediate book URI for streaming:', initialUri);
-          setLocalFileUri(initialUri);
-        }
-
-        // Trigger background download for offline caching if not cached yet
-        if (!uri && bookId && remoteUrl) {
-          console.log('[ReadingScreen] Initiating background download for offline cache...');
-          bookDownloadService.downloadBook(bookId, remoteUrl)
-            .then((downloadedUri) => {
-              if (downloadedUri && isMounted) {
-                console.log('[ReadingScreen] Background download finished:', downloadedUri);
-              }
-            })
-            .catch((err) => {
-              console.warn('[ReadingScreen] Background download warning:', err);
-              if (isMounted) {
-                setOfflineCacheWarning('Gagal mengunduh versi offline. Membaca melalui streaming.');
-                setTimeout(() => {
-                  if (isMounted) setOfflineCacheWarning(null);
-                }, 5000);
-              }
-            });
+        if (uri && isMounted) {
+          console.log('[ReadingScreen] Found local cached book path:', uri);
+          setLocalFileUri(uri);
+        } else if (bookId && remoteUrl) {
+          console.log('[ReadingScreen] Downloading book to local storage for robust reading...');
+          try {
+            const downloadedUri = await bookDownloadService.downloadBook(bookId, remoteUrl);
+            if (downloadedUri && isMounted) {
+              console.log('[ReadingScreen] Download finished, setting local URI:', downloadedUri);
+              setLocalFileUri(downloadedUri);
+            }
+          } catch (downloadErr) {
+            console.warn('[ReadingScreen] Download failed, falling back to direct URL:', downloadErr);
+            if (isMounted) {
+              setOfflineCacheWarning('Gagal mengunduh versi offline. Membaca melalui streaming.');
+              setLocalFileUri(remoteUrl);
+            }
+          }
         }
       } catch (e) {
         console.error('[ReadingScreen] Failed to resolve book:', e);
@@ -856,24 +904,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     resolveAndLoadBook();
     return () => { isMounted = false; };
   }, [bookId, localEpubUri, epubUrl]);
-
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const savedSettings = await AsyncStorage.getItem('reader_settings');
-        if (savedSettings) {
-          const parsed = JSON.parse(savedSettings);
-          if (parsed.theme) setTheme(parsed.theme);
-          if (parsed.fontSize) setFontSize(parsed.fontSize);
-          if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
-          if (parsed.pageTurnStyle) setPageTurnStyle(parsed.pageTurnStyle);
-        }
-      } catch (e) {
-        console.error('Failed to load settings', e);
-      }
-    };
-    loadPreferences();
-  }, []);
 
   const loadBookmarks = useCallback(async () => {
     const bms = await bookmarkService.getBookmarks(bookId);
@@ -903,7 +933,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
           if (parsed.pageTurnStyle) setPageTurnStyle(parsed.pageTurnStyle);
           if (parsed.lineHeight) setLineHeight(parsed.lineHeight);
-          if (parsed.marginHorizontal) setMarginHorizontal(parsed.marginHorizontal);
           if (parsed.textAlign) setTextAlign(parsed.textAlign);
         } catch (e) {
           console.warn('[ReadingScreen] Failed to parse stored settings:', e);
@@ -917,11 +946,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     if (!isReady || !webViewRef.current) return;
 
     const timer = setTimeout(() => {
+      const cssFont = getCssFontFamily(fontFamily);
       const themes = {
-        Light: { body: { background: '#FFFFFF', color: '#000000', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
-        Cream: { body: { background: '#F4F1E8', color: '#1B3A2D', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
-        Dark: { body: { background: '#1A1A1A', color: '#CCCCCC', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
-        Sepia: { body: { background: '#F5E6C8', color: '#5B4636', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
+        Light: { body: { background: '#FFFFFF', color: '#000000', 'font-size': `${fontSize}px`, 'font-family': cssFont, 'line-height': `${lineHeight}`, 'padding-left': '20px', 'padding-right': '20px', 'text-align': textAlign } },
+        Cream: { body: { background: '#F4F1E8', color: '#1B3A2D', 'font-size': `${fontSize}px`, 'font-family': cssFont, 'line-height': `${lineHeight}`, 'padding-left': '20px', 'padding-right': '20px', 'text-align': textAlign } },
+        Dark: { body: { background: '#1A1A1A', color: '#CCCCCC', 'font-size': `${fontSize}px`, 'font-family': cssFont, 'line-height': `${lineHeight}`, 'padding-left': '20px', 'padding-right': '20px', 'text-align': textAlign } },
+        Sepia: { body: { background: '#F5E6C8', color: '#5B4636', 'font-size': `${fontSize}px`, 'font-family': cssFont, 'line-height': `${lineHeight}`, 'padding-left': '20px', 'padding-right': '20px', 'text-align': textAlign } },
       };
       
       const themeObj = themes[theme];
@@ -938,13 +968,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         fontFamily,
         pageTurnStyle,
         lineHeight,
-        marginHorizontal,
         textAlign,
       })).catch(console.error);
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, marginHorizontal, textAlign, isReady, currentCfi]);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign, isReady, currentCfi]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
@@ -966,18 +995,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     setShowHighlights(false);
   };
 
-  // ── Auto-hide controls after 3 seconds of inactivity ─────────────────────
-
-  const scheduleHideControls = useCallback(() => {
-    if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
-    controlsHideTimer.current = setTimeout(() => {
-      Animated.timing(controlsOpacity, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }).start(() => setControlsVisible(false));
-    }, 3000);
-  }, [controlsOpacity]);
+  // ── Controls Visibility (Manual toggle via center tap, persistent by default) ──
 
   const showControls = useCallback(() => {
     setControlsVisible(true);
@@ -986,8 +1004,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       duration: 200,
       useNativeDriver: true,
     }).start();
-    scheduleHideControls();
-  }, [controlsOpacity, scheduleHideControls]);
+  }, [controlsOpacity]);
+
+  const hideControls = useCallback(() => {
+    Animated.timing(controlsOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setControlsVisible(false));
+  }, [controlsOpacity]);
 
   const handleLeftTap = useCallback(() => {
     pageTurnStartTimeRef.current = performance.now();
@@ -1001,29 +1026,20 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const handleCenterTap = useCallback(() => {
     if (controlsVisible) {
-      if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
-      Animated.timing(controlsOpacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }).start(() => setControlsVisible(false));
+      hideControls();
     } else {
       showControls();
     }
-  }, [controlsVisible, controlsOpacity, showControls]);
+  }, [controlsVisible, hideControls, showControls]);
 
-  // Suspend auto-hide timer when reader modals are open
+  // Keep controls visible when reader modals are open
   const isAnyModalOpen = showToc || showSettings || showBookmarks || showHighlights || showSearch;
 
   useEffect(() => {
     if (isAnyModalOpen) {
-      if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current);
-      setControlsVisible(true);
-      controlsOpacity.setValue(1);
-    } else {
-      scheduleHideControls();
+      showControls();
     }
-  }, [isAnyModalOpen, scheduleHideControls, controlsOpacity]);
+  }, [isAnyModalOpen, showControls]);
 
   // ── WebView message handler ───────────────────────────────────────────────
 
@@ -1104,8 +1120,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
   // This means the WebView loads ONCE — switching books just calls __bukooLoadBook().
   const epubShellHtml = useMemo(
-    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent) : '',
-    [epubJsContent, jsZipContent]
+    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent, themeColors[theme].bg) : '',
+    [epubJsContent, jsZipContent, theme]
   );
 
   // When everything is ready, inject the EPUB data into the already-loaded WebView
@@ -1309,7 +1325,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             allowFileAccess
             allowUniversalAccessFromFileURLs
             mixedContentMode="always"
-            style={styles.webView}
+            style={[styles.webView, { backgroundColor: themeColors[theme].bg }]}
+            containerStyle={{ backgroundColor: themeColors[theme].bg }}
             allowFileAccessFromFileURLs={Platform.OS === 'android'}
             onError={(e: { nativeEvent: { description: string } }) => {
               console.error('[ReadingScreen] WebView error:', e.nativeEvent.description);
@@ -1348,8 +1365,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         )}
       </View>
 
-      {/* ── Page Scrubber / QuickJump Slider ── */}
-      {controlsVisible && (
+      {/* ── Page Scrubber / QuickJump Slider (toggled via page counter tap) ── */}
+      {controlsVisible && showQuickJump && (
         <QuickJumpSlider
           currentPage={currentPage > 0 ? currentPage : 1}
           totalPages={totalPages > 0 ? totalPages : 1}
@@ -1374,14 +1391,19 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             <Text style={[styles.navTextButtonText, { color: themeColors[theme].text }]}>Prev</Text>
           </TouchableOpacity>
 
-          <View style={styles.pageCounter}>
+          <TouchableOpacity
+            style={styles.pageCounter}
+            onPress={() => setShowQuickJump((prev) => !prev)}
+            activeOpacity={0.7}
+            accessibilityLabel="Buka pengontrol slider halaman"
+          >
             <Text style={[styles.pageCounterText, { color: themeColors[theme].text, fontFamily: FONTS.serifBold }]}>
-              Halaman {currentPage > 0 ? currentPage : 62}/{totalPages > 0 ? totalPages : 271}
+              Halaman {currentPage > 0 ? currentPage : 1}/{totalPages > 0 ? totalPages : 1}
             </Text>
             <Text style={[styles.pageCounterSubtext, { color: COLORS.muted, fontFamily: FONTS.sansRegular }]}>
-              {progressPercent > 0 ? progressPercent : 34}% Selesai
+              {progressPercent > 0 ? progressPercent : 0}% Selesai
             </Text>
-          </View>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.navTextButton}
@@ -1434,8 +1456,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         }}
         lineHeight={lineHeight}
         setLineHeight={setLineHeight}
-        marginHorizontal={marginHorizontal}
-        setMarginHorizontal={setMarginHorizontal}
         textAlign={textAlign}
         setTextAlign={setTextAlign}
       />

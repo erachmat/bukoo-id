@@ -17,8 +17,6 @@ interface SettingsModalProps {
   setTheme: (theme: ReaderTheme) => void;
   lineHeight?: number;
   setLineHeight?: (lh: number) => void;
-  marginHorizontal?: number;
-  setMarginHorizontal?: (m: number) => void;
   textAlign?: 'left' | 'justify';
   setTextAlign?: (align: 'left' | 'justify') => void;
 }
@@ -34,8 +32,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setTheme,
   lineHeight = 1.6,
   setLineHeight,
-  marginHorizontal = 20,
-  setMarginHorizontal,
   textAlign = 'left',
   setTextAlign,
 }) => {
@@ -150,33 +146,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     <Text style={[styles.lhText, lineHeight === lh && styles.lhTextActive]}>
                       {lh}x
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* Margin Horizontal Selector */}
-          {setMarginHorizontal && (
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Margin Samping ({marginHorizontal}px)</Text>
-              <View style={styles.lineHeightRow}>
-                {[
-                  { label: 'Rapat (12px)', value: 12 },
-                  { label: 'Normal (20px)', value: 20 },
-                  { label: 'Longgar (32px)', value: 32 },
-                ].map((m) => (
-                  <TouchableOpacity
-                    key={m.value}
-                    style={[
-                      styles.lhChip,
-                      marginHorizontal === m.value && styles.lhChipActive,
-                    ]}
-                    onPress={() => setMarginHorizontal(m.value)}
-                  >
-                    <Text style={[styles.lhText, marginHorizontal === m.value && styles.lhTextActive]}>
-                      {m.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
