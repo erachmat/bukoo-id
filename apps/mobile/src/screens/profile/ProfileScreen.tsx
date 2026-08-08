@@ -4,14 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useLogout } from '../../hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { api } from '../../services/api';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { LogoBukoo } from '../../assets/logo/LogoBukoo';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const { mutate: logout } = useLogout();
+  const navigation = useNavigation<NavigationProp>();
   const queryClient = useQueryClient();
 
   const [activeModal, setActiveModal] = useState<'account' | 'subscription' | 'preferences' | 'support' | 'about' | null>(null);
@@ -59,7 +66,7 @@ export default function ProfileScreen() {
     if (itemId === 'account') {
       setActiveModal('account');
     } else if (itemId === 'subscription') {
-      setActiveModal('subscription');
+      navigation.navigate('Subscription');
     } else if (itemId === 'preferences') {
       setActiveModal('preferences');
       setNewGoalMinutes(goalsData?.goal?.dailyGoalMinutes?.toString() || '30');
@@ -73,50 +80,148 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Profil</Text>
-        </View>
+        {/* Top Header Bar with Logo & Upgrade CTA */}
+        <View style={styles.topHeaderBar}>
+          <View style={styles.brandContainer}>
+            <LogoBukoo size={24} />
+            <Text style={styles.brandTitleText}>BUKOO</Text>
+          </View>
 
-        <View style={styles.profileCard}>
-          {user?.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarPlaceholderText}>
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </Text>
+          <View style={styles.topHeaderActions}>
+            <View style={styles.plusPill}>
+              <Text style={styles.plusPillText}>PLUS</Text>
             </View>
-          )}
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{user?.name || 'Pengguna BUKOO'}</Text>
-            <Text style={styles.userEmail}>{user?.email || ''}</Text>
-            
-            {user?.subscriptionTier && (
-              <View style={styles.badgeContainer}>
-                <Text style={styles.badgeText}>{user.subscriptionTier}</Text>
-              </View>
-            )}
+            <TouchableOpacity
+              style={styles.upgradeButton}
+              onPress={() => navigation.navigate('Subscription')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.upgradeButtonText}>UPGRADE ↗</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.menuContainer}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity 
-              key={item.id} 
-              style={[styles.menuItem, index !== menuItems.length - 1 && styles.menuDivider]}
-              onPress={() => handleMenuPress(item.id)}
-            >
-              <Ionicons name={item.icon} size={22} color={COLORS.gold} style={{ marginRight: 16 }} />
-              <Text style={styles.menuText}>{item.title}</Text>
-              <Ionicons name="chevron-forward" size={18} color={COLORS.muted} />
+        {/* Profile Avatar & Info Section */}
+        <View style={styles.profileSection}>
+          <View style={styles.avatarBorderFrame}>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
+            ) : (
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80' }}
+                style={styles.avatarImage}
+              />
+            )}
+          </View>
+
+          <Text style={styles.profileNameText}>{user?.name || 'Rizqi Baihaqi Ahmadi'}</Text>
+
+          {/* Quick Stats Row */}
+          <View style={styles.quickStatsRow}>
+            <View style={styles.quickStatItem}>
+              <Text style={styles.quickStatNumber}>47</Text>
+              <Text style={styles.quickStatLabel}>Selesai</Text>
+            </View>
+            <View style={styles.quickStatItem}>
+              <Text style={styles.quickStatNumber}>312</Text>
+              <Text style={styles.quickStatLabel}>jam baca</Text>
+            </View>
+            <View style={styles.quickStatItem}>
+              <Text style={styles.quickStatNumber}>128</Text>
+              <Text style={styles.quickStatLabel}>Follower</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Weekly Streak Calendar Bar */}
+        <View style={styles.streakSection}>
+          <View style={styles.streakHeaderRow}>
+            <TouchableOpacity activeOpacity={0.6}>
+              <Ionicons name="chevron-back" size={20} color={COLORS.gold} />
             </TouchableOpacity>
-          ))}
+            <Text style={styles.streakTitle}>Agustus Week 1</Text>
+            <TouchableOpacity activeOpacity={0.6}>
+              <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Days Header */}
+          <View style={styles.daysHeaderRow}>
+            {['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((day, idx) => (
+              <Text key={`day-label-${idx}`} style={styles.dayLabelText}>{day}</Text>
+            ))}
+          </View>
+
+          {/* Days Pills */}
+          <View style={styles.daysPillRow}>
+            {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => {
+              const isActive = dayNum <= 6;
+              return (
+                <View
+                  key={`day-num-${dayNum}`}
+                  style={[styles.dayPill, isActive ? styles.dayPillActive : styles.dayPillInactive]}
+                >
+                  <Text style={[styles.dayNumText, isActive ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                    {dayNum}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Streak Indicator */}
+          <View style={styles.streakCountRow}>
+            <Ionicons name="flame" size={22} color={COLORS.gold} />
+            <Text style={styles.streakCountNumber}>21</Text>
+            <Text style={styles.streakCountText}>Hari Berturut-turut</Text>
+          </View>
+        </View>
+
+        {/* Pencapaian Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Pencapaian</Text>
+          <View style={styles.statsGrid}>
+            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="book-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>47</Text>
+              <Text style={styles.statTileLabel}>Buku selesai</Text>
+            </View>
+            <View style={[styles.statTile, { backgroundColor: '#0E2238', borderColor: '#1A3350' }]}>
+              <Ionicons name="time-outline" size={22} color="#60A5FA" style={{ marginBottom: 6 }} />
+              <Text style={[styles.statTileNumber, { color: '#60A5FA' }]}>312</Text>
+              <Text style={styles.statTileLabel}>Jam Membaca</Text>
+            </View>
+            <View style={[styles.statTile, { backgroundColor: '#261C12', borderColor: '#3D2A19' }]}>
+              <Ionicons name="flame-outline" size={22} color="#F97316" style={{ marginBottom: 6 }} />
+              <Text style={[styles.statTileNumber, { color: '#F97316' }]}>21</Text>
+              <Text style={styles.statTileLabel}>Hari Streak</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Aktifitas Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Aktifitas</Text>
+          <View style={styles.menuContainer}>
+            {menuItems.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.menuItem, index !== menuItems.length - 1 && styles.menuDivider]}
+                onPress={() => handleMenuPress(item.id)}
+              >
+                <Ionicons name={item.icon} size={22} color={COLORS.gold} style={{ marginRight: 16 }} />
+                <Text style={styles.menuText}>{item.title}</Text>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.muted} />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Keluar</Text>
         </TouchableOpacity>
       </ScrollView>
+
 
       {/* Account Modal */}
       <Modal visible={activeModal === 'account'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
@@ -293,28 +398,228 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
-  header: {
+  topHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
-  title: {
-    fontSize: 34,
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandTitleText: {
+    fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
+    letterSpacing: 1.5,
   },
-  profileCard: {
+  topHeaderActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.forestCard,
-    marginHorizontal: 20,
+    gap: 8,
+  },
+  plusPill: {
+    backgroundColor: '#18372C',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  plusPillText: {
+    color: COLORS.gold,
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  upgradeButton: {
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  profileSection: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 24,
+  },
+  avatarBorderFrame: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    padding: 3,
+    marginBottom: 12,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 42,
+  },
+  profileNameText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 16,
+  },
+  quickStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    backgroundColor: COLORS.forestCard,
+    borderRadius: 16,
+    paddingVertical: 16,
     borderWidth: 1,
     borderColor: COLORS.forestBorder,
   },
+  quickStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  quickStatNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 2,
+  },
+  quickStatLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+  },
+  streakSection: {
+    backgroundColor: COLORS.forestCard,
+    marginHorizontal: 20,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+  },
+  streakHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  streakTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: COLORS.cream,
+  },
+  daysHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+    marginBottom: 8,
+  },
+  dayLabelText: {
+    fontSize: 12,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    width: 32,
+    textAlign: 'center',
+  },
+  daysPillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  dayPill: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayPillActive: {
+    backgroundColor: COLORS.gold,
+  },
+  dayPillInactive: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.forestBorder,
+  },
+  dayNumText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  dayNumTextActive: {
+    color: '#FFFFFF',
+  },
+  dayNumTextInactive: {
+    color: COLORS.muted,
+  },
+  streakCountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.forestBorder,
+  },
+  streakCountNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.gold,
+  },
+  streakCountText: {
+    fontSize: 13,
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.cream,
+  },
+  sectionContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 12,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statTile: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  statTileNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    marginBottom: 2,
+  },
+  statTileLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+  },
+
   avatar: {
     width: 70,
     height: 70,
