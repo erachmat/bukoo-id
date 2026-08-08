@@ -169,16 +169,16 @@ export default function LibraryScreen() {
           </View>
 
           {/* Card 2: Jam Membaca */}
-          <View style={[styles.statCard, { backgroundColor: '#0E2238', borderColor: '#1A3350' }]}>
-            <Ionicons name="time-outline" size={24} color="#60A5FA" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#60A5FA' }]}>312</Text>
+          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+            <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>312</Text>
             <Text style={styles.statLabel}>Jam Membaca</Text>
           </View>
 
           {/* Card 3: Hari Streak */}
-          <View style={[styles.statCard, { backgroundColor: '#261C12', borderColor: '#3D2A19' }]}>
-            <Ionicons name="flame-outline" size={24} color="#F97316" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#F97316' }]}>21</Text>
+          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+            <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>21</Text>
             <Text style={styles.statLabel}>Hari Streak</Text>
           </View>
         </View>
@@ -208,14 +208,16 @@ export default function LibraryScreen() {
                 params: { bookId: item.id }
               } as never)}
             >
-              <View style={{ position: 'relative' }}>
-                <Image source={{ uri: item.coverUrl }} style={styles.wantBookCover} />
+              <View style={styles.coverWrapper}>
+                <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
                 {downloadedBookIds.includes(item.id) && (
                   <View style={styles.downloadBadge}>
                     <Text style={styles.downloadBadgeText}>⬇️</Text>
                   </View>
                 )}
               </View>
+              <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
             </TouchableOpacity>
           )}
         />
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
@@ -467,7 +469,7 @@ const styles = StyleSheet.create({
   },
   wantListContent: {
     paddingHorizontal: 20,
-    gap: 16,
+    gap: 8,
   },
   wantBookCard: {
     width: 150,
@@ -477,6 +479,28 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 12,
     backgroundColor: COLORS.forestCard,
+  },
+  coverWrapper: {
+    position: 'relative',
+    marginBottom: 10,
+  },
+  bookCover: {
+    width: 150,
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: COLORS.forestCard,
+  },
+  bookTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 2,
+  },
+  bookAuthor: {
+    fontSize: 13,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
   },
   downloadBadge: {
     position: 'absolute',

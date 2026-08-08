@@ -84,6 +84,20 @@ class HighlightService {
       return [];
     }
   }
+
+  async updateNote(id: number, note: string): Promise<void> {
+    await this.init();
+    if (!this.db) return;
+
+    try {
+      await this.db.runAsync(
+        'UPDATE highlights SET note = ? WHERE id = ?',
+        [note, id]
+      );
+    } catch (e) {
+      console.error('[HighlightService] Error updating note', e);
+    }
+  }
 }
 
 export const highlightService = new HighlightService();

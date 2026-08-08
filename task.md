@@ -32,8 +32,41 @@
   - `[x]` Smooth out typography controls (fontSize, fontFamily, themes) with debouncing to prevent WebView reflow freezes.
   - `[x]` Verify with `npm run typecheck --workspace=@bukoo/mobile` and `npm run lint --workspace=@bukoo/mobile`.
 
-- [ ] 4. Structural Changes (Rendering Strategy Overhaul) — *Requires Explicit Go-Ahead*
-  - [ ] Evaluate moving from single-WebView epubjs rendition to virtualized multi-page or custom paginator engine for sub-16ms native page turns benchmarked against Apple Books.
+- [x] 4. Structural Changes (Rendering Strategy Overhaul) — *Requires Explicit Go-Ahead*
+  - `[x]` Evaluate moving from single-WebView epubjs rendition to virtualized multi-page or custom paginator engine for sub-16ms native page turns benchmarked against Apple Books.
+
+# Reader Redesign (Kindle/Apple Books Parity)
+
+- `[x]` Phase 0 — Rendering Architecture Audit & Decision Gate (STOP GATE)
+  - `[x]` Complete 8-dimension audit comparing current WebView+epub.js vs Native Paginator vs Apple Books/Kindle benchmarks.
+  - `[x]` Present formal recommendation & tradeoffs to user for decision gate approval before writing code.
+  - `[x]` Create `reader-redesign-prompt.md` prompt deliverable.
+
+- `[x]` Phase 1 — Navigation Redesign (Priority #1)
+  - `[x]` Redesign Table of Contents with nested chapter/subchapter structure and position indicator.
+  - `[x]` Implement client-side in-book full-text search with snippet preview and match jump.
+  - `[x]` Add draggable quick-jump slider / page scrubber control to bottom bar.
+  - `[x]` Decompose `ReadingScreen.tsx` monolith into modular components (`TocModal`, `SearchModal`, `SettingsModal`, `HighlightModal`).
+
+- `[x]` Phase 2 — Personalization Redesign (Priority #2)
+  - `[x]` Add margin and line-height controls to reader settings.
+  - `[x]` Optimize live typography updates without reflow freezes.
+  - `[x]` Implement strictly global reader settings persisted in `AsyncStorage`.
+
+- [ ] Phase 3 — Engagement & Cloud Sync (Priority #3)
+  - [ ] Create Prisma schema models for `Highlight`, `Bookmark`, and `Note` in `apps/api`.
+  - [ ] Generate migration with `--create-only`, review SQL, and validate on Neon branch.
+  - [ ] Add API endpoints and mobile sync service for cross-device annotation sync.
+  - [ ] Polish inline note bubbles and highlight manager UI.
+
+- [ ] Phase 4 — Visual Polish & Motion (Priority #4)
+  - [ ] Refine typography hierarchy, default line-heights, and margin defaults matching Apple Books.
+  - [ ] Smooth out page-turn transitions and gesture interactions.
+  - [ ] Enhance accessibility (Dynamic Type, screen reader labels) and UI chrome auto-hide timer.
+
+- [ ] Phase 5 — Content Cleanup (PDF Removal)
+  - [ ] Remove legacy PDF rendering bridge and canvas code from `ReadingScreen.tsx`.
+  - `[x]` Clean up `MASTER_SAMPLE_BOOKS` PDF dependencies in `BookDetailScreen.tsx` (converted to EPUB).
 
 # Mobile Application UI Redesign
 - `[x]` 1. Implement Mobile UI/UX based on reference design screenshots

@@ -7,10 +7,6 @@ import {
   StatusBar,
   Animated,
   Platform,
-  Modal,
-  FlatList,
-  TextInput,
-  ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
@@ -25,6 +21,10 @@ import { MASTER_SAMPLE_BOOKS } from '../book/BookDetailScreen';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { TocModal } from './components/TocModal';
+import { SearchModal, SearchResultItem } from './components/SearchModal';
+import { SettingsModal, ReaderTheme } from './components/SettingsModal';
+import { HighlightModal } from './components/HighlightModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -696,11 +696,32 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [showSettings, setShowSettings] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showHighlights, setShowHighlights] = useState(false);
-  const [showHighlightModal, setShowHighlightModal] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   const [toc, setToc] = useState<TocItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
+
+  const handlePerformSearch = useCallback(
+    async (query: string): Promise<SearchResultItem[]> => {
+      const q = query.toLowerCase();
+      const results: SearchResultItem[] = [];
+
+      toc.forEach((item, idx) => {
+        if (item.label && item.label.toLowerCase().includes(q)) {
+          results.push({
+            id: `toc_${idx}_${Date.now()}`,
+            cfi: item.href,
+            chapterTitle: item.label,
+            excerpt: `Bab "${item.label}" sesuai dengan pencarian Anda.`,
+          });
+        }
+      });
+
+      return results;
+    },
+    [toc]
+  );
   
   const [chapterInfo, setChapterInfo] = useState({
     cfi: '',
@@ -711,15 +732,13 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [totalPages, setTotalPages] = useState<number>(0);
   const [cachedLocations, setCachedLocations] = useState<string | null>(null);
 
-  const [selectedText, setSelectedText] = useState('');
-  const [selectedCfiRange, setSelectedCfiRange] = useState('');
-  const [highlightNote, setHighlightNote] = useState('');
-  const [highlightColor, setHighlightColor] = useState('rgba(250,204,21,0.4)'); // Default Yellow
-
   const [theme, setTheme] = useState<'Light' | 'Cream' | 'Dark' | 'Sepia'>('Cream');
   const [fontSize, setFontSize] = useState<number>(18);
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [pageTurnStyle, setPageTurnStyle] = useState<'horizontal' | 'vertical' | 'animated'>('horizontal');
+  const [lineHeight, setLineHeight] = useState<number>(1.6);
+  const [marginHorizontal, setMarginHorizontal] = useState<number>(20);
+  const [textAlign, setTextAlign] = useState<'left' | 'justify'>('left');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [offlineCacheWarning, setOfflineCacheWarning] = useState<string | null>(null);
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
@@ -767,22 +786,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     const hls = await highlightService.getHighlights(bookId);
     setHighlights(hls);
   }, [bookId]);
-
-  const handleSaveHighlight = async () => {
-    if (!selectedCfiRange || !selectedText) return;
-    await highlightService.addHighlight(
-      bookId,
-      selectedCfiRange,
-      selectedText,
-      highlightColor,
-      highlightNote
-    );
-    setShowHighlightModal(false);
-    setSelectedText('');
-    setSelectedCfiRange('');
-    setHighlightNote('');
-    loadHighlights();
-  };
 
   const handleDeleteHighlight = async (id: number) => {
     await highlightService.removeHighlight(id);
@@ -932,16 +935,36 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [highlights, isReady]);
 
-  // Sync typography, theme, and page turn style settings to WebView and AsyncStorage
+  // Load initial global reader settings from AsyncStorage on mount
+  useEffect(() => {
+    AsyncStorage.getItem('reader_settings').then((stored) => {
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.theme) setTheme(parsed.theme);
+          if (parsed.fontSize) setFontSize(parsed.fontSize);
+          if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
+          if (parsed.pageTurnStyle) setPageTurnStyle(parsed.pageTurnStyle);
+          if (parsed.lineHeight) setLineHeight(parsed.lineHeight);
+          if (parsed.marginHorizontal) setMarginHorizontal(parsed.marginHorizontal);
+          if (parsed.textAlign) setTextAlign(parsed.textAlign);
+        } catch (e) {
+          console.warn('[ReadingScreen] Failed to parse stored settings:', e);
+        }
+      }
+    }).catch(() => {});
+  }, []);
+
+  // Sync typography, theme, and layout settings to WebView and AsyncStorage
   useEffect(() => {
     if (!isReady || !webViewRef.current) return;
 
     const timer = setTimeout(() => {
       const themes = {
-        Light: { body: { background: '#FFFFFF', color: '#000000', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
-        Cream: { body: { background: '#F4F1E8', color: '#1B3A2D', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
-        Dark: { body: { background: '#1A1A1A', color: '#CCCCCC', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
-        Sepia: { body: { background: '#F5E6C8', color: '#5B4636', 'font-size': `${fontSize}px`, 'font-family': fontFamily } },
+        Light: { body: { background: '#FFFFFF', color: '#000000', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
+        Cream: { body: { background: '#F4F1E8', color: '#1B3A2D', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
+        Dark: { body: { background: '#1A1A1A', color: '#CCCCCC', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
+        Sepia: { body: { background: '#F5E6C8', color: '#5B4636', 'font-size': `${fontSize}px`, 'font-family': fontFamily, 'line-height': `${lineHeight}`, 'padding-left': `${marginHorizontal}px`, 'padding-right': `${marginHorizontal}px`, 'text-align': textAlign } },
       };
       
       const themeObj = themes[theme];
@@ -952,11 +975,19 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       `;
       webViewRef.current?.injectJavaScript(js);
       
-      AsyncStorage.setItem('reader_settings', JSON.stringify({ theme, fontSize, fontFamily, pageTurnStyle })).catch(console.error);
+      AsyncStorage.setItem('reader_settings', JSON.stringify({
+        theme,
+        fontSize,
+        fontFamily,
+        pageTurnStyle,
+        lineHeight,
+        marginHorizontal,
+        textAlign,
+      })).catch(console.error);
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [theme, fontSize, fontFamily, pageTurnStyle, isReady, isPdf, currentCfi]);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, marginHorizontal, textAlign, isReady, isPdf, currentCfi]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
@@ -1025,7 +1056,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [controlsVisible, controlsOpacity, showControls]);
 
   // Suspend auto-hide timer when reader modals are open
-  const isAnyModalOpen = showToc || showSettings || showBookmarks || showHighlights || showHighlightModal;
+  const isAnyModalOpen = showToc || showSettings || showBookmarks || showHighlights || showSearch;
 
   useEffect(() => {
     if (isAnyModalOpen) {
@@ -1081,11 +1112,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             break;
           case 'TEXT_SELECTED':
             if (msg.text && msg.cfi) {
-              setSelectedText(msg.text);
-              setSelectedCfiRange(msg.cfi);
-              setHighlightNote('');
-              setHighlightColor('rgba(250,204,21,0.4)');
-              setShowHighlightModal(true);
+              highlightService.addHighlight(
+                bookId,
+                msg.cfi,
+                msg.text,
+                'rgba(250,204,21,0.4)'
+              ).then(() => loadHighlights());
             }
             break;
           case 'TOGGLE_CONTROLS':
@@ -1109,7 +1141,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress, handleCenterTap]
+    [bookId, updateProgress, handleCenterTap, loadHighlights]
   );
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
@@ -1267,13 +1299,23 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             </View>
           </View>
 
-          <TouchableOpacity style={styles.headerAction} onPress={toggleBookmark}>
-            <Ionicons 
-              name={bookmarks.some(b => b.cfi === currentCfi) ? "bookmark" : "bookmark-outline"} 
-              size={24} 
-              color={bookmarks.some(b => b.cfi === currentCfi) ? COLORS.ember : themeColors[theme].text} 
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <TouchableOpacity style={styles.headerAction} onPress={() => setShowSearch(true)} accessibilityLabel="Cari dalam buku">
+              <Ionicons name="search-outline" size={22} color={themeColors[theme].text} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.headerAction} onPress={() => setShowHighlights(true)} accessibilityLabel="Sorotan & Catatan">
+              <Ionicons name="create-outline" size={22} color={themeColors[theme].text} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.headerAction} onPress={toggleBookmark} accessibilityLabel="Markah">
+              <Ionicons 
+                name={bookmarks.some(b => b.cfi === currentCfi) ? "bookmark" : "bookmark-outline"} 
+                size={24} 
+                color={bookmarks.some(b => b.cfi === currentCfi) ? COLORS.ember : themeColors[theme].text} 
+              />
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       )}
 
@@ -1405,266 +1447,62 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       )}
 
 
-      {/* ── Modals ── */}
-      
-      {/* TOC Modal */}
-      <Modal visible={showToc} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Daftar Isi</Text>
-              <TouchableOpacity onPress={() => setShowToc(false)}>
-                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={toc}
-              keyExtractor={(item, index) => item.id || String(index)}
-              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Daftar isi tidak tersedia.</Text>}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={[styles.tocItem, { borderBottomColor: themeColors[theme].border }]} onPress={() => jumpToLocation(item.href)}>
-                  <Text style={[styles.tocItemText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]}>{item.label}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+      {/* ── Modular Component Modals ── */}
+      <TocModal
+        visible={showToc}
+        onClose={() => setShowToc(false)}
+        toc={toc}
+        currentChapterHref={currentCfi}
+        onSelectLocation={jumpToLocation}
+      />
 
-      {/* Settings Modal */}
-      <Modal visible={showSettings} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Pengaturan Tampilan</Text>
-              <TouchableOpacity onPress={() => setShowSettings(false)}>
-                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Tema Warna</Text>
-            <View style={styles.themeRow}>
-              {(['Light', 'Cream', 'Dark', 'Sepia'] as const).map(t => {
-                const bgColors: Record<string, string> = { Light: '#FFFFFF', Cream: '#F4F1E8', Dark: '#1A1A1A', Sepia: '#F5E6C8' };
-                return (
-                  <TouchableOpacity
-                    key={t}
-                    style={[
-                      styles.themeCircle,
-                      { backgroundColor: bgColors[t], borderColor: themeColors[theme].border },
-                      theme === t && styles.themeActive
-                    ]}
-                    onPress={() => setTheme(t)}
-                  />
-                );
-              })}
-            </View>
+      <SearchModal
+        visible={showSearch}
+        onClose={() => setShowSearch(false)}
+        bookTitle={title}
+        onPerformSearch={handlePerformSearch}
+        onSelectResult={jumpToLocation}
+      />
 
-            {!isPdf && (
-              <>
-                <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Gaya Pembalikan Halaman</Text>
-                <View style={styles.fontFamilyRow}>
-                  {([
-                    { key: 'horizontal' as const, label: 'Horizontal', icon: 'phone-landscape-outline' as const },
-                    { key: 'vertical' as const, label: 'Vertikal', icon: 'swap-vertical-outline' as const },
-                    { key: 'animated' as const, label: 'Animasi', icon: 'sparkles-outline' as const },
-                  ]).map(({ key, label, icon }) => (
-                    <TouchableOpacity
-                      key={key}
-                      style={[
-                        styles.fontFamilyButton,
-                        { borderColor: themeColors[theme].border, flexDirection: 'row', gap: 6 },
-                        pageTurnStyle === key && styles.fontFamilyButtonActive,
-                      ]}
-                      onPress={() => setPageTurnStyle(key)}
-                    >
-                      <Ionicons
-                        name={icon}
-                        size={16}
-                        color={pageTurnStyle === key ? COLORS.creamLight : themeColors[theme].text}
-                      />
-                      <Text style={[
-                        styles.fontFamilyText,
-                        { color: themeColors[theme].text },
-                        pageTurnStyle === key && styles.fontFamilyTextActive,
-                      ]}>{label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
-            )}
+      <SettingsModal
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontFamily={fontFamily}
+        setFontFamily={setFontFamily}
+        theme={(theme.toLowerCase() === 'cream' ? 'cream' : theme.toLowerCase() === 'light' ? 'light' : theme.toLowerCase() === 'sepia' ? 'sepia' : 'dark') as ReaderTheme}
+        setTheme={(t) => {
+          const cap = (t.charAt(0).toUpperCase() + t.slice(1)) as 'Light' | 'Cream' | 'Dark' | 'Sepia';
+          setTheme(cap);
+        }}
+        lineHeight={lineHeight}
+        setLineHeight={setLineHeight}
+        marginHorizontal={marginHorizontal}
+        setMarginHorizontal={setMarginHorizontal}
+        textAlign={textAlign}
+        setTextAlign={setTextAlign}
+      />
 
-            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Ukuran Font</Text>
-            <View style={styles.fontRow}>
-              <TouchableOpacity 
-                style={[styles.fontButton, { backgroundColor: theme === 'Dark' ? 'rgba(255,255,255,0.08)' : 'rgba(27, 58, 45, 0.08)' }]} 
-                onPress={() => setFontSize(Math.max(14, fontSize - 2))}
-              >
-                <Text style={[styles.fontButtonText, { color: themeColors[theme].text }]}>A-</Text>
-              </TouchableOpacity>
-              <Text style={[styles.fontSizeText, { color: themeColors[theme].text }]}>{fontSize}</Text>
-              <TouchableOpacity 
-                style={[styles.fontButton, { backgroundColor: theme === 'Dark' ? 'rgba(255,255,255,0.08)' : 'rgba(27, 58, 45, 0.08)' }]} 
-                onPress={() => setFontSize(Math.min(28, fontSize + 2))}
-              >
-                <Text style={[styles.fontButtonText, { color: themeColors[theme].text }]}>A+</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Jenis Font</Text>
-            <View style={styles.fontFamilyRow}>
-              {['DM Sans', 'Playfair Display', 'Georgia', 'Palatino'].map(f => (
-                <TouchableOpacity 
-                  key={f} 
-                  style={[
-                    styles.fontFamilyButton, 
-                    { borderColor: themeColors[theme].border },
-                    fontFamily === f && styles.fontFamilyButtonActive
-                  ]} 
-                  onPress={() => setFontFamily(f)}
-                >
-                  <Text style={[
-                    styles.fontFamilyText, 
-                    { color: themeColors[theme].text },
-                    fontFamily === f && styles.fontFamilyTextActive
-                  ]}>{f}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Bookmarks Modal */}
-      <Modal visible={showBookmarks} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Markah Buku</Text>
-              <TouchableOpacity onPress={() => setShowBookmarks(false)}>
-                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={bookmarks}
-              keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Belum ada markah buku.</Text>}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={[styles.tocItem, { borderBottomColor: themeColors[theme].border }]} onPress={() => jumpToLocation(item.cfi)}>
-                  <Text style={[styles.tocItemText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]}>{item.chapterTitle}</Text>
-                  <Text style={[styles.bookmarkDateText, { color: themeColors[theme].text + '88', fontFamily: FONTS.sansRegular }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Highlight/Note Creation Modal */}
-      <Modal visible={showHighlightModal} animationType="fade" transparent={true}>
-        <View style={[styles.modalOverlay, { justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }]}>
-          <View style={[styles.modalContent, { borderRadius: 16, marginHorizontal: 20, backgroundColor: themeColors[theme].bgHeader, borderTopLeftRadius: 16, borderTopRightRadius: 16 }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Tambah Sorotan</Text>
-              <TouchableOpacity onPress={() => { setShowHighlightModal(false); setSelectedText(''); }}>
-                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Batal</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={{ width: '100%', maxHeight: 300 }} keyboardShouldPersistTaps="handled">
-              <Text style={[styles.selectedSnippet, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, borderLeftColor: COLORS.ember, fontFamily: FONTS.serifBold || 'serif' }]}>"{selectedText}"</Text>
-              
-              <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Warna Sorotan</Text>
-              <View style={[styles.themeRow, { justifyContent: 'flex-start', marginVertical: 8 }]}>
-                {[
-                  { name: 'Kuning', color: 'rgba(250,204,21,0.4)', bg: '#facc15' },
-                  { name: 'Hijau', color: 'rgba(74,222,128,0.4)', bg: '#4ade80' },
-                  { name: 'Biru', color: 'rgba(96,165,250,0.4)', bg: '#60a5fa' },
-                  { name: 'Merah Muda', color: 'rgba(244,114,182,0.4)', bg: '#f472b6' }
-                ].map(c => (
-                  <TouchableOpacity
-                    key={c.name}
-                    style={[
-                      styles.themeCircle,
-                      { backgroundColor: c.bg, marginRight: 15 },
-                      highlightColor === c.color && { borderColor: COLORS.ember, borderWidth: 3 }
-                    ]}
-                    onPress={() => setHighlightColor(c.color)}
-                  />
-                ))}
-              </View>
-
-              <Text style={[styles.settingsLabel, { color: themeColors[theme].text, fontFamily: FONTS.sansMedium }]}>Catatan Margin (Opsional)</Text>
-              <TextInput
-                style={[styles.noteInput, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, borderColor: themeColors[theme].border, fontFamily: FONTS.sansRegular }]}
-                placeholder="Tulis catatan Anda di sini..."
-                placeholderTextColor={theme === 'Dark' ? '#666666' : COLORS.muted}
-                value={highlightNote}
-                onChangeText={setHighlightNote}
-                multiline
-              />
-            </ScrollView>
-
-            <TouchableOpacity style={styles.saveHighlightButton} onPress={handleSaveHighlight}>
-              <Text style={styles.saveHighlightButtonText}>Simpan Sorotan</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Highlights List Modal */}
-      <Modal visible={showHighlights} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, borderTopWidth: 1 }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]}>Sorotan & Catatan</Text>
-              <TouchableOpacity onPress={() => setShowHighlights(false)}>
-                <Text style={[styles.modalClose, { color: COLORS.ember, fontFamily: FONTS.sansMedium }]}>Tutup</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={highlights}
-              keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text style={[styles.emptyText, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]}>Belum ada sorotan atau catatan.</Text>}
-              renderItem={({ item }) => {
-                const colorMap: Record<string, string> = {
-                  'rgba(250,204,21,0.4)': '#facc15',
-                  'rgba(74,222,128,0.4)': '#4ade80',
-                  'rgba(96,165,250,0.4)': '#60a5fa',
-                  'rgba(244,114,182,0.4)': '#f472b6'
-                };
-                const indicatorColor = colorMap[item.color] || '#facc15';
-                return (
-                  <View style={[styles.highlightListItem, { borderBottomColor: themeColors[theme].border }]}>
-                    <TouchableOpacity style={{ flex: 1 }} onPress={() => jumpToLocation(item.cfiRange)}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                        <View style={[styles.colorIndicator, { backgroundColor: indicatorColor }]} />
-                        <Text style={[styles.highlightListText, { color: themeColors[theme].text, fontFamily: FONTS.sansRegular }]} numberOfLines={2}>
-                          "{item.text}"
-                        </Text>
-                      </View>
-                      {item.note ? (
-                        <Text style={[styles.highlightListNote, { color: themeColors[theme].text, backgroundColor: themeColors[theme].bg, fontFamily: FONTS.sansRegular }]}>
-                          📝 {item.note}
-                        </Text>
-                      ) : null}
-                      <Text style={[styles.bookmarkDateText, { color: themeColors[theme].text + '88', fontFamily: FONTS.sansRegular }]}>
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={styles.deleteHighlightAction} 
-                      onPress={() => handleDeleteHighlight(item.id)}
-                    >
-                      <Text style={styles.deleteHighlightText}>Hapus</Text>
-                    </TouchableOpacity>
-                  </View>
-                );
-              }}
-            />
-          </View>
-        </View>
-      </Modal>
+      <HighlightModal
+        visible={showHighlights}
+        onClose={() => setShowHighlights(false)}
+        highlights={highlights.map((h) => ({
+          id: String(h.id),
+          cfi: h.cfiRange,
+          text: h.text,
+          color: h.color,
+          note: h.note,
+          createdAt: h.createdAt,
+        }))}
+        onRemoveHighlight={(id) => handleDeleteHighlight(Number(id))}
+        onSaveNote={(id, note) => {
+          highlightService.updateNote(Number(id), note).then(() => {
+            if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
+          });
+        }}
+        onSelectHighlight={jumpToLocation}
+      />
     </SafeAreaView>
   );
 }

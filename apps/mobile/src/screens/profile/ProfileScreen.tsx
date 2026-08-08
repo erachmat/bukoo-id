@@ -83,8 +83,7 @@ export default function ProfileScreen() {
         {/* Top Header Bar with Logo & Upgrade CTA */}
         <View style={styles.topHeaderBar}>
           <View style={styles.brandContainer}>
-            <LogoBukoo size={24} />
-            <Text style={styles.brandTitleText}>BUKOO</Text>
+            <LogoBukoo size={30} />
           </View>
 
           <View style={styles.topHeaderActions}>
@@ -186,14 +185,14 @@ export default function ProfileScreen() {
               <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>47</Text>
               <Text style={styles.statTileLabel}>Buku selesai</Text>
             </View>
-            <View style={[styles.statTile, { backgroundColor: '#0E2238', borderColor: '#1A3350' }]}>
-              <Ionicons name="time-outline" size={22} color="#60A5FA" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#60A5FA' }]}>312</Text>
+            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="time-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>312</Text>
               <Text style={styles.statTileLabel}>Jam Membaca</Text>
             </View>
-            <View style={[styles.statTile, { backgroundColor: '#261C12', borderColor: '#3D2A19' }]}>
-              <Ionicons name="flame-outline" size={22} color="#F97316" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#F97316' }]}>21</Text>
+            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="flame-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>21</Text>
               <Text style={styles.statTileLabel}>Hari Streak</Text>
             </View>
           </View>
@@ -201,7 +200,7 @@ export default function ProfileScreen() {
 
         {/* Aktifitas Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Aktifitas</Text>
+          <Text style={styles.sectionTitle}>Aktivitas</Text>
           <View style={styles.menuContainer}>
             {menuItems.map((item, index) => (
               <TouchableOpacity
@@ -294,7 +293,7 @@ export default function ProfileScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Preferensi Target Bacaan</Text>
             <Text style={styles.modalSubtitle}>Sesuaikan target membaca harian Anda (menit):</Text>
-            
+
             <View style={styles.presetsRow}>
               {[10, 15, 30, 45, 60].map((mins) => (
                 <TouchableOpacity
@@ -320,8 +319,8 @@ export default function ProfileScreen() {
               <TouchableOpacity style={styles.cancelButton} onPress={() => setActiveModal(null)}>
                 <Text style={styles.cancelButtonText}>Batal</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.saveButton} 
+              <TouchableOpacity
+                style={styles.saveButton}
                 disabled={editGoalMutation.isPending}
                 onPress={() => {
                   const mins = parseInt(newGoalMinutes, 10);
@@ -589,7 +588,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 6,
   },
   sectionTitle: {
     fontSize: 20,
@@ -607,6 +606,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
     borderWidth: 1,
+    alignItems: 'center',
   },
   statTileNumber: {
     fontSize: 20,
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   statTileLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
   },
@@ -672,7 +672,6 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     backgroundColor: COLORS.forestCard,
-    marginHorizontal: 20,
     borderRadius: 16,
     marginBottom: 30,
     borderWidth: 1,
@@ -706,7 +705,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.forestBorder,
-    marginBottom: 40,
+    marginBottom: 48,
   },
   logoutText: {
     fontSize: 16,

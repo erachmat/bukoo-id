@@ -1,119 +1,284 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = SCREEN_WIDTH * 0.78;
+const CARD_MARGIN = 14;
+
+interface FeatureItem {
+  text: string;
+  included: boolean;
+}
+
+interface Plan {
+  id: string;
+  name: string;
+  subtitle?: string;
+  isPopular?: boolean;
+  isDark?: boolean;
+  priceMonthly: string;
+  priceYearly: string;
+  perLabel: string;
+  features: FeatureItem[];
+}
+
+const PLANS: Plan[] = [
+  {
+    id: 'plus',
+    name: 'PLUS',
+    isPopular: true,
+    isDark: true,
+    priceMonthly: '49.900',
+    priceYearly: '499.000',
+    perLabel: 'Per Bulan',
+    features: [
+      { text: '2000 + judul + Audiobook', included: true },
+      { text: 'Audiobook Indonesia', included: true },
+      { text: 'Offline Unlimited', included: true },
+      { text: 'AI Rekomendasi', included: true },
+      { text: 'Komunitas penuh', included: true },
+      { text: 'Buku Internasional Terbaru', included: false },
+    ],
+  },
+  {
+    id: 'baca',
+    name: 'BACA',
+    isDark: false,
+    priceMonthly: '29.900',
+    priceYearly: '289.000',
+    perLabel: 'Per Bulan',
+    features: [
+      { text: '2.000+ judul kurasi', included: true },
+      { text: 'Koleksi lokal penuh', included: true },
+      { text: 'Offline 10 judul', included: true },
+      { text: 'Tanpa iklan', included: true },
+      { text: 'Audiobook', included: false },
+      { text: 'AI Companion', included: false },
+    ],
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    isDark: false,
+    priceMonthly: '79.900',
+    priceYearly: '799.000',
+    perLabel: 'Per Bulan',
+    features: [
+      { text: 'Seluruh katalog global', included: true },
+      { text: '3 kredit buku terbaru', included: true },
+      { text: 'AI Companion penuh', included: true },
+      { text: 'BUKOO Originals', included: true },
+      { text: 'Priority support', included: true },
+      { text: 'Majalah & jurnal', included: true },
+    ],
+  },
+  {
+    id: 'keluarga',
+    name: 'Keluarga',
+    isDark: false,
+    priceMonthly: '99.900',
+    priceYearly: '959.000',
+    perLabel: 'Per Bulan',
+    features: [
+      { text: 'Semua fitur Premium', included: true },
+      { text: '5 profil terpisah', included: true },
+      { text: 'Konten anak & parental control', included: true },
+      { text: 'Sharing buku keluarga', included: true },
+      { text: 'Hemat 40% vs 5 akun Premium', included: true },
+      { text: 'Rak buku keluarga', included: true },
+    ],
+  },
+  {
+    id: 'gratis',
+    name: 'Gratis',
+    subtitle: 'Selamanya gratis',
+    isDark: false,
+    priceMonthly: '0',
+    priceYearly: '0',
+    perLabel: 'Per Bulan',
+    features: [
+      { text: '50 buku rotasi bulanan', included: true },
+      { text: '1 bab preview semua koleksi', included: true },
+      { text: 'Akses komunitas dasar', included: true },
+      { text: 'Iklan ringan', included: false },
+      { text: 'Audiobook', included: false },
+      { text: 'Offline reading', included: false },
+    ],
+  },
+];
+
 export default function SubscriptionScreen() {
   const navigation = useNavigation();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / (CARD_WIDTH + CARD_MARGIN));
+    if (index >= 0 && index < PLANS.length && index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  };
+
+  const renderCard = ({ item }: { item: Plan }) => {
+    const isDark = item.isDark;
+    const price = billingCycle === 'monthly' ? item.priceMonthly : item.priceYearly;
+
+    return (
+      <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
+        {/* Card Header Row */}
+        <View style={styles.cardHeader}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.cardTitle, isDark ? styles.titleDark : styles.titleLight]}>
+              {item.name}
+            </Text>
+            {item.isPopular && (
+              <View style={styles.popularBadge}>
+                <Ionicons name="star" size={10} color={COLORS.gold} />
+                <Text style={styles.popularText}>POPULER</Text>
+              </View>
+            )}
+          </View>
+          <Ionicons
+            name="arrow-forward"
+            size={18}
+            color={isDark ? COLORS.gold : '#1A1A1A'}
+            style={styles.arrowIcon}
+          />
+        </View>
+
+        {/* Price or Subtitle Section */}
+        {item.subtitle ? (
+          <Text style={styles.gratisSubtitle}>{item.subtitle}</Text>
+        ) : (
+          <View style={styles.priceContainer}>
+            <Text style={[styles.priceNumber, isDark ? styles.priceDark : styles.priceLight]}>
+              {price}
+            </Text>
+            <Text style={[styles.perLabel, isDark ? styles.perLabelDark : styles.perLabelLight]}>
+              {billingCycle === 'monthly' ? 'Per Bulan' : 'Per Tahun'}
+            </Text>
+          </View>
+        )}
+
+        {/* Feature List */}
+        <View style={styles.featuresContainer}>
+          {item.features.map((feature, index) => (
+            <View key={index} style={styles.featureRow}>
+              {feature.included ? (
+                <View style={[styles.iconBadge, isDark ? styles.iconBadgeDark : styles.iconBadgeLight]}>
+                  <Ionicons name="checkmark" size={13} color={isDark ? '#34D399' : '#16A34A'} />
+                </View>
+              ) : (
+                <View style={styles.iconCrossBadge}>
+                  <Ionicons name="close" size={14} color={isDark ? '#4B6B60' : '#A0A0A0'} />
+                </View>
+              )}
+              <Text
+                style={[
+                  styles.featureText,
+                  feature.included
+                    ? isDark
+                      ? styles.featureTextDark
+                      : styles.featureTextLight
+                    : isDark
+                      ? styles.featureTextExcludedDark
+                      : styles.featureTextExcludedLight,
+                ]}
+                numberOfLines={1}
+              >
+                {feature.text}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* CTA Upgrade Button */}
+        <TouchableOpacity style={styles.upgradeButton} activeOpacity={0.85}>
+          <Text style={styles.upgradeButtonText}>UPGRADE</Text>
+          <Ionicons name="arrow-forward" size={13} color="#FFFFFF" style={styles.btnArrowIcon} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Top Bar with Close Button */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.cream} />
+        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="close" size={24} color={COLORS.gold} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Pilih Paket Bukoo</Text>
-          <Text style={styles.subtitle}>Mulai Gratis, Upgrade kapan aja</Text>
-        </View>
+      {/* Screen Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Pilih Paket Bukoo</Text>
+        <Text style={styles.subtitle}>Mulai Gratis, Upgrade kapan aja</Text>
+      </View>
 
-        {/* Toggle Switch */}
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity
-            style={[styles.toggleOption, billingCycle === 'monthly' && styles.toggleOptionActive]}
-            onPress={() => setBillingCycle('monthly')}
-          >
-            <Text style={[styles.toggleText, billingCycle === 'monthly' && styles.toggleTextActive]}>
-              Bulanan
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleOption, billingCycle === 'yearly' && styles.toggleOptionActive]}
-            onPress={() => setBillingCycle('yearly')}
-          >
-            <Text style={[styles.toggleText, billingCycle === 'yearly' && styles.toggleTextActive]}>
-              Tahunan
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Tier Card 1: BEBAS */}
-        <TouchableOpacity style={styles.freeCard} activeOpacity={0.9}>
-          <View style={styles.iconBoxFree}>
-            <Ionicons name="book-outline" size={28} color={COLORS.gold} />
-            <Text style={styles.iconBoxTextFree}>FREE</Text>
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.tierNameFree}>BEBAS</Text>
-            <Text style={styles.tierDescFree}>50 Buku rotasi</Text>
-          </View>
-          <View style={styles.priceContainerRight}>
-            <Text style={styles.priceFreeTitle}>GRATIS</Text>
-            <Text style={styles.priceFreeSub}>SELAMANYA</Text>
-          </View>
+      {/* Billing Cycle Toggle */}
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[styles.toggleOption, billingCycle === 'monthly' && styles.toggleOptionActive]}
+          onPress={() => setBillingCycle('monthly')}
+        >
+          <Text style={[styles.toggleText, billingCycle === 'monthly' && styles.toggleTextActive]}>
+            Bulanan
+          </Text>
         </TouchableOpacity>
-
-        {/* Tier Card 2: BACA */}
-        <TouchableOpacity style={[styles.planCard, styles.planCardBaca]} activeOpacity={0.9}>
-          <View style={styles.iconBoxBaca}>
-            <Ionicons name="book" size={28} color={COLORS.gold} />
-            <Text style={styles.iconBoxTextBaca}>BACA</Text>
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.tierName}>BACA</Text>
-            <Text style={styles.tierDesc}>50rb Buku + 10 Judul Offline Buku</Text>
-          </View>
-          <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumber}>{billingCycle === 'monthly' ? '19.900' : '199.000'}</Text>
-            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
-          </View>
+        <TouchableOpacity
+          style={[styles.toggleOption, billingCycle === 'yearly' && styles.toggleOptionActive]}
+          onPress={() => setBillingCycle('yearly')}
+        >
+          <Text style={[styles.toggleText, billingCycle === 'yearly' && styles.toggleTextActive]}>
+            Tahunan
+          </Text>
         </TouchableOpacity>
+      </View>
 
-        {/* Tier Card 3: PLUS (Popular) */}
-        <TouchableOpacity style={[styles.planCard, styles.planCardPlus]} activeOpacity={0.9}>
-          <View style={styles.populerBadge}>
-            <Ionicons name="star" size={14} color={COLORS.gold} />
-            <Text style={styles.populerText}>POPULER</Text>
-          </View>
-          <View style={styles.iconBoxPlus}>
-            <Ionicons name="sparkles" size={28} color={COLORS.gold} />
-            <Text style={styles.iconBoxTextPlus}>PLUS</Text>
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.tierNamePlus}>PLUS</Text>
-            <Text style={styles.tierDesc}>Global . 3 Credit Original</Text>
-          </View>
-          <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumberPlus}>{billingCycle === 'monthly' ? '49.900' : '499.000'}</Text>
-            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
-          </View>
-        </TouchableOpacity>
+      {/* Subscription Cards Horizontal Carousel */}
+      <View style={styles.carouselWrapper}>
+        <FlatList
+          data={PLANS}
+          renderItem={renderCard}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={CARD_WIDTH + CARD_MARGIN}
+          decelerationRate="fast"
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={styles.carouselContent}
+        />
+      </View>
 
-        {/* Tier Card 4: PREMIUM */}
-        <TouchableOpacity style={[styles.planCard, styles.planCardPremium]} activeOpacity={0.9}>
-          <View style={styles.iconBoxPremium}>
-            <Ionicons name="diamond-outline" size={28} color={COLORS.gold} />
-            <Text style={styles.iconBoxTextPremium}>PREMIUM</Text>
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.tierNamePremium}>PREMIUM</Text>
-            <Text style={styles.tierDesc}>Global . 3 Credit Original</Text>
-          </View>
-          <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumberPremium}>{billingCycle === 'monthly' ? '79.900' : '799.000'}</Text>
-            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
-          </View>
-        </TouchableOpacity>
-
-      </ScrollView>
+      {/* Pagination Dot Indicators */}
+      <View style={styles.paginationContainer}>
+        {PLANS.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.paginationDot,
+              index === activeIndex ? styles.paginationDotActive : styles.paginationDotInactive,
+            ]}
+          />
+        ))}
+      </View>
     </SafeAreaView>
   );
 }
@@ -124,258 +289,249 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.forestDark,
   },
   topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 8,
   },
-  backButton: {
+  closeButton: {
     padding: 6,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 24,
+    marginTop: 4,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: FONTS.sansMedium,
+    fontSize: 14,
+    fontFamily: FONTS.serifRegular,
     color: COLORS.gold,
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#0B221B',
-    borderRadius: 30,
+    backgroundColor: '#0F261F',
+    borderRadius: 24,
     padding: 4,
-    width: '80%',
-    marginBottom: 28,
+    width: 240,
+    alignSelf: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#173D31',
   },
   toggleOption: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 26,
+    paddingVertical: 8,
+    borderRadius: 20,
     alignItems: 'center',
   },
   toggleOptionActive: {
     backgroundColor: COLORS.gold,
   },
   toggleText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     fontFamily: FONTS.sansMedium,
     color: COLORS.gold,
   },
   toggleTextActive: {
-    color: '#0A1A15',
+    color: '#ffffff',
     fontWeight: 'bold',
   },
-  freeCard: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#171412',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#26221F',
-  },
-  iconBoxFree: {
-    width: 65,
-    height: 70,
-    backgroundColor: '#000000',
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  iconBoxTextFree: {
-    color: COLORS.cream,
-    fontSize: 10,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    marginTop: 2,
-  },
-  cardContent: {
+  carouselWrapper: {
     flex: 1,
   },
-  tierNameFree: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: COLORS.cream,
-    marginBottom: 4,
+  carouselContent: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingBottom: 10,
+    alignItems: 'flex-start',
   },
-  tierDescFree: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
+  card: {
+    width: CARD_WIDTH,
+    marginRight: CARD_MARGIN,
+    borderRadius: 24,
+    padding: 18,
+    alignSelf: 'flex-start',
   },
-  priceContainerRight: {
-    alignItems: 'flex-end',
+  cardDark: {
+    backgroundColor: '#0C221A',
+    borderWidth: 1,
+    borderColor: '#183D30',
   },
-  priceFreeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: COLORS.cream,
+  cardLight: {
+    backgroundColor: '#FAF8F3',
+    borderWidth: 1,
+    borderColor: '#E6E2D8',
   },
-  priceFreeSub: {
-    fontSize: 11,
-    fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  planCard: {
-    width: '100%',
+  titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.forestCard,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-    position: 'relative',
+    gap: 8,
   },
-  planCardBaca: {
-    borderWidth: 1.5,
-    borderColor: '#2D6A53',
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
   },
-  iconBoxBaca: {
-    width: 65,
-    height: 70,
-    backgroundColor: '#07241C',
-    borderRadius: 14,
-    justifyContent: 'center',
+  titleDark: {
+    color: COLORS.gold,
+  },
+  titleLight: {
+    color: '#1A1A1A',
+  },
+  popularBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    gap: 3,
+    backgroundColor: 'rgba(201, 149, 42, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1D4E3D',
+    borderColor: COLORS.gold,
   },
-  iconBoxTextBaca: {
-    color: COLORS.cream,
+  popularText: {
+    color: COLORS.gold,
     fontSize: 10,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
-    marginTop: 2,
   },
-  tierName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: COLORS.cream,
-    marginBottom: 4,
+  arrowIcon: {
+    transform: [{ rotate: '-45deg' }],
   },
-  tierDesc: {
+  gratisSubtitle: {
     fontSize: 13,
     fontFamily: FONTS.sansRegular,
-    color: '#6EE7B7',
-    maxWidth: 160,
+    color: '#666666',
+    marginBottom: 16,
+  },
+  priceContainer: {
+    marginBottom: 10,
   },
   priceNumber: {
-    fontSize: 22,
+    fontSize: 32,
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: '#4ADE80',
+    fontFamily: FONTS.serifBold,
+    lineHeight: 36,
   },
-  pricePeriod: {
+  priceDark: {
+    color: COLORS.gold,
+  },
+  priceLight: {
+    color: '#1A1A1A',
+  },
+  perLabel: {
     fontSize: 12,
     fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
+    marginTop: 2,
   },
-  planCardPlus: {
-    borderWidth: 1.5,
-    borderColor: '#2D6A53',
-    backgroundColor: '#0D2721',
+  perLabelDark: {
+    color: '#8BAAA0',
   },
-  populerBadge: {
-    position: 'absolute',
-    top: 14,
-    right: 18,
+  perLabelLight: {
+    color: '#777777',
+  },
+  featuresContainer: {
+    marginTop: 4,
+    marginBottom: 0,
+  },
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    marginBottom: 8,
   },
-  populerText: {
-    color: COLORS.gold,
-    fontSize: 12,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-  },
-  iconBoxPlus: {
-    width: 65,
-    height: 70,
-    backgroundColor: '#0C202F',
-    borderRadius: 14,
+  iconBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-    borderWidth: 1,
-    borderColor: '#183850',
+    marginRight: 10,
   },
-  iconBoxTextPlus: {
-    color: COLORS.cream,
-    fontSize: 10,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    marginTop: 2,
+  iconBadgeDark: {
+    backgroundColor: '#123A2C',
   },
-  tierNamePlus: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: '#4ADE80',
-    marginBottom: 4,
+  iconBadgeLight: {
+    backgroundColor: '#DCFCE7',
   },
-  priceNumberPlus: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: '#4ADE80',
-  },
-  planCardPremium: {
-    borderWidth: 1.5,
-    borderColor: COLORS.gold,
-    backgroundColor: '#231D12',
-  },
-  iconBoxPremium: {
-    width: 65,
-    height: 70,
-    backgroundColor: '#2A1F0D',
-    borderRadius: 14,
+  iconCrossBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
+    marginRight: 10,
   },
-  iconBoxTextPremium: {
-    color: COLORS.cream,
-    fontSize: 10,
+  featureText: {
+    fontSize: 13,
+    fontFamily: FONTS.sansRegular,
+    flex: 1,
+  },
+  featureTextDark: {
+    color: '#E2E8F0',
+  },
+  featureTextLight: {
+    color: '#1F2937',
+  },
+  featureTextExcludedDark: {
+    color: '#4B6B60',
+    textDecorationLine: 'line-through',
+  },
+  featureTextExcludedLight: {
+    color: '#9CA3AF',
+    textDecorationLine: 'line-through',
+  },
+  upgradeButton: {
+    backgroundColor: COLORS.gold,
+    borderRadius: 24,
+    paddingVertical: 11,
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
-    marginTop: 2,
+    letterSpacing: 0.5,
   },
-  tierNamePremium: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: COLORS.gold,
-    marginBottom: 4,
+  btnArrowIcon: {
+    transform: [{ rotate: '-45deg' }],
   },
-  priceNumberPremium: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: COLORS.gold,
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    marginBottom: 16,
+  },
+  paginationDot: {
+    height: 8,
+    borderRadius: 4,
+  },
+  paginationDotActive: {
+    width: 24,
+    backgroundColor: COLORS.gold,
+  },
+  paginationDotInactive: {
+    width: 8,
+    backgroundColor: 'rgba(201, 149, 42, 0.3)',
   },
 });

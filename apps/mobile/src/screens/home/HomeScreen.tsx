@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   categoriesScroll: {
     paddingHorizontal: 20,
-    gap: 10,
+    gap: 6,
     marginBottom: 24,
   },
   categoryPill: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansMedium,
   },
   categoryTextActive: {
-    color: '#0A1A15',
+    color: '#ffffff',
     fontWeight: 'bold',
   },
   heroBanner: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   trendingListContent: {
     paddingHorizontal: 20,
-    gap: 16,
+    gap: 8,
   },
   bookCard: {
     width: 150,

@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
@@ -230,13 +230,13 @@ const styles = StyleSheet.create({
   },
   postingButtonText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 6,
   },
   filterChip: {
     paddingVertical: 8,
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
     color: COLORS.cream,

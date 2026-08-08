@@ -10,7 +10,7 @@ export const LogoBukoo: React.FC<LogoBukooProps> = ({ size = 28, style }) => {
   return (
     <View style={[styles.container, style]}>
       <Image
-        source={require('../../../../assets/logo bukoo.png')}
+        source={require('./logo bukoo.png')}
         style={{ width: size * 3.5, height: size, resizeMode: 'contain' }}
       />
     </View>
