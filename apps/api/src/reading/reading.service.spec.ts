@@ -61,7 +61,7 @@ describe('ReadingService', () => {
         id: 'book-premium',
         subscriptionRequired: 'PREMIUM',
         totalPages: 200,
-      } as any);
+      } as unknown as ReturnType<typeof prisma.book.findUnique>);
 
       // Mock user subscription: FREE (none/inactive)
       jest.spyOn(prisma.subscription, 'findUnique').mockResolvedValue(null);
@@ -86,17 +86,17 @@ describe('ReadingService', () => {
         id: 'book-premium',
         subscriptionRequired: 'PREMIUM',
         totalPages: 200,
-      } as any);
+      } as unknown as ReturnType<typeof prisma.book.findUnique>);
 
       // Mock active PREMIUM subscription
       jest.spyOn(prisma.subscription, 'findUnique').mockResolvedValue({
         planId: 'plan_premium',
         status: 'ACTIVE',
-      } as any);
+      } as unknown as ReturnType<typeof prisma.subscription.findUnique>);
 
       // Mock no existing progress
       jest.spyOn(prisma.readingProgress, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.readingProgress, 'upsert').mockResolvedValue({} as any);
+      jest.spyOn(prisma.readingProgress, 'upsert').mockResolvedValue({} as unknown as ReturnType<typeof prisma.readingProgress.upsert>);
 
       await service.updateProgress('user-premium', 'book-premium', {
         currentPage: 2,
@@ -124,7 +124,7 @@ describe('ReadingService', () => {
         id: 'book-free',
         subscriptionRequired: 'FREE',
         totalPages: 100,
-      } as any);
+      } as unknown as ReturnType<typeof prisma.book.findUnique>);
 
       // Mock active subscription (doesn't matter since book is free)
       jest.spyOn(prisma.subscription, 'findUnique').mockResolvedValue(null);
@@ -133,9 +133,9 @@ describe('ReadingService', () => {
       jest.spyOn(prisma.readingProgress, 'findUnique').mockResolvedValue({
         readingTimeSeconds: 45,
         readingTimeMinutes: 0,
-      } as any);
+      } as unknown as ReturnType<typeof prisma.readingProgress.findUnique>);
 
-      jest.spyOn(prisma.readingProgress, 'upsert').mockResolvedValue({} as any);
+      jest.spyOn(prisma.readingProgress, 'upsert').mockResolvedValue({} as unknown as ReturnType<typeof prisma.readingProgress.upsert>);
 
       // Sync 30 seconds (total 75 seconds -> 1 minute)
       await service.updateProgress('user-free', 'book-free', {

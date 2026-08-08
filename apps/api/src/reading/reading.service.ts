@@ -127,5 +127,62 @@ export class ReadingService {
       },
     });
   }
+
+  // --- Highlights & Notes Sync ---
+  async getHighlights(userId: string, bookId: string) {
+    return this.prisma.highlight.findMany({
+      where: { userId, bookId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async saveHighlight(userId: string, bookId: string, dto: { cfiRange: string; text: string; color?: string; note?: string }) {
+    return this.prisma.highlight.create({
+      data: {
+        userId,
+        bookId,
+        cfiRange: dto.cfiRange,
+        text: dto.text,
+        color: dto.color ?? 'rgba(250,204,21,0.4)',
+        note: dto.note,
+      },
+    });
+  }
+
+  async deleteHighlight(userId: string, highlightId: string) {
+    const hl = await this.prisma.highlight.findUnique({ where: { id: highlightId } });
+    if (!hl || hl.userId !== userId) {
+      throw new NotFoundException('Highlight not found');
+    }
+    return this.prisma.highlight.delete({ where: { id: highlightId } });
+  }
+
+  // --- Bookmarks Sync ---
+  async getBookmarks(userId: string, bookId: string) {
+    return this.prisma.bookmark.findMany({
+      where: { userId, bookId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async saveBookmark(userId: string, bookId: string, dto: { cfi: string; chapterTitle?: string; progress?: number }) {
+    return this.prisma.bookmark.create({
+      data: {
+        userId,
+        bookId,
+        cfi: dto.cfi,
+        chapterTitle: dto.chapterTitle,
+        progress: dto.progress ?? 0,
+      },
+    });
+  }
+
+  async deleteBookmark(userId: string, bookmarkId: string) {
+    const bm = await this.prisma.bookmark.findUnique({ where: { id: bookmarkId } });
+    if (!bm || bm.userId !== userId) {
+      throw new NotFoundException('Bookmark not found');
+    }
+    return this.prisma.bookmark.delete({ where: { id: bookmarkId } });
+  }
 }
 

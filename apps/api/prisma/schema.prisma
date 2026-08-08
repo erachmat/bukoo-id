@@ -37,6 +37,8 @@ model User {
 
   // Shared Relationships
   readingProgress     ReadingProgress[]
+  highlights          Highlight[]
+  bookmarks           Bookmark[]
 }
 
 // --- NextAuth Core Models ---
@@ -105,6 +107,8 @@ model Book {
   // Shared Relationships
   readingProgress      ReadingProgress[]
   shelves              ShelfBook[]
+  highlights           Highlight[]
+  bookmarks            Bookmark[]
 }
 
 // --- Reading Progress Syncing ---
@@ -259,9 +263,41 @@ enum DevicePlatform {
   IOS
 }
 
-// Retained for code/dto backwards compatibility
 enum SubscriptionTier {
   FREE
   BASIC
   PREMIUM
+}
+
+// --- Reader Annotations (Highlights, Bookmarks, Notes) ---
+model Highlight {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  cfiRange  String
+  text      String
+  color     String   @default("rgba(250,204,21,0.4)")
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId])
+}
+
+model Bookmark {
+  id           String   @id @default(cuid())
+  userId       String
+  bookId       String
+  cfi          String
+  chapterTitle String?
+  progress     Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId])
 }

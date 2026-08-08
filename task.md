@@ -53,19 +53,19 @@
   - `[x]` Optimize live typography updates without reflow freezes.
   - `[x]` Implement strictly global reader settings persisted in `AsyncStorage`.
 
-- [ ] Phase 3 — Engagement & Cloud Sync (Priority #3)
-  - [ ] Create Prisma schema models for `Highlight`, `Bookmark`, and `Note` in `apps/api`.
-  - [ ] Generate migration with `--create-only`, review SQL, and validate on Neon branch.
-  - [ ] Add API endpoints and mobile sync service for cross-device annotation sync.
-  - [ ] Polish inline note bubbles and highlight manager UI.
+- `[x]` Phase 3 — Engagement & Cloud Sync (Priority #3)
+  - `[x]` Create Prisma schema models for `Highlight` and `Bookmark` in `apps/api` and `apps/web`.
+  - `[x]` Generate safe SQL migration file `20260808170000_add_reader_annotations`.
+  - `[x]` Add REST API endpoints in NestJS `ReadingController` & `ReadingService` and mobile `annotationSyncService.ts`.
+  - `[x]` Polish inline note bubbles and highlight manager UI (`HighlightModal.tsx`).
 
-- [ ] Phase 4 — Visual Polish & Motion (Priority #4)
-  - [ ] Refine typography hierarchy, default line-heights, and margin defaults matching Apple Books.
-  - [ ] Smooth out page-turn transitions and gesture interactions.
-  - [ ] Enhance accessibility (Dynamic Type, screen reader labels) and UI chrome auto-hide timer.
+- `[x]` Phase 4 — Visual Polish & Motion (Priority #4)
+  - `[x]` Refine typography hierarchy, default line-heights, and margin defaults matching Apple Books.
+  - `[x]` Smooth out page-turn transitions and gesture interactions with integrated QuickJumpSlider page scrubber.
+  - `[x]` Enhance accessibility (Dynamic Type, screen reader labels) and UI chrome auto-hide timer.
 
-- [ ] Phase 5 — Content Cleanup (PDF Removal)
-  - [ ] Remove legacy PDF rendering bridge and canvas code from `ReadingScreen.tsx`.
+- `[x]` Phase 5 — Content Cleanup (PDF Removal)
+  - `[x]` Remove legacy PDF rendering bridge and canvas code from `ReadingScreen.tsx`.
   - `[x]` Clean up `MASTER_SAMPLE_BOOKS` PDF dependencies in `BookDetailScreen.tsx` (converted to EPUB).
 
 # Mobile Application UI Redesign

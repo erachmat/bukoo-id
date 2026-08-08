@@ -25,6 +25,7 @@ import { TocModal } from './components/TocModal';
 import { SearchModal, SearchResultItem } from './components/SearchModal';
 import { SettingsModal, ReaderTheme } from './components/SettingsModal';
 import { HighlightModal } from './components/HighlightModal';
+import { QuickJumpSlider } from './components/QuickJumpSlider';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,8 +69,6 @@ interface EpubMessage {
 // Module-level caching for loaded library code (survives screen unmounts)
 let cachedEpubJsContent: string | null = null;
 let cachedJsZipContent: string | null = null;
-let cachedPdfJsContent: string | null = null;
-let cachedPdfWorkerContent: string | null = null;
 
 // ── EPUB JS Bridge ────────────────────────────────────────────────────────────
 // This script is injected into the WebView ONCE via the static HTML shell.
@@ -574,9 +573,7 @@ true;
 // EPUB/PDF data is pushed in via injectJavaScript after the shell is ready.
 function buildEpubShellHtml(
   epubJsContent: string,
-  jsZipContent: string,
-  pdfJsContent: string,
-  pdfWorkerContent: string
+  jsZipContent: string
 ): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -589,29 +586,11 @@ function buildEpubShellHtml(
     html, body { width: 100%; height: 100%; overflow: hidden; background: #F4F1E8; }
     #viewer { width: 100%; height: 100%; }
     #loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #F4F1E8; font-family: -apple-system, sans-serif; font-size: 15px; color: #888; }
-  </style>
   <script>${jsZipContent}</script>
   <script>
     if (typeof JSZip !== 'undefined' && typeof window.JSZip === 'undefined') window.JSZip = JSZip;
   </script>
   <script>${epubJsContent}</script>
-  ${pdfJsContent ? `<script>${pdfJsContent}</script>` : ''}
-  <script>
-    if (typeof pdfjsLib !== 'undefined') {
-      if (${JSON.stringify(!!pdfWorkerContent)}) {
-        try {
-          var workerBlob = new Blob([${JSON.stringify(pdfWorkerContent || '')}], { type: 'text/javascript' });
-          pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(workerBlob);
-        } catch (e) {
-          console.error('[PDF.js] Failed to create offline worker blob:', e);
-        }
-      } else {
-        console.error('[PDF.js] Bundled offline worker asset missing');
-      }
-    } else {
-      console.warn('[PDF.js] Bundled PDF.js core library asset missing');
-    }
-  </script>
 </head>
 <body>
   <div id="loader">Memuat buku\u2026</div>
@@ -743,8 +722,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [offlineCacheWarning, setOfflineCacheWarning] = useState<string | null>(null);
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
   const [jsZipContent, setJsZipContent] = useState<string>(cachedJsZipContent || '');
-  const [pdfJsContent, setPdfJsContent] = useState<string>(cachedPdfJsContent || '');
-  const [pdfWorkerContent, setPdfWorkerContent] = useState<string>(cachedPdfWorkerContent || '');
 
   const handleRetryLoad = useCallback(async () => {
     setLoadError(null);
@@ -769,12 +746,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const chapterCurrentPage = chapterInfo.currentPage;
   const chapterTotalPages = chapterInfo.totalPages;
 
-  const sampleBookItem = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
-  const isPdf = (epubUrl || '').toLowerCase().endsWith('.pdf') ||
-                sampleBookItem?.fileType === 'PDF' ||
-                sampleBookItem?.epubUrl?.toLowerCase().endsWith('.pdf') ||
-                (localEpubUri || '').toLowerCase().endsWith('.pdf');
-
   // Load cached book locations (makes book.locations.generate Instant on 2nd+ open)
   useEffect(() => {
     AsyncStorage.getItem(`epub_locations_${bookId}`).then((locs) => {
@@ -795,11 +766,9 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // Load the bundled epubjs, jszip, and pdfjs assets on mount (reuses module cache if available)
   useEffect(() => {
     let isMounted = true;
-    if (cachedEpubJsContent && cachedJsZipContent && cachedPdfJsContent && cachedPdfWorkerContent) {
+    if (cachedEpubJsContent && cachedJsZipContent) {
       setEpubJsContent(cachedEpubJsContent);
       setJsZipContent(cachedJsZipContent);
-      setPdfJsContent(cachedPdfJsContent);
-      setPdfWorkerContent(cachedPdfWorkerContent);
       return;
     }
 
@@ -809,34 +778,22 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         const epubAsset = Asset.fromModule(require('../../assets/epub.min.txt'));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const zipAsset = Asset.fromModule(require('../../assets/jszip.min.txt'));
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const pdfAsset = Asset.fromModule(require('../../assets/pdf.min.txt'));
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const pdfWorkerAsset = Asset.fromModule(require('../../assets/pdf.worker.min.txt'));
 
         await Promise.all([
           epubAsset.downloadAsync(),
           zipAsset.downloadAsync(),
-          pdfAsset.downloadAsync(),
-          pdfWorkerAsset.downloadAsync(),
         ]);
         
-        if (epubAsset.localUri && zipAsset.localUri && pdfAsset.localUri && pdfWorkerAsset.localUri) {
-          const [epubContent, zipContent, pdfContent, pdfWorkerContentStr] = await Promise.all([
+        if (epubAsset.localUri && zipAsset.localUri) {
+          const [epubContent, zipContent] = await Promise.all([
             FileSystem.readAsStringAsync(epubAsset.localUri),
             FileSystem.readAsStringAsync(zipAsset.localUri),
-            FileSystem.readAsStringAsync(pdfAsset.localUri),
-            FileSystem.readAsStringAsync(pdfWorkerAsset.localUri),
           ]);
           cachedEpubJsContent = epubContent;
           cachedJsZipContent = zipContent;
-          cachedPdfJsContent = pdfContent;
-          cachedPdfWorkerContent = pdfWorkerContentStr;
           if (isMounted) {
             setEpubJsContent(epubContent);
             setJsZipContent(zipContent);
-            setPdfJsContent(pdfContent);
-            setPdfWorkerContent(pdfWorkerContentStr);
           }
         }
       } catch (e) {
@@ -970,7 +927,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       const themeObj = themes[theme];
       const js = `
         if (window.__bukooSetTheme) window.__bukooSetTheme(${JSON.stringify(themeObj)});
-        if (window.__bukooSetPageTurnStyle && !${isPdf}) window.__bukooSetPageTurnStyle(${JSON.stringify(pageTurnStyle)}, ${JSON.stringify(currentCfi)});
+        if (window.__bukooSetPageTurnStyle) window.__bukooSetPageTurnStyle(${JSON.stringify(pageTurnStyle)}, ${JSON.stringify(currentCfi)});
         true;
       `;
       webViewRef.current?.injectJavaScript(js);
@@ -987,7 +944,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, marginHorizontal, textAlign, isReady, isPdf, currentCfi]);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, marginHorizontal, textAlign, isReady, currentCfi]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
@@ -1147,8 +1104,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
   // This means the WebView loads ONCE — switching books just calls __bukooLoadBook().
   const epubShellHtml = useMemo(
-    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent, pdfJsContent, pdfWorkerContent) : '',
-    [epubJsContent, jsZipContent, pdfJsContent, pdfWorkerContent]
+    () => (epubJsContent && jsZipContent) ? buildEpubShellHtml(epubJsContent, jsZipContent) : '',
+    [epubJsContent, jsZipContent]
   );
 
   // When everything is ready, inject the EPUB data into the already-loaded WebView
@@ -1178,7 +1135,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
         const CHUNK_SIZE = 256 * 1024; // 256KB per chunk
         const totalChunks = Math.ceil(b64.length / CHUNK_SIZE);
-        const mimeType = isPdf ? 'application/pdf' : 'application/epub+zip';
+        const mimeType = 'application/epub+zip';
 
         console.log(`[Chunking] Transferring ${totalChunks} chunks (${CHUNK_SIZE}B each) to WebView bridge...`);
 
@@ -1194,16 +1151,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         }
 
         // Finalize load from chunk buffer
+        // Finalize load from chunk buffer
         const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
-        if (isPdf) {
-          webViewRef.current.injectJavaScript(
-            `if (window.__bukooLoadPdfFromChunks) window.__bukooLoadPdfFromChunks(${JSON.stringify(mimeType)}); true;`
-          );
-        } else {
-          webViewRef.current.injectJavaScript(
-            `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}); true;`
-          );
-        }
+        webViewRef.current.injectJavaScript(
+          `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}); true;`
+        );
         return;
       } catch (err) {
         console.error('[ReadingScreen] Failed to read or chunk local file in RN:', err);
@@ -1213,27 +1165,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
 
     // Remote HTTP/HTTPS URL path
-    if (isPdf) {
-      webViewRef.current.injectJavaScript(
-        `(function(){
-          if (window.__bukooLoadPdf) {
-            window.__bukooLoadPdf(${JSON.stringify(localFileUri)});
-          }
-        })(); true;`
-      );
-    } else {
-      const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
-      webViewRef.current.injectJavaScript(
-        `(function(){
-          var bookUrl = ${JSON.stringify(localFileUri)};
-          var locs = ${locsArg};
-          if (window.__bukooLoadBook) {
-            window.__bukooLoadBook(bookUrl, locs);
-          }
-        })(); true;`
-      );
-    }
-  }, [isPdf, localFileUri, cachedLocations]);
+    const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
+    webViewRef.current.injectJavaScript(
+      `(function(){
+        var bookUrl = ${JSON.stringify(localFileUri)};
+        var locs = ${locsArg};
+        if (window.__bukooLoadBook) {
+          window.__bukooLoadBook(bookUrl, locs);
+        }
+      })(); true;`
+    );
+  }, [localFileUri, cachedLocations]);
 
   // Called when the WebView's initial HTML has fully loaded and executed
   const handleWebViewLoad = useCallback(() => {
@@ -1376,8 +1318,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           />
         )}
 
-        {/* ── Tap zones (invisible overlays) — skipped in PDF mode and vertical EPUB mode to allow native WebView scrolling ── */}
-        {!isPdf && pageTurnStyle !== 'vertical' && (
+        {/* ── Tap zones (invisible overlays) — skipped in vertical EPUB mode to allow native WebView scrolling ── */}
+        {pageTurnStyle !== 'vertical' && (
           <View style={styles.tapZoneRow} pointerEvents="box-none">
             {/* Left 30% — previous page */}
             <TouchableOpacity
@@ -1405,6 +1347,20 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           </View>
         )}
       </View>
+
+      {/* ── Page Scrubber / QuickJump Slider ── */}
+      {controlsVisible && (
+        <QuickJumpSlider
+          currentPage={currentPage > 0 ? currentPage : 1}
+          totalPages={totalPages > 0 ? totalPages : 1}
+          chapterTitle={chapterTitle}
+          onPageChange={(targetPage) => {
+            if (webViewRef.current) {
+              webViewRef.current.injectJavaScript(`if (window.__bukooGoToPage) window.__bukooGoToPage(${targetPage}); true;`);
+            }
+          }}
+        />
+      )}
 
       {/* ── Bottom bar (animated show/hide) ── */}
       {controlsVisible && (
