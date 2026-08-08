@@ -72,8 +72,8 @@ export default function SubscriptionScreen() {
             <Text style={styles.tierDesc}>50rb Buku + 10 Judul Offline Buku</Text>
           </View>
           <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumber}>19.900</Text>
-            <Text style={styles.pricePeriod}>/Bulan</Text>
+            <Text style={styles.priceNumber}>{billingCycle === 'monthly' ? '19.900' : '199.000'}</Text>
+            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
           </View>
         </TouchableOpacity>
 
@@ -92,8 +92,8 @@ export default function SubscriptionScreen() {
             <Text style={styles.tierDesc}>Global . 3 Credit Original</Text>
           </View>
           <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumberPlus}>49.900</Text>
-            <Text style={styles.pricePeriod}>/Bulan</Text>
+            <Text style={styles.priceNumberPlus}>{billingCycle === 'monthly' ? '49.900' : '499.000'}</Text>
+            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
           </View>
         </TouchableOpacity>
 
@@ -108,10 +108,11 @@ export default function SubscriptionScreen() {
             <Text style={styles.tierDesc}>Global . 3 Credit Original</Text>
           </View>
           <View style={styles.priceContainerRight}>
-            <Text style={styles.priceNumberPremium}>79.900</Text>
-            <Text style={styles.pricePeriod}>/Bulan</Text>
+            <Text style={styles.priceNumberPremium}>{billingCycle === 'monthly' ? '79.900' : '799.000'}</Text>
+            <Text style={styles.pricePeriod}>{billingCycle === 'monthly' ? '/Bulan' : '/Tahun'}</Text>
           </View>
         </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
