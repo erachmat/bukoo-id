@@ -108,8 +108,8 @@ export default function LibraryScreen() {
             <View style={styles.readingStatusBadge}>
               <Text style={styles.readingStatusText}>Sedang dibaca</Text>
             </View>
-            <Text style={styles.activeTitle}>Moby Dick</Text>
-            <Text style={styles.activeAuthor}>by herman melvile</Text>
+            <Text style={styles.activeTitle}>Laut Bercerita</Text>
+            <Text style={styles.activeAuthor}>Laila S. Chudori</Text>
 
             <View style={styles.progressRow}>
               <View style={styles.progressBarBackground}>
@@ -132,7 +132,34 @@ export default function LibraryScreen() {
           </View>
         </View>
 
+        {/* AI Companion Insight Banner Card */}
+        <TouchableOpacity
+          style={styles.aiCard}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Ai' as never)}
+        >
+          <View style={styles.aiHeader}>
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>AI</Text>
+            </View>
+            <Ionicons name="sparkles" size={16} color={COLORS.gold} style={{ marginHorizontal: 4 }} />
+            <Text style={styles.aiTitle}>Ai Companion</Text>
+          </View>
+          <Text style={styles.aiQuote}>
+            "Kamu membaca paling fokus membaca diantara jam 20.00 - 22.00. lanjut malam ini?"
+          </Text>
+          <TouchableOpacity
+            style={styles.aiButton}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Ai' as never)}
+          >
+            <Text style={styles.aiButtonText}>Lanjut Baca</Text>
+            <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+
         {/* 3-Card Quick Stats Grid */}
+
         <View style={styles.statsGrid}>
           {/* Card 1: Buku Selesai */}
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
@@ -321,7 +348,66 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
   },
+  aiCard: {
+    backgroundColor: '#0F2922',
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#173E33',
+  },
+  aiHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  aiBadge: {
+    backgroundColor: COLORS.goldPill,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  aiBadgeText: {
+    color: COLORS.gold,
+    fontSize: 10,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  aiTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+  },
+  aiQuote: {
+    fontSize: 14,
+    fontFamily: FONTS.serifItalic,
+    color: COLORS.cream,
+    lineHeight: 20,
+    fontStyle: 'italic',
+    marginBottom: 14,
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 20,
+    gap: 6,
+  },
+  aiButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
   statsGrid: {
+
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
