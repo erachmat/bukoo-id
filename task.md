@@ -122,6 +122,12 @@
   - `[x]` Add red glow icon badge (`Ionicons name="log-out-outline"`), title, subtitle, and styled `Batal` / `Ya, Keluar` buttons.
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
+# LoginScreen Header Logo Update
+- `[x]` 1. Replace Text Title with Logo Image
+  - `[x]` Replaced plain `<Text style={styles.title}>BUKOO</Text>` in `LoginScreen.tsx` header with `<LogoBukoo size={42} />` using `assets/logo/logo bukoo.png`.
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
+
+
 
 
 
