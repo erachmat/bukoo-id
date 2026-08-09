@@ -82,5 +82,25 @@
   - `[x]` `SearchScreen.tsx` (Jelajahi header, filter funnel, trending pills, BUKOO original carousel).
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`, `npm run test --workspace=@bukoo/mobile` passed cleanly.
 
+# Reader Bug Fixes
+- `[x]` 1. Fix Bottombar Prev/Next Page Navigation in Vertical Scroll mode
+  - `[x]` Remove `target.scrollBy` fallback in `window.__bukooNext` & `window.__bukooPrev`.
+  - `[x]` Ensure `window.__bukooCurrentRendition.next()` / `prev()` are called.
+- `[x]` 2. Fix Highlight Removal Sync in WebView
+  - `[x]` Fix `window.__bukooRemoveHighlight` function overwrite bug in EPUB_JS_BRIDGE.
+  - `[x]` Safely pass `cfiRange` using `JSON.stringify` in WebView JS injections.
+- `[x]` 3. Verification
+  - `[x]` Run `npm run typecheck --workspace=@bukoo/mobile` (PASSED).
+  - `[x]` Run `npm run lint --workspace=@bukoo/mobile` (PASSED).
+  - `[x]` Run `npm run test --workspace=@bukoo/mobile` (No tests configured for workspace).
+
+# Mobile Backend API Integration
+- `[x]` 1. Connect Mobile Screens to Live NestJS Backend API
+  - `[x]` Create `booksApi` and `libraryApi` in `apps/mobile/src/services/api.ts`.
+  - `[x]` Create custom React Query hooks: `useBooksApi.ts` (`useFeaturedBooks`, `useSearchBooks`, `useGenreBooks`) and `useLibraryApi.ts` (`useUserLibrary`).
+  - `[x]` Wire `HomeScreen.tsx` to `useFeaturedBooks` with pull-to-refresh control.
+  - `[x]` Wire `SearchScreen.tsx` to `useSearchBooks` and `useGenreBooks`.
+  - `[x]` Wire `LibraryScreen.tsx` to `useUserLibrary` for dynamic active reading card & progress percentage.
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
 
