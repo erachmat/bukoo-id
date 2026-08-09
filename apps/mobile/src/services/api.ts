@@ -246,3 +246,39 @@ export const authApi = {
     }
   },
 };
+
+export interface BookItemDto {
+  id: string;
+  title: string;
+  author: string;
+  coverUrl: string;
+  publisher?: string;
+  synopsis?: string;
+  ratingAverage?: number;
+  ratingCount?: number;
+  subscriptionRequired?: string;
+  is_accessible?: boolean;
+}
+
+export interface FeaturedBooksResponseDto {
+  continue_reading: BookItemDto[];
+  editors_choice: BookItemDto[];
+  trending: BookItemDto[];
+  new_releases: BookItemDto[];
+}
+
+export const booksApi = {
+  getFeatured: async (): Promise<FeaturedBooksResponseDto> => {
+    const res = await api.get<FeaturedBooksResponseDto>('/books/featured');
+    return res.data;
+  },
+  search: async (query: string): Promise<BookItemDto[]> => {
+    if (!query.trim()) return [];
+    const res = await api.get<{ items: BookItemDto[] } | BookItemDto[]>(`/books/search?q=${encodeURIComponent(query)}`);
+    return Array.isArray(res.data) ? res.data : (res.data.items || []);
+  },
+  getByGenre: async (genre: string): Promise<BookItemDto[]> => {
+    const res = await api.get<BookItemDto[]>(`/books?genre=${encodeURIComponent(genre)}`);
+    return res.data;
+  },
+};
