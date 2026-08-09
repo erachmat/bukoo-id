@@ -21,26 +21,38 @@ export function useAuthHydration() {
   const [isReady, setIsReady] = useState(false);
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     const hydrateAuth = async () => {
       try {
         const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
         if (refreshToken) {
-          // Verify & refresh token session
-          const data = await authApi.refresh(refreshToken);
-          await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
-          if (data.refreshToken) {
-            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
+          try {
+            const data = await authApi.refresh(refreshToken);
+            await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
+            if (data.refreshToken) {
+              await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
+            }
+            setUser(data.user);
+          } catch (err: unknown) {
+            const status = (err as { response?: { status?: number } })?.response?.status;
+            if (status === 401 || status === 403) {
+              // Token is invalid/revoked: purge local tokens & clear user
+              await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+              await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+              clearUser();
+            } else {
+              // Network error or backend offline: preserve stored user profile if present
+              if (user) {
+                setUser(user);
+              }
+            }
           }
-          setUser(data.user);
         } else {
           clearUser();
         }
       } catch {
-        // Clear corrupt or expired tokens
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
         clearUser();
       } finally {
         setIsReady(true);
@@ -48,7 +60,7 @@ export function useAuthHydration() {
     };
 
     hydrateAuth();
-  }, [setUser, clearUser]);
+  }, [setUser, clearUser, user]);
 
   return isReady;
 }
