@@ -6,7 +6,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
-import { useFeaturedBooks } from '../../hooks/api/useBooksApi';
+import { useFeaturedBooks, useGenreBooks } from '../../hooks/api/useBooksApi';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
+  const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
 
   useEffect(() => {
     if (!isFocused) return;
@@ -85,6 +86,14 @@ export default function HomeScreen() {
     ? featuredData.trending
     : ((trendingBooks && trendingBooks.length > 0) ? trendingBooks : defaultTrending);
 
+  const currentSectionTitle = selectedCategory === 'Semua'
+    ? 'Trending Minggu ini🔥'
+    : `Buku ${selectedCategory}`;
+
+  const currentBooksData = (selectedCategory !== 'Semua' && categoryBooks && categoryBooks.length > 0)
+    ? categoryBooks
+    : displayTrending;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
@@ -127,7 +136,7 @@ export default function HomeScreen() {
           contentContainerStyle={styles.categoriesScroll}
         >
           {CATEGORIES.map((cat, idx) => {
-            const isSelected = selectedCategory === cat && idx !== 3; // match mockup with double Self Dev
+            const isSelected = selectedCategory === cat;
             return (
               <TouchableOpacity
                 key={`${cat}-${idx}`}
@@ -166,9 +175,9 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        {/* Trending Minggu ini Section */}
+        {/* Dynamic Category / Trending Section Header */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Minggu ini🔥</Text>
+          <Text style={styles.sectionTitle}>{currentSectionTitle}</Text>
           <TouchableOpacity
             style={styles.seeAllButton}
             onPress={() => navigation.navigate('Search')}
@@ -178,12 +187,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Horizontal Trending Books List */}
+        {/* Dynamic Category / Trending Books List */}
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.trendingListContent}
-          data={displayTrending}
+          data={currentBooksData}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
