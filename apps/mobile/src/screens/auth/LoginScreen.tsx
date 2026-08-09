@@ -16,6 +16,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 import { useLogin, useSocialLogin } from '../../hooks/useAuth';
 import { AuthStackParamList } from '../../navigation/types';
 import {
@@ -221,7 +222,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       <View style={styles.innerContainer}>
         {/* App Title */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>BUKOO</Text>
+          <LogoBukoo size={42} />
           <Text style={styles.subtitle}>Selamat datang kembali di perpustakaan digitalmu</Text>
         </View>
 
