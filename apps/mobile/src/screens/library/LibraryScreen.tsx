@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
+import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -18,6 +19,8 @@ export default function LibraryScreen() {
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+
+  const { data: userLibraryProgress, refetch: refetchLibraryProgress } = useUserLibrary();
 
   useEffect(() => {
     if (isFocused) {
@@ -42,7 +45,7 @@ export default function LibraryScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refetchBooks();
+      await Promise.all([refetchBooks(), refetchLibraryProgress()]);
       const ids = await bookDownloadService.getDownloadedBooks();
       setDownloadedBookIds(ids);
     } catch (e) {
@@ -75,6 +78,12 @@ export default function LibraryScreen() {
 
   const displayWantToRead = (books && books.length > 0) ? books : wantToReadBooks;
 
+  const activeProgress = (userLibraryProgress && userLibraryProgress.length > 0) ? userLibraryProgress[0] : null;
+  const activeTitle = activeProgress?.bookTitle || 'Laut Bercerita';
+  const activeCover = activeProgress?.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12093551-L.jpg';
+  const activePercent = activeProgress?.progressPercent ?? 40;
+  const activeBookId = activeProgress?.bookId || 'moby-dick';
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
@@ -101,21 +110,21 @@ export default function LibraryScreen() {
         {/* Featured "Sedang dibaca" Card */}
         <View style={styles.activeCard}>
           <Image
-            source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }}
+            source={{ uri: activeCover }}
             style={styles.activeCover}
           />
           <View style={styles.activeInfo}>
             <View style={styles.readingStatusBadge}>
               <Text style={styles.readingStatusText}>Sedang dibaca</Text>
             </View>
-            <Text style={styles.activeTitle}>Laut Bercerita</Text>
+            <Text style={styles.activeTitle}>{activeTitle}</Text>
             <Text style={styles.activeAuthor}>Laila S. Chudori</Text>
 
             <View style={styles.progressRow}>
               <View style={styles.progressBarBackground}>
-                <View style={[styles.progressBarFill, { width: '40%' }]} />
+                <View style={[styles.progressBarFill, { width: `${activePercent}%` }]} />
               </View>
-              <Text style={styles.progressText}>40%</Text>
+              <Text style={styles.progressText}>{activePercent}%</Text>
             </View>
 
             <TouchableOpacity
@@ -123,7 +132,7 @@ export default function LibraryScreen() {
               activeOpacity={0.8}
               onPress={() => navigation.navigate('ReadingStack', {
                 screen: 'BookDetail',
-                params: { bookId: 'moby-dick' }
+                params: { bookId: activeBookId }
               } as never)}
             >
               <Text style={styles.continueButtonText}>Lanjut Baca</Text>

@@ -282,3 +282,22 @@ export const booksApi = {
     return res.data;
   },
 };
+
+export interface ReadingProgressItemDto {
+  bookId: string;
+  bookTitle?: string;
+  bookCoverUrl?: string;
+  progressPercent?: number;
+  lastReadAt?: string;
+}
+
+export const libraryApi = {
+  getReadingProgress: async (): Promise<ReadingProgressItemDto[]> => {
+    try {
+      const res = await api.get<ReadingProgressItemDto[]>('/reading/progress');
+      return res.data;
+    } catch {
+      return [];
+    }
+  },
+};
