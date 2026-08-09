@@ -103,4 +103,11 @@
   - `[x]` Wire `LibraryScreen.tsx` to `useUserLibrary` for dynamic active reading card & progress percentage.
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
+# Persistent Auth & Silent Auto-Login
+- `[x]` 1. Offline-Resilient Auth & Session Hydration
+  - `[x]` Update `useAuthHydration()` in `apps/mobile/src/hooks/useAuth.ts` to distinguish 401/403 (purge tokens) from network disconnection (preserve cached user profile for offline reading).
+  - `[x]` Verified `ProfileScreen.tsx` logout button clean token eviction via `useLogout()`.
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
+
+
 
