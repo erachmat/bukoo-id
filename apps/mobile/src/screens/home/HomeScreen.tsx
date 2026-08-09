@@ -6,6 +6,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
+import { useFeaturedBooks } from '../../hooks/api/useBooksApi';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -24,6 +25,8 @@ export default function HomeScreen() {
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [refreshing, setRefreshing] = useState(false);
+
+  const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
 
   useEffect(() => {
     if (!isFocused) return;
@@ -47,7 +50,7 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refetchBooks();
+      await Promise.all([refetchFeatured(), refetchBooks()]);
       const ids = await bookDownloadService.getDownloadedBooks();
       setDownloadedBookIds(ids);
     } catch (e) {
@@ -78,7 +81,9 @@ export default function HomeScreen() {
     },
   ];
 
-  const displayTrending = (trendingBooks && trendingBooks.length > 0) ? trendingBooks : defaultTrending;
+  const displayTrending = (featuredData?.trending && featuredData.trending.length > 0)
+    ? featuredData.trending
+    : ((trendingBooks && trendingBooks.length > 0) ? trendingBooks : defaultTrending);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
