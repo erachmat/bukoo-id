@@ -4,16 +4,22 @@
     "slug": "bukoo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.erachmat.bukoo"
+      "bundleIdentifier": "com.erachmat.bukoo",
+      "icon": "./assets/icon.png"
     },
     "android": {
-      "package": "com.erachmat.bukoo"
+      "package": "com.erachmat.bukoo",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B1914"
+      }
     },
     "extra": {
       "eas": {
