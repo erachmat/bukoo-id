@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
@@ -23,6 +23,7 @@ export default function ProfileScreen() {
 
   const [activeModal, setActiveModal] = useState<'account' | 'subscription' | 'preferences' | 'support' | 'about' | null>(null);
   const [newGoalMinutes, setNewGoalMinutes] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { data: goalsData } = useQuery({
     queryKey: ['reading', 'goals'],
@@ -44,14 +45,7 @@ export default function ProfileScreen() {
   });
 
   const handleLogout = () => {
-    Alert.alert(
-      'Keluar',
-      'Apakah Anda yakin ingin keluar dari akun?',
-      [
-        { text: 'Batal', style: 'cancel' },
-        { text: 'Keluar', style: 'destructive', onPress: () => logout() },
-      ]
-    );
+    setShowLogoutModal(true);
   };
 
   const menuItems = [
@@ -382,6 +376,38 @@ export default function ProfileScreen() {
             <TouchableOpacity style={styles.closeModalButton} onPress={() => setActiveModal(null)}>
               <Text style={styles.closeModalButtonText}>Tutup</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Custom Logout Modal */}
+      <Modal visible={showLogoutModal} transparent animationType="fade" onRequestClose={() => setShowLogoutModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.logoutModalCard}>
+            <View style={styles.logoutIconBadge}>
+              <Ionicons name="log-out-outline" size={32} color="#EF4444" />
+            </View>
+
+            <Text style={styles.logoutModalTitle}>Keluar dari BUKOO?</Text>
+            <Text style={styles.logoutModalSubtitle}>
+              Apakah Anda yakin ingin keluar dari akun Anda? Sesi membaca dan progress Anda tersimpan dengan aman.
+            </Text>
+
+            <View style={styles.logoutModalActions}>
+              <TouchableOpacity style={styles.logoutCancelButton} onPress={() => setShowLogoutModal(false)}>
+                <Text style={styles.logoutCancelText}>Batal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutConfirmButton}
+                onPress={() => {
+                  setShowLogoutModal(false);
+                  logout();
+                }}
+              >
+                <Text style={styles.logoutConfirmText}>Ya, Keluar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -913,5 +939,74 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
     lineHeight: 18,
+  },
+  logoutModalCard: {
+    width: '88%',
+    backgroundColor: '#122B23',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#1D4437',
+    padding: 24,
+    alignItems: 'center',
+  },
+  logoutIconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoutModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  logoutModalSubtitle: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  logoutModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  logoutCancelButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#1D4437',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(11, 25, 20, 0.5)',
+  },
+  logoutCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.creamLight,
+  },
+  logoutConfirmButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutConfirmText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: '#FFFFFF',
   },
 });
