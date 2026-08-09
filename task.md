@@ -109,5 +109,13 @@
   - `[x]` Verified `ProfileScreen.tsx` logout button clean token eviction via `useLogout()`.
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
+# HomeScreen Category Filtering Integration
+- `[x]` 1. Dynamic Genre Book Filtering on HomeScreen
+  - `[x]` Connect `HomeScreen.tsx` category pills to `useGenreBooks` (`GET /books?genre=...`).
+  - `[x]` Clean up hardcoded selection index logic (`isSelected = selectedCategory === cat`).
+  - `[x]` Dynamically update section title (`Buku ${selectedCategory}` vs `Trending Minggu ini🔥`) and horizontal book carousel data.
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
+
+
 
 
