@@ -127,6 +127,14 @@
   - `[x]` Replaced plain `<Text style={styles.title}>BUKOO</Text>` in `LoginScreen.tsx` header with `<LogoBukoo size={42} />` using `assets/logo/logo bukoo.png`.
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
+# Mobile App Launcher Icon Update
+- `[x]` 1. Update App Launcher Icons across Expo & Android Resources
+  - `[x]` Extracted primary Dark Forest & Gold BUKOO icon emblem from `assets/BUKOO App icon.png`.
+  - `[x]` Configured `apps/mobile/app.json` for Expo app icons (`icon`, `adaptiveIcon`, `favicon`).
+  - `[x]` Generated native Android app launcher mipmaps (`ic_launcher.webp`, `ic_launcher_round.webp`, `ic_launcher.png`, `ic_launcher_round.png`) across all densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
+
+
 
 
 
