@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { api } from '../../services/api';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'react-native';
+
+import { useSearchBooks, useGenreBooks } from '../../hooks/api/useBooksApi';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -20,19 +20,9 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Trending🔥');
 
-  const { data: searchResults } = useQuery({
-    queryKey: ['search', searchQuery],
-    queryFn: async () => {
-      if (!searchQuery.trim()) return [];
-      try {
-        const response = await api.get(`/books/search?q=${encodeURIComponent(searchQuery)}`);
-        return response.data.items || [];
-      } catch {
-        return [];
-      }
-    },
-    enabled: searchQuery.trim().length > 0,
-  });
+  const { data: searchResults } = useSearchBooks(searchQuery);
+  const cleanCategory = selectedCategory.replace('🔥', '').trim();
+  const { data: genreBooks } = useGenreBooks(cleanCategory);
 
   const exploreBooks = [
     {
@@ -46,6 +36,18 @@ export default function SearchScreen() {
       title: 'BOOK 2 OF AUTHORI...',
       author: 'Jeff Vandermeer',
       coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+    },
+    {
+      id: 'moby-dick-orig',
+      title: 'Moby Dick',
+      author: 'Herman Melville',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+    },
+    {
+      id: 'authority-orig',
+      title: 'BOOK 2 OF AUTHORITY',
+      author: 'Jeff Vandermeer',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
     },
   ];
 
@@ -62,6 +64,18 @@ export default function SearchScreen() {
       author: 'Jeff Vandermeer',
       coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
     },
+    {
+      id: 'laut-bercerita',
+      title: 'Laut Bercerita',
+      author: 'Laila S. Chudori',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+    },
+    {
+      id: 'authority-search',
+      title: 'BOOK 2 OF AUTHORI...',
+      author: 'Jeff Vandermeer',
+      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+    },
   ];
 
   return (
@@ -69,6 +83,11 @@ export default function SearchScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
+          {navigation.canGoBack() && (
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.cream} />
+            </TouchableOpacity>
+          )}
           <Text style={styles.title}>Jelajahi</Text>
           <TouchableOpacity style={styles.filterButton}>
             <Ionicons name="funnel-outline" size={20} color={COLORS.gold} />
@@ -137,7 +156,7 @@ export default function SearchScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.bookListContent}
-              data={exploreBooks}
+              data={(genreBooks && genreBooks.length > 0) ? genreBooks : exploreBooks}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -203,13 +222,17 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
   },
+  backButton: {
+    marginRight: 12,
+    padding: 4,
+  },
   title: {
+    flex: 1,
     fontSize: 28,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
@@ -238,7 +261,7 @@ const styles = StyleSheet.create({
   },
   categoriesScroll: {
     paddingHorizontal: 20,
-    gap: 10,
+    gap: 6,
     marginBottom: 24,
   },
   categoryPill: {
@@ -264,7 +287,7 @@ const styles = StyleSheet.create({
   },
   bookListContent: {
     paddingHorizontal: 20,
-    gap: 16,
+    gap: 8,
     marginBottom: 24,
   },
   exploreBookCard: {
