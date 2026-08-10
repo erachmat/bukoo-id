@@ -18,7 +18,7 @@ export default function MarketingLayout({
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">BUKOO</div>
-            <p className="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 19.900/bulan.</p>
+            <p className="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
             <div className="social-row">
               <div className="social-btn">📘</div>
               <div className="social-btn">📷</div>
@@ -76,7 +76,7 @@ export default function MarketingLayout({
         </div>
 
         <div className="footer-bottom">
-          <div className="footer-copy">© 2025 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</div>
+          <div className="footer-copy">© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</div>
           <div className="footer-legal">
             <Link href="/syarat-ketentuan">Syarat &amp; Ketentuan</Link>
             <Link href="/privasi">Privasi</Link>

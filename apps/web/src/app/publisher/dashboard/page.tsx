@@ -205,7 +205,7 @@ export default async function PublisherDashboardPage() {
                     <div className="step-title">Gross Revenue Platform BUKOO</div>
                     <div className="step-desc">Total pendapatan dari 15.000 subscriber aktif dengan mix tier berbeda.</div>
                     <div className="step-formula">
-                      <span className="var">Subscriber Tier Baca</span>: <span className="num">5.250</span> × Rp 19.900 = Rp 104.475.000<br />
+                      <span className="var">Subscriber Tier Baca</span>: <span className="num">5.250</span> × Rp 29.900 = Rp 156.975.000<br />
                       <span className="var">Subscriber Tier Plus</span>: <span className="num">6.750</span> × Rp 49.900 = Rp 336.825.000<br />
                       <span className="var">Subscriber Tier Prem</span>: <span className="num">3.000</span> × Rp 79.900 = Rp 239.700.000<br />
                       <span className="result">Gross Revenue = {formatRupiah(grossRevenue)}</span>

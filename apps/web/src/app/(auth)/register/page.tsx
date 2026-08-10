@@ -22,7 +22,7 @@ export default async function RegisterPage(props: {
         Mulai Gratis 7 Hari
       </h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6' }}>
-        Buat akun dan nikmati akses ke 200.000+ buku tanpa biaya apapun.
+        Buat akun dan nikmati akses ke 2.000+ buku tanpa biaya apapun.
       </p>
 
       {params.error && (
@@ -40,7 +40,7 @@ export default async function RegisterPage(props: {
       {/* Value props */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
         {[
-          '✅ 200.000+ judul buku digital',
+          '✅ 2.000+ judul buku digital',
           '✅ Gratis 7 hari, tanpa kartu kredit',
           '✅ Batal kapan saja',
         ].map((item) => (

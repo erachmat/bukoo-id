@@ -5986,3 +5986,740 @@
 {"_e":"metro:client_log","_t":1786212073874,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
 {"_e":"metro:client_log","_t":1786212074119,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
 {"_e":"metro:client_log","_t":1786212074365,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"root:init","_t":1786212578956,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786212578971,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786212580122,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786212582148,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[117060:0809/010940.313703:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786212591460,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786212597318,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786212597319,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786212597324,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786212597424,"id":"1","progress":0.03126859012492564,"total":164,"current":29}
+{"_e":"metro:bundling:progress","_t":1786212597527,"id":"1","progress":0.06691279642547941,"total":317,"current":82}
+{"_e":"metro:bundling:progress","_t":1786212597627,"id":"1","progress":0.2895799811088803,"total":459,"current":247}
+{"_e":"metro:bundling:progress","_t":1786212597727,"id":"1","progress":0.37950645901524765,"total":586,"current":361}
+{"_e":"metro:bundling:progress","_t":1786212597827,"id":"1","progress":0.4489386175452001,"total":694,"current":465}
+{"_e":"metro:bundling:progress","_t":1786212597927,"id":"1","progress":0.5981259579816033,"total":759,"current":587}
+{"_e":"metro:bundling:progress","_t":1786212598027,"id":"1","progress":0.6662712732085555,"total":849,"current":693}
+{"_e":"metro:bundling:progress","_t":1786212598146,"id":"1","progress":0.6662712732085555,"total":974,"current":793}
+{"_e":"metro:bundling:progress","_t":1786212598246,"id":"1","progress":0.7044295274339816,"total":1033,"current":867}
+{"_e":"metro:bundling:progress","_t":1786212598346,"id":"1","progress":0.7502866769427387,"total":1121,"current":971}
+{"_e":"metro:bundling:progress","_t":1786212598446,"id":"1","progress":0.9092926127983119,"total":1163,"current":1109}
+{"_e":"metro:bundling:progress","_t":1786212598546,"id":"1","progress":0.9983200338959113,"total":1190,"current":1189}
+{"_e":"metro:bundling:progress","_t":1786212598996,"id":"1","progress":0.999,"total":1190,"current":1190}
+{"_e":"metro:bundling:progress","_t":1786212599111,"id":"1","progress":0.999,"total":1243,"current":1243}
+{"_e":"metro:bundling:done","_t":1786212599193,"id":"1","total":1243,"ms":1875.046064}
+{"_e":"metro:client_log","_t":1786212604687,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786212606192,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786212628976,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786212629897,"level":"log","data":["[Perf] WebView shell ready duration: 1668ms"]}
+{"_e":"metro:client_log","_t":1786212630160,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786212630338,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 41ms"]}
+{"_e":"metro:client_log","_t":1786212630339,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786212630807,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2578ms, In-WebView load: 321ms, Location gen (generated): 295ms"]}
+{"_e":"metro:client_log","_t":1786212634857,"level":"log","data":["[Perf] WebView shell ready duration: 6625ms"]}
+{"_e":"metro:client_log","_t":1786212634912,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 56ms"]}
+{"_e":"metro:client_log","_t":1786212634913,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786212635262,"level":"log","data":["[Perf] Total Time-to-First-Frame: 7033ms, In-WebView load: 268ms, Location gen (generated): 248ms"]}
+{"_e":"metro:client_log","_t":1786212674536,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786212681279,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786212683079,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786212684080,"level":"log","data":["[Perf] Page turn latency: 70ms"]}
+{"_e":"metro:client_log","_t":1786212684890,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786212685243,"level":"log","data":["[Perf] Page turn latency: 69ms"]}
+{"_e":"metro:client_log","_t":1786212685662,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786212685900,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786212686206,"level":"log","data":["[Perf] Page turn latency: 153ms"]}
+{"_e":"metro:client_log","_t":1786212686772,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786212687111,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1786212688408,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786212689232,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786212690110,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786212691090,"level":"log","data":["[Perf] Page turn latency: 210ms"]}
+{"_e":"metro:client_log","_t":1786212691859,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1786212693364,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786212718466,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786212718513,"level":"log","data":["[Perf] WebView shell ready duration: 615ms"]}
+{"_e":"metro:client_log","_t":1786212718807,"level":"log","data":["[Perf] WebView shell ready duration: 941ms"]}
+{"_e":"metro:client_log","_t":1786212718862,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 83ms"]}
+{"_e":"metro:client_log","_t":1786212718864,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786212718898,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 101ms"]}
+{"_e":"metro:client_log","_t":1786212718899,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786212719155,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1291ms, In-WebView load: 61ms, Location gen (cached): 46ms"]}
+{"_e":"metro:client_log","_t":1786212835870,"level":"log","data":["[Perf] Page turn latency: 135ms"]}
+{"_e":"metro:client_log","_t":1786212838246,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786212838445,"level":"log","data":["[Perf] WebView shell ready duration: 758ms"]}
+{"_e":"metro:client_log","_t":1786212838525,"level":"log","data":["[Perf] WebView shell ready duration: 838ms"]}
+{"_e":"metro:client_log","_t":1786212838574,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 44ms"]}
+{"_e":"metro:client_log","_t":1786212838575,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786212838895,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1206ms, In-WebView load: 98ms, Location gen (cached): 66ms"]}
+{"_e":"metro:bundling:failed","_t":1786213017117,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/components/SettingsModal.tsx: Expected corresponding JSX closing tag for <View>. (212:4)\n\n  210 |         </View>\n  211 |       </View>\n> 212 |     </Modal>\n      |     ^\n  213 |   );\n  214 | };\n  215 |","importStack":null,"filename":"src/screens/reading/components/SettingsModal.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:failed","_t":1786213022864,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/components/SettingsModal.tsx: Expected corresponding JSX closing tag for <TouchableOpacity>. (132:12)\n\n  130 |                     <Ionicons name=\"checkmark-circle\" size={16} color={COLORS.gold} style={styles.checkIcon} />\n  131 |                   )}\n> 132 |             </View>\n      |             ^\n  133 |           </View>\n  134 |\n  135 |           {/* Page Turn Mode Selector */}","importStack":null,"filename":"src/screens/reading/components/SettingsModal.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:failed","_t":1786213029480,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/components/SettingsModal.tsx: Expected corresponding JSX closing tag for <TouchableOpacity>. (132:12)\n\n  130 |                     <Ionicons name=\"checkmark-circle\" size={16} color={COLORS.gold} style={styles.checkIcon} />\n  131 |                   )}\n> 132 |             </View>\n      |             ^\n  133 |           </View>\n  134 |\n  135 |           {/* Page Turn Mode Selector */}","importStack":null,"filename":"src/screens/reading/components/SettingsModal.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:failed","_t":1786213037875,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/components/SettingsModal.tsx: Expected corresponding JSX closing tag for <TouchableOpacity>. (132:12)\n\n  130 |                     <Ionicons name=\"checkmark-circle\" size={16} color={COLORS.gold} style={styles.checkIcon} />\n  131 |                   )}\n> 132 |             </View>\n      |             ^\n  133 |           </View>\n  134 |\n  135 |           {/* Page Turn Mode Selector */}","importStack":null,"filename":"src/screens/reading/components/SettingsModal.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:client_log","_t":1786213086047,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213086435,"level":"log","data":["[Perf] WebView shell ready duration: 1072ms"]}
+{"_e":"metro:client_log","_t":1786213086486,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 35ms"]}
+{"_e":"metro:client_log","_t":1786213086487,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213086753,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1390ms, In-WebView load: 115ms, Location gen (cached): 86ms"]}
+{"_e":"metro:client_log","_t":1786213295583,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213295700,"level":"log","data":["[Perf] WebView shell ready duration: 689ms"]}
+{"_e":"metro:client_log","_t":1786213295778,"level":"log","data":["[Perf] WebView shell ready duration: 768ms"]}
+{"_e":"metro:client_log","_t":1786213295818,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 36ms"]}
+{"_e":"metro:client_log","_t":1786213295822,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213296122,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1110ms, In-WebView load: 106ms, Location gen (cached): 69ms"]}
+{"_e":"metro:client_log","_t":1786213480857,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 137ms"]}
+{"_e":"metro:client_log","_t":1786213480900,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213480911,"level":"log","data":["[Perf] WebView shell ready duration: 185909ms"]}
+{"_e":"metro:client_log","_t":1786213480936,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213481051,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 128ms"]}
+{"_e":"metro:client_log","_t":1786213481053,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213481111,"level":"log","data":["[Perf] Total Time-to-First-Frame: 186111ms, In-WebView load: 82ms, Location gen (cached): 57ms"]}
+{"_e":"metro:client_log","_t":1786213481252,"level":"log","data":["[Perf] Total Time-to-First-Frame: 186251ms, In-WebView load: 54ms, Location gen (cached): 31ms"]}
+{"_e":"metro:client_log","_t":1786213481583,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:bundling:started","_t":1786213501858,"id":"e","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786213501858,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786213501946,"id":"e","total":1,"ms":87.147088}
+{"_e":"metro:client_log","_t":1786213507990,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786213529490,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213530109,"level":"log","data":["[Perf] WebView shell ready duration: 1904ms"]}
+{"_e":"metro:client_log","_t":1786213530160,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 40ms"]}
+{"_e":"metro:client_log","_t":1786213530161,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213530480,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2274ms, In-WebView load: 107ms, Location gen (cached): 70ms"]}
+{"_e":"metro:client_log","_t":1786213699639,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 110ms"]}
+{"_e":"metro:client_log","_t":1786213699680,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213699713,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213699805,"level":"log","data":["[Perf] Total Time-to-First-Frame: 171607ms, In-WebView load: 87ms, Location gen (cached): 40ms"]}
+{"_e":"metro:client_log","_t":1786213700129,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:bundling:started","_t":1786213782796,"id":"g","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786213782796,"id":"g","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786213782865,"id":"g","total":1,"ms":68.980221}
+{"_e":"metro:client_log","_t":1786213789088,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786213802127,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213802725,"level":"log","data":["[Perf] WebView shell ready duration: 1905ms"]}
+{"_e":"metro:client_log","_t":1786213802776,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 36ms"]}
+{"_e":"metro:client_log","_t":1786213802778,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213802995,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2176ms, In-WebView load: 109ms, Location gen (cached): 76ms"]}
+{"_e":"metro:client_log","_t":1786213814995,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213815213,"level":"log","data":["[Perf] WebView shell ready duration: 732ms"]}
+{"_e":"metro:client_log","_t":1786213815234,"level":"log","data":["[Perf] WebView shell ready duration: 754ms"]}
+{"_e":"metro:client_log","_t":1786213815304,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 69ms"]}
+{"_e":"metro:client_log","_t":1786213815306,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213815352,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 122ms"]}
+{"_e":"metro:client_log","_t":1786213815356,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213815623,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1142ms, In-WebView load: 75ms, Location gen (cached): 51ms"]}
+{"_e":"metro:client_log","_t":1786213873447,"level":"log","data":["[Perf] Page turn latency: 188ms"]}
+{"_e":"metro:client_log","_t":1786213886981,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213887179,"level":"log","data":["[Perf] WebView shell ready duration: 738ms"]}
+{"_e":"metro:client_log","_t":1786213887242,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 41ms"]}
+{"_e":"metro:client_log","_t":1786213887245,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213887294,"level":"log","data":["[Perf] WebView shell ready duration: 853ms"]}
+{"_e":"metro:client_log","_t":1786213887324,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 37ms"]}
+{"_e":"metro:client_log","_t":1786213887327,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213887691,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1254ms, In-WebView load: 77ms, Location gen (cached): 60ms"]}
+{"_e":"metro:client_log","_t":1786213970393,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213970437,"level":"log","data":["[Perf] WebView shell ready duration: 859ms"]}
+{"_e":"metro:client_log","_t":1786213970437,"level":"log","data":["[Perf] WebView shell ready duration: 862ms"]}
+{"_e":"metro:client_log","_t":1786213970568,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 38ms"]}
+{"_e":"metro:client_log","_t":1786213970570,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213970824,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1283ms, In-WebView load: 95ms, Location gen (cached): 66ms"]}
+{"_e":"metro:client_log","_t":1786213978911,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786213982421,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786213984397,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786213985387,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786213986031,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786213986499,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786213986724,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786213990369,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786213990668,"level":"log","data":["[Perf] WebView shell ready duration: 855ms"]}
+{"_e":"metro:client_log","_t":1786213990676,"level":"log","data":["[Perf] WebView shell ready duration: 863ms"]}
+{"_e":"metro:client_log","_t":1786213990720,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 65ms"]}
+{"_e":"metro:client_log","_t":1786213990721,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213990811,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 109ms"]}
+{"_e":"metro:client_log","_t":1786213990813,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786213991045,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1232ms, In-WebView load: 70ms, Location gen (cached): 53ms"]}
+{"_e":"metro:client_log","_t":1786213993567,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786213994162,"level":"log","data":["[Perf] Page turn latency: 68ms"]}
+{"_e":"metro:client_log","_t":1786213994390,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786213994590,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786213995137,"level":"log","data":["[Perf] Page turn latency: 146ms"]}
+{"_e":"metro:client_log","_t":1786213995464,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786214002221,"level":"log","data":["[Perf] Page turn latency: 62ms"]}
+{"_e":"metro:client_log","_t":1786214003875,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786214004383,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786214004599,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786214005204,"level":"log","data":["[Perf] Page turn latency: 173ms"]}
+{"_e":"metro:client_log","_t":1786214005397,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786214005605,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786214005770,"level":"log","data":["[Perf] Page turn latency: 71ms"]}
+{"_e":"metro:client_log","_t":1786214006180,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1786214012519,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786214028037,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786214028223,"level":"log","data":["[Perf] WebView shell ready duration: 753ms"]}
+{"_e":"metro:client_log","_t":1786214028256,"level":"log","data":["[Perf] WebView shell ready duration: 789ms"]}
+{"_e":"metro:client_log","_t":1786214028295,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 48ms"]}
+{"_e":"metro:client_log","_t":1786214028298,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214028368,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 107ms"]}
+{"_e":"metro:client_log","_t":1786214028369,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214028545,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1076ms, In-WebView load: 78ms, Location gen (cached): 66ms"]}
+{"_e":"metro:client_log","_t":1786214032153,"level":"log","data":["[Perf] Page turn latency: 63ms"]}
+{"_e":"metro:client_log","_t":1786214032878,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786214045476,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786214045620,"level":"log","data":["[Perf] WebView shell ready duration: 742ms"]}
+{"_e":"metro:client_log","_t":1786214045667,"level":"log","data":["[Perf] WebView shell ready duration: 789ms"]}
+{"_e":"metro:client_log","_t":1786214045682,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 42ms"]}
+{"_e":"metro:client_log","_t":1786214045684,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214045763,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 103ms"]}
+{"_e":"metro:client_log","_t":1786214045765,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214046075,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1197ms, In-WebView load: 97ms, Location gen (cached): 81ms"]}
+{"_e":"metro:client_log","_t":1786214135846,"level":"log","data":["[Perf] Page turn latency: 169ms"]}
+{"_e":"metro:bundling:started","_t":1786214299457,"id":"i","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786214299458,"id":"i","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786214299537,"id":"i","total":1,"ms":78.944768}
+{"_e":"metro:client_log","_t":1786214305722,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786214318016,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786214318608,"level":"log","data":["[Perf] WebView shell ready duration: 1890ms"]}
+{"_e":"metro:client_log","_t":1786214318652,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 30ms"]}
+{"_e":"metro:client_log","_t":1786214318653,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214318844,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2126ms, In-WebView load: 106ms, Location gen (cached): 76ms"]}
+{"_e":"metro:client_log","_t":1786214324951,"level":"log","data":["[Perf] Page turn latency: 870ms"]}
+{"_e":"metro:client_log","_t":1786214327697,"level":"log","data":["[Perf] Page turn latency: 1158ms"]}
+{"_e":"metro:client_log","_t":1786214331283,"level":"log","data":["[Perf] Page turn latency: 1084ms"]}
+{"_e":"metro:bundling:started","_t":1786214590544,"id":"k","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786214590544,"id":"k","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786214590630,"id":"k","total":1,"ms":86.127882}
+{"_e":"metro:client_log","_t":1786214596888,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786214622128,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786214622711,"level":"log","data":["[Perf] WebView shell ready duration: 1901ms"]}
+{"_e":"metro:client_log","_t":1786214622757,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 33ms"]}
+{"_e":"metro:client_log","_t":1786214622758,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214623059,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2251ms, In-WebView load: 112ms, Location gen (cached): 79ms"]}
+{"_e":"metro:client_log","_t":1786214628817,"level":"log","data":["[Perf] Page turn latency: 770ms"]}
+{"_e":"metro:client_log","_t":1786214632603,"level":"log","data":["[Perf] Page turn latency: 532ms"]}
+{"_e":"metro:client_log","_t":1786214736985,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786214736989,"level":"log","data":["[Perf] WebView shell ready duration: 686ms"]}
+{"_e":"metro:client_log","_t":1786214737257,"level":"log","data":["[Perf] WebView shell ready duration: 956ms"]}
+{"_e":"metro:client_log","_t":1786214737300,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 67ms"]}
+{"_e":"metro:client_log","_t":1786214737302,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214737337,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 87ms"]}
+{"_e":"metro:client_log","_t":1786214737338,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786214737630,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1329ms, In-WebView load: 73ms, Location gen (cached): 54ms"]}
+{"_e":"metro:client_log","_t":1786214740491,"level":"log","data":["[Perf] Page turn latency: 833ms"]}
+{"_e":"metro:client_log","_t":1786214743922,"level":"log","data":["[Perf] Page turn latency: 1873ms"]}
+{"_e":"metro:client_log","_t":1786214745225,"level":"log","data":["[Perf] Page turn latency: 1165ms"]}
+{"_e":"metro:bundling:started","_t":1786215182413,"id":"m","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786215182413,"id":"m","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786215182475,"id":"m","total":1,"ms":61.997102}
+{"_e":"metro:client_log","_t":1786215188903,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786215200883,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786215201487,"level":"log","data":["[Perf] WebView shell ready duration: 1965ms"]}
+{"_e":"metro:client_log","_t":1786215201543,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 41ms"]}
+{"_e":"metro:client_log","_t":1786215201544,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786215201851,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2328ms, In-WebView load: 115ms, Location gen (cached): 78ms"]}
+{"_e":"metro:client_log","_t":1786215206740,"level":"log","data":["[Perf] Page turn latency: 58ms"]}
+{"_e":"metro:client_log","_t":1786215207565,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786215207830,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786215208030,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786215211123,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1786215211519,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1786215211720,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1786215211914,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786215212291,"level":"log","data":["[Perf] Page turn latency: 187ms"]}
+{"_e":"metro:client_log","_t":1786215212477,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786215212679,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1786215212944,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786215213647,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1786215218578,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786215219180,"level":"log","data":["[Perf] Page turn latency: 96ms"]}
+{"_e":"metro:client_log","_t":1786215219654,"level":"log","data":["[Perf] Page turn latency: 96ms"]}
+{"_e":"metro:client_log","_t":1786215220410,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1786215221346,"level":"log","data":["[Perf] Page turn latency: 189ms"]}
+{"_e":"metro:client_log","_t":1786215221869,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1786215222630,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786215223357,"level":"log","data":["[Perf] Page turn latency: 171ms"]}
+{"_e":"metro:client_log","_t":1786215227718,"level":"log","data":["[Perf] Page turn latency: 181ms"]}
+{"_e":"metro:client_log","_t":1786215228406,"level":"log","data":["[Perf] Page turn latency: 209ms"]}
+{"_e":"metro:client_log","_t":1786215229008,"level":"log","data":["[Perf] Page turn latency: 184ms"]}
+{"_e":"metro:client_log","_t":1786215229736,"level":"log","data":["[Perf] Page turn latency: 186ms"]}
+{"_e":"metro:client_log","_t":1786215230595,"level":"log","data":["[Perf] Page turn latency: 186ms"]}
+{"_e":"metro:client_log","_t":1786215231779,"level":"log","data":["[Perf] Page turn latency: 183ms"]}
+{"_e":"metro:client_log","_t":1786215232902,"level":"log","data":["[Perf] Page turn latency: 185ms"]}
+{"_e":"metro:client_log","_t":1786215233939,"level":"log","data":["[Perf] Page turn latency: 184ms"]}
+{"_e":"metro:client_log","_t":1786215234586,"level":"log","data":["[Perf] Page turn latency: 179ms"]}
+{"_e":"metro:client_log","_t":1786215235231,"level":"log","data":["[Perf] Page turn latency: 190ms"]}
+{"_e":"metro:client_log","_t":1786215239031,"level":"log","data":["[Perf] Page turn latency: 198ms"]}
+{"_e":"metro:client_log","_t":1786215239659,"level":"log","data":["[Perf] Page turn latency: 198ms"]}
+{"_e":"metro:client_log","_t":1786215240273,"level":"log","data":["[Perf] Page turn latency: 204ms"]}
+{"_e":"metro:client_log","_t":1786215240943,"level":"log","data":["[Perf] Page turn latency: 196ms"]}
+{"_e":"metro:client_log","_t":1786215241919,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1786215242763,"level":"log","data":["[Perf] Page turn latency: 204ms"]}
+{"_e":"metro:client_log","_t":1786215243653,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1786215244469,"level":"log","data":["[Perf] Page turn latency: 294ms"]}
+{"_e":"metro:client_log","_t":1786215245286,"level":"log","data":["[Perf] Page turn latency: 203ms"]}
+{"_e":"metro:client_log","_t":1786215245942,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1786215246341,"level":"log","data":["[Perf] Page turn latency: 204ms"]}
+{"_e":"metro:client_log","_t":1786215246723,"level":"log","data":["[Perf] Page turn latency: 25ms"]}
+{"_e":"metro:client_log","_t":1786215247186,"level":"log","data":["[Perf] Page turn latency: 10ms"]}
+{"_e":"metro:client_log","_t":1786215247670,"level":"log","data":["[Perf] Page turn latency: 43ms"]}
+{"_e":"metro:client_log","_t":1786215247847,"level":"log","data":["[Perf] Page turn latency: 7ms"]}
+{"_e":"metro:client_log","_t":1786215248306,"level":"log","data":["[Perf] Page turn latency: 179ms"]}
+{"_e":"metro:client_log","_t":1786215248589,"level":"log","data":["[Perf] Page turn latency: 202ms"]}
+{"_e":"metro:client_log","_t":1786215248880,"level":"log","data":["[Perf] Page turn latency: 202ms"]}
+{"_e":"metro:client_log","_t":1786215249180,"level":"log","data":["[Perf] Page turn latency: 196ms"]}
+{"_e":"metro:client_log","_t":1786215250874,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1786215252541,"level":"log","data":["[Perf] Page turn latency: 236ms"]}
+{"_e":"metro:client_log","_t":1786215253379,"level":"log","data":["[Perf] Page turn latency: 200ms"]}
+{"_e":"metro:client_log","_t":1786215254184,"level":"log","data":["[Perf] Page turn latency: 198ms"]}
+{"_e":"metro:client_log","_t":1786215255568,"level":"log","data":["[Perf] Page turn latency: 212ms"]}
+{"_e":"metro:client_log","_t":1786215256240,"level":"log","data":["[Perf] Page turn latency: 194ms"]}
+{"_e":"metro:client_log","_t":1786215257684,"level":"log","data":["[Perf] Page turn latency: 174ms"]}
+{"_e":"metro:client_log","_t":1786215258098,"level":"log","data":["[Perf] Page turn latency: 203ms"]}
+{"_e":"metro:client_log","_t":1786215258401,"level":"log","data":["[Perf] Page turn latency: 41ms"]}
+{"_e":"metro:client_log","_t":1786215258664,"level":"log","data":["[Perf] Page turn latency: 1ms"]}
+{"_e":"metro:client_log","_t":1786215259870,"level":"log","data":["[Perf] Page turn latency: 195ms"]}
+{"_e":"metro:client_log","_t":1786215260926,"level":"log","data":["[Perf] Page turn latency: 196ms"]}
+{"_e":"metro:client_log","_t":1786215261616,"level":"log","data":["[Perf] Page turn latency: 193ms"]}
+{"_e":"metro:client_log","_t":1786215266606,"level":"log","data":["[Perf] Page turn latency: 253ms"]}
+{"_e":"metro:client_log","_t":1786215267421,"level":"log","data":["[Perf] Page turn latency: 174ms"]}
+{"_e":"metro:client_log","_t":1786215287249,"level":"log","data":["[Perf] Page turn latency: 185ms"]}
+{"_e":"metro:client_log","_t":1786215291547,"level":"log","data":["[Perf] Page turn latency: 196ms"]}
+{"_e":"metro:client_log","_t":1786215292278,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1786215292936,"level":"log","data":["[Perf] Page turn latency: 183ms"]}
+{"_e":"metro:client_log","_t":1786215296312,"level":"log","data":["[Perf] Page turn latency: 169ms"]}
+{"_e":"metro:client_log","_t":1786215297546,"level":"log","data":["[Perf] Page turn latency: 178ms"]}
+{"_e":"metro:client_log","_t":1786215298794,"level":"log","data":["[Perf] Page turn latency: 222ms"]}
+{"_e":"metro:client_log","_t":1786215306883,"level":"log","data":["[Perf] Page turn latency: 177ms"]}
+{"_e":"metro:client_log","_t":1786215307543,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1786215311871,"level":"log","data":["[Perf] Page turn latency: 156ms"]}
+{"_e":"metro:client_log","_t":1786215312486,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786215357821,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786215358215,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786215358518,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"root:init","_t":1786216507628,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786216507644,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786216508960,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786216511070,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[141606:0809/021509.149514:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786216520745,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786216528002,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786216528003,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786216528011,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786216528111,"id":"1","progress":0.012844444444444443,"total":150,"current":17}
+{"_e":"metro:bundling:progress","_t":1786216528211,"id":"1","progress":0.06086608379501385,"total":304,"current":75}
+{"_e":"metro:bundling:progress","_t":1786216528311,"id":"1","progress":0.21519854057237525,"total":457,"current":212}
+{"_e":"metro:bundling:progress","_t":1786216528411,"id":"1","progress":0.3647897870893271,"total":553,"current":334}
+{"_e":"metro:bundling:progress","_t":1786216528511,"id":"1","progress":0.47369220859340977,"total":664,"current":457}
+{"_e":"metro:bundling:progress","_t":1786216528611,"id":"1","progress":0.4975967859751644,"total":740,"current":522}
+{"_e":"metro:bundling:progress","_t":1786216528714,"id":"1","progress":0.7153181893009376,"total":791,"current":669}
+{"_e":"metro:bundling:progress","_t":1786216528813,"id":"1","progress":0.7190581628926225,"total":888,"current":753}
+{"_e":"metro:bundling:progress","_t":1786216528932,"id":"1","progress":0.7190581628926225,"total":977,"current":794}
+{"_e":"metro:bundling:progress","_t":1786216529032,"id":"1","progress":0.7190581628926225,"total":1022,"current":857}
+{"_e":"metro:bundling:progress","_t":1786216529143,"id":"1","progress":0.7467801664482442,"total":1119,"current":967}
+{"_e":"metro:bundling:progress","_t":1786216529243,"id":"1","progress":0.8559829480048708,"total":1163,"current":1076}
+{"_e":"metro:bundling:progress","_t":1786216529343,"id":"1","progress":0.979815489796633,"total":1183,"current":1171}
+{"_e":"metro:bundling:progress","_t":1786216529443,"id":"1","progress":0.9983200338959113,"total":1190,"current":1189}
+{"_e":"metro:bundling:progress","_t":1786216529959,"id":"1","progress":0.999,"total":1190,"current":1190}
+{"_e":"metro:bundling:done","_t":1786216530125,"id":"1","total":1190,"ms":2122.753274}
+{"_e":"metro:client_log","_t":1786216535511,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786216536890,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786216561944,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786216563512,"level":"log","data":["[Perf] WebView shell ready duration: 2294ms"]}
+{"_e":"metro:client_log","_t":1786216563815,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786216564008,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 42ms"]}
+{"_e":"metro:client_log","_t":1786216564010,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786216564386,"level":"log","data":["[Perf] Total Time-to-First-Frame: 3168ms, In-WebView load: 291ms, Location gen (generated): 252ms"]}
+{"_e":"metro:client_log","_t":1786216568938,"level":"log","data":["[Perf] WebView shell ready duration: 7720ms"]}
+{"_e":"metro:client_log","_t":1786216568972,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 31ms"]}
+{"_e":"metro:client_log","_t":1786216568976,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786216569332,"level":"log","data":["[Perf] Total Time-to-First-Frame: 8114ms, In-WebView load: 249ms, Location gen (generated): 223ms"]}
+{"_e":"metro:client_log","_t":1786216574095,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1786216575030,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786216575516,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786216575848,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1786216576053,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786216576228,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1786216576427,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786216576646,"level":"log","data":["[Perf] Page turn latency: 99ms"]}
+{"_e":"metro:client_log","_t":1786216579326,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786216579903,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786216580274,"level":"log","data":["[Perf] Page turn latency: 113ms"]}
+{"_e":"root:init","_t":1786282017668,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786282017699,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786282018880,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786282021298,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[111078:0809/202659.074225:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786282029764,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786282058265,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786282058266,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786282058271,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786282058937,"id":"1","progress":0.010000000000000002,"total":1,"current":1}
+{"_e":"metro:bundling:progress","_t":1786282059037,"id":"1","progress":0.04000000000000001,"total":10,"current":2}
+{"_e":"metro:bundling:progress","_t":1786282059144,"id":"1","progress":0.16000000000000003,"total":10,"current":4}
+{"_e":"metro:bundling:progress","_t":1786282059247,"id":"1","progress":0.16000000000000003,"total":12,"current":4}
+{"_e":"metro:bundling:progress","_t":1786282059285,"id":"1","progress":0.17361111111111113,"total":12,"current":5}
+{"_e":"metro:bundling:progress","_t":1786282059386,"id":"1","progress":0.17361111111111113,"total":37,"current":6}
+{"_e":"metro:bundling:progress","_t":1786282059490,"id":"1","progress":0.17361111111111113,"total":41,"current":7}
+{"_e":"metro:bundling:progress","_t":1786282059536,"id":"1","progress":0.17361111111111113,"total":41,"current":8}
+{"_e":"metro:bundling:progress","_t":1786282059636,"id":"1","progress":0.17361111111111113,"total":46,"current":12}
+{"_e":"metro:bundling:progress","_t":1786282059747,"id":"1","progress":0.17361111111111113,"total":50,"current":14}
+{"_e":"metro:bundling:progress","_t":1786282059855,"id":"1","progress":0.17361111111111113,"total":51,"current":15}
+{"_e":"metro:bundling:progress","_t":1786282059886,"id":"1","progress":0.17361111111111113,"total":51,"current":16}
+{"_e":"metro:bundling:progress","_t":1786282059987,"id":"1","progress":0.17361111111111113,"total":58,"current":19}
+{"_e":"metro:bundling:progress","_t":1786282060091,"id":"1","progress":0.17361111111111113,"total":60,"current":23}
+{"_e":"metro:bundling:progress","_t":1786282060191,"id":"1","progress":0.1758584807492196,"total":62,"current":26}
+{"_e":"metro:bundling:progress","_t":1786282060291,"id":"1","progress":0.20897959183673467,"total":70,"current":32}
+{"_e":"metro:bundling:progress","_t":1786282060391,"id":"1","progress":0.25,"total":72,"current":36}
+{"_e":"metro:bundling:progress","_t":1786282060492,"id":"1","progress":0.28994082840236685,"total":78,"current":42}
+{"_e":"metro:bundling:progress","_t":1786282060591,"id":"1","progress":0.40057683063611604,"total":79,"current":50}
+{"_e":"metro:bundling:progress","_t":1786282060691,"id":"1","progress":0.4444444444444444,"total":84,"current":56}
+{"_e":"metro:bundling:progress","_t":1786282060808,"id":"1","progress":0.4933390022675736,"total":84,"current":59}
+{"_e":"metro:bundling:progress","_t":1786282060983,"id":"1","progress":0.4933390022675736,"total":96,"current":63}
+{"_e":"metro:bundling:progress","_t":1786282061088,"id":"1","progress":0.4933390022675736,"total":258,"current":70}
+{"_e":"metro:bundling:progress","_t":1786282061201,"id":"1","progress":0.4933390022675736,"total":275,"current":80}
+{"_e":"metro:bundling:progress","_t":1786282061319,"id":"1","progress":0.4933390022675736,"total":276,"current":86}
+{"_e":"metro:bundling:progress","_t":1786282061419,"id":"1","progress":0.4933390022675736,"total":278,"current":88}
+{"_e":"metro:bundling:progress","_t":1786282061519,"id":"1","progress":0.4933390022675736,"total":297,"current":93}
+{"_e":"metro:bundling:progress","_t":1786282061620,"id":"1","progress":0.4933390022675736,"total":298,"current":95}
+{"_e":"metro:bundling:progress","_t":1786282061720,"id":"1","progress":0.4933390022675736,"total":301,"current":98}
+{"_e":"metro:bundling:progress","_t":1786282061821,"id":"1","progress":0.4933390022675736,"total":302,"current":99}
+{"_e":"metro:bundling:progress","_t":1786282061835,"id":"1","progress":0.4933390022675736,"total":302,"current":100}
+{"_e":"metro:bundling:progress","_t":1786282061935,"id":"1","progress":0.4933390022675736,"total":308,"current":104}
+{"_e":"metro:bundling:progress","_t":1786282062036,"id":"1","progress":0.4933390022675736,"total":311,"current":107}
+{"_e":"metro:bundling:progress","_t":1786282062116,"id":"1","progress":0.4933390022675736,"total":311,"current":108}
+{"_e":"metro:bundling:progress","_t":1786282062221,"id":"1","progress":0.4933390022675736,"total":321,"current":111}
+{"_e":"metro:bundling:progress","_t":1786282062365,"id":"1","progress":0.4933390022675736,"total":323,"current":113}
+{"_e":"metro:bundling:progress","_t":1786282062467,"id":"1","progress":0.4933390022675736,"total":330,"current":116}
+{"_e":"metro:bundling:progress","_t":1786282062655,"id":"1","progress":0.4933390022675736,"total":330,"current":117}
+{"_e":"metro:bundling:progress","_t":1786282062761,"id":"1","progress":0.4933390022675736,"total":333,"current":118}
+{"_e":"metro:bundling:progress","_t":1786282062863,"id":"1","progress":0.4933390022675736,"total":338,"current":123}
+{"_e":"metro:bundling:progress","_t":1786282062966,"id":"1","progress":0.4933390022675736,"total":340,"current":126}
+{"_e":"metro:bundling:progress","_t":1786282063070,"id":"1","progress":0.4933390022675736,"total":354,"current":135}
+{"_e":"metro:bundling:progress","_t":1786282063170,"id":"1","progress":0.4933390022675736,"total":357,"current":141}
+{"_e":"metro:bundling:progress","_t":1786282063270,"id":"1","progress":0.4933390022675736,"total":360,"current":146}
+{"_e":"metro:bundling:progress","_t":1786282063373,"id":"1","progress":0.4933390022675736,"total":373,"current":155}
+{"_e":"metro:bundling:progress","_t":1786282063474,"id":"1","progress":0.4933390022675736,"total":379,"current":164}
+{"_e":"metro:bundling:progress","_t":1786282063574,"id":"1","progress":0.4933390022675736,"total":385,"current":176}
+{"_e":"metro:bundling:progress","_t":1786282063677,"id":"1","progress":0.4933390022675736,"total":408,"current":188}
+{"_e":"metro:bundling:progress","_t":1786282063779,"id":"1","progress":0.4933390022675736,"total":410,"current":199}
+{"_e":"metro:bundling:progress","_t":1786282063880,"id":"1","progress":0.4933390022675736,"total":413,"current":206}
+{"_e":"metro:bundling:progress","_t":1786282063985,"id":"1","progress":0.4933390022675736,"total":424,"current":216}
+{"_e":"metro:bundling:progress","_t":1786282064082,"id":"1","progress":0.4933390022675736,"total":461,"current":229}
+{"_e":"metro:bundling:progress","_t":1786282064182,"id":"1","progress":0.4933390022675736,"total":466,"current":259}
+{"_e":"metro:bundling:progress","_t":1786282064285,"id":"1","progress":0.4933390022675736,"total":478,"current":262}
+{"_e":"metro:bundling:progress","_t":1786282064388,"id":"1","progress":0.4933390022675736,"total":482,"current":262}
+{"_e":"metro:bundling:progress","_t":1786282064400,"id":"1","progress":0.4933390022675736,"total":482,"current":263}
+{"_e":"metro:bundling:progress","_t":1786282064514,"id":"1","progress":0.4933390022675736,"total":484,"current":264}
+{"_e":"metro:bundling:progress","_t":1786282064615,"id":"1","progress":0.4933390022675736,"total":500,"current":267}
+{"_e":"metro:bundling:progress","_t":1786282064718,"id":"1","progress":0.4933390022675736,"total":502,"current":274}
+{"_e":"metro:bundling:progress","_t":1786282064828,"id":"1","progress":0.4933390022675736,"total":503,"current":275}
+{"_e":"metro:bundling:progress","_t":1786282064929,"id":"1","progress":0.4933390022675736,"total":510,"current":277}
+{"_e":"metro:bundling:progress","_t":1786282065030,"id":"1","progress":0.4933390022675736,"total":512,"current":278}
+{"_e":"metro:bundling:progress","_t":1786282065073,"id":"1","progress":0.4933390022675736,"total":512,"current":279}
+{"_e":"metro:bundling:progress","_t":1786282065225,"id":"1","progress":0.4933390022675736,"total":514,"current":282}
+{"_e":"metro:bundling:progress","_t":1786282065321,"id":"1","progress":0.4933390022675736,"total":522,"current":291}
+{"_e":"metro:bundling:progress","_t":1786282065423,"id":"1","progress":0.4933390022675736,"total":525,"current":298}
+{"_e":"metro:bundling:progress","_t":1786282065541,"id":"1","progress":0.4933390022675736,"total":533,"current":307}
+{"_e":"metro:bundling:progress","_t":1786282065643,"id":"1","progress":0.4933390022675736,"total":535,"current":314}
+{"_e":"metro:bundling:progress","_t":1786282065749,"id":"1","progress":0.4933390022675736,"total":539,"current":320}
+{"_e":"metro:bundling:progress","_t":1786282065850,"id":"1","progress":0.4933390022675736,"total":545,"current":326}
+{"_e":"metro:bundling:progress","_t":1786282065951,"id":"1","progress":0.4933390022675736,"total":552,"current":333}
+{"_e":"metro:bundling:progress","_t":1786282066053,"id":"1","progress":0.4933390022675736,"total":560,"current":339}
+{"_e":"metro:bundling:progress","_t":1786282066156,"id":"1","progress":0.4933390022675736,"total":573,"current":343}
+{"_e":"metro:bundling:progress","_t":1786282066261,"id":"1","progress":0.4933390022675736,"total":580,"current":352}
+{"_e":"metro:bundling:progress","_t":1786282066363,"id":"1","progress":0.4933390022675736,"total":592,"current":361}
+{"_e":"metro:bundling:progress","_t":1786282066464,"id":"1","progress":0.4933390022675736,"total":602,"current":372}
+{"_e":"metro:bundling:progress","_t":1786282066571,"id":"1","progress":0.4933390022675736,"total":624,"current":380}
+{"_e":"metro:bundling:progress","_t":1786282066671,"id":"1","progress":0.4933390022675736,"total":629,"current":390}
+{"_e":"metro:bundling:progress","_t":1786282066771,"id":"1","progress":0.4933390022675736,"total":631,"current":393}
+{"_e":"metro:bundling:progress","_t":1786282066878,"id":"1","progress":0.4933390022675736,"total":632,"current":398}
+{"_e":"metro:bundling:progress","_t":1786282066984,"id":"1","progress":0.4933390022675736,"total":632,"current":401}
+{"_e":"metro:bundling:progress","_t":1786282067095,"id":"1","progress":0.4933390022675736,"total":632,"current":404}
+{"_e":"metro:bundling:progress","_t":1786282067197,"id":"1","progress":0.4933390022675736,"total":637,"current":409}
+{"_e":"metro:bundling:progress","_t":1786282067297,"id":"1","progress":0.4933390022675736,"total":638,"current":414}
+{"_e":"metro:bundling:progress","_t":1786282067399,"id":"1","progress":0.4933390022675736,"total":640,"current":420}
+{"_e":"metro:bundling:progress","_t":1786282067513,"id":"1","progress":0.4933390022675736,"total":642,"current":425}
+{"_e":"metro:bundling:progress","_t":1786282067616,"id":"1","progress":0.4933390022675736,"total":650,"current":435}
+{"_e":"metro:bundling:progress","_t":1786282067716,"id":"1","progress":0.4933390022675736,"total":650,"current":437}
+{"_e":"metro:bundling:progress","_t":1786282067820,"id":"1","progress":0.4933390022675736,"total":667,"current":444}
+{"_e":"metro:bundling:progress","_t":1786282067945,"id":"1","progress":0.4933390022675736,"total":668,"current":454}
+{"_e":"metro:bundling:progress","_t":1786282068049,"id":"1","progress":0.4933390022675736,"total":685,"current":461}
+{"_e":"metro:bundling:progress","_t":1786282068123,"id":"1","progress":0.4933390022675736,"total":685,"current":462}
+{"_e":"metro:bundling:progress","_t":1786282068223,"id":"1","progress":0.4933390022675736,"total":685,"current":463}
+{"_e":"metro:bundling:progress","_t":1786282068378,"id":"1","progress":0.4933390022675736,"total":685,"current":464}
+{"_e":"metro:bundling:progress","_t":1786282068478,"id":"1","progress":0.4933390022675736,"total":696,"current":466}
+{"_e":"metro:bundling:progress","_t":1786282068578,"id":"1","progress":0.4933390022675736,"total":715,"current":469}
+{"_e":"metro:bundling:progress","_t":1786282068681,"id":"1","progress":0.4933390022675736,"total":740,"current":472}
+{"_e":"metro:bundling:progress","_t":1786282068793,"id":"1","progress":0.4933390022675736,"total":743,"current":476}
+{"_e":"metro:bundling:progress","_t":1786282068896,"id":"1","progress":0.4933390022675736,"total":746,"current":482}
+{"_e":"metro:bundling:progress","_t":1786282068995,"id":"1","progress":0.4933390022675736,"total":749,"current":486}
+{"_e":"metro:bundling:progress","_t":1786282069096,"id":"1","progress":0.4933390022675736,"total":755,"current":496}
+{"_e":"metro:bundling:progress","_t":1786282069196,"id":"1","progress":0.4933390022675736,"total":756,"current":505}
+{"_e":"metro:bundling:progress","_t":1786282069299,"id":"1","progress":0.4933390022675736,"total":759,"current":513}
+{"_e":"metro:bundling:progress","_t":1786282069404,"id":"1","progress":0.4933390022675736,"total":762,"current":519}
+{"_e":"metro:bundling:progress","_t":1786282069505,"id":"1","progress":0.4933390022675736,"total":768,"current":527}
+{"_e":"metro:bundling:progress","_t":1786282069605,"id":"1","progress":0.4933390022675736,"total":768,"current":528}
+{"_e":"metro:bundling:progress","_t":1786282069660,"id":"1","progress":0.4933390022675736,"total":768,"current":529}
+{"_e":"metro:bundling:progress","_t":1786282069763,"id":"1","progress":0.4933390022675736,"total":769,"current":533}
+{"_e":"metro:bundling:progress","_t":1786282069877,"id":"1","progress":0.49492780213778054,"total":769,"current":541}
+{"_e":"metro:bundling:progress","_t":1786282069977,"id":"1","progress":0.4968796498033798,"total":776,"current":547}
+{"_e":"metro:bundling:progress","_t":1786282070077,"id":"1","progress":0.5133648634286322,"total":776,"current":556}
+{"_e":"metro:bundling:progress","_t":1786282070177,"id":"1","progress":0.5136111111111111,"total":780,"current":559}
+{"_e":"metro:bundling:progress","_t":1786282070277,"id":"1","progress":0.5151682708383285,"total":783,"current":562}
+{"_e":"metro:bundling:progress","_t":1786282070378,"id":"1","progress":0.5188414732608153,"total":783,"current":564}
+{"_e":"metro:bundling:progress","_t":1786282070526,"id":"1","progress":0.5206829677257299,"total":783,"current":565}
+{"_e":"metro:bundling:progress","_t":1786282070626,"id":"1","progress":0.5336647697153268,"total":783,"current":572}
+{"_e":"metro:bundling:progress","_t":1786282070726,"id":"1","progress":0.544919253159003,"total":783,"current":578}
+{"_e":"metro:bundling:progress","_t":1786282070826,"id":"1","progress":0.544919253159003,"total":794,"current":586}
+{"_e":"metro:bundling:progress","_t":1786282070930,"id":"1","progress":0.5545097108500454,"total":795,"current":592}
+{"_e":"metro:bundling:progress","_t":1786282071028,"id":"1","progress":0.5662562499999999,"total":800,"current":602}
+{"_e":"metro:bundling:progress","_t":1786282071128,"id":"1","progress":0.5667213735639439,"total":801,"current":603}
+{"_e":"metro:bundling:progress","_t":1786282071229,"id":"1","progress":0.5690651799429108,"total":802,"current":605}
+{"_e":"metro:bundling:progress","_t":1786282071337,"id":"1","progress":0.5723251417769376,"total":805,"current":609}
+{"_e":"metro:bundling:progress","_t":1786282071445,"id":"1","progress":0.5769974310901054,"total":807,"current":613}
+{"_e":"metro:bundling:progress","_t":1786282071546,"id":"1","progress":0.5807686460938903,"total":807,"current":615}
+{"_e":"metro:bundling:progress","_t":1786282071647,"id":"1","progress":0.5902504264881788,"total":807,"current":620}
+{"_e":"metro:bundling:progress","_t":1786282071753,"id":"1","progress":0.6040829330457799,"total":808,"current":628}
+{"_e":"metro:bundling:progress","_t":1786282071854,"id":"1","progress":0.6278712820481863,"total":814,"current":645}
+{"_e":"metro:bundling:progress","_t":1786282071953,"id":"1","progress":0.6400000000000001,"total":815,"current":652}
+{"_e":"metro:bundling:progress","_t":1786282072061,"id":"1","progress":0.6525950240378494,"total":817,"current":660}
+{"_e":"metro:bundling:progress","_t":1786282072163,"id":"1","progress":0.6616433670434264,"total":820,"current":667}
+{"_e":"metro:bundling:progress","_t":1786282072282,"id":"1","progress":0.665460422405877,"total":825,"current":673}
+{"_e":"metro:bundling:progress","_t":1786282072383,"id":"1","progress":0.6719270062869822,"total":832,"current":682}
+{"_e":"metro:bundling:progress","_t":1786282072483,"id":"1","progress":0.679831961908284,"total":832,"current":686}
+{"_e":"metro:bundling:progress","_t":1786282072586,"id":"1","progress":0.679831961908284,"total":838,"current":690}
+{"_e":"metro:bundling:progress","_t":1786282072686,"id":"1","progress":0.6921288042266107,"total":839,"current":698}
+{"_e":"metro:bundling:progress","_t":1786282072795,"id":"1","progress":0.7020802050230068,"total":839,"current":703}
+{"_e":"metro:bundling:progress","_t":1786282072895,"id":"1","progress":0.7162841126927441,"total":846,"current":716}
+{"_e":"metro:bundling:progress","_t":1786282072999,"id":"1","progress":0.7162841126927441,"total":931,"current":736}
+{"_e":"metro:bundling:progress","_t":1786282073114,"id":"1","progress":0.7162841126927441,"total":939,"current":746}
+{"_e":"metro:bundling:progress","_t":1786282073215,"id":"1","progress":0.7162841126927441,"total":962,"current":754}
+{"_e":"metro:bundling:progress","_t":1786282073317,"id":"1","progress":0.7162841126927441,"total":964,"current":764}
+{"_e":"metro:bundling:progress","_t":1786282073417,"id":"1","progress":0.7162841126927441,"total":971,"current":769}
+{"_e":"metro:bundling:progress","_t":1786282073521,"id":"1","progress":0.7162841126927441,"total":973,"current":775}
+{"_e":"metro:bundling:progress","_t":1786282073620,"id":"1","progress":0.7162841126927441,"total":981,"current":778}
+{"_e":"metro:bundling:progress","_t":1786282073657,"id":"1","progress":0.7162841126927441,"total":981,"current":779}
+{"_e":"metro:bundling:progress","_t":1786282073760,"id":"1","progress":0.7162841126927441,"total":989,"current":784}
+{"_e":"metro:bundling:progress","_t":1786282073864,"id":"1","progress":0.7162841126927441,"total":994,"current":791}
+{"_e":"metro:bundling:progress","_t":1786282073975,"id":"1","progress":0.7162841126927441,"total":998,"current":801}
+{"_e":"metro:bundling:progress","_t":1786282074092,"id":"1","progress":0.7162841126927441,"total":1002,"current":805}
+{"_e":"metro:bundling:progress","_t":1786282074192,"id":"1","progress":0.7162841126927441,"total":1006,"current":811}
+{"_e":"metro:bundling:progress","_t":1786282074292,"id":"1","progress":0.7162841126927441,"total":1009,"current":820}
+{"_e":"metro:bundling:progress","_t":1786282074396,"id":"1","progress":0.7162841126927441,"total":1014,"current":834}
+{"_e":"metro:bundling:progress","_t":1786282074497,"id":"1","progress":0.7162841126927441,"total":1017,"current":839}
+{"_e":"metro:bundling:progress","_t":1786282074597,"id":"1","progress":0.7162841126927441,"total":1019,"current":844}
+{"_e":"metro:bundling:progress","_t":1786282074697,"id":"1","progress":0.7162841126927441,"total":1027,"current":851}
+{"_e":"metro:bundling:progress","_t":1786282074797,"id":"1","progress":0.7162841126927441,"total":1029,"current":854}
+{"_e":"metro:bundling:progress","_t":1786282074897,"id":"1","progress":0.7162841126927441,"total":1030,"current":866}
+{"_e":"metro:bundling:progress","_t":1786282074997,"id":"1","progress":0.7162841126927441,"total":1031,"current":870}
+{"_e":"metro:bundling:progress","_t":1786282075098,"id":"1","progress":0.72052460789616,"total":1032,"current":876}
+{"_e":"metro:bundling:progress","_t":1786282075199,"id":"1","progress":0.72052460789616,"total":1038,"current":878}
+{"_e":"metro:bundling:progress","_t":1786282075298,"id":"1","progress":0.72052460789616,"total":1050,"current":882}
+{"_e":"metro:bundling:progress","_t":1786282075403,"id":"1","progress":0.72052460789616,"total":1054,"current":889}
+{"_e":"metro:bundling:progress","_t":1786282075506,"id":"1","progress":0.7360860020661156,"total":1056,"current":906}
+{"_e":"metro:bundling:progress","_t":1786282075606,"id":"1","progress":0.7524248163452709,"total":1056,"current":916}
+{"_e":"metro:bundling:progress","_t":1786282075709,"id":"1","progress":0.7810015330133897,"total":1058,"current":935}
+{"_e":"metro:bundling:progress","_t":1786282075811,"id":"1","progress":0.7810015330133897,"total":1078,"current":943}
+{"_e":"metro:bundling:progress","_t":1786282075913,"id":"1","progress":0.7810015330133897,"total":1099,"current":954}
+{"_e":"metro:bundling:progress","_t":1786282076013,"id":"1","progress":0.7810015330133897,"total":1104,"current":960}
+{"_e":"metro:bundling:progress","_t":1786282076119,"id":"1","progress":0.7810015330133897,"total":1108,"current":963}
+{"_e":"metro:bundling:progress","_t":1786282076220,"id":"1","progress":0.7810015330133897,"total":1115,"current":968}
+{"_e":"metro:bundling:progress","_t":1786282076349,"id":"1","progress":0.7810015330133897,"total":1117,"current":973}
+{"_e":"metro:bundling:progress","_t":1786282076450,"id":"1","progress":0.7810015330133897,"total":1119,"current":976}
+{"_e":"metro:bundling:progress","_t":1786282076543,"id":"1","progress":0.7810015330133897,"total":1119,"current":977}
+{"_e":"metro:bundling:progress","_t":1786282076644,"id":"1","progress":0.7810015330133897,"total":1124,"current":982}
+{"_e":"metro:bundling:progress","_t":1786282076744,"id":"1","progress":0.7810015330133897,"total":1125,"current":987}
+{"_e":"metro:bundling:progress","_t":1786282076844,"id":"1","progress":0.7810015330133897,"total":1132,"current":993}
+{"_e":"metro:bundling:progress","_t":1786282076944,"id":"1","progress":0.7810015330133897,"total":1136,"current":1001}
+{"_e":"metro:bundling:progress","_t":1786282077044,"id":"1","progress":0.7861362239429702,"total":1138,"current":1009}
+{"_e":"metro:bundling:progress","_t":1786282077159,"id":"1","progress":0.7916795833591667,"total":1143,"current":1017}
+{"_e":"metro:bundling:progress","_t":1786282077259,"id":"1","progress":0.7980860922294488,"total":1144,"current":1022}
+{"_e":"metro:bundling:progress","_t":1786282077362,"id":"1","progress":0.8176944268334898,"total":1149,"current":1039}
+{"_e":"metro:bundling:progress","_t":1786282077461,"id":"1","progress":0.828891493383743,"total":1150,"current":1047}
+{"_e":"metro:bundling:progress","_t":1786282077561,"id":"1","progress":0.8402777777777777,"total":1152,"current":1056}
+{"_e":"metro:bundling:progress","_t":1786282077663,"id":"1","progress":0.8469103021965645,"total":1154,"current":1062}
+{"_e":"metro:bundling:progress","_t":1786282077766,"id":"1","progress":0.8469103021965645,"total":1164,"current":1069}
+{"_e":"metro:bundling:progress","_t":1786282077865,"id":"1","progress":0.8514616220597174,"total":1165,"current":1075}
+{"_e":"metro:bundling:progress","_t":1786282077943,"id":"1","progress":0.8530464735029196,"total":1165,"current":1076}
+{"_e":"metro:bundling:progress","_t":1786282078043,"id":"1","progress":0.8530464735029196,"total":1171,"current":1078}
+{"_e":"metro:bundling:progress","_t":1786282078166,"id":"1","progress":0.8530464735029196,"total":1172,"current":1081}
+{"_e":"metro:bundling:progress","_t":1786282078265,"id":"1","progress":0.8531554105238622,"total":1179,"current":1089}
+{"_e":"metro:bundling:progress","_t":1786282078366,"id":"1","progress":0.853394237435661,"total":1181,"current":1091}
+{"_e":"metro:bundling:progress","_t":1786282078479,"id":"1","progress":0.8567591456595943,"total":1183,"current":1095}
+{"_e":"metro:bundling:progress","_t":1786282078580,"id":"1","progress":0.8616852712350228,"total":1185,"current":1100}
+{"_e":"metro:bundling:progress","_t":1786282078680,"id":"1","progress":0.8711111111111112,"total":1185,"current":1106}
+{"_e":"metro:bundling:progress","_t":1786282078788,"id":"1","progress":0.8791038791522228,"total":1186,"current":1112}
+{"_e":"metro:bundling:progress","_t":1786282078890,"id":"1","progress":0.8886162053638714,"total":1186,"current":1118}
+{"_e":"metro:bundling:progress","_t":1786282079177,"id":"1","progress":0.8886162053638714,"total":1189,"current":1120}
+{"_e":"metro:bundling:progress","_t":1786282079330,"id":"1","progress":0.8886162053638714,"total":1192,"current":1123}
+{"_e":"metro:bundling:progress","_t":1786282079431,"id":"1","progress":0.8973400325624552,"total":1195,"current":1132}
+{"_e":"metro:bundling:progress","_t":1786282079532,"id":"1","progress":0.9009173611111112,"total":1200,"current":1139}
+{"_e":"metro:bundling:progress","_t":1786282079634,"id":"1","progress":0.9058225198712075,"total":1202,"current":1144}
+{"_e":"metro:bundling:progress","_t":1786282079740,"id":"1","progress":0.914176598614096,"total":1208,"current":1155}
+{"_e":"metro:bundling:progress","_t":1786282079840,"id":"1","progress":0.9143152790109965,"total":1210,"current":1157}
+{"_e":"metro:bundling:progress","_t":1786282079941,"id":"1","progress":0.9175456744226643,"total":1211,"current":1160}
+{"_e":"metro:bundling:progress","_t":1786282080041,"id":"1","progress":0.9175456744226643,"total":1217,"current":1165}
+{"_e":"metro:bundling:progress","_t":1786282080142,"id":"1","progress":0.9196479584592059,"total":1219,"current":1169}
+{"_e":"metro:bundling:progress","_t":1786282080243,"id":"1","progress":0.9307504703036817,"total":1220,"current":1177}
+{"_e":"metro:bundling:progress","_t":1786282080343,"id":"1","progress":0.9371381656393941,"total":1221,"current":1182}
+{"_e":"metro:bundling:progress","_t":1786282080446,"id":"1","progress":0.9453041629298852,"total":1226,"current":1192}
+{"_e":"metro:bundling:progress","_t":1786282080561,"id":"1","progress":0.9517368884550499,"total":1228,"current":1198}
+{"_e":"metro:bundling:progress","_t":1786282080667,"id":"1","progress":0.9645475576706986,"total":1230,"current":1208}
+{"_e":"metro:bundling:progress","_t":1786282080767,"id":"1","progress":0.977365324872761,"total":1230,"current":1216}
+{"_e":"metro:bundling:progress","_t":1786282080867,"id":"1","progress":0.980676783862758,"total":1236,"current":1224}
+{"_e":"metro:bundling:progress","_t":1786282080968,"id":"1","progress":0.9919517429760666,"total":1240,"current":1235}
+{"_e":"metro:bundling:progress","_t":1786282081067,"id":"1","progress":0.998391636770096,"total":1243,"current":1242}
+{"_e":"metro:bundling:progress","_t":1786282081548,"id":"1","progress":0.999,"total":1243,"current":1243}
+{"_e":"metro:bundling:done","_t":1786282081976,"id":"1","total":1243,"ms":23711.045226}
+{"_e":"metro:client_log","_t":1786282089540,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786282090393,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786282113746,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786282115282,"level":"log","data":["[Perf] WebView shell ready duration: 2634ms"]}
+{"_e":"metro:client_log","_t":1786282115288,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 42ms"]}
+{"_e":"metro:client_log","_t":1786282115288,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786282115923,"level":"log","data":["[Perf] Total Time-to-First-Frame: 3329ms, In-WebView load: 366ms, Location gen (generated): 321ms"]}
+{"_e":"metro:client_log","_t":1786282120379,"level":"log","data":["[Perf] WebView shell ready duration: 7785ms"]}
+{"_e":"metro:client_log","_t":1786282120410,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 35ms"]}
+{"_e":"metro:client_log","_t":1786282120414,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786282120785,"level":"log","data":["[Perf] Total Time-to-First-Frame: 8212ms, In-WebView load: 262ms, Location gen (generated): 239ms"]}
+{"_e":"metro:client_log","_t":1786282174368,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786282175289,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786282313173,"level":"log","data":["[Perf] Page turn latency: 175ms"]}
+{"_e":"metro:client_log","_t":1786282314690,"level":"log","data":["[Perf] Page turn latency: 177ms"]}
+{"_e":"metro:client_log","_t":1786282321156,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1786282321828,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786282322150,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1786282328612,"level":"log","data":["[Perf] Page turn latency: 180ms"]}
+{"_e":"metro:client_log","_t":1786282329256,"level":"log","data":["[Perf] Page turn latency: 179ms"]}
+{"_e":"metro:client_log","_t":1786282329813,"level":"log","data":["[Perf] Page turn latency: 185ms"]}
+{"_e":"metro:client_log","_t":1786282335100,"level":"log","data":["[Perf] Page turn latency: 203ms"]}
+{"_e":"metro:client_log","_t":1786282335771,"level":"log","data":["[Perf] Page turn latency: 184ms"]}
+{"_e":"metro:client_log","_t":1786282336421,"level":"log","data":["[Perf] Page turn latency: 189ms"]}
+{"_e":"metro:client_log","_t":1786282345105,"level":"error","data":["The action 'NAVIGATE' with payload {\"name\":\"Search\"} was not handled by any navigator.\n\nDo you have a screen named 'Search'?\n\nIf you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.\n\nIf you're using conditional rendering, navigation will happen automatically and you shouldn't navigate manually, see.\n\nThis is a development-only warning and won't be shown in production."]}
+{"_e":"metro:client_log","_t":1786282357975,"level":"error","data":["The action 'NAVIGATE' with payload {\"name\":\"Search\"} was not handled by any navigator.\n\nDo you have a screen named 'Search'?\n\nIf you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.\n\nIf you're using conditional rendering, navigation will happen automatically and you shouldn't navigate manually, see.\n\nThis is a development-only warning and won't be shown in production."]}
+{"_e":"metro:client_log","_t":1786282366584,"level":"error","data":["The action 'NAVIGATE' with payload {\"name\":\"Search\"} was not handled by any navigator.\n\nDo you have a screen named 'Search'?\n\nIf you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.\n\nIf you're using conditional rendering, navigation will happen automatically and you shouldn't navigate manually, see.\n\nThis is a development-only warning and won't be shown in production."]}
+{"_e":"metro:bundling:started","_t":1786282381259,"id":"k","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786282381259,"id":"k","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786282381327,"id":"k","total":1,"ms":67.805606}
+{"_e":"metro:client_log","_t":1786282389681,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786282395203,"level":"error","data":["The action 'NAVIGATE' with payload {\"name\":\"Search\"} was not handled by any navigator.\n\nDo you have a screen named 'Search'?\n\nIf you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.\n\nIf you're using conditional rendering, navigation will happen automatically and you shouldn't navigate manually, see.\n\nThis is a development-only warning and won't be shown in production."]}
+{"_e":"root:init","_t":1786287013934,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786287013966,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786287015244,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786287017124,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[135807:0809/215015.523388:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786287025848,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786287055970,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786287055970,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786287055978,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786287056094,"id":"1","progress":0.025095578864817177,"total":101,"current":16}
+{"_e":"metro:bundling:progress","_t":1786287056194,"id":"1","progress":0.11583871960603263,"total":285,"current":97}
+{"_e":"metro:bundling:progress","_t":1786287056294,"id":"1","progress":0.11655249161752802,"total":372,"current":127}
+{"_e":"metro:bundling:progress","_t":1786287056394,"id":"1","progress":0.2654489603024575,"total":460,"current":237}
+{"_e":"metro:bundling:progress","_t":1786287056497,"id":"1","progress":0.40868622448979586,"total":560,"current":358}
+{"_e":"metro:bundling:progress","_t":1786287056601,"id":"1","progress":0.4700867725626591,"total":668,"current":458}
+{"_e":"metro:bundling:progress","_t":1786287056701,"id":"1","progress":0.615621301775148,"total":715,"current":561}
+{"_e":"metro:bundling:progress","_t":1786287056811,"id":"1","progress":0.7035702275885259,"total":794,"current":666}
+{"_e":"metro:bundling:progress","_t":1786287056912,"id":"1","progress":0.7234773417888756,"total":870,"current":740}
+{"_e":"metro:bundling:progress","_t":1786287057037,"id":"1","progress":0.7234773417888756,"total":979,"current":782}
+{"_e":"metro:bundling:progress","_t":1786287057137,"id":"1","progress":0.7234773417888756,"total":1009,"current":828}
+{"_e":"metro:bundling:progress","_t":1786287057237,"id":"1","progress":0.7234773417888756,"total":1059,"current":891}
+{"_e":"metro:bundling:progress","_t":1786287057339,"id":"1","progress":0.7234773417888756,"total":1131,"current":955}
+{"_e":"metro:bundling:progress","_t":1786287057459,"id":"1","progress":0.763340121890517,"total":1148,"current":1003}
+{"_e":"metro:bundling:progress","_t":1786287057560,"id":"1","progress":0.8988437441254289,"total":1194,"current":1132}
+{"_e":"metro:bundling:progress","_t":1786287057660,"id":"1","progress":0.9967897291979162,"total":1245,"current":1243}
+{"_e":"metro:bundling:progress","_t":1786287057946,"id":"1","progress":0.9983942194480735,"total":1245,"current":1244}
+{"_e":"metro:bundling:done","_t":1786287058084,"id":"1","total":1245,"ms":2113.885716}
+{"_e":"metro:client_log","_t":1786287067306,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786287068168,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786287106316,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786287108362,"level":"log","data":["[Perf] WebView shell ready duration: 2479ms"]}
+{"_e":"metro:client_log","_t":1786287108416,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 56ms"]}
+{"_e":"metro:client_log","_t":1786287108420,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786287108939,"level":"log","data":["[Perf] Total Time-to-First-Frame: 3087ms, In-WebView load: 345ms, Location gen (generated): 309ms"]}
+{"_e":"metro:client_log","_t":1786287122788,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786287123107,"level":"log","data":["[Perf] WebView shell ready duration: 699ms"]}
+{"_e":"metro:client_log","_t":1786287124754,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786287124864,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 31ms"]}
+{"_e":"metro:client_log","_t":1786287124869,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786287125462,"level":"log","data":["[Perf] Total Time-to-First-Frame: 3084ms, In-WebView load: 318ms, Location gen (generated): 285ms"]}
+{"_e":"metro:client_log","_t":1786287135395,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786287135867,"level":"log","data":["[Perf] WebView shell ready duration: 763ms"]}
+{"_e":"metro:client_log","_t":1786287135943,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 71ms"]}
+{"_e":"metro:client_log","_t":1786287135947,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786287136214,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1101ms, In-WebView load: 134ms, Location gen (cached): 94ms"]}
+{"_e":"metro:client_log","_t":1786287148502,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786287148772,"level":"log","data":["[Perf] WebView shell ready duration: 662ms"]}
+{"_e":"metro:client_log","_t":1786287148873,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/cmp0ls4ks000004ldqhs3rtbu.epub"]}
+{"_e":"metro:client_log","_t":1786287149117,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 49ms"]}
+{"_e":"metro:client_log","_t":1786287149121,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786287149527,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1382ms, In-WebView load: 322ms, Location gen (generated): 284ms"]}
+{"_e":"metro:client_log","_t":1786287632144,"level":"error","data":["React has detected a change in the order of Hooks called by HomeScreen. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n1. useCallback                useCallback\n2. useCallback                useCallback\n3. useSyncExternalStore       useSyncExternalStore\n4. useDebugValue              useDebugValue\n5. useContext                 useContext\n6. useContext                 useContext\n7. useContext                 useContext\n8. useContext                 useContext\n9. useContext                 useContext\n10. useCallback               useCallback\n11. useSyncExternalStore      useSyncExternalStore\n12. useState                  useState\n13. useState                  useState\n14. useState                  useState\n15. useContext                useContext\n16. useContext                useContext\n17. useContext                useContext\n18. useEffect                 useEffect\n19. useState                  useState\n20. useCallback               useCallback\n21. useSyncExternalStore      useSyncExternalStore\n22. useEffect                 useEffect\n23. useEffect                 useContext\n   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"]}
+{"_e":"metro:client_log","_t":1786287632441,"level":"error","data":["[Error: Should have a queue. You are likely calling Hooks conditionally, which is not allowed. (https://react.dev/link/invalid-hook-call)]"]}
+{"_e":"metro:bundling:started","_t":1786287703248,"id":"k","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786287703248,"id":"k","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786287703315,"id":"k","total":1,"ms":67.035558}
+{"_e":"metro:client_log","_t":1786287711065,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786287713605,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:bundling:started","_t":1786287766529,"id":"m","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786287766529,"id":"m","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786287766600,"id":"m","total":1,"ms":71.608331}
+{"_e":"metro:client_log","_t":1786287774916,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786287776448,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"root:init","_t":1786287792471,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786287792488,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786287793646,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786287795488,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[141937:0809/220313.908361:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786287804722,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786287828341,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786287828342,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786287828347,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786287828447,"id":"1","progress":0.034293552812071325,"total":81,"current":15}
+{"_e":"metro:bundling:progress","_t":1786287828547,"id":"1","progress":0.07388180712580514,"total":298,"current":81}
+{"_e":"metro:bundling:progress","_t":1786287828647,"id":"1","progress":0.10181735537860893,"total":351,"current":112}
+{"_e":"metro:bundling:progress","_t":1786287828751,"id":"1","progress":0.2852014486192848,"total":470,"current":251}
+{"_e":"metro:bundling:progress","_t":1786287828851,"id":"1","progress":0.36761459586538786,"total":602,"current":365}
+{"_e":"metro:bundling:progress","_t":1786287828951,"id":"1","progress":0.4657004029856282,"total":677,"current":462}
+{"_e":"metro:bundling:progress","_t":1786287829051,"id":"1","progress":0.5918794450718843,"total":724,"current":557}
+{"_e":"metro:bundling:progress","_t":1786287829151,"id":"1","progress":0.6776100535395597,"total":820,"current":675}
+{"_e":"metro:bundling:progress","_t":1786287829251,"id":"1","progress":0.6776100535395597,"total":955,"current":785}
+{"_e":"metro:bundling:progress","_t":1786287829351,"id":"1","progress":0.6776100535395597,"total":1001,"current":802}
+{"_e":"metro:bundling:progress","_t":1786287829451,"id":"1","progress":0.7092984507821538,"total":1128,"current":950}
+{"_e":"metro:bundling:progress","_t":1786287829552,"id":"1","progress":0.8009562141155349,"total":1171,"current":1048}
+{"_e":"metro:bundling:progress","_t":1786287829652,"id":"1","progress":0.9627713966850355,"total":1224,"current":1201}
+{"_e":"metro:bundling:done","_t":1786287829788,"id":"1","total":1224,"ms":1446.002043}
+{"_e":"metro:client_log","_t":1786287837101,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786287838147,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786288030587,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786288031498,"level":"log","data":["[Perf] WebView shell ready duration: 1915ms"]}
+{"_e":"metro:client_log","_t":1786288031734,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/book_filsafat_ajaran_islam.epub"]}
+{"_e":"metro:client_log","_t":1786288031842,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 38ms"]}
+{"_e":"metro:client_log","_t":1786288031847,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786288032346,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2762ms, In-WebView load: 391ms, Location gen (generated): 344ms"]}
+{"_e":"metro:client_log","_t":1786288198858,"level":"error","data":["React has detected a change in the order of Hooks called by ProfileScreen. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n1. useCallback                useCallback\n2. useCallback                useCallback\n3. useSyncExternalStore       useSyncExternalStore\n4. useDebugValue              useDebugValue\n5. useCallback                useCallback\n6. useCallback                useCallback\n7. useSyncExternalStore       useSyncExternalStore\n8. useDebugValue              useDebugValue\n9. useContext                 useContext\n10. useState                  useState\n11. useEffect                 useEffect\n12. useCallback               useCallback\n13. useSyncExternalStore      useSyncExternalStore\n14. useCallback               useCallback\n15. useContext                useContext\n16. useContext                useContext\n17. useContext                useContext\n18. useState                  useState\n19. useState                  useState\n20. useContext                useState\n   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"]}
+{"_e":"metro:client_log","_t":1786288199139,"level":"error","data":["[Error: Should have a queue. You are likely calling Hooks conditionally, which is not allowed. (https://react.dev/link/invalid-hook-call)]"]}
+{"_e":"metro:bundling:started","_t":1786288265482,"id":"7","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786288265482,"id":"7","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786288265553,"id":"7","total":1,"ms":70.920649}
+{"_e":"metro:client_log","_t":1786288274007,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786288276054,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"root:init","_t":1786288727695,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786288727714,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786288728897,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786288731076,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[149670:0809/221849.204260:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786288740634,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786288768634,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786288768634,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786288768639,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786288768809,"id":"1","progress":0.01951773356401384,"total":136,"current":19}
+{"_e":"metro:bundling:progress","_t":1786288768909,"id":"1","progress":0.12834696868236914,"total":321,"current":115}
+{"_e":"metro:bundling:progress","_t":1786288769013,"id":"1","progress":0.1826684180896979,"total":365,"current":156}
+{"_e":"metro:bundling:progress","_t":1786288769114,"id":"1","progress":0.2661621900826446,"total":440,"current":227}
+{"_e":"metro:bundling:progress","_t":1786288769213,"id":"1","progress":0.39889196675900274,"total":570,"current":360}
+{"_e":"metro:bundling:progress","_t":1786288769313,"id":"1","progress":0.4650594341934806,"total":676,"current":461}
+{"_e":"metro:bundling:progress","_t":1786288769413,"id":"1","progress":0.6443025088959957,"total":745,"current":598}
+{"_e":"metro:bundling:progress","_t":1786288769514,"id":"1","progress":0.6614604962359537,"total":857,"current":697}
+{"_e":"metro:bundling:progress","_t":1786288769614,"id":"1","progress":0.6614604962359537,"total":992,"current":794}
+{"_e":"metro:bundling:progress","_t":1786288769714,"id":"1","progress":0.6843512954933116,"total":1042,"current":862}
+{"_e":"metro:bundling:progress","_t":1786288769814,"id":"1","progress":0.7381260194619156,"total":1143,"current":982}
+{"_e":"metro:bundling:progress","_t":1786288769914,"id":"1","progress":0.8731008452162768,"total":1189,"current":1111}
+{"_e":"metro:bundling:progress","_t":1786288770015,"id":"1","progress":0.9304143857087414,"total":1214,"current":1171}
+{"_e":"metro:bundling:done","_t":1786288770186,"id":"1","total":1214,"ms":1552.244161}
+{"_e":"metro:client_log","_t":1786288777704,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786288779372,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}

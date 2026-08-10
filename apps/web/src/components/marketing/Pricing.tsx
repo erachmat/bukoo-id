@@ -33,10 +33,10 @@ export function Pricing() {
           <div className="price-tier-num">TIER 1</div>
           <div className="price-name">Baca</div>
           <div className="price-target">Pelajar &amp; Mahasiswa</div>
-          <div className="price-amount price-amount-paid">19.900</div>
+          <div className="price-amount price-amount-paid">29.900</div>
           <div className="price-period">per bulan</div>
           <ul className="price-features">
-            <li className="pf-item"><span className="pf-check">✓</span>50.000+ judul pilihan</li>
+            <li className="pf-item"><span className="pf-check">✓</span>2.000+ judul kurasi</li>
             <li className="pf-item"><span className="pf-check">✓</span>Koleksi lokal penuh</li>
             <li className="pf-item"><span className="pf-check">✓</span>Offline 10 judul</li>
             <li className="pf-item"><span className="pf-check">✓</span>Tanpa iklan</li>
@@ -55,7 +55,7 @@ export function Pricing() {
           <div className="price-amount price-amount-paid">49.900</div>
           <div className="price-period">per bulan</div>
           <ul className="price-features">
-            <li className="pf-item"><span className="pf-check">✓</span>200.000+ judul global</li>
+            <li className="pf-item"><span className="pf-check">✓</span>2.000+ judul kurasi</li>
             <li className="pf-item"><span className="pf-check">✓</span>Audiobook Indonesia</li>
             <li className="pf-item"><span className="pf-check">✓</span>Offline unlimited</li>
             <li className="pf-item"><span className="pf-check">✓</span>AI Rekomendasi</li>

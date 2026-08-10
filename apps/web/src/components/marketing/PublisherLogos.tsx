@@ -3,7 +3,7 @@ import React from 'react';
 export function PublisherLogos() {
   return (
     <div className="publisher-section">
-      <div className="publisher-label">500+ Penerbit Terpercaya dari Seluruh Dunia</div>
+      <div className="publisher-label">50 Penerbit Terpercaya dari Indonesia &amp; Dunia</div>
       <div className="publisher-logos">
         <div className="pub-logo">Gramedia Pustaka</div>
         <div className="pub-logo">Mizan Group</div>

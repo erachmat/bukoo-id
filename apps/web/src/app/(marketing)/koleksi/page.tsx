@@ -43,7 +43,7 @@ export default function KoleksiPage() {
             marginBottom: '40px',
             lineHeight: '1.6'
           }}>
-            Jelajahi lebih dari 200.000 judul dari berbagai genre. Temukan bacaan favoritmu berikutnya.
+            Jelajahi lebih dari 2.000+ judul dari berbagai genre. Temukan bacaan favoritmu berikutnya.
           </p>
 
           {/* Category Pills */}

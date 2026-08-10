@@ -42,7 +42,7 @@ interface TocItem {
 }
 
 interface EpubMessage {
-  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY' | 'TOGGLE_CONTROLS';
+  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY' | 'TOGGLE_CONTROLS' | 'SEARCH_RESULTS' | 'HIGHLIGHT_CLICKED';
   page?: number;
   cfi?: string;
   percent?: number;
@@ -56,6 +56,7 @@ interface EpubMessage {
   bookLoadDurationMs?: number;
   locationGenTimeMs?: number;
   cachedLocsUsed?: boolean;
+  results?: SearchResultItem[];
 }
 
 // ─── JavaScript injected into the WebView ────────────────────────────────────
@@ -164,12 +165,37 @@ const EPUB_JS_BRIDGE = `
     }, 120);
   }
 
+  // Helper: find the scrollable element inside epub.js iframe for vertical mode
+  function getVerticalScrollTarget() {
+    var viewer = document.getElementById('viewer');
+    if (!viewer) return window;
+    // epub.js scrolled-doc creates an iframe inside #viewer
+    var iframe = viewer.querySelector('iframe');
+    if (iframe && iframe.contentDocument) {
+      var iDoc = iframe.contentDocument;
+      var body = iDoc.body || iDoc.documentElement;
+      return body;
+    }
+    // Fallback: try the viewer div itself
+    return viewer;
+  }
+
   window.__bukooNext = function () {
     if (__bukooPdfState.canvases.length > 0) {
       var nextNum = Math.min(__bukooPdfState.currentNum + 1, __bukooPdfState.total);
       window.__bukooGoToPdfPage(nextNum);
     } else if (window.__bukooCurrentRendition) {
-      if (window.__bukooCurrentPageTurnStyle === 'animated') {
+      if (window.__bukooCurrentPageTurnStyle === 'vertical') {
+        var book = window.__bukooCurrentBook;
+        var loc = book && book.locations && book.locations.total > 0
+          ? book.locations.locationFromCfi(window.__bukooCurrentRendition.location.start.cfi)
+          : null;
+        if (typeof loc === 'number') {
+          var cfi = book.locations.cfiFromLocation(Math.min(loc + 1, book.locations.total));
+          if (cfi) { window.__bukooCurrentRendition.display(cfi); return; }
+        }
+        window.__bukooCurrentRendition.next();
+      } else if (window.__bukooCurrentPageTurnStyle === 'animated') {
         animatePageTurn('next', function () {
           window.__bukooCurrentRendition.next();
         });
@@ -184,7 +210,17 @@ const EPUB_JS_BRIDGE = `
       var prevNum = Math.max(__bukooPdfState.currentNum - 1, 1);
       window.__bukooGoToPdfPage(prevNum);
     } else if (window.__bukooCurrentRendition) {
-      if (window.__bukooCurrentPageTurnStyle === 'animated') {
+      if (window.__bukooCurrentPageTurnStyle === 'vertical') {
+        var book = window.__bukooCurrentBook;
+        var loc = book && book.locations && book.locations.total > 0
+          ? book.locations.locationFromCfi(window.__bukooCurrentRendition.location.start.cfi)
+          : null;
+        if (typeof loc === 'number') {
+          var cfi = book.locations.cfiFromLocation(Math.max(loc - 1, 1));
+          if (cfi) { window.__bukooCurrentRendition.display(cfi); return; }
+        }
+        window.__bukooCurrentRendition.prev();
+      } else if (window.__bukooCurrentPageTurnStyle === 'animated') {
         animatePageTurn('prev', function () {
           window.__bukooCurrentRendition.prev();
         });
@@ -197,6 +233,96 @@ const EPUB_JS_BRIDGE = `
   window.__bukooDisplay = function (t) {
     if (window.__bukooCurrentRendition) {
       window.__bukooCurrentRendition.display(t);
+    }
+  };
+
+  window.__bukooSearchBook = function (query) {
+    var book = window.__bukooCurrentBook;
+    if (!book || !book.spine) {
+      sendMessage({ type: 'SEARCH_RESULTS', query: query, results: [] });
+      return;
+    }
+    var q = (query || '').toLowerCase().trim();
+    if (!q) {
+      sendMessage({ type: 'SEARCH_RESULTS', query: query, results: [] });
+      return;
+    }
+
+    var promises = [];
+    book.spine.each(function (item) {
+      // epub.js: item.load returns the section document
+      var p = item.load(book.load.bind(book)).then(function (doc) {
+        var results = [];
+        try {
+          // Try epub.js section.find() API (available in 0.3.x)
+          var matches = item.find ? item.find(q) : [];
+          if (matches && matches.length > 0) {
+            results = matches.map(function (m, idx) {
+              return {
+                id: (item.idref || item.href || 'sec') + '_' + idx,
+                cfi: m.cfi,
+                excerpt: m.excerpt || q,
+                chapterTitle: item.href || '',
+              };
+            });
+          } else if (doc && doc.body) {
+            // Fallback: plain text search
+            var text = doc.body.innerText || doc.body.textContent || '';
+            var lower = text.toLowerCase();
+            var pos = lower.indexOf(q);
+            if (pos !== -1) {
+              var start = Math.max(0, pos - 60);
+              var end = Math.min(text.length, pos + q.length + 60);
+              results.push({
+                id: (item.idref || item.href || 'sec') + '_0',
+                cfi: item.href,
+                excerpt: (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : ''),
+                chapterTitle: item.href || '',
+              });
+            }
+          }
+        } catch (e) {}
+        item.unload();
+        return results;
+      }).catch(function () { return []; });
+      promises.push(p);
+    });
+
+    Promise.all(promises).then(function (resultsArray) {
+      var flatResults = [];
+      for (var i = 0; i < resultsArray.length; i++) {
+        var arr = resultsArray[i];
+        if (arr) for (var j = 0; j < arr.length; j++) flatResults.push(arr[j]);
+      }
+      sendMessage({ type: 'SEARCH_RESULTS', query: query, results: flatResults.slice(0, 100) });
+    });
+  };
+
+  window.__bukooAddHighlight = function (cfi, color) {
+    if (window.__bukooCurrentRendition && window.__bukooCurrentRendition.annotations) {
+      try {
+        // epub.js highlight() has no de-dupe — always clear first so repeat
+        // calls for the same range never stack orphaned marks.
+        window.__bukooCurrentRendition.annotations.remove(cfi, 'highlight');
+        window.__bukooCurrentRendition.annotations.highlight(
+          cfi,
+          {},
+          function () {
+            sendMessage({ type: 'HIGHLIGHT_CLICKED', cfi: cfi });
+          },
+          'bukoo-highlight-class',
+          { fill: color || '#FACC15', 'fill-opacity': '0.35' }
+        );
+      } catch (err) {}
+    }
+  };
+
+  window.__bukooRemoveHighlight = function (cfi) {
+    if (window.__bukooCurrentRendition && window.__bukooCurrentRendition.annotations) {
+      try {
+        window.__bukooCurrentRendition.annotations.remove(cfi, 'highlight');
+        window.__bukooCurrentRendition.annotations.remove(cfi);
+      } catch (err) {}
     }
   };
 
@@ -345,11 +471,18 @@ const EPUB_JS_BRIDGE = `
     rendition.on('rendered', function (section, view) {
       if (!view || !view.document) return;
       var doc = view.document;
+      var win = view.window || doc.defaultView;
       var startX = 0;
       var startY = 0;
       var startTime = 0;
+      var didScroll = false;
+
+      var markScrolled = function () { didScroll = true; };
+      doc.addEventListener('scroll', markScrolled, { passive: true });
+      if (win) win.addEventListener('scroll', markScrolled, { passive: true });
 
       doc.addEventListener('touchstart', function (e) {
+        didScroll = false;
         if (e.touches && e.touches.length === 1) {
           startX = e.touches[0].clientX;
           startY = e.touches[0].clientY;
@@ -358,6 +491,7 @@ const EPUB_JS_BRIDGE = `
       }, { passive: true });
 
       doc.addEventListener('touchend', function (e) {
+        if (didScroll) return;
         if (!e.changedTouches || e.changedTouches.length === 0) return;
         var endX = e.changedTouches[0].clientX;
         var endY = e.changedTouches[0].clientY;
@@ -367,11 +501,18 @@ const EPUB_JS_BRIDGE = `
 
         var sel = doc.getSelection();
         if (sel && sel.toString() && sel.toString().trim().length > 0) {
-          var selectedText = sel.toString();
+          var selectedText = sel.toString().trim();
           try {
             var range = sel.getRangeAt(0);
-            var cfiRange = rendition.getRange(section.href).generateCfiRange(range);
-            sendMessage({ type: 'TEXT_SELECTED', text: selectedText, cfi: cfiRange });
+            // Use epub.js Contents cfiFromRange — the correct public API
+            var contents = rendition.getContents ? rendition.getContents() : [];
+            var cfiRange = null;
+            if (contents && contents.length > 0 && contents[0] && contents[0].cfiFromRange) {
+              cfiRange = contents[0].cfiFromRange(range);
+            }
+            if (cfiRange) {
+              sendMessage({ type: 'TEXT_SELECTED', text: selectedText, cfi: cfiRange });
+            }
           } catch (err) {}
           return;
         }
@@ -386,16 +527,9 @@ const EPUB_JS_BRIDGE = `
           return;
         }
 
-        // Tap gesture (< 12px move within 300ms)
-        if (Math.abs(diffX) < 12 && Math.abs(diffY) < 12 && duration < 300) {
-          var screenWidth = doc.documentElement.clientWidth || window.innerWidth;
-          if (window.__bukooCurrentPageTurnStyle !== 'vertical' && endX < screenWidth * 0.25) {
-            window.__bukooPrev();
-          } else if (window.__bukooCurrentPageTurnStyle !== 'vertical' && endX > screenWidth * 0.75) {
-            window.__bukooNext();
-          } else {
-            sendMessage({ type: 'TOGGLE_CONTROLS' });
-          }
+        // Single tap gesture (< 8px move within 300ms) toggles top & bottom control bars anywhere on screen
+        if (Math.abs(diffX) < 8 && Math.abs(diffY) < 8 && duration < 300) {
+          sendMessage({ type: 'TOGGLE_CONTROLS' });
         }
       }, { passive: true });
     });
@@ -740,25 +874,32 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
 
+  const appliedHighlightIdsRef = useRef<Set<number>>(new Set());
+  const pendingSearchResolver = useRef<((results: SearchResultItem[]) => void) | null>(null);
+
   const handlePerformSearch = useCallback(
-    async (query: string): Promise<SearchResultItem[]> => {
-      const q = query.toLowerCase();
-      const results: SearchResultItem[] = [];
+    (query: string): Promise<SearchResultItem[]> => {
+      const q = query.trim();
+      if (!q) return Promise.resolve([]);
 
-      toc.forEach((item, idx) => {
-        if (item.label && item.label.toLowerCase().includes(q)) {
-          results.push({
-            id: `toc_${idx}_${Date.now()}`,
-            cfi: item.href,
-            chapterTitle: item.label,
-            excerpt: `Bab "${item.label}" sesuai dengan pencarian Anda.`,
-          });
+      return new Promise((resolve) => {
+        pendingSearchResolver.current = resolve;
+        if (webViewRef.current) {
+          const cleanQuery = q.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          webViewRef.current.injectJavaScript(`if (window.__bukooSearchBook) window.__bukooSearchBook('${cleanQuery}'); true;`);
+        } else {
+          resolve([]);
         }
-      });
 
-      return results;
+        setTimeout(() => {
+          if (pendingSearchResolver.current === resolve) {
+            pendingSearchResolver.current = null;
+            resolve([]);
+          }
+        }, 5000);
+      });
     },
-    [toc]
+    []
   );
   
   const [chapterInfo, setChapterInfo] = useState({
@@ -819,7 +960,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [bookId]);
 
   const handleDeleteHighlight = async (id: number) => {
+    const target = highlights.find((h) => Number(h.id) === Number(id));
     await highlightService.removeHighlight(id);
+    if (target && webViewRef.current) {
+      webViewRef.current.injectJavaScript(`if (window.__bukooRemoveHighlight) window.__bukooRemoveHighlight(${JSON.stringify(target.cfiRange)}); true;`);
+    }
     loadHighlights();
   };
 
@@ -916,10 +1061,22 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [loadBookmarks, loadHighlights]);
 
   useEffect(() => {
-    if (isReady && webViewRef.current) {
-      const js = `if (window.__bukooApplyHighlights) window.__bukooApplyHighlights(${JSON.stringify(highlights)}); true;`;
-      webViewRef.current.injectJavaScript(js);
-    }
+    if (!isReady || !webViewRef.current) return;
+    const currentIds = new Set(highlights.map((h) => h.id));
+
+    highlights.forEach((h) => {
+      if (!appliedHighlightIdsRef.current.has(h.id)) {
+        const color = h.color || '#FACC15';
+        webViewRef.current?.injectJavaScript(
+          `if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(h.cfiRange)}, ${JSON.stringify(color)}); true;`
+        );
+        appliedHighlightIdsRef.current.add(h.id);
+      }
+    });
+
+    appliedHighlightIdsRef.current.forEach((id) => {
+      if (!currentIds.has(id)) appliedHighlightIdsRef.current.delete(id);
+    });
   }, [highlights, isReady]);
 
   // Load initial global reader settings from AsyncStorage on mount
@@ -1007,12 +1164,14 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [controlsOpacity]);
 
   const hideControls = useCallback(() => {
+    // In vertical scroll mode bars must stay permanently visible
+    if (pageTurnStyle === 'vertical') return;
     Animated.timing(controlsOpacity, {
       toValue: 0,
       duration: 200,
       useNativeDriver: true,
     }).start(() => setControlsVisible(false));
-  }, [controlsOpacity]);
+  }, [controlsOpacity, pageTurnStyle]);
 
   const handleLeftTap = useCallback(() => {
     pageTurnStartTimeRef.current = performance.now();
@@ -1085,16 +1244,30 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             break;
           case 'TEXT_SELECTED':
             if (msg.text && msg.cfi) {
+              const hlColor = 'rgba(250,204,21,0.4)';
               highlightService.addHighlight(
                 bookId,
                 msg.cfi,
                 msg.text,
-                'rgba(250,204,21,0.4)'
-              ).then(() => loadHighlights());
+                hlColor
+              ).then(() => {
+                loadHighlights();
+                webViewRef.current?.injectJavaScript(`if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(msg.cfi)}, ${JSON.stringify(hlColor)}); true;`);
+              });
+            }
+            break;
+          case 'SEARCH_RESULTS':
+            if (pendingSearchResolver.current) {
+              pendingSearchResolver.current(msg.results || []);
+              pendingSearchResolver.current = null;
             }
             break;
           case 'TOGGLE_CONTROLS':
-            handleCenterTap();
+            // In vertical scroll mode taps are too easily confused with scrolls —
+            // keep bars always visible and ignore the toggle signal.
+            if (pageTurnStyle !== 'vertical') {
+              handleCenterTap();
+            }
             break;
           case 'ERROR': {
             console.warn('[ReadingScreen] WebView error:', msg.error);
@@ -1114,7 +1287,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress, handleCenterTap, loadHighlights]
+    [bookId, updateProgress, handleCenterTap, loadHighlights, pageTurnStyle]
   );
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
@@ -1334,35 +1507,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             }}
           />
         )}
-
-        {/* ── Tap zones (invisible overlays) — skipped in vertical EPUB mode to allow native WebView scrolling ── */}
-        {pageTurnStyle !== 'vertical' && (
-          <View style={styles.tapZoneRow} pointerEvents="box-none">
-            {/* Left 30% — previous page */}
-            <TouchableOpacity
-              style={styles.tapLeft}
-              activeOpacity={1}
-              onPress={handleLeftTap}
-              accessibilityLabel="Halaman sebelumnya"
-            />
-
-            {/* Center 40% — toggle controls */}
-            <TouchableOpacity
-              style={styles.tapCenter}
-              activeOpacity={1}
-              onPress={handleCenterTap}
-              accessibilityLabel="Tampilkan / sembunyikan kontrol"
-            />
-
-            {/* Right 30% — next page */}
-            <TouchableOpacity
-              style={styles.tapRight}
-              activeOpacity={1}
-              onPress={handleRightTap}
-              accessibilityLabel="Halaman berikutnya"
-            />
-          </View>
-        )}
       </View>
 
       {/* ── Page Scrubber / QuickJump Slider (toggled via page counter tap) ── */}
@@ -1454,6 +1598,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           const cap = (t.charAt(0).toUpperCase() + t.slice(1)) as 'Light' | 'Cream' | 'Dark' | 'Sepia';
           setTheme(cap);
         }}
+        pageTurnStyle={pageTurnStyle}
+        setPageTurnStyle={setPageTurnStyle}
         lineHeight={lineHeight}
         setLineHeight={setLineHeight}
         textAlign={textAlign}

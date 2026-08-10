@@ -15,6 +15,8 @@ interface SettingsModalProps {
   setFontFamily: (font: string) => void;
   theme: ReaderTheme;
   setTheme: (theme: ReaderTheme) => void;
+  pageTurnStyle?: 'horizontal' | 'vertical' | 'animated';
+  setPageTurnStyle?: (style: 'horizontal' | 'vertical' | 'animated') => void;
   lineHeight?: number;
   setLineHeight?: (lh: number) => void;
   textAlign?: 'left' | 'justify';
@@ -30,6 +32,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setFontFamily,
   theme,
   setTheme,
+  pageTurnStyle = 'horizontal',
+  setPageTurnStyle,
   lineHeight = 1.6,
   setLineHeight,
   textAlign = 'left',
@@ -129,6 +133,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               ))}
             </View>
           </View>
+
+          {/* Page Turn Mode Selector */}
+          {setPageTurnStyle && (
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>Mode Perpindahan Halaman</Text>
+              <View style={styles.lineHeightRow}>
+                {[
+                  { label: 'Geser Samping', value: 'horizontal' as const },
+                  { label: 'Gulir Vertikal', value: 'vertical' as const },
+                  { label: 'Animasi', value: 'animated' as const },
+                ].map((mode) => (
+                  <TouchableOpacity
+                    key={mode.value}
+                    style={[
+                      styles.lhChip,
+                      pageTurnStyle === mode.value && styles.lhChipActive,
+                    ]}
+                    onPress={() => setPageTurnStyle(mode.value)}
+                  >
+                    <Text style={[styles.lhText, pageTurnStyle === mode.value && styles.lhTextActive]}>
+                      {mode.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
 
           {/* Line Height Selector */}
           {setLineHeight && (

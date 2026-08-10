@@ -24,8 +24,8 @@ export function ComparisonTable() {
             <tr>
               <td>Akses Katalog Buku</td>
               <td>50 buku bulanan</td>
-              <td>50.000+ judul</td>
-              <td>200.000+ judul</td>
+              <td>2.000+ judul</td>
+              <td>2.000+ judul kurasi</td>
               <td>Seluruh katalog</td>
               <td>Seluruh katalog</td>
             </tr>

@@ -26,13 +26,13 @@ export function Hero() {
         <h1 className="hero-h1">
           Baca Tanpa Batas,
           <em>Mulai Hari Ini</em>
-          <span>200.000+ Buku</span>
+          <span>2.000+ Buku</span>
         </h1>
 
         <p className="hero-sub">
-          Nikmati ratusan ribu judul dari penerbit Indonesia dan dunia —
+          Nikmati ribuan judul kurasi dari penerbit Indonesia dan dunia —
           fiksi, non-fiksi, audiobook, sampai BUKOO Originals eksklusif.
-          Harga mulai <strong style={{ color: 'var(--amber)' }}>Rp 19.900/bulan</strong>.
+          Harga mulai <strong style={{ color: 'var(--amber)' }}>Rp 29.900/bulan</strong>.
         </p>
 
         <form className="hero-input-row" onSubmit={handleSubmit}>

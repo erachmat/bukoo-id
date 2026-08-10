@@ -8,15 +8,15 @@ export function Stats() {
         <div className="stat-label">Potensi Pengguna Internet Indonesia</div>
       </div>
       <div className="stat-item">
-        <div className="stat-num">200<span>k+</span></div>
-        <div className="stat-label">Judul Buku Tersedia</div>
+        <div className="stat-num">2.000<span>+</span></div>
+        <div className="stat-label">Judul Buku Kurasi</div>
       </div>
       <div className="stat-item">
-        <div className="stat-num">500<span>+</span></div>
+        <div className="stat-num">50<span></span></div>
         <div className="stat-label">Penerbit Mitra</div>
       </div>
       <div className="stat-item">
-        <div className="stat-num">Rp<span>19rb</span></div>
+        <div className="stat-num">Rp<span>29rb</span></div>
         <div className="stat-label">Harga Langganan Mulai Dari</div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import ReadingScreen from '../screens/reading/ReadingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import BookDetailScreen from '../screens/book/BookDetailScreen';
 import SubscriptionScreen from '../screens/subscription/SubscriptionScreen';
+import SearchScreen from '../screens/search/SearchScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const ReadingStack = createNativeStackNavigator<ReadingStackParamList>();
@@ -31,6 +32,7 @@ export default function AppNavigator() {
         // Main App flow
         <>
           <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen name="Search" component={SearchScreen} />
           <Stack.Screen name="ReadingStack" component={ReadingStackNavigator} />
           <Stack.Screen 
             name="ReadingScreen" 

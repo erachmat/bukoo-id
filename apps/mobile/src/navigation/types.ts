@@ -28,6 +28,7 @@ export type RootStackParamList = {
   ReadingScreen: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; totalPages?: number };
   Profile: undefined;
   Subscription: undefined;
+  Search: undefined;
 };
 
 // Global typing for React Navigation — use interface extension, not namespace

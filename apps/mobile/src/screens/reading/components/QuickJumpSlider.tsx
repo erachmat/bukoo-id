@@ -14,7 +14,6 @@ interface QuickJumpSliderProps {
 export const QuickJumpSlider: React.FC<QuickJumpSliderProps> = ({
   currentPage,
   totalPages,
-  chapterTitle,
   onPageChange,
 }) => {
   const total = Math.max(totalPages, 1);

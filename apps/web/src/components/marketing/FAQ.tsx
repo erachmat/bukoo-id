@@ -24,7 +24,7 @@ export function FAQ() {
           Apa itu BUKOO dan bagaimana cara kerjanya?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">BUKOO adalah platform langganan buku digital yang memungkinkan kamu mengakses 200.000+ judul buku dari ratusan penerbit Indonesia dan internasional. Cukup bayar satu biaya langganan bulanan, dan nikmati bacaan sepuasnya — mirip Netflix tapi untuk buku. Tersedia di iOS, Android, dan web browser.</div>
+        <div className="faq-a">BUKOO adalah platform langganan buku digital yang memungkinkan kamu mengakses 2.000+ judul buku kurasi dari puluhan penerbit Indonesia dan internasional. Cukup bayar satu biaya langganan bulanan, dan nikmati bacaan sepuasnya — mirip Netflix tapi untuk buku. Tersedia di iOS, Android, dan web browser.</div>
       </div>
 
       <div className="faq-item">
@@ -32,7 +32,7 @@ export function FAQ() {
           Apakah saya bisa membaca offline tanpa internet?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">Ya! Semua tier berbayar mendukung offline reading. Tier Baca (Rp 19.900) memungkinkan download hingga 10 judul, sementara tier Plus ke atas mendapatkan offline unlimited tanpa batasan. Sangat cocok untuk daerah dengan koneksi internet tidak stabil.</div>
+        <div className="faq-a">Ya! Semua tier berbayar mendukung offline reading. Tier Baca (Rp 29.900) memungkinkan download hingga 10 judul, sementara tier Plus ke atas mendapatkan offline unlimited tanpa batasan. Sangat cocok untuk daerah dengan koneksi internet tidak stabil.</div>
       </div>
 
       <div className="faq-item">
@@ -48,7 +48,7 @@ export function FAQ() {
           Buku apa saja yang tersedia di BUKOO?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">BUKOO memiliki 200.000+ judul mencakup berbagai genre: self-development, fiksi dan sastra Indonesia, bisnis dan keuangan, sains, akademik, hingga buku anak. Kami bermitra dengan 500+ penerbit termasuk Gramedia Pustaka Utama, Mizan, Bentang, Penguin Random House, dan banyak lagi. BUKOO Originals menambahkan konten eksklusif dari penulis-penulis terbaik Indonesia.</div>
+        <div className="faq-a">BUKOO memiliki 2.000+ judul kurasi mencakup berbagai genre: self-development, fiksi dan sastra Indonesia, bisnis dan keuangan, sains, akademik, hingga buku anak. Kami bermitra dengan 50 penerbit pilihan termasuk Gramedia Pustaka Utama, Mizan, Bentang, Penguin Random House, dan banyak lagi. BUKOO Originals menambahkan konten eksklusif dari penulis-penulis terbaik Indonesia.</div>
       </div>
 
       <div className="faq-item">
@@ -56,7 +56,7 @@ export function FAQ() {
           Apa itu BUKOO AI Companion?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">AI Companion adalah asisten membaca personal yang ada di tier Plus ke atas. Ia bisa merekomendasikan buku sesuai selera, membuat rangkuman bab, menjawab pertanyaan tentang isi buku, dan membangun "Peta Baca" — jalur membaca yang dikurasi AI berdasarkan tujuan dan minatmu.</div>
+        <div className="faq-a">AI Companion adalah asisten membaca personal yang ada di tier Plus ke atas. Ia bisa merekomendasikan buku sesuai selera, membuat rangkuman bab, menjawab pertanyaan tentang isi buku, dan membangun &quot;Peta Baca&quot; — jalur membaca yang dikurasi AI berdasarkan tujuan dan minatmu.</div>
       </div>
 
       <div className="faq-item">
