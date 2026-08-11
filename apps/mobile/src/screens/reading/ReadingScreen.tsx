@@ -1025,24 +1025,44 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         if (uri && isMounted) {
           console.log('[ReadingScreen] Found local cached book path:', uri);
           setLocalFileUri(uri);
-        } else if (bookId && remoteUrl) {
+          return;
+        }
+
+        if (bookId && remoteUrl) {
           console.log('[ReadingScreen] Downloading book to local storage for robust reading...');
           try {
             const downloadedUri = await bookDownloadService.downloadBook(bookId, remoteUrl);
             if (downloadedUri && isMounted) {
               console.log('[ReadingScreen] Download finished, setting local URI:', downloadedUri);
               setLocalFileUri(downloadedUri);
+              return;
             }
           } catch (downloadErr) {
-            console.warn('[ReadingScreen] Download failed, falling back to direct URL:', downloadErr);
-            if (isMounted) {
-              setOfflineCacheWarning('Gagal mengunduh versi offline. Membaca melalui streaming.');
-              setLocalFileUri(remoteUrl);
-            }
+            console.warn('[ReadingScreen] Download failed, checking static fallback asset:', downloadErr);
           }
         }
+
+        // Fallback: load bundled static sample EPUB asset for guaranteed demo reading
+        console.log('[ReadingScreen] Loading static bundled sample EPUB asset for demo...');
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const sampleAsset = Asset.fromModule(require('../../assets/sample-book.epub'));
+        await sampleAsset.downloadAsync();
+        if (sampleAsset.localUri && isMounted) {
+          setOfflineCacheWarning('Mode Demo: Menggunakan sampel buku lokal.');
+          setLocalFileUri(sampleAsset.localUri);
+        }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to resolve book:', e);
+        console.error('[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:', e);
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const sampleAsset = Asset.fromModule(require('../../assets/sample-book.epub'));
+          await sampleAsset.downloadAsync();
+          if (sampleAsset.localUri && isMounted) {
+            setLocalFileUri(sampleAsset.localUri);
+          }
+        } catch (assetErr) {
+          setLoadError('Gagal memuat sampel buku.');
+        }
       }
     };
 

@@ -99,8 +99,7 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2025,
     synopsis: 'Buku karya monumental yang menjelaskan secara mendalam tentang filsafat ajaran Islam, tujuan hidup manusia, keadaan fisik, moral, dan kerohanian manusia.',
-    fileUrl: '/public/books/filsafat-ajaran-islam.epub',
-    epubUrl: '/public/books/filsafat-ajaran-islam.epub',
+    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
     fileType: 'EPUB',
   },
   book_perlunya_seorang_imam: {
@@ -115,8 +114,7 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2024,
     synopsis: 'Membahas pentingnya kepemimpinan rohani dan keberadaan seorang Imam pada setiap zaman untuk membimbing umat manusia menuju kebenaran.',
-    fileUrl: '/public/books/perlunya-seorang-imam.epub',
-    epubUrl: '/public/books/perlunya-seorang-imam.epub',
+    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
     fileType: 'EPUB',
   },
   book_riwayat_rasulullah: {
@@ -131,8 +129,7 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2023,
     synopsis: 'Riwayat lengkap dan agung perjalanan hidup Nabi Besar Muhammad SAW dari masa kelahiran, kerasulan, hingga akhir hayat beliau.',
-    fileUrl: '/public/books/riwayat-rasulullah.epub',
-    epubUrl: '/public/books/riwayat-rasulullah.epub',
+    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
     fileType: 'EPUB',
   },
   'art-of-war': {
