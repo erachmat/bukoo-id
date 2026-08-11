@@ -1038,7 +1038,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               return;
             }
           } catch (downloadErr) {
-            console.warn('[ReadingScreen] Download failed, checking static fallback asset:', downloadErr);
+            console.warn('[ReadingScreen] Download failed, streaming directly from remote URL:', downloadErr);
+            if (isMounted && remoteUrl) {
+              setLocalFileUri(remoteUrl);
+              return;
+            }
           }
         }
 
