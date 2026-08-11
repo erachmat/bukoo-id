@@ -1028,22 +1028,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           return;
         }
 
-        if (bookId && remoteUrl) {
-          console.log('[ReadingScreen] Downloading book to local storage for robust reading...');
-          try {
-            const downloadedUri = await bookDownloadService.downloadBook(bookId, remoteUrl);
-            if (downloadedUri && isMounted) {
-              console.log('[ReadingScreen] Download finished, setting local URI:', downloadedUri);
-              setLocalFileUri(downloadedUri);
-              return;
-            }
-          } catch (downloadErr) {
-            console.warn('[ReadingScreen] Download failed, streaming directly from remote URL:', downloadErr);
-            if (isMounted && remoteUrl) {
-              setLocalFileUri(remoteUrl);
-              return;
-            }
-          }
+        // Directly open remote URL without downloading first
+        if (remoteUrl && isMounted) {
+          console.log('[ReadingScreen] Opening directly from remote URL:', remoteUrl);
+          setLocalFileUri(remoteUrl);
+          return;
         }
 
         // Fallback: load bundled static sample EPUB asset for guaranteed demo reading
