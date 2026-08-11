@@ -17,7 +17,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-// Allow .txt files to be bundled as raw assets (used for epub.min.txt)
-config.resolver.assetExts = [...(config.resolver.assetExts || []), 'txt'];
+// Allow .txt and .epub files to be bundled as raw assets
+config.resolver.assetExts = [...(config.resolver.assetExts || []), 'txt', 'epub'];
 
 module.exports = config;
