@@ -1014,7 +1014,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     const resolveAndLoadBook = async () => {
       try {
         const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
-        const remoteUrl = epubUrl || sampleBook?.epubUrl || '';
+        let remoteUrl = epubUrl || sampleBook?.epubUrl || '';
+        if (remoteUrl) {
+          remoteUrl = remoteUrl.replace(/\.pdf$/i, '.epub');
+        }
 
         // Check if file already exists locally on disk
         let uri: string | null = localEpubUri || null;

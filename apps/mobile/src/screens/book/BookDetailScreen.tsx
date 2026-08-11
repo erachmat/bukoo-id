@@ -389,12 +389,13 @@ export default function BookDetailScreen() {
 
   const resolveEpubUrl = (url?: string) => {
     if (!url) return undefined;
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
+    const epubPath = url.replace(/\.pdf$/i, '.epub');
+    if (epubPath.startsWith('http://') || epubPath.startsWith('https://')) {
+      return epubPath;
     }
     const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://bukooapi-production.up.railway.app';
     const domainBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
-    return `${domainBaseUrl}/${url.replace(/^\//, '')}`;
+    return `${domainBaseUrl}/${epubPath.replace(/^\//, '')}`;
   };
 
   const rawEpubUrl = book?.epubUrl || book?.fileUrl || sampleFallback.epubUrl || sampleFallback.fileUrl;
