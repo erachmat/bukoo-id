@@ -383,11 +383,25 @@ export default function BookDetailScreen() {
   });
 
   const sampleFallback = MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
+
+  const resolveEpubUrl = (url?: string) => {
+    if (!url) return undefined;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://bukooapi-production.up.railway.app';
+    const domainBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
+    return `${domainBaseUrl}/${url.replace(/^\//, '')}`;
+  };
+
+  const rawEpubUrl = book?.epubUrl || book?.fileUrl;
+  const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl) || sampleFallback.epubUrl;
+
   const displayBook = book ? {
     ...sampleFallback,
     ...book,
     synopsis: book.synopsis || sampleFallback.synopsis,
-    epubUrl: book.epubUrl || sampleFallback.epubUrl,
+    epubUrl: resolvedEpubUrl,
   } : sampleFallback;
   const insets = useSafeAreaInsets();
 

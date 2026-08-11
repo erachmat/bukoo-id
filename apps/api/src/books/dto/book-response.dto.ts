@@ -19,6 +19,8 @@ export class BookResponseDto {
   isPublished!: boolean;
   subscriptionRequired!: SubscriptionTier;
   isAvailableOffline!: boolean;
+  fileUrl!: string | null;
+  fileType!: string | null;
   createdAt!: Date;
   updatedAt!: Date;
   is_accessible!: boolean;

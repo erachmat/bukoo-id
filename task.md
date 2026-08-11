@@ -134,9 +134,10 @@
   - `[x]` Generated native Android app launcher mipmaps (`ic_launcher.webp`, `ic_launcher_round.webp`, `ic_launcher.png`, `ic_launcher_round.png`) across all densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
 
-
-
-
-
-
-
+# Sample Books Conversion to EPUB
+- `[x]` 1. Convert PDF books in `sample-books/` to EPUB format
+  - `[x]` Convert `Filsafat Ajaran Islam (Edisi 2025) final 3 - ISBN DIGITAL.pdf` -> `apps/api/public/books/filsafat-ajaran-islam.epub`.
+  - `[x]` Convert `Perlunya Seorang Imam (Revisi) 2.pdf` -> `apps/api/public/books/perlunya-seorang-imam.epub`.
+  - `[x]` Convert `RIWAYAT-RASULULLAH.pdf` -> `apps/api/public/books/riwayat-rasulullah.epub`.
+  - `[x]` Update `apps/api/prisma/seed.ts` fileUrls and fileTypes to EPUB.
+  - `[x]` Verification complete: typecheck, lint, test across touched workspaces.
