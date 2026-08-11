@@ -1013,6 +1013,26 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     let isMounted = true;
     const resolveAndLoadBook = async () => {
       try {
+        // Bundled local assets for the 3 offline books (no download needed)
+        const OFFLINE_BOOK_ASSETS: Record<string, number> = {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          book_filsafat_ajaran_islam: require('../../assets/filsafat-ajaran-islam.epub') as number,
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          book_perlunya_seorang_imam: require('../../assets/perlunya-seorang-imam.epub') as number,
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          book_riwayat_rasulullah: require('../../assets/riwayat-rasulullah.epub') as number,
+        };
+
+        if (OFFLINE_BOOK_ASSETS[bookId] !== undefined) {
+          console.log('[ReadingScreen] Loading offline bundled asset for:', bookId);
+          const asset = Asset.fromModule(OFFLINE_BOOK_ASSETS[bookId]);
+          await asset.downloadAsync();
+          if (asset.localUri && isMounted) {
+            setLocalFileUri(asset.localUri);
+          }
+          return;
+        }
+
         const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
         let remoteUrl = epubUrl || sampleBook?.epubUrl || '';
         if (remoteUrl) {
