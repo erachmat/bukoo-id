@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { bookDownloadService } from '../services/bookDownload';
 
-export function useBookDownload(bookId: string) {
+export function useBookDownload(bookId: string, remoteUrl?: string) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [localUri, setLocalUri] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export function useBookDownload(bookId: string) {
     let isMounted = true;
     
     const checkLocalFile = async () => {
-      const path = await bookDownloadService.getLocalBookPath(bookId);
+      const path = await bookDownloadService.getLocalBookPath(bookId, remoteUrl);
       if (isMounted) {
         setLocalUri(path);
       }
@@ -20,7 +20,7 @@ export function useBookDownload(bookId: string) {
     return () => {
       isMounted = false;
     };
-  }, [bookId]);
+  }, [bookId, remoteUrl]);
 
   const download = useCallback(async (remoteUrl: string) => {
     setIsDownloading(true);

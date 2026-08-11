@@ -1019,7 +1019,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         // Check if file already exists locally on disk
         let uri: string | null = localEpubUri || null;
         if (!uri && bookId) {
-          uri = await bookDownloadService.getLocalBookPath(bookId);
+          uri = await bookDownloadService.getLocalBookPath(bookId, remoteUrl);
         }
 
         if (uri && isMounted) {

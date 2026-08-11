@@ -130,11 +130,53 @@ class BookDownloadService {
     }
   }
 
-  async getLocalBookPath(bookId: string): Promise<string | null> {
+  async getLocalBookPath(bookId: string, remoteUrl?: string): Promise<string | null> {
     await this.ensureDirectoryExists();
+    const expectedExt = remoteUrl ? this.getExtension(remoteUrl) : null;
     const epubUri = this.DOWNLOAD_DIR + bookId + '.epub';
     const pdfUri = this.DOWNLOAD_DIR + bookId + '.pdf';
     
+    if (expectedExt === '.epub') {
+      // Purge stale PDF cache if book format switched to EPUB
+      const pdfInfo = await FileSystem.getInfoAsync(pdfUri);
+      if (pdfInfo.exists) {
+        console.warn(`[BookDownloadService] Purging stale PDF cache for ${bookId} because expected format is EPUB`);
+        await FileSystem.deleteAsync(pdfUri, { idempotent: true });
+      }
+
+      const epubInfo = await FileSystem.getInfoAsync(epubUri);
+      if (epubInfo.exists) {
+        const isValid = await this.validateBookFile(epubUri);
+        if (isValid) {
+          return epubUri;
+        }
+        console.warn(`[BookDownloadService] Corrupted/invalid EPUB detected for ${bookId}, deleting cache...`);
+        await FileSystem.deleteAsync(epubUri, { idempotent: true });
+      }
+      return null;
+    }
+
+    if (expectedExt === '.pdf') {
+      // Purge stale EPUB cache if book format switched to PDF
+      const epubInfo = await FileSystem.getInfoAsync(epubUri);
+      if (epubInfo.exists) {
+        console.warn(`[BookDownloadService] Purging stale EPUB cache for ${bookId} because expected format is PDF`);
+        await FileSystem.deleteAsync(epubUri, { idempotent: true });
+      }
+
+      const pdfInfo = await FileSystem.getInfoAsync(pdfUri);
+      if (pdfInfo.exists) {
+        const isValid = await this.validateBookFile(pdfUri);
+        if (isValid) {
+          return pdfUri;
+        }
+        console.warn(`[BookDownloadService] Corrupted/invalid PDF detected for ${bookId}, deleting cache...`);
+        await FileSystem.deleteAsync(pdfUri, { idempotent: true });
+      }
+      return null;
+    }
+
+    // Fallback if no remoteUrl extension provided
     const epubInfo = await FileSystem.getInfoAsync(epubUri);
     if (epubInfo.exists) {
       const isValid = await this.validateBookFile(epubUri);

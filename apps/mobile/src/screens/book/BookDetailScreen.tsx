@@ -99,7 +99,8 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2025,
     synopsis: 'Buku karya monumental yang menjelaskan secara mendalam tentang filsafat ajaran Islam, tujuan hidup manusia, keadaan fisik, moral, dan kerohanian manusia.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
+    fileUrl: '/public/books/filsafat-ajaran-islam.epub',
+    epubUrl: '/public/books/filsafat-ajaran-islam.epub',
     fileType: 'EPUB',
   },
   book_perlunya_seorang_imam: {
@@ -114,7 +115,8 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2024,
     synopsis: 'Membahas pentingnya kepemimpinan rohani dan keberadaan seorang Imam pada setiap zaman untuk membimbing umat manusia menuju kebenaran.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
+    fileUrl: '/public/books/perlunya-seorang-imam.epub',
+    epubUrl: '/public/books/perlunya-seorang-imam.epub',
     fileType: 'EPUB',
   },
   book_riwayat_rasulullah: {
@@ -129,7 +131,8 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     language: 'id',
     publishedYear: 2023,
     synopsis: 'Riwayat lengkap dan agung perjalanan hidup Nabi Besar Muhammad SAW dari masa kelahiran, kerasulan, hingga akhir hayat beliau.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
+    fileUrl: '/public/books/riwayat-rasulullah.epub',
+    epubUrl: '/public/books/riwayat-rasulullah.epub',
     fileType: 'EPUB',
   },
   'art-of-war': {
@@ -394,15 +397,18 @@ export default function BookDetailScreen() {
     return `${domainBaseUrl}/${url.replace(/^\//, '')}`;
   };
 
-  const rawEpubUrl = book?.epubUrl || book?.fileUrl;
-  const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl) || sampleFallback.epubUrl;
+  const rawEpubUrl = book?.epubUrl || book?.fileUrl || sampleFallback.epubUrl || sampleFallback.fileUrl;
+  const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl);
 
   const displayBook = book ? {
     ...sampleFallback,
     ...book,
     synopsis: book.synopsis || sampleFallback.synopsis,
     epubUrl: resolvedEpubUrl,
-  } : sampleFallback;
+  } : {
+    ...sampleFallback,
+    epubUrl: resolvedEpubUrl,
+  };
   const insets = useSafeAreaInsets();
 
   if (isLoading || isLoadingProgress) {

@@ -140,4 +140,5 @@
   - `[x]` Convert `Perlunya Seorang Imam (Revisi) 2.pdf` -> `apps/api/public/books/perlunya-seorang-imam.epub`.
   - `[x]` Convert `RIWAYAT-RASULULLAH.pdf` -> `apps/api/public/books/riwayat-rasulullah.epub`.
   - `[x]` Update `apps/api/prisma/seed.ts` fileUrls and fileTypes to EPUB.
+  - `[x]` Fix stale PDF cache loading bug in ReadingScreen & bookDownloadService when book format switches to EPUB.
   - `[x]` Verification complete: typecheck, lint, test across touched workspaces.
