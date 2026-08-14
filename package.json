@@ -15,7 +15,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "clean": "turbo run clean",
-    "postinstall": "npm run build --workspace=@bukoo/shared-types"
+    "postinstall": "npm run build --workspace=@bukoo/shared-types && npm run build --workspace=@bukoo/db"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
