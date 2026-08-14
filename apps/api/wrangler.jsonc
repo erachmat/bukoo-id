@@ -10,7 +10,7 @@
       "binding": "DB",
       "database_name": "bukoo-db",
       // Replace this with your actual D1 database ID from: wrangler d1 create bukoo-db
-      "database_id": "YOUR_D1_DATABASE_ID_HERE",
+      "database_id": "84f02aaa-eda5-4a93-ae92-ace4f00af03c",
       "migrations_dir": "../../packages/db/drizzle"
     }
   ],

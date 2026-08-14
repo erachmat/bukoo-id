@@ -393,7 +393,7 @@ export default function BookDetailScreen() {
     if (epubPath.startsWith('http://') || epubPath.startsWith('https://')) {
       return epubPath;
     }
-    const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://bukooapi-production.up.railway.app';
+    const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://bukoo-api.erachmat-dev.workers.dev';
     const domainBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
     return `${domainBaseUrl}/${epubPath.replace(/^\//, '')}`;
   };

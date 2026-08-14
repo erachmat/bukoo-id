@@ -14,7 +14,7 @@ interface RemoteBookmark {
   chapterTitle?: string;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bukooapi-production.up.railway.app/v1';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bukoo-api.erachmat-dev.workers.dev/v1';
 
 class AnnotationSyncService {
   private async getAuthToken(): Promise<string | null> {

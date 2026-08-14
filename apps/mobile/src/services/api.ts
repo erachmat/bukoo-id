@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore, UserPublicDto } from '../stores/authStore';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://bukooapi-production.up.railway.app/v1';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://bukoo-api.erachmat-dev.workers.dev/v1';
 
 export const api = axios.create({
   baseURL: API_URL,
