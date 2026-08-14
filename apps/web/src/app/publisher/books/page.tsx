@@ -1,7 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { books as booksTable } from "@bukoo/db";
+import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { DeletePublisherBookButton } from "./delete-button";
 
@@ -15,10 +17,11 @@ export default async function PublisherBooksPage() {
     redirect("/login");
   }
 
-  const books = await prisma.book.findMany({
-    where: { publisherUserId: user.id },
-    orderBy: { createdAt: "desc" },
-  });
+  const books = await db
+    .select()
+    .from(booksTable)
+    .where(eq(booksTable.publisherUserId, user.id ?? ''))
+    .orderBy(desc(booksTable.createdAt));
 
   return (
     <>
@@ -66,13 +69,13 @@ export default async function PublisherBooksPage() {
                       </td>
                     </tr>
                   ) : (
-                    books.map((book) => (
+                    books.map((book: typeof books[number]) => (
                       <tr key={book.id}>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            {book.coverUrl ? (
+                            {book.coverKey ? (
                               <img
-                                src={book.coverUrl}
+                                src={book.coverKey}
                                 alt={book.title}
                                 style={{ width: "36px", height: "52px", objectFit: "cover", borderRadius: "4px", flexShrink: 0, border: "1px solid var(--border)" }}
                               />
@@ -89,7 +92,7 @@ export default async function PublisherBooksPage() {
                         </td>
                         <td>
                           <span style={{ background: "var(--bg)", color: "var(--text-mid)", fontSize: "11px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px" }}>
-                            {book.genre[0] ?? "Sastra"}
+                            {(typeof book.genre === 'string' ? JSON.parse(book.genre || '[]') : book.genre)[0] ?? "Sastra"}
                           </span>
                         </td>
                         <td>{book.language}</td>
@@ -100,7 +103,7 @@ export default async function PublisherBooksPage() {
                             <span className="card-badge badge-teal" style={{ background: "rgba(0, 201, 167, 0.1)", color: "var(--teal-d)", border: "1px solid rgba(0, 201, 167, 0.2)" }}>GRATIS</span>
                           )}
                         </td>
-                        <td style={{ fontWeight: 600, fontSize: "12px" }}>{book.fileType}</td>
+                        <td style={{ fontWeight: 600, fontSize: "12px" }}>{book.epubKey ? 'EPUB' : '—'}</td>
                         <td style={{ textAlign: "right", fontWeight: 600 }}>
                           {book.readCount.toLocaleString("id-ID")} kali
                         </td>

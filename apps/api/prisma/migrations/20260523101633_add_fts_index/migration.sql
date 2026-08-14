@@ -1,2 +1,0 @@
--- Create GIN index for Indonesian full-text search on Book title and author
-CREATE INDEX books_fts_idx ON "Book" USING GIN (to_tsvector('indonesian', coalesce("title", '') || ' ' || coalesce("author", '')));

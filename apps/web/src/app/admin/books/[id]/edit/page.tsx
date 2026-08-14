@@ -1,14 +1,18 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { books as booksTable } from '@bukoo/db'
+import { eq } from 'drizzle-orm'
 import { BookForm } from '../../_components/book-form'
 import { updateBook } from '../../actions'
 
 export default async function EditBookPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
-  const book = await prisma.book.findUnique({ where: { id } })
+  const book = await db.query.books.findFirst({ where: eq(booksTable.id, id) })
 
   if (!book) notFound()
+
+  const genreList = typeof book.genre === 'string' ? JSON.parse(book.genre || '[]') : book.genre
 
   const boundAction = updateBook.bind(null, id)
 
@@ -28,14 +32,14 @@ export default async function EditBookPage(props: { params: Promise<{ id: string
           title: book.title,
           author: book.author,
           description: book.description ?? undefined,
-          genre: book.genre[0],
-          language: book.language,
-          subscriptionRequired: book.subscriptionRequired,
-          year: book.year,
+          genre: Array.isArray(genreList) ? genreList[0] : undefined,
+          language: book.language as 'ID' | 'EN',
+          subscriptionRequired: book.subscriptionRequired as 'FREE' | 'PERSONAL' | 'FAMILY',
+          year: book.publishedYear,
           publisher: book.publisher,
-          pageCount: book.pageCount,
-          coverUrl: book.coverUrl,
-          fileUrl: book.fileUrl,
+          pageCount: book.totalPages,
+          coverUrl: book.coverKey ?? undefined,
+          fileUrl: book.epubKey ?? undefined,
         }}
       />
     </div>

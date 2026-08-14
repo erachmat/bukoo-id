@@ -1,43 +1,49 @@
-'use server'
+'use server';
 
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { readingProgress } from '@bukoo/db';
+import { eq, and } from 'drizzle-orm';
+import { createId } from '@paralleldrive/cuid2';
 
 export async function updateReadingProgress(
   bookId: string,
   location: string | null,
   progress: number, // 0.0 - 1.0
 ) {
-  const session = await auth()
+  const session = await auth();
   if (!session?.user?.id) {
-    throw new Error('Not authenticated')
+    throw new Error('Not authenticated');
   }
 
-  const userId = session.user.id
+  const userId = session.user.id;
+  const progressPercent = progress * 100;
+  const now = new Date().toISOString();
 
-  await prisma.readingProgress.upsert({
-    where: {
-      userId_bookId: {
-        userId,
-        bookId,
-      },
-    },
-    update: {
-      cfiPosition: location,
-      progressPercent: progress * 100,
-      updatedAt: new Date(),
-    },
-    create: {
+  const existing = await db.query.readingProgress.findFirst({
+    where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, bookId)),
+  });
+
+  if (existing) {
+    await db
+      .update(readingProgress)
+      .set({
+        cfiPosition: location,
+        progressPercent,
+        updatedAt: now,
+        lastReadAt: now,
+      })
+      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, bookId)));
+  } else {
+    await db.insert(readingProgress).values({
+      id: createId(),
       userId,
       bookId,
       cfiPosition: location,
-      progressPercent: progress * 100,
-    },
-  })
+      progressPercent,
+      lastReadAt: now,
+    });
+  }
 
-  // Only revalidate cache optionally to prevent waterfall thrashing if called frequently
-  // revalidatePath('/library')
-  
-  return { success: true }
+  return { success: true };
 }

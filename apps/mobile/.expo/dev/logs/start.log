@@ -6723,3 +6723,851 @@
 {"_e":"metro:bundling:done","_t":1786288770186,"id":"1","total":1214,"ms":1552.244161}
 {"_e":"metro:client_log","_t":1786288777704,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
 {"_e":"metro:client_log","_t":1786288779372,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"root:init","_t":1786437560798,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"env:mode","_t":1786437560799,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1786437560803,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"https://bukooapi-production.up.railway.app/v1","EXPO_PUBLIC_GOOGLE_CLIENT_ID":"576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"}}
+{"_e":"devserver:start","_t":1786437561242,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786437562644,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786437564699,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[142511:0811/153923.075206:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786437574033,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"root:init","_t":1786437739919,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786437739937,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786437741001,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786437742682,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[144318:0811/154221.168652:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786437752223,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786437834767,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786437834767,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786437834779,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786437835415,"id":"1","progress":0.010000000000000002,"total":1,"current":1}
+{"_e":"metro:bundling:progress","_t":1786437835516,"id":"1","progress":0.04000000000000001,"total":10,"current":2}
+{"_e":"metro:bundling:progress","_t":1786437835633,"id":"1","progress":0.05536332179930796,"total":17,"current":4}
+{"_e":"metro:bundling:progress","_t":1786437835733,"id":"1","progress":0.05536332179930796,"total":42,"current":6}
+{"_e":"metro:bundling:progress","_t":1786437835834,"id":"1","progress":0.05536332179930796,"total":46,"current":10}
+{"_e":"metro:bundling:progress","_t":1786437835933,"id":"1","progress":0.05536332179930796,"total":49,"current":11}
+{"_e":"metro:bundling:progress","_t":1786437836127,"id":"1","progress":0.059975010412328195,"total":49,"current":12}
+{"_e":"metro:bundling:progress","_t":1786437836228,"id":"1","progress":0.059975010412328195,"total":145,"current":14}
+{"_e":"metro:bundling:progress","_t":1786437836329,"id":"1","progress":0.059975010412328195,"total":152,"current":17}
+{"_e":"metro:bundling:progress","_t":1786437836430,"id":"1","progress":0.059975010412328195,"total":154,"current":23}
+{"_e":"metro:bundling:progress","_t":1786437836531,"id":"1","progress":0.059975010412328195,"total":164,"current":32}
+{"_e":"metro:bundling:progress","_t":1786437836634,"id":"1","progress":0.059975010412328195,"total":175,"current":42}
+{"_e":"metro:bundling:progress","_t":1786437836745,"id":"1","progress":0.06925207756232686,"total":190,"current":50}
+{"_e":"metro:bundling:progress","_t":1786437836847,"id":"1","progress":0.07619900173611112,"total":192,"current":53}
+{"_e":"metro:bundling:progress","_t":1786437836947,"id":"1","progress":0.07619900173611112,"total":200,"current":55}
+{"_e":"metro:bundling:progress","_t":1786437837051,"id":"1","progress":0.08357853597178859,"total":211,"current":61}
+{"_e":"metro:bundling:progress","_t":1786437837154,"id":"1","progress":0.08729338842975208,"total":220,"current":65}
+{"_e":"metro:bundling:progress","_t":1786437837257,"id":"1","progress":0.09425977223761157,"total":228,"current":70}
+{"_e":"metro:bundling:progress","_t":1786437837361,"id":"1","progress":0.09631391200951249,"total":232,"current":72}
+{"_e":"metro:bundling:progress","_t":1786437837462,"id":"1","progress":0.09831944843435794,"total":236,"current":74}
+{"_e":"metro:bundling:progress","_t":1786437837561,"id":"1","progress":0.11673611111111111,"total":240,"current":82}
+{"_e":"metro:bundling:progress","_t":1786437837664,"id":"1","progress":0.12856938778749544,"total":251,"current":90}
+{"_e":"metro:bundling:progress","_t":1786437837764,"id":"1","progress":0.15249880121476905,"total":274,"current":107}
+{"_e":"metro:bundling:progress","_t":1786437837864,"id":"1","progress":0.1672275953283499,"total":291,"current":119}
+{"_e":"metro:bundling:progress","_t":1786437837965,"id":"1","progress":0.21490285513793253,"total":302,"current":140}
+{"_e":"metro:bundling:progress","_t":1786437838067,"id":"1","progress":0.2532572946533986,"total":308,"current":155}
+{"_e":"metro:bundling:progress","_t":1786437838167,"id":"1","progress":0.2532572946533986,"total":393,"current":165}
+{"_e":"metro:bundling:progress","_t":1786437838270,"id":"1","progress":0.2532572946533986,"total":402,"current":179}
+{"_e":"metro:bundling:progress","_t":1786437838369,"id":"1","progress":0.2532572946533986,"total":415,"current":193}
+{"_e":"metro:bundling:progress","_t":1786437838474,"id":"1","progress":0.2532572946533986,"total":425,"current":209}
+{"_e":"metro:bundling:progress","_t":1786437838574,"id":"1","progress":0.26159940240720475,"total":436,"current":223}
+{"_e":"metro:bundling:progress","_t":1786437838674,"id":"1","progress":0.27515644929846933,"total":448,"current":235}
+{"_e":"metro:bundling:progress","_t":1786437838774,"id":"1","progress":0.29730696343638524,"total":464,"current":253}
+{"_e":"metro:bundling:progress","_t":1786437838876,"id":"1","progress":0.30631699695423437,"total":477,"current":264}
+{"_e":"metro:bundling:progress","_t":1786437838981,"id":"1","progress":0.30631699695423437,"total":510,"current":282}
+{"_e":"metro:bundling:progress","_t":1786437839081,"id":"1","progress":0.31334502338610665,"total":527,"current":295}
+{"_e":"metro:bundling:progress","_t":1786437839181,"id":"1","progress":0.32412080046193636,"total":541,"current":308}
+{"_e":"metro:bundling:progress","_t":1786437839285,"id":"1","progress":0.32412080046193636,"total":557,"current":312}
+{"_e":"metro:bundling:progress","_t":1786437839387,"id":"1","progress":0.32412080046193636,"total":581,"current":318}
+{"_e":"metro:bundling:progress","_t":1786437839487,"id":"1","progress":0.3332979062599638,"total":582,"current":336}
+{"_e":"metro:bundling:progress","_t":1786437839594,"id":"1","progress":0.3703294616115128,"total":585,"current":356}
+{"_e":"metro:bundling:progress","_t":1786437839701,"id":"1","progress":0.37885789523075564,"total":593,"current":365}
+{"_e":"metro:bundling:progress","_t":1786437839805,"id":"1","progress":0.37885789523075564,"total":634,"current":389}
+{"_e":"metro:bundling:progress","_t":1786437839907,"id":"1","progress":0.3949908462651804,"total":646,"current":406}
+{"_e":"metro:bundling:progress","_t":1786437840009,"id":"1","progress":0.3949908462651804,"total":680,"current":417}
+{"_e":"metro:bundling:progress","_t":1786437840110,"id":"1","progress":0.3949908462651804,"total":683,"current":421}
+{"_e":"metro:bundling:progress","_t":1786437840213,"id":"1","progress":0.3949908462651804,"total":695,"current":434}
+{"_e":"metro:bundling:progress","_t":1786437840317,"id":"1","progress":0.40843221727265505,"total":701,"current":448}
+{"_e":"metro:bundling:progress","_t":1786437840423,"id":"1","progress":0.4275147928994083,"total":702,"current":459}
+{"_e":"metro:bundling:progress","_t":1786437840524,"id":"1","progress":0.45778180172023536,"total":705,"current":477}
+{"_e":"metro:bundling:progress","_t":1786437840629,"id":"1","progress":0.462705239697936,"total":713,"current":485}
+{"_e":"metro:bundling:progress","_t":1786437840730,"id":"1","progress":0.46496176795241895,"total":723,"current":493}
+{"_e":"metro:bundling:progress","_t":1786437840830,"id":"1","progress":0.48692790725757756,"total":728,"current":508}
+{"_e":"metro:bundling:progress","_t":1786437840931,"id":"1","progress":0.500439635913537,"total":728,"current":515}
+{"_e":"metro:bundling:progress","_t":1786437841037,"id":"1","progress":0.5245812799539367,"total":729,"current":528}
+{"_e":"metro:bundling:progress","_t":1786437841137,"id":"1","progress":0.539896836049154,"total":739,"current":543}
+{"_e":"metro:bundling:progress","_t":1786437841238,"id":"1","progress":0.5418872374437166,"total":739,"current":544}
+{"_e":"metro:bundling:progress","_t":1786437841338,"id":"1","progress":0.5418872374437166,"total":749,"current":549}
+{"_e":"metro:bundling:progress","_t":1786437841439,"id":"1","progress":0.5418872374437166,"total":769,"current":560}
+{"_e":"metro:bundling:progress","_t":1786437841539,"id":"1","progress":0.5418872374437166,"total":781,"current":566}
+{"_e":"metro:bundling:progress","_t":1786437841639,"id":"1","progress":0.5418872374437166,"total":781,"current":573}
+{"_e":"metro:bundling:progress","_t":1786437841739,"id":"1","progress":0.5454123932736359,"total":784,"current":579}
+{"_e":"metro:bundling:progress","_t":1786437841840,"id":"1","progress":0.563923149336483,"total":791,"current":594}
+{"_e":"metro:bundling:progress","_t":1786437841947,"id":"1","progress":0.5729384108775515,"total":794,"current":601}
+{"_e":"metro:bundling:progress","_t":1786437842047,"id":"1","progress":0.5773753912980174,"total":812,"current":617}
+{"_e":"metro:bundling:progress","_t":1786437842149,"id":"1","progress":0.588967009194159,"total":817,"current":627}
+{"_e":"metro:bundling:progress","_t":1786437842250,"id":"1","progress":0.591715976331361,"total":832,"current":640}
+{"_e":"metro:bundling:progress","_t":1786437842350,"id":"1","progress":0.591715976331361,"total":887,"current":656}
+{"_e":"metro:bundling:progress","_t":1786437842450,"id":"1","progress":0.591715976331361,"total":902,"current":666}
+{"_e":"metro:bundling:progress","_t":1786437842550,"id":"1","progress":0.591715976331361,"total":904,"current":678}
+{"_e":"metro:bundling:progress","_t":1786437842650,"id":"1","progress":0.591715976331361,"total":908,"current":692}
+{"_e":"metro:bundling:progress","_t":1786437842751,"id":"1","progress":0.5961119719725196,"total":917,"current":708}
+{"_e":"metro:bundling:progress","_t":1786437842851,"id":"1","progress":0.6025116143170196,"total":925,"current":718}
+{"_e":"metro:bundling:progress","_t":1786437842953,"id":"1","progress":0.6137236641646849,"total":928,"current":727}
+{"_e":"metro:bundling:progress","_t":1786437843054,"id":"1","progress":0.626310556133657,"total":930,"current":736}
+{"_e":"metro:bundling:progress","_t":1786437843154,"id":"1","progress":0.6355442631103906,"total":932,"current":743}
+{"_e":"metro:bundling:progress","_t":1786437843257,"id":"1","progress":0.6355442631103906,"total":968,"current":759}
+{"_e":"metro:bundling:progress","_t":1786437843393,"id":"1","progress":0.6355442631103906,"total":975,"current":766}
+{"_e":"metro:bundling:progress","_t":1786437843499,"id":"1","progress":0.6355442631103906,"total":1032,"current":779}
+{"_e":"metro:bundling:progress","_t":1786437843601,"id":"1","progress":0.6355442631103906,"total":1041,"current":797}
+{"_e":"metro:bundling:progress","_t":1786437843702,"id":"1","progress":0.6355442631103906,"total":1042,"current":813}
+{"_e":"metro:bundling:progress","_t":1786437843805,"id":"1","progress":0.6355442631103906,"total":1046,"current":822}
+{"_e":"metro:bundling:progress","_t":1786437843906,"id":"1","progress":0.6355442631103906,"total":1052,"current":832}
+{"_e":"metro:bundling:progress","_t":1786437844007,"id":"1","progress":0.637275632747934,"total":1056,"current":843}
+{"_e":"metro:bundling:progress","_t":1786437844106,"id":"1","progress":0.6390963643908201,"total":1062,"current":849}
+{"_e":"metro:bundling:progress","_t":1786437844207,"id":"1","progress":0.6513828801324383,"total":1073,"current":866}
+{"_e":"metro:bundling:progress","_t":1786437844307,"id":"1","progress":0.6645958502632489,"total":1077,"current":878}
+{"_e":"metro:bundling:progress","_t":1786437844407,"id":"1","progress":0.6645958502632489,"total":1085,"current":884}
+{"_e":"metro:bundling:progress","_t":1786437844508,"id":"1","progress":0.6702391015577829,"total":1092,"current":894}
+{"_e":"metro:bundling:progress","_t":1786437844618,"id":"1","progress":0.6702391015577829,"total":1105,"current":900}
+{"_e":"metro:bundling:progress","_t":1786437844736,"id":"1","progress":0.6702391015577829,"total":1110,"current":904}
+{"_e":"metro:bundling:progress","_t":1786437844836,"id":"1","progress":0.6731657475124819,"total":1114,"current":914}
+{"_e":"metro:bundling:progress","_t":1786437844937,"id":"1","progress":0.6731657475124819,"total":1121,"current":919}
+{"_e":"metro:bundling:progress","_t":1786437845037,"id":"1","progress":0.6804416790123456,"total":1125,"current":928}
+{"_e":"metro:bundling:progress","_t":1786437845139,"id":"1","progress":0.7135527178735389,"total":1127,"current":952}
+{"_e":"metro:bundling:progress","_t":1786437845241,"id":"1","progress":0.7486544942407324,"total":1128,"current":976}
+{"_e":"metro:bundling:progress","_t":1786437845484,"id":"1","progress":0.7536698253582896,"total":1130,"current":981}
+{"_e":"metro:bundling:progress","_t":1786437845633,"id":"1","progress":0.7536698253582896,"total":1135,"current":985}
+{"_e":"metro:bundling:progress","_t":1786437845733,"id":"1","progress":0.7546787246016805,"total":1135,"current":986}
+{"_e":"metro:bundling:progress","_t":1786437845896,"id":"1","progress":0.7562102893516274,"total":1135,"current":987}
+{"_e":"metro:bundling:progress","_t":1786437845996,"id":"1","progress":0.7830228162131943,"total":1138,"current":1007}
+{"_e":"metro:bundling:progress","_t":1786437846097,"id":"1","progress":0.7925342058298632,"total":1148,"current":1022}
+{"_e":"metro:bundling:progress","_t":1786437846199,"id":"1","progress":0.8018458185652428,"total":1167,"current":1045}
+{"_e":"metro:bundling:progress","_t":1786437846302,"id":"1","progress":0.824333959092366,"total":1173,"current":1065}
+{"_e":"metro:bundling:progress","_t":1786437846404,"id":"1","progress":0.8263057348789857,"total":1176,"current":1069}
+{"_e":"metro:bundling:progress","_t":1786437846513,"id":"1","progress":0.8365367644904675,"total":1183,"current":1082}
+{"_e":"metro:bundling:progress","_t":1786437846614,"id":"1","progress":0.8445377343374459,"total":1185,"current":1089}
+{"_e":"metro:bundling:progress","_t":1786437846714,"id":"1","progress":0.8465857124567012,"total":1189,"current":1094}
+{"_e":"metro:bundling:progress","_t":1786437846815,"id":"1","progress":0.8631309555993433,"total":1198,"current":1113}
+{"_e":"metro:bundling:progress","_t":1786437846916,"id":"1","progress":0.8891132880566964,"total":1209,"current":1140}
+{"_e":"metro:bundling:progress","_t":1786437847018,"id":"1","progress":0.917678706021399,"total":1213,"current":1162}
+{"_e":"metro:bundling:progress","_t":1786437847118,"id":"1","progress":0.9450389680193496,"total":1220,"current":1186}
+{"_e":"metro:bundling:progress","_t":1786437847239,"id":"1","progress":0.9723927262224641,"total":1223,"current":1206}
+{"_e":"metro:bundling:progress","_t":1786437847339,"id":"1","progress":0.9870760647142419,"total":1234,"current":1226}
+{"_e":"metro:bundling:progress","_t":1786437847439,"id":"1","progress":0.9951903877319138,"total":1246,"current":1243}
+{"_e":"metro:bundling:progress","_t":1786437847545,"id":"1","progress":0.999,"total":1246,"current":1246}
+{"_e":"metro:bundling:done","_t":1786437847870,"id":"1","total":1246,"ms":13102.944951}
+{"_e":"metro:client_log","_t":1786437857678,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786437859725,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786437917585,"level":"error","data":["[authApi.login] FAILED","{\"data\": \"{\\\"message\\\":\\\"Invalid credentials\\\",\\\"error\\\":\\\"Unauthorized\\\",\\\"statusCode\\\":401}\", \"message\": \"Request failed with status code 401\", \"status\": 401, \"url\": \"https://bukooapi-production.up.railway.app/v1/auth/login\"}"]}
+{"_e":"metro:client_log","_t":1786438009232,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786438011849,"level":"log","data":["[Perf] WebView shell ready duration: 3657ms"]}
+{"_e":"metro:client_log","_t":1786438013259,"level":"log","data":["[ReadingScreen] Download finished, setting local URI:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786438013403,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 30ms"]}
+{"_e":"metro:client_log","_t":1786438013616,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786438013986,"level":"log","data":["[Perf] Total Time-to-First-Frame: 5806ms, In-WebView load: 331ms, Location gen (generated): 291ms"]}
+{"_e":"metro:client_log","_t":1786438294558,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786438295401,"level":"log","data":["[Perf] WebView shell ready duration: 1064ms"]}
+{"_e":"metro:client_log","_t":1786438295591,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 35ms"]}
+{"_e":"metro:client_log","_t":1786438295592,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786438295893,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1370ms, In-WebView load: 124ms, Location gen (cached): 89ms"]}
+{"_e":"metro:bundling:started","_t":1786438301093,"id":"f","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786438301093,"id":"f","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786438301182,"id":"f","total":1,"ms":89.193185}
+{"_e":"metro:client_log","_t":1786438324208,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786438325897,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:server_log","_t":1786438445196,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:client_log","_t":1786438448289,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786438449702,"level":"log","data":["[Perf] WebView shell ready duration: 1733ms"]}
+{"_e":"metro:client_log","_t":1786438449835,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 36ms"]}
+{"_e":"metro:client_log","_t":1786438449835,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786438450043,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2067ms, In-WebView load: 117ms, Location gen (cached): 75ms"]}
+{"_e":"metro:bundling:started","_t":1786438450582,"id":"h","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:client_log","_t":1786438501407,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786438501668,"level":"log","data":["[Perf] WebView shell ready duration: 605ms"]}
+{"_e":"metro:client_log","_t":1786438502008,"level":"warn","data":["[ReadingScreen] Download failed, falling back to direct URL:","[Error: Download failed with status 404]"]}
+{"_e":"metro:client_log","_t":1786438502205,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/v1/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786438572240,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786438572385,"level":"warn","data":["[ReadingScreen] Download failed, falling back to direct URL:","[Error: Download failed with status 404]"]}
+{"_e":"metro:client_log","_t":1786438572914,"level":"log","data":["[Perf] WebView shell ready duration: 1039ms"]}
+{"_e":"metro:client_log","_t":1786438573133,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/v1/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"root:init","_t":1786440100244,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786440100310,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786440101866,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786440103853,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[160509:0811/162142.166752:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786440113361,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786440219058,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786440219059,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440219069,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440219173,"id":"1","progress":0.04854926745188164,"total":59,"current":13}
+{"_e":"metro:bundling:progress","_t":1786440219273,"id":"1","progress":0.04854926745188164,"total":250,"current":49}
+{"_e":"metro:bundling:progress","_t":1786440219374,"id":"1","progress":0.11649754383448674,"total":334,"current":114}
+{"_e":"metro:bundling:progress","_t":1786440219473,"id":"1","progress":0.2765309155766944,"total":464,"current":244}
+{"_e":"metro:bundling:progress","_t":1786440219573,"id":"1","progress":0.34769322235434,"total":580,"current":342}
+{"_e":"metro:bundling:progress","_t":1786440219673,"id":"1","progress":0.42781874937249575,"total":662,"current":433}
+{"_e":"metro:bundling:progress","_t":1786440219773,"id":"1","progress":0.5104911566482896,"total":711,"current":508}
+{"_e":"metro:bundling:progress","_t":1786440219873,"id":"1","progress":0.7174830327581763,"total":778,"current":659}
+{"_e":"metro:bundling:progress","_t":1786440219973,"id":"1","progress":0.7174830327581763,"total":905,"current":763}
+{"_e":"metro:bundling:progress","_t":1786440220073,"id":"1","progress":0.7174830327581763,"total":979,"current":784}
+{"_e":"metro:bundling:progress","_t":1786440220173,"id":"1","progress":0.7174830327581763,"total":1074,"current":899}
+{"_e":"metro:bundling:progress","_t":1786440220273,"id":"1","progress":0.7278595530343782,"total":1144,"current":976}
+{"_e":"metro:bundling:progress","_t":1786440220374,"id":"1","progress":0.8910847138109254,"total":1178,"current":1112}
+{"_e":"metro:bundling:progress","_t":1786440220474,"id":"1","progress":0.9773103008975582,"total":1227,"current":1213}
+{"_e":"metro:bundling:done","_t":1786440220613,"id":"1","total":1227,"ms":1553.978372}
+{"_e":"metro:client_log","_t":1786440238988,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786440240859,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786440262277,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786440263438,"level":"log","data":["[Perf] WebView shell ready duration: 2241ms"]}
+{"_e":"metro:client_log","_t":1786440320765,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786440321065,"level":"log","data":["[Perf] WebView shell ready duration: 543ms"]}
+{"_e":"metro:client_log","_t":1786440321696,"level":"log","data":["[RN Diagnostic] Disk size: 9564759 bytes | b64 length: 12818548 chars | RN Read duration: 635ms"]}
+{"_e":"metro:client_log","_t":1786440321762,"level":"log","data":["[Chunking] Transferring 49 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440322735,"level":"log","data":["[RN Diagnostic] Disk size: 9646679 bytes | b64 length: 13015156 chars | RN Read duration: 1560ms"]}
+{"_e":"metro:client_log","_t":1786440322906,"level":"log","data":["[Chunking] Transferring 50 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440337339,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786440337625,"level":"log","data":["[Perf] WebView shell ready duration: 544ms"]}
+{"_e":"metro:client_log","_t":1786440338347,"level":"log","data":["[RN Diagnostic] Disk size: 12235351 bytes | b64 length: 16401184 chars | RN Read duration: 722ms"]}
+{"_e":"metro:client_log","_t":1786440338362,"level":"log","data":["[Chunking] Transferring 63 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440339736,"level":"log","data":["[RN Diagnostic] Disk size: 12333408 bytes | b64 length: 16619636 chars | RN Read duration: 1957ms"]}
+{"_e":"metro:client_log","_t":1786440339789,"level":"log","data":["[Chunking] Transferring 64 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440416904,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786440417143,"level":"log","data":["[Perf] WebView shell ready duration: 546ms"]}
+{"_e":"metro:client_log","_t":1786440445952,"level":"log","data":["[Perf] WebView shell ready duration: 824ms"]}
+{"_e":"metro:client_log","_t":1786440445995,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786440446234,"level":"log","data":["[RN Diagnostic] Disk size: 1643552 bytes | b64 length: 2191404 chars | RN Read duration: 78ms"]}
+{"_e":"metro:client_log","_t":1786440446538,"level":"log","data":["[Chunking] Transferring 9 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440472305,"level":"log","data":["[Perf] WebView shell ready duration: 1010ms"]}
+{"_e":"metro:client_log","_t":1786440472464,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786440472771,"level":"log","data":["[RN Diagnostic] Disk size: 3496816 bytes | b64 length: 4684268 chars | RN Read duration: 240ms"]}
+{"_e":"metro:client_log","_t":1786440472918,"level":"log","data":["[Chunking] Transferring 18 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440475956,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786440476207,"level":"log","data":["[Perf] WebView shell ready duration: 1132ms"]}
+{"_e":"metro:client_log","_t":1786440476439,"level":"log","data":["[RN Diagnostic] Disk size: 3798960 bytes | b64 length: 5065280 chars | RN Read duration: 218ms"]}
+{"_e":"metro:client_log","_t":1786440476658,"level":"log","data":["[Chunking] Transferring 20 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440485050,"level":"log","data":["[RN Diagnostic] Disk size: 4343367 bytes | b64 length: 5791156 chars | RN Read duration: 267ms"]}
+{"_e":"metro:client_log","_t":1786440485072,"level":"log","data":["[Chunking] Transferring 23 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786440485316,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"root:init","_t":1786440559984,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786440560000,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786440561314,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786440563379,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[164408:0811/162921.506283:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786440573395,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786440636653,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786440636653,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440636661,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440636763,"id":"1","progress":0.07609988109393578,"total":58,"current":16}
+{"_e":"metro:bundling:progress","_t":1786440636864,"id":"1","progress":0.07609988109393578,"total":273,"current":57}
+{"_e":"metro:bundling:progress","_t":1786440636964,"id":"1","progress":0.07920685574957868,"total":334,"current":94}
+{"_e":"metro:bundling:progress","_t":1786440637065,"id":"1","progress":0.2892255876549314,"total":463,"current":249}
+{"_e":"metro:bundling:progress","_t":1786440637166,"id":"1","progress":0.3651984886910616,"total":556,"current":336}
+{"_e":"metro:bundling:progress","_t":1786440637266,"id":"1","progress":0.45725295761358686,"total":664,"current":449}
+{"_e":"metro:bundling:progress","_t":1786440637366,"id":"1","progress":0.5154503616042078,"total":741,"current":532}
+{"_e":"metro:bundling:progress","_t":1786440637466,"id":"1","progress":0.6843801652892562,"total":770,"current":637}
+{"_e":"metro:bundling:progress","_t":1786440637566,"id":"1","progress":0.6843801652892562,"total":870,"current":693}
+{"_e":"metro:bundling:progress","_t":1786440637675,"id":"1","progress":0.6843801652892562,"total":987,"current":794}
+{"_e":"metro:bundling:progress","_t":1786440637775,"id":"1","progress":0.6843801652892562,"total":1018,"current":833}
+{"_e":"metro:bundling:progress","_t":1786440637875,"id":"1","progress":0.7473064176360881,"total":1092,"current":944}
+{"_e":"metro:bundling:progress","_t":1786440637978,"id":"1","progress":0.7540355835206357,"total":1147,"current":996}
+{"_e":"metro:bundling:progress","_t":1786440638087,"id":"1","progress":0.8383449945699586,"total":1185,"current":1085}
+{"_e":"metro:bundling:progress","_t":1786440638200,"id":"1","progress":0.9428458268495912,"total":1207,"current":1172}
+{"_e":"metro:bundling:progress","_t":1786440638300,"id":"1","progress":0.9983929291467208,"total":1244,"current":1243}
+{"_e":"metro:bundling:progress","_t":1786440638402,"id":"1","progress":0.999,"total":1246,"current":1246}
+{"_e":"metro:bundling:done","_t":1786440638490,"id":"1","total":1246,"ms":1837.023779}
+{"_e":"metro:client_log","_t":1786440656613,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786440659235,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786440680979,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786440683465,"level":"log","data":["[Perf] WebView shell ready duration: 3591ms"]}
+{"_e":"root:init","_t":1786440782559,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786440782576,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786440783796,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786440785784,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[166185:0811/163303.977149:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786440795616,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786440834346,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786440834347,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440834356,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786440834456,"id":"1","progress":0.041167821886158376,"total":69,"current":14}
+{"_e":"metro:bundling:progress","_t":1786440834558,"id":"1","progress":0.04691837506027708,"total":277,"current":60}
+{"_e":"metro:bundling:progress","_t":1786440834658,"id":"1","progress":0.07529000594883999,"total":328,"current":90}
+{"_e":"metro:bundling:progress","_t":1786440834758,"id":"1","progress":0.21832154230468526,"total":458,"current":214}
+{"_e":"metro:bundling:progress","_t":1786440834858,"id":"1","progress":0.37147690340455003,"total":548,"current":334}
+{"_e":"metro:bundling:progress","_t":1786440834958,"id":"1","progress":0.4451424332563602,"total":637,"current":425}
+{"_e":"metro:bundling:progress","_t":1786440835058,"id":"1","progress":0.4795798047110001,"total":735,"current":509}
+{"_e":"metro:bundling:progress","_t":1786440835162,"id":"1","progress":0.625782867483652,"total":761,"current":602}
+{"_e":"metro:bundling:progress","_t":1786440835263,"id":"1","progress":0.6467308914861362,"total":858,"current":690}
+{"_e":"metro:bundling:progress","_t":1786440835363,"id":"1","progress":0.7325401407027391,"total":909,"current":778}
+{"_e":"metro:bundling:progress","_t":1786440835463,"id":"1","progress":0.7325401407027391,"total":1028,"current":832}
+{"_e":"metro:bundling:progress","_t":1786440835578,"id":"1","progress":0.7387473533228605,"total":1089,"current":936}
+{"_e":"metro:bundling:progress","_t":1786440835680,"id":"1","progress":0.7904605761278524,"total":1172,"current":1042}
+{"_e":"metro:bundling:progress","_t":1786440835788,"id":"1","progress":0.9445460397993816,"total":1209,"current":1175}
+{"_e":"metro:bundling:done","_t":1786440835953,"id":"1","total":1209,"ms":1606.476476}
+{"_e":"metro:client_log","_t":1786440858515,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786440860843,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786440908291,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786440910163,"level":"log","data":["[Perf] WebView shell ready duration: 2796ms"]}
+{"_e":"metro:client_log","_t":1786441080131,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_filsafat_ajaran_islam.pdf"]}
+{"_e":"metro:client_log","_t":1786441080719,"level":"log","data":["[Perf] WebView shell ready duration: 600ms"]}
+{"_e":"metro:client_log","_t":1786441080982,"level":"log","data":["[RN Diagnostic] Disk size: 4539176 bytes | b64 length: 6052236 chars | RN Read duration: 293ms"]}
+{"_e":"metro:client_log","_t":1786441080982,"level":"log","data":["[Chunking] Transferring 24 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786441119127,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786441119420,"level":"log","data":["[Perf] WebView shell ready duration: 598ms"]}
+{"_e":"metro:client_log","_t":1786441256062,"level":"warn","data":["[ReadingScreen] Download failed, falling back to direct URL:","[Error: Download incomplete (6358750 of 40167617 bytes written)]"]}
+{"_e":"metro:client_log","_t":1786441327365,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786441328014,"level":"log","data":["[Perf] WebView shell ready duration: 971ms"]}
+{"_e":"metro:client_log","_t":1786441409098,"level":"log","data":["[Perf] WebView shell ready duration: 640ms"]}
+{"_e":"metro:client_log","_t":1786441409307,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786441409307,"level":"log","data":["[RN Diagnostic] Disk size: 5568384 bytes | b64 length: 7424512 chars | RN Read duration: 305ms"]}
+{"_e":"metro:client_log","_t":1786441409307,"level":"log","data":["[Chunking] Transferring 29 chunks (262144B each) to WebView bridge..."]}
+{"_e":"root:init","_t":1786441474698,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786441474715,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786441475949,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786441478063,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[171097:0811/164436.161375:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786441488587,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786441547868,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786441547869,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786441547878,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786441547986,"id":"1","progress":0.04938271604938271,"total":54,"current":12}
+{"_e":"metro:bundling:progress","_t":1786441548085,"id":"1","progress":0.04938271604938271,"total":257,"current":55}
+{"_e":"metro:bundling:progress","_t":1786441548185,"id":"1","progress":0.08369922075867252,"total":318,"current":92}
+{"_e":"metro:bundling:progress","_t":1786441548285,"id":"1","progress":0.2884956427222975,"total":458,"current":246}
+{"_e":"metro:bundling:progress","_t":1786441548385,"id":"1","progress":0.34639226064944745,"total":559,"current":329}
+{"_e":"metro:bundling:progress","_t":1786441548485,"id":"1","progress":0.4633836551023371,"total":664,"current":452}
+{"_e":"metro:bundling:progress","_t":1786441548585,"id":"1","progress":0.56406576124698,"total":719,"current":540}
+{"_e":"metro:bundling:progress","_t":1786441548685,"id":"1","progress":0.7156421533811986,"total":779,"current":659}
+{"_e":"metro:bundling:progress","_t":1786441548785,"id":"1","progress":0.7197409063066115,"total":831,"current":705}
+{"_e":"metro:bundling:progress","_t":1786441548895,"id":"1","progress":0.7197409063066115,"total":957,"current":790}
+{"_e":"metro:bundling:progress","_t":1786441548995,"id":"1","progress":0.7197409063066115,"total":1044,"current":856}
+{"_e":"metro:bundling:progress","_t":1786441549095,"id":"1","progress":0.7338378404811972,"total":1144,"current":980}
+{"_e":"metro:bundling:progress","_t":1786441549197,"id":"1","progress":0.807858560090703,"total":1176,"current":1057}
+{"_e":"metro:bundling:progress","_t":1786441549297,"id":"1","progress":0.9413333004944309,"total":1209,"current":1173}
+{"_e":"metro:bundling:done","_t":1786441549469,"id":"1","total":1209,"ms":1600.142885}
+{"_e":"metro:client_log","_t":1786441560940,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786441563410,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786441583569,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786441585436,"level":"log","data":["[Perf] WebView shell ready duration: 2766ms"]}
+{"_e":"root:init","_t":1786441890557,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786441890577,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786441891733,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786441893835,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[174236:0811/165131.930697:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786441903510,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786442034322,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786442034323,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786442034334,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786442034440,"id":"1","progress":0.011531012116571326,"total":149,"current":16}
+{"_e":"metro:bundling:progress","_t":1786442034545,"id":"1","progress":0.04636634876658319,"total":274,"current":59}
+{"_e":"metro:bundling:progress","_t":1786442034645,"id":"1","progress":0.08114890507092605,"total":337,"current":96}
+{"_e":"metro:bundling:progress","_t":1786442034746,"id":"1","progress":0.282933454051607,"total":470,"current":250}
+{"_e":"metro:bundling:progress","_t":1786442034847,"id":"1","progress":0.383322495274102,"total":575,"current":356}
+{"_e":"metro:bundling:progress","_t":1786442034946,"id":"1","progress":0.46782352578608605,"total":674,"current":461}
+{"_e":"metro:bundling:progress","_t":1786442035046,"id":"1","progress":0.5495062136578284,"total":746,"current":553}
+{"_e":"metro:bundling:progress","_t":1786442035146,"id":"1","progress":0.7199925515909439,"total":779,"current":661}
+{"_e":"metro:bundling:progress","_t":1786442035246,"id":"1","progress":0.7199925515909439,"total":876,"current":733}
+{"_e":"metro:bundling:progress","_t":1786442035363,"id":"1","progress":0.7199925515909439,"total":979,"current":795}
+{"_e":"metro:bundling:progress","_t":1786442035463,"id":"1","progress":0.7199925515909439,"total":1028,"current":861}
+{"_e":"metro:bundling:progress","_t":1786442035575,"id":"1","progress":0.7456576699311895,"total":1121,"current":968}
+{"_e":"metro:bundling:progress","_t":1786442035675,"id":"1","progress":0.8377707673930955,"total":1157,"current":1059}
+{"_e":"metro:bundling:progress","_t":1786442035808,"id":"1","progress":0.9579349171641445,"total":1176,"current":1151}
+{"_e":"metro:bundling:progress","_t":1786442035909,"id":"1","progress":0.9983242566831243,"total":1193,"current":1192}
+{"_e":"metro:bundling:progress","_t":1786442036342,"id":"1","progress":0.999,"total":1193,"current":1193}
+{"_e":"metro:bundling:progress","_t":1786442036452,"id":"1","progress":0.999,"total":1246,"current":1246}
+{"_e":"metro:bundling:done","_t":1786442036537,"id":"1","total":1246,"ms":2214.808048}
+{"_e":"metro:client_log","_t":1786442054248,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786442056997,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786442074078,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786442076046,"level":"log","data":["[Perf] WebView shell ready duration: 2620ms"]}
+{"_e":"metro:client_log","_t":1786442143548,"level":"log","data":["[ReadingScreen] Downloading book to local storage for robust reading..."]}
+{"_e":"metro:client_log","_t":1786442143957,"level":"log","data":["[Perf] WebView shell ready duration: 661ms"]}
+{"_e":"metro:client_log","_t":1786442147962,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_perlunya_seorang_imam.pdf"]}
+{"_e":"metro:client_log","_t":1786442148139,"level":"log","data":["[RN Diagnostic] Disk size: 20572 bytes | b64 length: 27432 chars | RN Read duration: 10ms"]}
+{"_e":"metro:client_log","_t":1786442148139,"level":"log","data":["[Chunking] Transferring 1 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:bundling:started","_t":1786442176832,"id":"e","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786442176832,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786442176911,"id":"e","total":1,"ms":78.575755}
+{"_e":"metro:client_log","_t":1786442187359,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786442189404,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786442219434,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_riwayat_rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786442220945,"level":"log","data":["[Perf] WebView shell ready duration: 1727ms"]}
+{"_e":"metro:client_log","_t":1786442221846,"level":"log","data":["[RN Diagnostic] Disk size: 22784039 bytes | b64 length: 30487948 chars | RN Read duration: 1083ms"]}
+{"_e":"metro:client_log","_t":1786442221887,"level":"log","data":["[Chunking] Transferring 117 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786442231595,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786442231910,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.pdf"]}
+{"_e":"metro:client_log","_t":1786442232208,"level":"log","data":["[Perf] WebView shell ready duration: 621ms"]}
+{"_e":"metro:client_log","_t":1786442251254,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.pdf"]}
+{"_e":"metro:client_log","_t":1786442251467,"level":"log","data":["[Perf] WebView shell ready duration: 554ms"]}
+{"_e":"metro:client_log","_t":1786442251467,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.pdf"]}
+{"_e":"metro:client_log","_t":1786442364716,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442365104,"level":"log","data":["[Perf] WebView shell ready duration: 948ms"]}
+{"_e":"metro:client_log","_t":1786442365322,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442390884,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.epub"]}
+{"_e":"metro:client_log","_t":1786442391344,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.epub"]}
+{"_e":"metro:client_log","_t":1786442391423,"level":"log","data":["[Perf] WebView shell ready duration: 601ms"]}
+{"_e":"metro:client_log","_t":1786442397282,"level":"log","data":["[Perf] Total Time-to-First-Frame: 6592ms, In-WebView load: 5982ms, Location gen (generated): 3129ms"]}
+{"_e":"metro:client_log","_t":1786442397779,"level":"log","data":["[Perf] Page turn latency: 172ms"]}
+{"_e":"metro:client_log","_t":1786442399329,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1786442401641,"level":"log","data":["[Perf] Page turn latency: 214ms"]}
+{"_e":"metro:client_log","_t":1786442402449,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786442413032,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786442423069,"level":"log","data":["[Perf] WebView shell ready duration: 32396ms"]}
+{"_e":"metro:client_log","_t":1786442423187,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.epub"]}
+{"_e":"metro:client_log","_t":1786442426233,"level":"log","data":["[Perf] Total Time-to-First-Frame: 35685ms, In-WebView load: 3249ms, Location gen (generated): 3007ms"]}
+{"_e":"metro:client_log","_t":1786442508606,"level":"log","data":["[Perf] Page turn latency: 148ms"]}
+{"_e":"metro:client_log","_t":1786442509177,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442509391,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442509740,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442518708,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786442520478,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442521363,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786442522416,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786442523138,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442528476,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786442529052,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442529718,"level":"log","data":["[Perf] Page turn latency: 158ms"]}
+{"_e":"metro:client_log","_t":1786442530173,"level":"log","data":["[Perf] Page turn latency: 144ms"]}
+{"_e":"metro:client_log","_t":1786442531478,"level":"log","data":["[Perf] Page turn latency: 136ms"]}
+{"_e":"metro:client_log","_t":1786442531762,"level":"log","data":["[Perf] Page turn latency: 65ms"]}
+{"_e":"metro:client_log","_t":1786442532050,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786442532263,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786442532390,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786442532572,"level":"log","data":["[Perf] Page turn latency: 69ms"]}
+{"_e":"metro:client_log","_t":1786442532865,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786442533267,"level":"log","data":["[Perf] Page turn latency: 63ms"]}
+{"_e":"metro:client_log","_t":1786442534782,"level":"log","data":["[Perf] Page turn latency: 66ms"]}
+{"_e":"metro:client_log","_t":1786442537900,"level":"log","data":["[Perf] Page turn latency: 161ms"]}
+{"_e":"metro:client_log","_t":1786442538481,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786442539188,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786442539935,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786442552724,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_perlunya_seorang_imam.pdf"]}
+{"_e":"metro:client_log","_t":1786442553249,"level":"log","data":["[Perf] WebView shell ready duration: 745ms"]}
+{"_e":"metro:client_log","_t":1786442553495,"level":"log","data":["[RN Diagnostic] Disk size: 2236235 bytes | b64 length: 2981648 chars | RN Read duration: 251ms"]}
+{"_e":"metro:client_log","_t":1786442553705,"level":"log","data":["[Chunking] Transferring 12 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786442553705,"level":"log","data":["[Perf] WebView shell ready duration: 1116ms"]}
+{"_e":"metro:client_log","_t":1786442553749,"level":"log","data":["[RN Diagnostic] Disk size: 2236235 bytes | b64 length: 2981648 chars | RN Read duration: 270ms"]}
+{"_e":"metro:client_log","_t":1786442553755,"level":"log","data":["[Chunking] Transferring 12 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786442563990,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442564303,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442564303,"level":"log","data":["[Perf] WebView shell ready duration: 545ms"]}
+{"_e":"metro:client_log","_t":1786442564303,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442564335,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442564349,"level":"log","data":["[Perf] WebView shell ready duration: 732ms"]}
+{"_e":"metro:client_log","_t":1786442566178,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2562ms, In-WebView load: 1814ms, Location gen (generated): 1096ms"]}
+{"_e":"metro:client_log","_t":1786442569630,"level":"log","data":["[Perf] Page turn latency: 130ms"]}
+{"_e":"metro:client_log","_t":1786442570833,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786442571889,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442573975,"level":"log","data":["[Perf] Page turn latency: 155ms"]}
+{"_e":"metro:client_log","_t":1786442574740,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442575460,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442576378,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786442577483,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442578435,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786442579259,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786442580103,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786442580882,"level":"log","data":["[Perf] Page turn latency: 145ms"]}
+{"_e":"metro:client_log","_t":1786442688978,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442689359,"level":"log","data":["[Perf] WebView shell ready duration: 641ms"]}
+{"_e":"metro:client_log","_t":1786442689445,"level":"log","data":["[Perf] WebView shell ready duration: 750ms"]}
+{"_e":"metro:client_log","_t":1786442689445,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442702147,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1786442702383,"level":"log","data":["[Perf] WebView shell ready duration: 583ms"]}
+{"_e":"metro:client_log","_t":1786442702576,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1786442702589,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub"]}
+{"_e":"metro:client_log","_t":1786442702589,"level":"log","data":["[Perf] WebView shell ready duration: 775ms"]}
+{"_e":"metro:client_log","_t":1786442704138,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:bundling:started","_t":1786442891287,"id":"g","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786442891288,"id":"g","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786442891371,"id":"g","total":1,"ms":83.061607}
+{"_e":"metro:client_log","_t":1786442905398,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786442907705,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786442927769,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442929759,"level":"log","data":["[Perf] WebView shell ready duration: 2898ms"]}
+{"_e":"metro:client_log","_t":1786442929773,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442938682,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/riwayat-rasulullah.epub"]}
+{"_e":"metro:client_log","_t":1786442938731,"level":"log","data":["[Perf] WebView shell ready duration: 11880ms"]}
+{"_e":"metro:client_log","_t":1786442982901,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442983210,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442983210,"level":"log","data":["[Perf] WebView shell ready duration: 579ms"]}
+{"_e":"metro:client_log","_t":1786442983210,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442984413,"level":"warn","data":["[useReadingSession] updateLocalProgress failed:","[Error: Call to function 'NativeStatement.finalizeAsync' has been rejected.\n→ Caused by: Error code \u0013: UNIQUE constraint failed: reading_progress.bookId]"]}
+{"_e":"metro:client_log","_t":1786442985359,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2742ms, In-WebView load: 2139ms, Location gen (generated): 1203ms"]}
+{"_e":"metro:client_log","_t":1786442985570,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2819ms, In-WebView load: 2123ms, Location gen (generated): 1182ms"]}
+{"_e":"metro:client_log","_t":1786442988425,"level":"log","data":["[Perf] WebView shell ready duration: 6120ms"]}
+{"_e":"metro:client_log","_t":1786442988625,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/perlunya-seorang-imam.epub"]}
+{"_e":"metro:client_log","_t":1786442989725,"level":"log","data":["[Perf] Total Time-to-First-Frame: 7416ms, In-WebView load: 1187ms, Location gen (generated): 996ms"]}
+{"_e":"metro:client_log","_t":1786442995156,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786442995847,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786442996288,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786442996805,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786442997148,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786442997431,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786442997721,"level":"log","data":["[Perf] Page turn latency: 134ms"]}
+{"_e":"metro:client_log","_t":1786442998073,"level":"log","data":["[Perf] Page turn latency: 66ms"]}
+{"_e":"metro:client_log","_t":1786442998077,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786442998415,"level":"log","data":["[Perf] Page turn latency: 49ms"]}
+{"_e":"metro:client_log","_t":1786442998434,"level":"log","data":["[Perf] Page turn latency: 67ms"]}
+{"_e":"metro:client_log","_t":1786442998731,"level":"log","data":["[Perf] Page turn latency: 138ms"]}
+{"_e":"metro:client_log","_t":1786442998978,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786442999117,"level":"log","data":["[Perf] Page turn latency: 50ms"]}
+{"_e":"metro:client_log","_t":1786442999441,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786442999748,"level":"log","data":["[Perf] Page turn latency: 219ms"]}
+{"_e":"metro:client_log","_t":1786443000053,"level":"log","data":["[Perf] Page turn latency: 135ms"]}
+{"_e":"metro:client_log","_t":1786443000448,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786443000742,"level":"log","data":["[Perf] Page turn latency: 130ms"]}
+{"_e":"metro:client_log","_t":1786443001025,"level":"log","data":["[Perf] Page turn latency: 70ms"]}
+{"_e":"metro:client_log","_t":1786443001332,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786443001542,"level":"log","data":["[Perf] Page turn latency: 62ms"]}
+{"_e":"metro:client_log","_t":1786443001844,"level":"log","data":["[Perf] Page turn latency: 133ms"]}
+{"_e":"metro:client_log","_t":1786443002053,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786443002092,"level":"log","data":["[Perf] Page turn latency: 67ms"]}
+{"_e":"metro:client_log","_t":1786443002681,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443047096,"level":"log","data":["[ReadingScreen] Opening directly from remote URL:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.epub"]}
+{"_e":"metro:client_log","_t":1786443047248,"level":"log","data":["[Perf] WebView shell ready duration: 701ms"]}
+{"_e":"metro:client_log","_t":1786443047294,"level":"log","data":["[Perf] Using remote URL for streaming directly:","https://bukooapi-production.up.railway.app/public/books/filsafat-ajaran-islam.epub"]}
+{"_e":"metro:client_log","_t":1786443047503,"level":"log","data":["[Perf] WebView shell ready duration: 768ms"]}
+{"_e":"metro:client_log","_t":1786443053788,"level":"log","data":["[Perf] Total Time-to-First-Frame: 7160ms, In-WebView load: 6314ms, Location gen (generated): 3265ms"]}
+{"_e":"metro:client_log","_t":1786443055429,"level":"log","data":["[Perf] Page turn latency: 171ms"]}
+{"_e":"metro:client_log","_t":1786443057732,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786443058884,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443059391,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443059719,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443060313,"level":"log","data":["[Perf] Page turn latency: 73ms"]}
+{"_e":"metro:client_log","_t":1786443060677,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786443061139,"level":"log","data":["[Perf] Page turn latency: 61ms"]}
+{"_e":"metro:client_log","_t":1786443061520,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443062054,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786443062361,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786443062365,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443062668,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443063053,"level":"log","data":["[Perf] Page turn latency: 104ms"]}
+{"_e":"metro:client_log","_t":1786443063186,"level":"log","data":["[Perf] Page turn latency: 81ms"]}
+{"_e":"metro:client_log","_t":1786443063438,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786443063677,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786443063970,"level":"log","data":["[Perf] Page turn latency: 123ms"]}
+{"_e":"metro:client_log","_t":1786443064183,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786443064496,"level":"log","data":["[Perf] Page turn latency: 144ms"]}
+{"_e":"metro:client_log","_t":1786443064648,"level":"log","data":["[Perf] Page turn latency: 64ms"]}
+{"_e":"metro:client_log","_t":1786443064983,"level":"log","data":["[Perf] Page turn latency: 157ms"]}
+{"_e":"metro:client_log","_t":1786443065295,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443065579,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786443065760,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1786443066033,"level":"log","data":["[Perf] Page turn latency: 67ms"]}
+{"_e":"metro:client_log","_t":1786443066252,"level":"log","data":["[Perf] Page turn latency: 71ms"]}
+{"_e":"metro:client_log","_t":1786443066465,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1786443066744,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443066990,"level":"log","data":["[Perf] Page turn latency: 109ms"]}
+{"_e":"metro:client_log","_t":1786443067339,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443068128,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786443068639,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443069092,"level":"log","data":["[Perf] Page turn latency: 159ms"]}
+{"_e":"metro:client_log","_t":1786443069430,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1786443070144,"level":"log","data":["[Perf] Page turn latency: 331ms"]}
+{"_e":"metro:client_log","_t":1786443070429,"level":"log","data":["[Perf] Page turn latency: 61ms"]}
+{"_e":"metro:client_log","_t":1786443072293,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1786443072710,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1786443073119,"level":"log","data":["[Perf] Page turn latency: 64ms"]}
+{"_e":"metro:client_log","_t":1786443074075,"level":"log","data":["[Perf] Page turn latency: 167ms"]}
+{"_e":"metro:client_log","_t":1786443074676,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"root:init","_t":1786443158744,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786443158768,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786443159887,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786443161934,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[183756:0811/171240.082603:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786443171042,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786443212135,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786443212135,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786443212142,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786443212319,"id":"1","progress":0.06688466111771701,"total":58,"current":15}
+{"_e":"metro:bundling:progress","_t":1786443212419,"id":"1","progress":0.06688466111771701,"total":249,"current":41}
+{"_e":"metro:bundling:progress","_t":1786443212519,"id":"1","progress":0.06688466111771701,"total":296,"current":68}
+{"_e":"metro:bundling:progress","_t":1786443212620,"id":"1","progress":0.15581717451523547,"total":380,"current":150}
+{"_e":"metro:bundling:progress","_t":1786443212720,"id":"1","progress":0.3515956204211841,"total":511,"current":303}
+{"_e":"metro:bundling:progress","_t":1786443212821,"id":"1","progress":0.43195482773624455,"total":636,"current":418}
+{"_e":"metro:bundling:progress","_t":1786443212920,"id":"1","progress":0.49625465095313803,"total":741,"current":522}
+{"_e":"metro:bundling:progress","_t":1786443213030,"id":"1","progress":0.6992777493858099,"total":806,"current":674}
+{"_e":"metro:bundling:progress","_t":1786443213131,"id":"1","progress":0.6992777493858099,"total":893,"current":739}
+{"_e":"metro:bundling:progress","_t":1786443213236,"id":"1","progress":0.6992777493858099,"total":991,"current":796}
+{"_e":"metro:bundling:progress","_t":1786443213335,"id":"1","progress":0.7344665061396,"total":1077,"current":923}
+{"_e":"metro:bundling:progress","_t":1786443213435,"id":"1","progress":0.7681019784108631,"total":1149,"current":1007}
+{"_e":"metro:bundling:progress","_t":1786443213535,"id":"1","progress":0.9119533166713156,"total":1199,"current":1145}
+{"_e":"metro:bundling:done","_t":1786443213713,"id":"1","total":1199,"ms":1578.002441}
+{"_e":"metro:client_log","_t":1786443222600,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786443225384,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"root:init","_t":1786443950520,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786443950534,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786443951647,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786443953830,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[189269:0811/172551.841393:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786443963932,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786444011454,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786444011455,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444011462,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444011601,"id":"1","progress":0.06688466111771701,"total":58,"current":15}
+{"_e":"metro:bundling:progress","_t":1786444011712,"id":"1","progress":0.06688466111771701,"total":197,"current":46}
+{"_e":"metro:bundling:progress","_t":1786444011831,"id":"1","progress":0.06688466111771701,"total":279,"current":61}
+{"_e":"metro:bundling:progress","_t":1786444011938,"id":"1","progress":0.06688466111771701,"total":305,"current":75}
+{"_e":"metro:bundling:progress","_t":1786444012038,"id":"1","progress":0.09087166561646715,"total":345,"current":104}
+{"_e":"metro:bundling:progress","_t":1786444012138,"id":"1","progress":0.1347046174739701,"total":376,"current":138}
+{"_e":"metro:bundling:progress","_t":1786444012241,"id":"1","progress":0.18771456889906105,"total":457,"current":198}
+{"_e":"metro:bundling:progress","_t":1786444012350,"id":"1","progress":0.2915533495981228,"total":463,"current":250}
+{"_e":"metro:bundling:progress","_t":1786444012575,"id":"1","progress":0.2915533495981228,"total":470,"current":251}
+{"_e":"metro:bundling:progress","_t":1786444012590,"id":"1","progress":0.2915533495981228,"total":470,"current":252}
+{"_e":"metro:bundling:progress","_t":1786444012690,"id":"1","progress":0.3657581368944636,"total":544,"current":329}
+{"_e":"metro:bundling:progress","_t":1786444012790,"id":"1","progress":0.419430554409757,"total":613,"current":397}
+{"_e":"metro:bundling:progress","_t":1786444012908,"id":"1","progress":0.4636865657638945,"total":677,"current":461}
+{"_e":"metro:bundling:progress","_t":1786444013008,"id":"1","progress":0.4813125638031448,"total":738,"current":512}
+{"_e":"metro:bundling:progress","_t":1786444013108,"id":"1","progress":0.593123799186457,"total":757,"current":583}
+{"_e":"metro:bundling:progress","_t":1786444013208,"id":"1","progress":0.7204493605588913,"total":787,"current":668}
+{"_e":"metro:bundling:progress","_t":1786444013507,"id":"1","progress":0.7204493605588913,"total":809,"current":676}
+{"_e":"metro:bundling:progress","_t":1786444013514,"id":"1","progress":0.7204493605588913,"total":809,"current":677}
+{"_e":"metro:bundling:progress","_t":1786444013616,"id":"1","progress":0.7204493605588913,"total":844,"current":688}
+{"_e":"metro:bundling:progress","_t":1786444013716,"id":"1","progress":0.7341461095346055,"total":894,"current":766}
+{"_e":"metro:bundling:progress","_t":1786444013937,"id":"1","progress":0.7341461095346055,"total":944,"current":789}
+{"_e":"metro:bundling:progress","_t":1786444014034,"id":"1","progress":0.7341461095346055,"total":946,"current":790}
+{"_e":"metro:bundling:progress","_t":1786444014134,"id":"1","progress":0.7341461095346055,"total":988,"current":807}
+{"_e":"metro:bundling:progress","_t":1786444014234,"id":"1","progress":0.7341461095346055,"total":1034,"current":866}
+{"_e":"metro:bundling:progress","_t":1786444014348,"id":"1","progress":0.7441178506828918,"total":1121,"current":967}
+{"_e":"metro:bundling:progress","_t":1786444014448,"id":"1","progress":0.7937759955568242,"total":1137,"current":1013}
+{"_e":"metro:bundling:progress","_t":1786444014558,"id":"1","progress":0.9596001665972511,"total":1176,"current":1152}
+{"_e":"metro:bundling:progress","_t":1786444014658,"id":"1","progress":0.9983242566831243,"total":1193,"current":1192}
+{"_e":"metro:bundling:progress","_t":1786444014826,"id":"1","progress":0.999,"total":1193,"current":1193}
+{"_e":"metro:bundling:progress","_t":1786444014927,"id":"1","progress":0.999,"total":1229,"current":1219}
+{"_e":"metro:bundling:done","_t":1786444015065,"id":"1","total":1229,"ms":3610.858279}
+{"_e":"root:init","_t":1786444016614,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786444016632,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786444017636,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786444019424,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[190133:0811/172657.795459:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786444028337,"atlas":false,"workers":6,"host":"::","port":8082}
+{"_e":"metro:client_log","_t":1786444031975,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786444033623,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:bundling:started","_t":1786444057757,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786444057757,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444057766,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444057866,"id":"1","progress":0.011531012116571326,"total":149,"current":16}
+{"_e":"metro:bundling:progress","_t":1786444057966,"id":"1","progress":0.05683961229770624,"total":302,"current":72}
+{"_e":"metro:bundling:progress","_t":1786444058067,"id":"1","progress":0.10504063044329004,"total":361,"current":117}
+{"_e":"metro:bundling:progress","_t":1786444058166,"id":"1","progress":0.34602076124567477,"total":493,"current":290}
+{"_e":"metro:bundling:progress","_t":1786444058266,"id":"1","progress":0.4229249433978385,"total":612,"current":398}
+{"_e":"metro:bundling:progress","_t":1786444058366,"id":"1","progress":0.4673518387827347,"total":727,"current":497}
+{"_e":"metro:bundling:progress","_t":1786444058466,"id":"1","progress":0.7135129706152434,"total":792,"current":669}
+{"_e":"metro:bundling:progress","_t":1786444058566,"id":"1","progress":0.7135129706152434,"total":848,"current":684}
+{"_e":"metro:bundling:progress","_t":1786444058690,"id":"1","progress":0.7135129706152434,"total":992,"current":797}
+{"_e":"metro:bundling:progress","_t":1786444058791,"id":"1","progress":0.7135129706152434,"total":1057,"current":886}
+{"_e":"metro:bundling:progress","_t":1786444058891,"id":"1","progress":0.7393904413040137,"total":1149,"current":988}
+{"_e":"metro:bundling:progress","_t":1786444058996,"id":"1","progress":0.9445460397993816,"total":1209,"current":1175}
+{"_e":"metro:bundling:done","_t":1786444059142,"id":"1","total":1209,"ms":1385.554557}
+{"_e":"metro:client_log","_t":1786444068518,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786444069738,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786444083218,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"metro:client_log","_t":1786444090145,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"metro:client_log","_t":1786444099054,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"metro:client_log","_t":1786444111349,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"metro:client_log","_t":1786444142108,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"root:init","_t":1786444253076,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786444253097,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786444254151,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786444256490,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[192158:0811/173054.326512:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786444264898,"atlas":false,"workers":6,"host":"::","port":8082}
+{"_e":"metro:bundling:started","_t":1786444304307,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786444304308,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444304318,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786444304429,"id":"1","progress":0.0244140625,"total":128,"current":20}
+{"_e":"metro:bundling:progress","_t":1786444304529,"id":"1","progress":0.0244140625,"total":243,"current":26}
+{"_e":"metro:bundling:progress","_t":1786444304661,"id":"1","progress":0.0871655328798186,"total":315,"current":93}
+{"_e":"metro:bundling:progress","_t":1786444304761,"id":"1","progress":0.14603940953767364,"total":437,"current":167}
+{"_e":"metro:bundling:progress","_t":1786444304862,"id":"1","progress":0.2520876736111111,"total":480,"current":241}
+{"_e":"metro:bundling:progress","_t":1786444304961,"id":"1","progress":0.3141842569763047,"total":537,"current":301}
+{"_e":"metro:bundling:progress","_t":1786444305061,"id":"1","progress":0.3960807560176783,"total":661,"current":416}
+{"_e":"metro:bundling:progress","_t":1786444305164,"id":"1","progress":0.4096,"total":750,"current":480}
+{"_e":"metro:bundling:progress","_t":1786444305264,"id":"1","progress":0.4913810374426112,"total":913,"current":640}
+{"_e":"metro:bundling:progress","_t":1786444305364,"id":"1","progress":0.6180530833432223,"total":954,"current":750}
+{"_e":"metro:bundling:progress","_t":1786444305464,"id":"1","progress":0.7359031504557241,"total":1013,"current":869}
+{"_e":"metro:bundling:progress","_t":1786444305585,"id":"1","progress":0.8052611886040978,"total":1062,"current":953}
+{"_e":"metro:bundling:progress","_t":1786444305685,"id":"1","progress":0.8337863573472544,"total":1151,"current":1051}
+{"_e":"metro:bundling:progress","_t":1786444305785,"id":"1","progress":0.8884866044113943,"total":1202,"current":1133}
+{"_e":"metro:bundling:progress","_t":1786444305885,"id":"1","progress":0.9887505916896578,"total":1241,"current":1234}
+{"_e":"metro:bundling:done","_t":1786444306001,"id":"1","total":1241,"ms":1692.946091}
+{"_e":"metro:client_log","_t":1786444319061,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786444320923,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786444337543,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"root:init","_t":1786447015203,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786447015223,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786447016573,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786447018614,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[11199:0811/181657.085850:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786447029014,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786447045522,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786447045523,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786447045528,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786447046152,"id":"1","progress":0.010000000000000002,"total":1,"current":1}
+{"_e":"metro:bundling:progress","_t":1786447046252,"id":"1","progress":0.04000000000000001,"total":10,"current":2}
+{"_e":"metro:bundling:progress","_t":1786447046393,"id":"1","progress":0.04000000000000001,"total":17,"current":3}
+{"_e":"metro:bundling:progress","_t":1786447046493,"id":"1","progress":0.04000000000000001,"total":42,"current":6}
+{"_e":"metro:bundling:progress","_t":1786447046594,"id":"1","progress":0.04340277777777778,"total":48,"current":10}
+{"_e":"metro:bundling:progress","_t":1786447046694,"id":"1","progress":0.05039566847147022,"total":49,"current":11}
+{"_e":"metro:bundling:progress","_t":1786447046855,"id":"1","progress":0.059975010412328195,"total":49,"current":12}
+{"_e":"metro:bundling:progress","_t":1786447046960,"id":"1","progress":0.059975010412328195,"total":145,"current":14}
+{"_e":"metro:bundling:progress","_t":1786447047062,"id":"1","progress":0.059975010412328195,"total":152,"current":19}
+{"_e":"metro:bundling:progress","_t":1786447047162,"id":"1","progress":0.059975010412328195,"total":154,"current":24}
+{"_e":"metro:bundling:progress","_t":1786447047265,"id":"1","progress":0.059975010412328195,"total":171,"current":36}
+{"_e":"metro:bundling:progress","_t":1786447047374,"id":"1","progress":0.06184037400968617,"total":189,"current":47}
+{"_e":"metro:bundling:progress","_t":1786447047474,"id":"1","progress":0.0741207751980483,"total":191,"current":52}
+{"_e":"metro:bundling:progress","_t":1786447047575,"id":"1","progress":0.07955292570677186,"total":195,"current":55}
+{"_e":"metro:bundling:progress","_t":1786447047681,"id":"1","progress":0.08735955737824264,"total":203,"current":60}
+{"_e":"metro:bundling:progress","_t":1786447047787,"id":"1","progress":0.08944012577517686,"total":214,"current":64}
+{"_e":"metro:bundling:progress","_t":1786447047888,"id":"1","progress":0.09239457392924372,"total":227,"current":69}
+{"_e":"metro:bundling:progress","_t":1786447047988,"id":"1","progress":0.0952930056710775,"total":230,"current":71}
+{"_e":"metro:bundling:progress","_t":1786447048097,"id":"1","progress":0.09900787752675386,"total":232,"current":73}
+{"_e":"metro:bundling:progress","_t":1786447048203,"id":"1","progress":0.11780020109164031,"total":236,"current":81}
+{"_e":"metro:bundling:progress","_t":1786447048306,"id":"1","progress":0.12207867615038469,"total":249,"current":87}
+{"_e":"metro:bundling:progress","_t":1786447048406,"id":"1","progress":0.15156459413787074,"total":262,"current":102}
+{"_e":"metro:bundling:progress","_t":1786447048510,"id":"1","progress":0.1695501730103806,"total":272,"current":112}
+{"_e":"metro:bundling:progress","_t":1786447048616,"id":"1","progress":0.18076958674626312,"total":294,"current":125}
+{"_e":"metro:bundling:progress","_t":1786447048717,"id":"1","progress":0.22570391055286365,"total":301,"current":143}
+{"_e":"metro:bundling:progress","_t":1786447048819,"id":"1","progress":0.2630697190426639,"total":310,"current":159}
+{"_e":"metro:bundling:progress","_t":1786447048920,"id":"1","progress":0.2630697190426639,"total":398,"current":169}
+{"_e":"metro:bundling:progress","_t":1786447049021,"id":"1","progress":0.2630697190426639,"total":401,"current":177}
+{"_e":"metro:bundling:progress","_t":1786447049123,"id":"1","progress":0.2630697190426639,"total":413,"current":191}
+{"_e":"metro:bundling:progress","_t":1786447049224,"id":"1","progress":0.2630697190426639,"total":431,"current":209}
+{"_e":"metro:bundling:progress","_t":1786447049325,"id":"1","progress":0.26502560696550975,"total":439,"current":226}
+{"_e":"metro:bundling:progress","_t":1786447049427,"id":"1","progress":0.282735373403751,"total":457,"current":243}
+{"_e":"metro:bundling:progress","_t":1786447049529,"id":"1","progress":0.3065261839414983,"total":466,"current":258}
+{"_e":"metro:bundling:progress","_t":1786447049629,"id":"1","progress":0.318865450375049,"total":487,"current":275}
+{"_e":"metro:bundling:progress","_t":1786447049732,"id":"1","progress":0.32170866596884806,"total":506,"current":287}
+{"_e":"metro:bundling:progress","_t":1786447049835,"id":"1","progress":0.33062499999999995,"total":520,"current":299}
+{"_e":"metro:bundling:progress","_t":1786447049939,"id":"1","progress":0.33062499999999995,"total":548,"current":311}
+{"_e":"metro:bundling:progress","_t":1786447050039,"id":"1","progress":0.33062499999999995,"total":557,"current":314}
+{"_e":"metro:bundling:progress","_t":1786447050142,"id":"1","progress":0.33062499999999995,"total":560,"current":320}
+{"_e":"metro:bundling:progress","_t":1786447050242,"id":"1","progress":0.3416484824439595,"total":568,"current":332}
+{"_e":"metro:bundling:progress","_t":1786447050350,"id":"1","progress":0.3416484824439595,"total":606,"current":351}
+{"_e":"metro:bundling:progress","_t":1786447050452,"id":"1","progress":0.37746166004528175,"total":612,"current":376}
+{"_e":"metro:bundling:progress","_t":1786447050555,"id":"1","progress":0.3791456382912765,"total":635,"current":391}
+{"_e":"metro:bundling:progress","_t":1786447050655,"id":"1","progress":0.37927572873289706,"total":656,"current":404}
+{"_e":"metro:bundling:progress","_t":1786447050772,"id":"1","progress":0.38570637119113577,"total":665,"current":413}
+{"_e":"metro:bundling:progress","_t":1786447050873,"id":"1","progress":0.38570637119113577,"total":682,"current":418}
+{"_e":"metro:bundling:progress","_t":1786447050973,"id":"1","progress":0.38570637119113577,"total":692,"current":426}
+{"_e":"metro:bundling:progress","_t":1786447051073,"id":"1","progress":0.3910754179504854,"total":694,"current":434}
+{"_e":"metro:bundling:progress","_t":1786447051174,"id":"1","progress":0.4102576103833732,"total":701,"current":449}
+{"_e":"metro:bundling:progress","_t":1786447051274,"id":"1","progress":0.44507688042913013,"total":703,"current":469}
+{"_e":"metro:bundling:progress","_t":1786447051374,"id":"1","progress":0.4646152696171482,"total":713,"current":486}
+{"_e":"metro:bundling:progress","_t":1786447051475,"id":"1","progress":0.47097270280661285,"total":714,"current":490}
+{"_e":"metro:bundling:progress","_t":1786447051575,"id":"1","progress":0.49174428814930865,"total":723,"current":507}
+{"_e":"metro:bundling:progress","_t":1786447051675,"id":"1","progress":0.5088053048221722,"total":729,"current":520}
+{"_e":"metro:bundling:progress","_t":1786447051777,"id":"1","progress":0.5194206653847011,"total":734,"current":529}
+{"_e":"metro:bundling:progress","_t":1786447051879,"id":"1","progress":0.5377777777777777,"total":735,"current":539}
+{"_e":"metro:bundling:progress","_t":1786447051986,"id":"1","progress":0.5424123447772097,"total":740,"current":545}
+{"_e":"metro:bundling:progress","_t":1786447052085,"id":"1","progress":0.5464006574141709,"total":740,"current":547}
+{"_e":"metro:bundling:progress","_t":1786447052186,"id":"1","progress":0.5464006574141709,"total":770,"current":555}
+{"_e":"metro:bundling:progress","_t":1786447052286,"id":"1","progress":0.5464006574141709,"total":774,"current":571}
+{"_e":"metro:bundling:progress","_t":1786447052389,"id":"1","progress":0.5529743466264057,"total":784,"current":583}
+{"_e":"metro:bundling:progress","_t":1786447052491,"id":"1","progress":0.5568890624999999,"total":800,"current":597}
+{"_e":"metro:bundling:progress","_t":1786447052591,"id":"1","progress":0.5574868591079771,"total":821,"current":613}
+{"_e":"metro:bundling:progress","_t":1786447052692,"id":"1","progress":0.5656940718616803,"total":823,"current":619}
+{"_e":"metro:bundling:progress","_t":1786447052793,"id":"1","progress":0.5656940718616803,"total":839,"current":625}
+{"_e":"metro:bundling:progress","_t":1786447052895,"id":"1","progress":0.5674273107351535,"total":839,"current":632}
+{"_e":"metro:bundling:progress","_t":1786447052997,"id":"1","progress":0.5674273107351535,"total":870,"current":642}
+{"_e":"metro:bundling:progress","_t":1786447053099,"id":"1","progress":0.5674273107351535,"total":884,"current":654}
+{"_e":"metro:bundling:progress","_t":1786447053204,"id":"1","progress":0.5674273107351535,"total":892,"current":662}
+{"_e":"metro:bundling:progress","_t":1786447053310,"id":"1","progress":0.5674273107351535,"total":895,"current":666}
+{"_e":"metro:bundling:progress","_t":1786447053429,"id":"1","progress":0.5674273107351535,"total":903,"current":669}
+{"_e":"metro:bundling:progress","_t":1786447053529,"id":"1","progress":0.5674273107351535,"total":904,"current":679}
+{"_e":"metro:bundling:progress","_t":1786447053633,"id":"1","progress":0.5846756814505052,"total":905,"current":692}
+{"_e":"metro:bundling:progress","_t":1786447053735,"id":"1","progress":0.597184551300666,"total":911,"current":704}
+{"_e":"metro:bundling:progress","_t":1786447053836,"id":"1","progress":0.59764147217595,"total":921,"current":712}
+{"_e":"metro:bundling:progress","_t":1786447053936,"id":"1","progress":0.6000793493354493,"total":923,"current":715}
+{"_e":"metro:bundling:progress","_t":1786447054043,"id":"1","progress":0.606812304781267,"total":923,"current":719}
+{"_e":"metro:bundling:progress","_t":1786447054147,"id":"1","progress":0.6133576313612132,"total":927,"current":726}
+{"_e":"metro:bundling:progress","_t":1786447054254,"id":"1","progress":0.626310556133657,"total":930,"current":736}
+{"_e":"metro:bundling:progress","_t":1786447054353,"id":"1","progress":0.6355442631103906,"total":932,"current":743}
+{"_e":"metro:bundling:progress","_t":1786447054454,"id":"1","progress":0.6355442631103906,"total":960,"current":755}
+{"_e":"metro:bundling:progress","_t":1786447054554,"id":"1","progress":0.6355442631103906,"total":980,"current":765}
+{"_e":"metro:bundling:progress","_t":1786447054653,"id":"1","progress":0.6355442631103906,"total":1033,"current":783}
+{"_e":"metro:bundling:progress","_t":1786447054758,"id":"1","progress":0.6355442631103906,"total":1035,"current":794}
+{"_e":"metro:bundling:progress","_t":1786447054858,"id":"1","progress":0.6355442631103906,"total":1046,"current":810}
+{"_e":"metro:bundling:progress","_t":1786447054959,"id":"1","progress":0.6355442631103906,"total":1047,"current":824}
+{"_e":"metro:bundling:progress","_t":1786447055060,"id":"1","progress":0.6366488216568325,"total":1049,"current":837}
+{"_e":"metro:bundling:progress","_t":1786447055160,"id":"1","progress":0.6403030661730945,"total":1056,"current":845}
+{"_e":"metro:bundling:progress","_t":1786447055260,"id":"1","progress":0.6444938422569656,"total":1070,"current":859}
+{"_e":"metro:bundling:progress","_t":1786447055360,"id":"1","progress":0.644767208855599,"total":1076,"current":864}
+{"_e":"metro:bundling:progress","_t":1786447055461,"id":"1","progress":0.6533406952791522,"total":1085,"current":877}
+{"_e":"metro:bundling:progress","_t":1786447055562,"id":"1","progress":0.6637017086103864,"total":1090,"current":888}
+{"_e":"metro:bundling:progress","_t":1786447055698,"id":"1","progress":0.6637017086103864,"total":1099,"current":892}
+{"_e":"metro:bundling:progress","_t":1786447055796,"id":"1","progress":0.6669938504813885,"total":1102,"current":900}
+{"_e":"metro:bundling:progress","_t":1786447055896,"id":"1","progress":0.667141009266379,"total":1108,"current":905}
+{"_e":"metro:bundling:progress","_t":1786447055996,"id":"1","progress":0.6675549478171691,"total":1115,"current":911}
+{"_e":"metro:bundling:progress","_t":1786447056097,"id":"1","progress":0.6764732330076768,"total":1121,"current":922}
+{"_e":"metro:bundling:progress","_t":1786447056203,"id":"1","progress":0.6833777777777778,"total":1125,"current":930}
+{"_e":"metro:bundling:progress","_t":1786447056303,"id":"1","progress":0.7090626227729624,"total":1127,"current":949}
+{"_e":"metro:bundling:progress","_t":1786447056516,"id":"1","progress":0.736431769025703,"total":1128,"current":968}
+{"_e":"metro:bundling:progress","_t":1786447056647,"id":"1","progress":0.7414276764037905,"total":1130,"current":973}
+{"_e":"metro:bundling:progress","_t":1786447056748,"id":"1","progress":0.7750812403453362,"total":1137,"current":1001}
+{"_e":"metro:bundling:progress","_t":1786447056849,"id":"1","progress":0.796020527221766,"total":1141,"current":1018}
+{"_e":"metro:bundling:progress","_t":1786447056949,"id":"1","progress":0.796020527221766,"total":1162,"current":1033}
+{"_e":"metro:bundling:progress","_t":1786447057050,"id":"1","progress":0.812624230021683,"total":1167,"current":1052}
+{"_e":"metro:bundling:progress","_t":1786447057152,"id":"1","progress":0.8239053254437869,"total":1170,"current":1062}
+{"_e":"metro:bundling:progress","_t":1786447057254,"id":"1","progress":0.8281309001184708,"total":1178,"current":1072}
+{"_e":"metro:bundling:progress","_t":1786447057356,"id":"1","progress":0.8407957483481757,"total":1180,"current":1082}
+{"_e":"metro:bundling:progress","_t":1786447057457,"id":"1","progress":0.8483786529393063,"total":1191,"current":1097}
+{"_e":"metro:bundling:progress","_t":1786447057561,"id":"1","progress":0.858142539521367,"total":1195,"current":1107}
+{"_e":"metro:bundling:progress","_t":1786447057661,"id":"1","progress":0.8669850725710646,"total":1205,"current":1122}
+{"_e":"metro:bundling:progress","_t":1786447057762,"id":"1","progress":0.8907615600027321,"total":1210,"current":1142}
+{"_e":"metro:bundling:progress","_t":1786447057862,"id":"1","progress":0.917745061053226,"total":1214,"current":1163}
+{"_e":"metro:bundling:progress","_t":1786447057962,"id":"1","progress":0.9339162859446385,"total":1220,"current":1179}
+{"_e":"metro:bundling:progress","_t":1786447058084,"id":"1","progress":0.9419012490265561,"total":1221,"current":1185}
+{"_e":"metro:bundling:progress","_t":1786447058188,"id":"1","progress":0.9756205836752514,"total":1223,"current":1208}
+{"_e":"metro:bundling:progress","_t":1786447058287,"id":"1","progress":0.9886869596967605,"total":1234,"current":1227}
+{"_e":"metro:bundling:progress","_t":1786447058387,"id":"1","progress":0.9967923035897859,"total":1246,"current":1244}
+{"_e":"metro:bundling:progress","_t":1786447058488,"id":"1","progress":0.999,"total":1246,"current":1246}
+{"_e":"metro:bundling:done","_t":1786447058818,"id":"1","total":1246,"ms":13295.877506}
+{"_e":"metro:client_log","_t":1786447064554,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786447066477,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786447092730,"level":"error","data":["[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:","[Error: Cannot find module '../../assets/filsafat-ajaran-islam.epub']"]}
+{"_e":"metro:client_log","_t":1786447176895,"level":"log","data":["[ReadingScreen] Loading offline bundled asset for:","book_filsafat_ajaran_islam"]}
+{"_e":"root:init","_t":1786447325593,"format":"v0-jsonl","version":"56.1.19"}
+{"_e":"devserver:start","_t":1786447325621,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786447326779,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1786447328585,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[13865:0811/182206.975385:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/erachmat/.cache/dotslash/af/5aa55d5d0401a9f3a438c9deb082205f28e353/React Native DevTools-linux-x64/chrome-sandbox is owned by root and has mode 4755.\n"]}
+{"_e":"metro:instantiate","_t":1786447337349,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786447344060,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786447344060,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786447344065,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786447344168,"id":"1","progress":0.008038049940546967,"total":145,"current":13}
+{"_e":"metro:bundling:progress","_t":1786447344267,"id":"1","progress":0.055925858290723156,"total":296,"current":70}
+{"_e":"metro:bundling:progress","_t":1786447344367,"id":"1","progress":0.23920215098873016,"total":458,"current":224}
+{"_e":"metro:bundling:progress","_t":1786447344467,"id":"1","progress":0.3604264139395335,"total":563,"current":338}
+{"_e":"metro:bundling:progress","_t":1786447344567,"id":"1","progress":0.4548862486014173,"total":685,"current":462}
+{"_e":"metro:bundling:progress","_t":1786447344667,"id":"1","progress":0.6262167524335049,"total":762,"current":603}
+{"_e":"metro:bundling:progress","_t":1786447344767,"id":"1","progress":0.7397578065819376,"total":872,"current":750}
+{"_e":"metro:bundling:progress","_t":1786447344868,"id":"1","progress":0.7397578065819376,"total":915,"current":779}
+{"_e":"metro:bundling:progress","_t":1786447344970,"id":"1","progress":0.7397578065819376,"total":1055,"current":883}
+{"_e":"metro:bundling:progress","_t":1786447345070,"id":"1","progress":0.7906531188880663,"total":1119,"current":995}
+{"_e":"metro:bundling:progress","_t":1786447345170,"id":"1","progress":0.9504210360462878,"total":1195,"current":1165}
+{"_e":"metro:bundling:progress","_t":1786447345291,"id":"1","progress":0.999,"total":1250,"current":1250}
+{"_e":"metro:bundling:done","_t":1786447345370,"id":"1","total":1250,"ms":1309.838793}
+{"_e":"metro:client_log","_t":1786447352439,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786447354385,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+{"_e":"metro:client_log","_t":1786447403616,"level":"log","data":["[ReadingScreen] Loading offline bundled asset for:","book_perlunya_seorang_imam"]}
+{"_e":"metro:client_log","_t":1786447405736,"level":"log","data":["[Perf] WebView shell ready duration: 2475ms"]}
+{"_e":"metro:client_log","_t":1786447405904,"level":"log","data":["[RN Diagnostic] Disk size: 830050 bytes | b64 length: 1106736 chars | RN Read duration: 156ms"]}
+{"_e":"metro:client_log","_t":1786447405906,"level":"log","data":["[Chunking] Transferring 5 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447407321,"level":"log","data":["[Perf] Total Time-to-First-Frame: 4057ms, In-WebView load: 1327ms, Location gen (generated): 1299ms"]}
+{"_e":"metro:client_log","_t":1786447410562,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1786447411704,"level":"log","data":["[Perf] Page turn latency: 108ms"]}
+{"_e":"metro:client_log","_t":1786447412558,"level":"log","data":["[Perf] Page turn latency: 65ms"]}
+{"_e":"metro:client_log","_t":1786447413561,"level":"log","data":["[Perf] Page turn latency: 382ms"]}
+{"_e":"metro:client_log","_t":1786447414115,"level":"log","data":["[Perf] Page turn latency: 69ms"]}
+{"_e":"metro:client_log","_t":1786447414565,"level":"log","data":["[Perf] Page turn latency: 62ms"]}
+{"_e":"metro:client_log","_t":1786447415129,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1786447415760,"level":"log","data":["[Perf] Page turn latency: 203ms"]}
+{"_e":"metro:client_log","_t":1786447429471,"level":"log","data":["[ReadingScreen] Loading offline bundled asset for:","book_perlunya_seorang_imam"]}
+{"_e":"metro:client_log","_t":1786447429777,"level":"log","data":["[Perf] WebView shell ready duration: 525ms"]}
+{"_e":"metro:client_log","_t":1786447429957,"level":"log","data":["[RN Diagnostic] Disk size: 830050 bytes | b64 length: 1106736 chars | RN Read duration: 186ms"]}
+{"_e":"metro:client_log","_t":1786447429960,"level":"log","data":["[Chunking] Transferring 5 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447430438,"level":"log","data":["[Perf] WebView shell ready duration: 1187ms"]}
+{"_e":"metro:client_log","_t":1786447430443,"level":"log","data":["[RN Diagnostic] Disk size: 830050 bytes | b64 length: 1106736 chars | RN Read duration: 633ms"]}
+{"_e":"metro:client_log","_t":1786447430444,"level":"log","data":["[Chunking] Transferring 5 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447430477,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1227ms, In-WebView load: 222ms, Location gen (cached): 189ms"]}
+{"_e":"metro:client_log","_t":1786447430620,"level":"log","data":["[RN Diagnostic] Disk size: 830050 bytes | b64 length: 1106736 chars | RN Read duration: 613ms"]}
+{"_e":"metro:client_log","_t":1786447430622,"level":"log","data":["[Chunking] Transferring 5 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447431212,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1963ms, In-WebView load: 391ms, Location gen (cached): 369ms"]}
+{"_e":"metro:client_log","_t":1786447440804,"level":"log","data":["[ReadingScreen] Loading offline bundled asset for:","book_filsafat_ajaran_islam"]}
+{"_e":"metro:client_log","_t":1786447441046,"level":"log","data":["[Perf] WebView shell ready duration: 510ms"]}
+{"_e":"metro:client_log","_t":1786447441279,"level":"log","data":["[RN Diagnostic] Disk size: 560428 bytes | b64 length: 747240 chars | RN Read duration: 235ms"]}
+{"_e":"metro:client_log","_t":1786447441280,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447441323,"level":"log","data":["[Perf] WebView shell ready duration: 787ms"]}
+{"_e":"metro:client_log","_t":1786447441326,"level":"log","data":["[RN Diagnostic] Disk size: 560428 bytes | b64 length: 747240 chars | RN Read duration: 251ms"]}
+{"_e":"metro:client_log","_t":1786447441329,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447441394,"level":"log","data":["[RN Diagnostic] Disk size: 560428 bytes | b64 length: 747240 chars | RN Read duration: 119ms"]}
+{"_e":"metro:client_log","_t":1786447441395,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786447441817,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1280ms, In-WebView load: 118ms, Location gen (cached): 108ms"]}

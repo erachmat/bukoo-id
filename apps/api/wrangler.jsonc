@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/wrangler",
+  "name": "bukoo-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bukoo-db",
+      // Replace this with your actual D1 database ID from: wrangler d1 create bukoo-db
+      "database_id": "YOUR_D1_DATABASE_ID_HERE",
+      "migrations_dir": "../../packages/db/drizzle"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "BUKOO_STORAGE",
+      "bucket_name": "bukoo-assets"
+    }
+  ],
+
+  "ai": {
+    "binding": "AI"
+  },
+
+  // Secrets are NOT set here — use: wrangler secret put <NAME>
+  // Required secrets:
+  //   JWT_SECRET         — openssl rand -base64 32
+  //   GOOGLE_CLIENT_ID   — from Google Cloud Console
+  //   APPLE_CLIENT_ID    — from Apple Developer Console
+  //   MAILCHANNELS_API_KEY — from MailChannels dashboard
+  //   MAIL_FROM          — e.g. noreply@bukoo.id
+
+  "observability": {
+    "enabled": true
+  }
+}

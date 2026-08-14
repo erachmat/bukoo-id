@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { books as booksTable, users as usersTable, subscriptions, readingProgress } from '@bukoo/db'
+import { eq, and } from 'drizzle-orm'
 import { prismaBookToCatalogBook } from '@/lib/data/book-mapper'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,9 +16,9 @@ import { isBookAccessible } from '@bukoo/shared-types'
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const session = await auth()
-  
-  const row = await prisma.book.findUnique({
-    where: { id: resolvedParams.id },
+
+  const row = await db.query.books.findFirst({
+    where: eq(booksTable.id, resolvedParams.id),
   })
   if (!row || !row.isPublished) notFound()
 
@@ -25,23 +27,19 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   let userTier = 'FREE'
 
   if (session?.user?.id) {
-    const userDb = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        subscription: {
-          include: { plan: true }
-        },
-        readingProgress: {
-          where: { bookId: resolvedParams.id }
-        }
-      }
-    })
-    
-    userTier = 'FREE'
-    if (userDb?.subscription && (userDb.subscription.status === 'ACTIVE' || userDb.subscription.status === 'TRIALING')) {
-      userTier = userDb.subscription.planId.replace('plan_', '').toUpperCase()
+    const [sub, prog] = await Promise.all([
+      db.query.subscriptions.findFirst({
+        where: eq(subscriptions.userId, session.user.id),
+      }),
+      db.query.readingProgress.findFirst({
+        where: and(eq(readingProgress.userId, session.user.id), eq(readingProgress.bookId, resolvedParams.id)),
+      }),
+    ])
+
+    if (sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING')) {
+      userTier = sub.planId.replace('plan_', '').toUpperCase()
     }
-    userProgress = userDb?.readingProgress[0] || null
+    userProgress = prog || null
   }
 
   // Access Check

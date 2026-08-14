@@ -1,27 +1,34 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { books as booksTable, users as usersTable } from '@bukoo/db'
+import { count, ne, eq, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboardPage() {
-  const [totalBooks, totalUsers, premiumBooks, freeBooks] = await Promise.all([
-    prisma.book.count(),
-    prisma.user.count(),
-    prisma.book.count({ where: { NOT: { subscriptionRequired: 'FREE' } } }),
-    prisma.book.count({ where: { subscriptionRequired: 'FREE' } }),
+  const [[{ totalBooks }], [{ totalUsers }], [{ premiumBooks }], [{ freeBooks }]] = await Promise.all([
+    db.select({ totalBooks: count() }).from(booksTable),
+    db.select({ totalUsers: count() }).from(usersTable),
+    db.select({ premiumBooks: count() }).from(booksTable).where(ne(booksTable.subscriptionRequired, 'FREE')),
+    db.select({ freeBooks: count() }).from(booksTable).where(eq(booksTable.subscriptionRequired, 'FREE')),
   ])
 
-  const recentUsers = await prisma.user.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
-  })
+  const recentUsers = await db
+    .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, role: usersTable.role, createdAt: usersTable.createdAt })
+    .from(usersTable)
+    .orderBy(desc(usersTable.createdAt))
+    .limit(5)
 
-  const recentBooks = await prisma.book.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    select: { id: true, title: true, author: true, subscriptionRequired: true, genre: true },
-  })
+  const recentBooksRaw = await db
+    .select({ id: booksTable.id, title: booksTable.title, author: booksTable.author, subscriptionRequired: booksTable.subscriptionRequired, genre: booksTable.genre })
+    .from(booksTable)
+    .orderBy(desc(booksTable.createdAt))
+    .limit(5)
+
+  const recentBooks = recentBooksRaw.map((b: typeof recentBooksRaw[number]) => ({
+    ...b,
+    genre: typeof b.genre === 'string' ? JSON.parse(b.genre || '[]') : b.genre,
+  }))
 
   const stats = [
     { label: 'Total Buku', value: totalBooks.toLocaleString('id-ID'), icon: '📚', sub: `${premiumBooks} premium · ${freeBooks} gratis`, live: true },
@@ -59,15 +66,14 @@ export default async function AdminDashboardPage() {
           </div>
           {recentBooks.length === 0 ? (
             <p style={{ fontSize: 13, color: '#AAB4C0', textAlign: 'center', padding: '20px 0' }}>Belum ada buku.</p>
-          ) : recentBooks.map((b, i) => (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: i < recentBooks.length - 1 ? 12 : 0, marginBottom: i < recentBooks.length - 1 ? 12 : 0, borderBottom: i < recentBooks.length - 1 ? '1px solid #F0F2F5' : 'none' }}>
-              <div style={{ width: 36, height: 52, background: '#F0F2F5', borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📖</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, color: '#1A2332', fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.title}</div>
-                <div style={{ fontSize: 11, color: '#8896A5', marginTop: 2 }}>{b.author}</div>
+          ) : recentBooks.map((b: typeof recentBooks[number], i: number) => (
+            <div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < recentBooks.length - 1 ? '1px solid #F0F2F5' : 'none' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1A2332' }}>{b.title}</div>
+                <div style={{ fontSize: 11, color: '#6B7A8D', marginTop: 2 }}>{b.author}</div>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 7px', borderRadius: 6, background: b.subscriptionRequired !== 'FREE' ? 'rgba(245,158,11,0.1)' : 'rgba(0,201,167,0.1)', color: b.subscriptionRequired !== 'FREE' ? '#B45309' : '#00856F', flexShrink: 0 }}>
-                {b.subscriptionRequired !== 'FREE' ? b.subscriptionRequired : 'FREE'}
+              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: b.subscriptionRequired === 'FREE' ? 'rgba(0,201,167,0.1)' : 'rgba(245,158,11,0.1)', color: b.subscriptionRequired === 'FREE' ? '#00856F' : '#B45309' }}>
+                {b.subscriptionRequired}
               </span>
             </div>
           ))}
@@ -80,8 +86,8 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/users" style={{ fontSize: 12, color: '#00C9A7', fontWeight: 600, textDecoration: 'none' }}>Lihat semua →</Link>
           </div>
           {recentUsers.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#AAB4C0', textAlign: 'center', padding: '20px 0' }}>Belum ada pengguna.</p>
-          ) : recentUsers.map((u, i) => (
+            <div style={{ color: '#AAB4C0', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>Belum ada pengguna.</div>
+          ) : recentUsers.map((u: typeof recentUsers[number], i: number) => (
             <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: i < recentUsers.length - 1 ? 12 : 0, marginBottom: i < recentUsers.length - 1 ? 12 : 0, borderBottom: i < recentUsers.length - 1 ? '1px solid #F0F2F5' : 'none' }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#00C9A7,#004D4A)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 14, fontWeight: 800, color: '#fff' }}>
                 {(u.name?.[0] ?? u.email[0]).toUpperCase()}

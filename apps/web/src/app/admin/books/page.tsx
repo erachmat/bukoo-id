@@ -1,13 +1,13 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { books as booksTable } from '@bukoo/db'
+import { desc } from 'drizzle-orm'
 import { DeleteBookButton } from './_components/delete-book-button'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminBooksPage() {
-  const books = await prisma.book.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
+  const books = await db.select().from(booksTable).orderBy(desc(booksTable.createdAt))
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -49,12 +49,12 @@ export default async function AdminBooksPage() {
                 </td>
               </tr>
             )}
-            {books.map((book, i) => (
+            {books.map((book: typeof books[number], i: number) => (
               <tr key={book.id} style={{ borderBottom: i < books.length - 1 ? '1px solid #F0F2F5' : 'none' }}>
                 <td style={{ padding: '14px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {book.coverUrl ? (
-                      <img src={book.coverUrl} alt={book.title} style={{ width: 36, height: 52, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #E8ECF0' }} />
+                    {book.coverKey ? (
+                      <img src={book.coverKey} alt={book.title} style={{ width: 36, height: 52, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #E8ECF0' }} />
                     ) : (
                       <div style={{ width: 36, height: 52, background: '#F0F2F5', borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#AAB4C0' }}>?</div>
                     )}

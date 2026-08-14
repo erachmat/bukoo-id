@@ -1,19 +1,30 @@
+/** Canonical subscription tier values — must match D1 schema `subscriptionRequired` column values */
+export type SubscriptionTier = 'FREE' | 'PELAJAR' | 'PERSONAL' | 'PLUS' | 'FAMILY';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatarUrl: string | null;
-  subscriptionTier: 'free' | 'premium' | 'vip' | string;
+  /** Uppercase tier string matching SubscriptionTier */
+  subscriptionTier: SubscriptionTier | string;
   onboardingCompleted: boolean;
-  createdAt: string; // ISO 8601 string representation of Date
+  createdAt: string; // ISO 8601 string
 }
 
 export interface Book {
   id: string;
   title: string;
   author: string;
-  coverUrl: string;
-  genre: string[];
+  /**
+   * R2 object key for the cover image.
+   * Callers construct the public URL from this key.
+   * @example "covers/abc123.jpg"
+   */
+  coverKey: string | null;
+  /** @deprecated Use coverKey — will be removed after R2 migration is complete */
+  coverUrl?: string;
+  genre: string[]; // stored as JSON text in D1; serialized/deserialized in API layer
   language: string;
   rating: number; // e.g. 4.8
   totalPages: number;
@@ -27,17 +38,21 @@ export interface ReadingProgress {
   progressPercent: number; // e.g. 23.5 (percentage from 0 to 100)
   cfiPosition: string | null; // CFI format for EPUB positioning
   readingTimeMinutes: number;
-  lastReadAt: string; // ISO 8601 string representation of Date
+  lastReadAt: string; // ISO 8601 string
 }
 
 export interface Subscription {
   id: string;
   planId: string;
-  status: 'active' | 'canceled' | 'past_due' | 'unpaid' | string;
-  currentPeriodEnd: string; // ISO 8601 string representation of Date
+  status: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'EXPIRED' | 'PENDING_PAYMENT' | string;
+  currentPeriodEnd: string; // ISO 8601 string
   cancelAtPeriodEnd: boolean;
 }
 
+/**
+ * Ordered list of subscription tiers from lowest to highest access.
+ * PREMIUM is kept at the end for legacy compatibility — new tiers use FAMILY as the highest.
+ */
 export const TIER_ORDER = ['FREE', 'PELAJAR', 'PERSONAL', 'PLUS', 'FAMILY', 'PREMIUM'];
 
 /**

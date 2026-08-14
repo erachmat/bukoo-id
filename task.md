@@ -142,3 +142,18 @@
   - `[x]` Update `apps/api/prisma/seed.ts` fileUrls and fileTypes to EPUB.
   - `[x]` Fix stale PDF cache loading bug in ReadingScreen & bookDownloadService when book format switches to EPUB.
   - `[x]` Verification complete: typecheck, lint, test across touched workspaces.
+
+# Fix Offline EPUB Asset Require Paths
+- `[x]` 1. Fix relative asset path for offline EPUB books in ReadingScreen
+  - `[x]` Correct relative require paths in `ReadingScreen.tsx` from `../../assets/` to `../../../assets/` to accurately resolve `apps/mobile/assets/` files (`filsafat-ajaran-islam.epub`, `perlunya-seorang-imam.epub`, `riwayat-rasulullah.epub`, `sample-book.epub`).
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile` (PASSED), `npm run lint --workspace=@bukoo/mobile` (PASSED), `npm run test --workspace=@bukoo/mobile` (No tests specified for mobile yet).
+
+# Mobile Release Build & API Fallback Fix
+- `[x]` 1. Fix Release APK Login Error & Production Environment Variables
+  - `[x]` Update default `API_URL` fallback in `api.ts` from `http://localhost:3000` to `https://bukooapi-production.up.railway.app/v1`.
+  - `[x]` Update default `API_BASE_URL` fallback in `annotationSyncService.ts` to `https://bukooapi-production.up.railway.app/v1`.
+  - `[x]` Update `webClientId` fallback in `LoginScreen.tsx` to `576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com`.
+  - `[x]` Add `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_GOOGLE_CLIENT_ID` to `eas.json` under `development`, `preview`, and `production` build profiles.
+  - `[x]` Verification complete: typecheck, lint, test across touched workspace `@bukoo/mobile`.
+
+

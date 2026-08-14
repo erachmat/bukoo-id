@@ -1,17 +1,16 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache';
+import { db } from '@/lib/db';
+import { users } from '@bukoo/db';
+import { eq } from 'drizzle-orm';
 
 export async function updateUserRole(userId: string, role: string) {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { role: role as any },
-  })
-  revalidatePath('/admin/users')
+  await db.update(users).set({ role }).where(eq(users.id, userId));
+  revalidatePath('/admin/users');
 }
 
 export async function deleteUser(userId: string) {
-  await prisma.user.delete({ where: { id: userId } })
-  revalidatePath('/admin/users')
+  await db.delete(users).where(eq(users.id, userId));
+  revalidatePath('/admin/users');
 }

@@ -1,26 +1,35 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { readingProgress, books } from '@bukoo/db'
+import { eq, and, desc, gt } from 'drizzle-orm'
 import Link from 'next/link'
-import { Play } from 'lucide-react'
 
 export default async function ResumeReading() {
   const session = await auth()
   if (!session?.user?.id) return null
 
   // Get Top 5 most recently updated reading progress records
-  const readingList = await prisma.readingProgress.findMany({
-    where: {
-      userId: session.user.id,
-      progressPercent: { gt: 0 }, // only those actually started
-    },
-    include: {
-      book: true,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-    take: 5,
-  })
+  const readingList = await db
+    .select({
+      id: readingProgress.id,
+      progressPercent: readingProgress.progressPercent,
+      book: {
+        id: books.id,
+        title: books.title,
+        author: books.author,
+        coverKey: books.coverKey,
+      },
+    })
+    .from(readingProgress)
+    .innerJoin(books, eq(readingProgress.bookId, books.id))
+    .where(
+      and(
+        eq(readingProgress.userId, session.user.id),
+        gt(readingProgress.progressPercent, 0),
+      ),
+    )
+    .orderBy(desc(readingProgress.updatedAt))
+    .limit(5)
 
   if (readingList.length === 0) return null
 
@@ -45,7 +54,9 @@ export default async function ResumeReading() {
           msOverflowStyle: 'none',
         }}
       >
-        {readingList.map(({ book, progressPercent, id }) => (
+        {readingList.map((item: typeof readingList[number]) => {
+          const { book, progressPercent, id } = item
+          return (
           <Link 
             key={id} 
             href={`/book/${book.id}/read`}
@@ -152,7 +163,8 @@ export default async function ResumeReading() {
 
             </div>
           </Link>
-        ))}
+          )
+        })}
       </div>
 
       <style>{`

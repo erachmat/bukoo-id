@@ -1,124 +1,136 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { put, del } from '@vercel/blob'
-import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
+import { books } from '@bukoo/db';
+import { eq, and } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+import { createId } from '@paralleldrive/cuid2';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// R2 upload helpers (shared with admin/books/actions.ts)
+// ---------------------------------------------------------------------------
 
-async function saveUploadedFile(file: File, prefix: string): Promise<string> {
-  const ext = file.name.split('.').pop() ?? 'bin'
-  const filename = `${prefix}-${Date.now()}.${ext}`
-  
-  try {
-    const blob = await put(filename, file, { access: 'public' })
-    return blob.url
-  } catch (err: any) {
-    console.warn('Vercel Blob upload failed:', err.message)
-    if (prefix === 'cover') {
-      return `https://placehold.co/400x600?text=Cover+Preview`
-    }
-    return '#'
+async function uploadToR2(file: File, folder: 'covers' | 'epubs'): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'bin';
+  const key = `${folder}/${createId()}.${ext}`;
+
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
+  const token = process.env.CLOUDFLARE_R2_TOKEN!;
+
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': file.type || 'application/octet-stream',
+      },
+      body: file.stream(),
+      // @ts-expect-error — required for streaming in server actions
+      duplex: 'half',
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`R2 upload failed (${response.status}): ${body}`);
   }
+
+  return key;
 }
 
-async function deleteFile(publicUrl: string | null | undefined) {
-  if (!publicUrl) return
-  if (publicUrl.includes('public.blob.vercel-storage.com')) {
-    try {
-      await del(publicUrl)
-    } catch {
-      // File might not exist — ignore
-    }
-  }
+async function deleteFromR2(key: string | null | undefined) {
+  if (!key) return;
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
+  const token = process.env.CLOUDFLARE_R2_TOKEN!;
+  await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`,
+    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
+  ).catch(() => {});
 }
 
 async function getPublisherUser() {
-  const session = await auth()
-  const user = session?.user
-  if (!user || (user as any).role !== 'PUBLISHER') {
-    throw new Error('Unauthorized')
+  const session = await auth();
+  const user = session?.user;
+  if (!user || (user as { role?: string }).role !== 'PUBLISHER') {
+    throw new Error('Unauthorized');
   }
-  return user
+  return user as { id: string; name?: string | null; role: string };
 }
 
-// ─── Create ──────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// Publisher book actions
+// ---------------------------------------------------------------------------
 
 export async function createPublisherBook(formData: FormData) {
-  const user = await getPublisherUser()
+  const user = await getPublisherUser();
 
-  const title = formData.get('title') as string
-  const author = formData.get('author') as string
-  const description = formData.get('description') as string
-  const genre = formData.get('genre') as string
-  const language = formData.get('language') as 'ID' | 'EN'
-  const subscriptionRequired = formData.get('subscriptionRequired') as any || 'FREE'
-  const year = formData.get('year') ? Number(formData.get('year')) : null
-  const pageCount = formData.get('pageCount') ? Number(formData.get('pageCount')) : null
+  const title = formData.get('title') as string;
+  const author = formData.get('author') as string;
+  const description = formData.get('description') as string;
+  const genre = formData.get('genre') as string;
+  const language = (formData.get('language') as string) || 'ID';
+  const subscriptionRequired = (formData.get('subscriptionRequired') as string) || 'FREE';
+  const year = formData.get('year') ? Number(formData.get('year')) : null;
+  const pageCount = formData.get('pageCount') ? Number(formData.get('pageCount')) : null;
 
-  const coverFile = formData.get('cover') as File | null
-  const epubFile = formData.get('epub') as File | null
+  const coverFile = formData.get('cover') as File | null;
+  const epubFile = formData.get('epub') as File | null;
 
-  let coverUrl: string | undefined
-  let fileUrl: string | undefined
-  let fileType: 'EPUB' | 'PDF' = 'EPUB'
+  let coverKey: string | null = null;
+  let epubKey: string | null = null;
 
   if (coverFile && coverFile.size > 0) {
-    coverUrl = await saveUploadedFile(coverFile, 'cover')
+    coverKey = await uploadToR2(coverFile, 'covers');
   }
   if (epubFile && epubFile.size > 0) {
-    fileUrl = await saveUploadedFile(epubFile, 'epub')
-    if (epubFile.name.toLowerCase().endsWith('.pdf')) {
-      fileType = 'PDF'
-    }
+    epubKey = await uploadToR2(epubFile, 'epubs');
   }
 
-  await prisma.book.create({
-    data: {
-      title,
-      author,
-      description: description || null,
-      coverUrl: coverUrl ?? null,
-      fileUrl: fileUrl ?? null,
-      fileType,
-      genre: genre ? [genre] : [],
-      language,
-      subscriptionRequired,
-      isPublished: true,
-      year: year ?? null,
-      publisher: user.name || 'Mitra Penerbit',
-      publisherUserId: user.id,
-      pageCount: pageCount ?? null,
-    },
-  })
+  await db.insert(books).values({
+    id: createId(),
+    title,
+    author,
+    description: description || null,
+    coverKey,
+    epubKey,
+    genre: JSON.stringify(genre ? [genre] : []),
+    language,
+    subscriptionRequired,
+    isPublished: true,
+    publishedYear: year ?? null,
+    publisher: user.name || 'Mitra Penerbit',
+    publisherUserId: user.id,
+    totalPages: pageCount ?? null,
+  });
 
-  revalidatePath('/publisher/books')
-  revalidatePath('/publisher/dashboard')
-  redirect('/publisher/books')
+  revalidatePath('/publisher/books');
+  revalidatePath('/publisher/dashboard');
+  redirect('/publisher/books');
 }
 
-// ─── Delete ──────────────────────────────────────────────────────────────────
-
 export async function deletePublisherBook(id: string) {
-  const user = await getPublisherUser()
+  const user = await getPublisherUser();
 
-  const book = await prisma.book.findFirst({
-    where: { id, publisherUserId: user.id },
-  })
+  const book = await db.query.books.findFirst({
+    where: and(eq(books.id, id), eq(books.publisherUserId, user.id)),
+  });
 
   if (!book) {
-    throw new Error('Book not found or unauthorized')
+    throw new Error('Book not found or unauthorized');
   }
 
-  await deleteFile(book.coverUrl)
-  await deleteFile(book.fileUrl)
-  
-  await prisma.book.delete({
-    where: { id },
-  })
+  await Promise.all([
+    deleteFromR2(book.coverKey),
+    deleteFromR2(book.epubKey),
+  ]);
 
-  revalidatePath('/publisher/books')
-  revalidatePath('/publisher/dashboard')
+  await db.delete(books).where(eq(books.id, id));
+
+  revalidatePath('/publisher/books');
+  revalidatePath('/publisher/dashboard');
 }

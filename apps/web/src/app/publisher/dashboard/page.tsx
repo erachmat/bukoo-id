@@ -1,6 +1,8 @@
 import React from "react";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { books as booksTable, readingProgress } from "@bukoo/db";
+import { eq, gte, count, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -18,32 +20,32 @@ export default async function PublisherDashboardPage() {
   const name = user.name || "Gramedia Pustaka Utama";
 
   // 1. Total books registered by this publisher
-  const totalBooks = await prisma.book.count({
-    where: { publisherUserId: user.id },
-  });
+  const [{ totalBooks }] = await db
+    .select({ totalBooks: count() })
+    .from(booksTable)
+    .where(eq(booksTable.publisherUserId, user.id ?? ''));
 
-  // 2. Total active books (books with at least 1 reading progress record)
-  const activeBooks = await prisma.book.count({
-    where: {
-      publisherUserId: user.id,
-      readingProgress: { some: {} },
-    },
-  });
+  // 2. Total active books (books with at least 1 reading session >= 80%)
+  const activeBookIds = await db
+    .selectDistinct({ bookId: readingProgress.bookId })
+    .from(readingProgress)
+    .innerJoin(booksTable, sql`${readingProgress.bookId} = ${booksTable.id} AND ${booksTable.publisherUserId} = ${user.id ?? ''}`)
+    .where(gte(readingProgress.progressPercent, 80));
+  const activeBooks = activeBookIds.length;
 
-  // 3. Total reading progress sessions (completed sessions >= 80%)
-  const totalSessions = await prisma.readingProgress.count({
-    where: {
-      book: { publisherUserId: user.id },
-      progressPercent: { gte: 80 },
-    },
-  });
+  // 3. Total reading progress sessions (completed sessions >= 80%) for this publisher's books
+  const [{ totalSessions }] = await db
+    .select({ totalSessions: count() })
+    .from(readingProgress)
+    .innerJoin(booksTable, sql`${readingProgress.bookId} = ${booksTable.id} AND ${booksTable.publisherUserId} = ${user.id ?? ''}`)
+    .where(gte(readingProgress.progressPercent, 80));
 
   // 4. Total reads on the entire platform (completed sessions >= 80%)
-  const platformTotalSessions = await prisma.readingProgress.count({
-    where: {
-      progressPercent: { gte: 80 },
-    },
-  }) || 1; // avoid division by zero
+  const [{ platformTotal }] = await db
+    .select({ platformTotal: count() })
+    .from(readingProgress)
+    .where(gte(readingProgress.progressPercent, 80));
+  const platformTotalSessions = platformTotal || 1; // avoid division by zero
 
   // Let's compute dynamic royalty parameters:
   const grossRevenue = 573000000; // Mock platform gross revenue (Rp 573 Juta)

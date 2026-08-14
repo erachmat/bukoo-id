@@ -33,7 +33,7 @@ import { COLORS } from '../../constants/COLORS';
 // - Android: Android google-services.json
 // Make sure to add them to your native project build directories.
 GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || 'your-google-oauth-client-id.apps.googleusercontent.com',
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com',
   offlineAccess: true,
 });
 

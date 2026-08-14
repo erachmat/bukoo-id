@@ -1,4 +1,6 @@
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { users as usersTable, subscriptions } from '@bukoo/db'
+import { desc, eq } from 'drizzle-orm'
 import { UserRoleSelect } from './_components/user-role-select'
 import { DeleteUserButton } from './_components/delete-user-button'
 
@@ -12,22 +14,30 @@ const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 export default async function AdminUsersPage() {
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      subscription: {
-        select: {
-          status: true,
-          planId: true
-        }
-      },
-      createdAt: true,
-    },
-  })
+  // Drizzle: select users with their subscription (left join)
+  const usersWithSubs = await db
+    .select({
+      id: usersTable.id,
+      name: usersTable.name,
+      email: usersTable.email,
+      role: usersTable.role,
+      createdAt: usersTable.createdAt,
+      subscriptionStatus: subscriptions.status,
+      subscriptionPlanId: subscriptions.planId,
+    })
+    .from(usersTable)
+    .leftJoin(subscriptions, eq(subscriptions.userId, usersTable.id))
+    .orderBy(desc(usersTable.createdAt))
+
+  // Map to the shape the JSX below expects
+  const users = usersWithSubs.map((u: typeof usersWithSubs[number]) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    createdAt: u.createdAt,
+    subscription: u.subscriptionStatus ? { status: u.subscriptionStatus, planId: u.subscriptionPlanId ?? '' } : null,
+  }))
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -51,7 +61,7 @@ export default async function AdminUsersPage() {
                 <td colSpan={5} style={{ padding: '48px 16px', textAlign: 'center', color: '#AAB4C0', fontSize: 14 }}>Belum ada pengguna.</td>
               </tr>
             )}
-            {users.map((user, i) => {
+            {users.map((user: typeof users[number], i: number) => {
               const rc = ROLE_COLORS[user.role] ?? ROLE_COLORS.USER
               return (
                 <tr key={user.id} style={{ borderBottom: i < users.length - 1 ? '1px solid #F0F2F5' : 'none' }}>
