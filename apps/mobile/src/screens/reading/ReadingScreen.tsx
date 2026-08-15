@@ -230,9 +230,86 @@ const EPUB_JS_BRIDGE = `
     }
   };
 
+  // ── Safe position restore (fixes resume off-by-one / "snap-back") ──────────
+  // epub.js positions a point CFI that sits exactly on a page boundary one page
+  // EARLY. That's why resuming at a saved position shows the right page counter
+  // but the *content* is one page behind — pressing "next" then "snaps back" to
+  // a lower page number. Strategy:
+  //   1. Nudge the saved CFI a few characters forward so the anchor lands inside
+  //      the page (exact position when the layout has settled).
+  //   2. Verify the relocated page against the saved location; if it still landed
+  //      one page early (race with layout settling), re-display at the start of
+  //      the saved location, which reliably shows the correct page number.
+  function nudgeCfiForward(cfi) {
+    if (typeof cfi !== 'string') return cfi;
+    // Only nudge positive character offsets — ":0" / element anchors are safe.
+    // Use [0-9] rather than \\d so no escaping is needed inside the template literal.
+    var m = cfi.match(/:([1-9][0-9]*)/);
+    if (!m) return cfi;
+    var off = parseInt(m[1], 10) + 1;
+    return cfi.slice(0, m.index) + ':' + off + cfi.slice(m.index + m[0].length);
+  }
+
+  window.__bukooRestorePosition = function (cfi) {
+    var book = window.__bukooCurrentBook;
+    var rendition = window.__bukooCurrentRendition;
+    if (!book || !rendition || !cfi) return;
+
+    var targetLoc = -1;
+    try {
+      if (book.locations && book.locations.total > 0) {
+        targetLoc = book.locations.locationFromCfi(cfi);
+      }
+    } catch (e) {}
+
+    var target = nudgeCfiForward(cfi);
+    var settled = false;
+
+    var cleanup = function () {
+      rendition.off('relocated', onRelocated);
+      rendition.off('displayerror', onError);
+    };
+
+    var fallbackToLocation = function () {
+      cleanup();
+      if (targetLoc >= 0 && book.locations && book.locations.total > 0) {
+        try {
+          var locCfi = book.locations.cfiFromLocation(targetLoc);
+          if (locCfi) { rendition.display(locCfi); return; }
+        } catch (e) {}
+      }
+      rendition.display(cfi);
+    };
+
+    var onRelocated = function (location) {
+      if (settled) return;
+      settled = true;
+      var startCfi = (location && location.start && location.start.cfi) || '';
+      if (targetLoc >= 0 && book.locations && book.locations.total > 0) {
+        var actualLoc = book.locations.locationFromCfi(startCfi);
+        // Landed one page early (snap-back) — re-position at the saved location.
+        if (actualLoc >= 0 && actualLoc < targetLoc) {
+          fallbackToLocation();
+          return;
+        }
+      }
+      cleanup();
+    };
+
+    var onError = function () {
+      if (settled) return;
+      settled = true;
+      fallbackToLocation();
+    };
+
+    rendition.on('relocated', onRelocated);
+    rendition.on('displayerror', onError);
+    rendition.display(target);
+  };
+
   window.__bukooDisplay = function (t) {
-    if (window.__bukooCurrentRendition) {
-      window.__bukooCurrentRendition.display(t);
+    if (window.__bukooCurrentRendition && t) {
+      window.__bukooRestorePosition(t);
     }
   };
 
@@ -691,7 +768,10 @@ const EPUB_JS_BRIDGE = `
       attachRenditionListeners(rendition, book);
 
       if (targetCfi) {
-        rendition.display(targetCfi);
+        // Use the safe restore path (nudge + verify) so the pre-ready display
+        // doesn't land one page early. If locations aren't loaded yet the
+        // verification is skipped and the position is corrected on READY.
+        window.__bukooRestorePosition(targetCfi);
       } else {
         rendition.display();
       }
@@ -712,23 +792,30 @@ const EPUB_JS_BRIDGE = `
         var total = (book.locations && book.locations.total > 0) ? book.locations.total : (book.spine.items ? book.spine.items.length : 1);
         var savedLocs = book.locations.save();
 
-        // Emit initial PAGE_CHANGED with accurate location once locations are ready
-        try {
-          var curr = rendition.currentLocation();
-          if (curr && curr.start && curr.start.cfi) {
-            var cfi = curr.start.cfi;
-            var page = book.locations.locationFromCfi(cfi) || 1;
-            var pct = book.locations.percentageFromCfi(cfi);
-            var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
-            var chapterTitle = '';
-            var navItem = book.navigation ? book.navigation.get(curr.start.href) : null;
-            if (navItem && navItem.label) chapterTitle = navItem.label.trim();
-            sendMessage({
-              type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
-              chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
-            });
-          }
-        } catch (err) {}
+        // Emit initial PAGE_CHANGED with accurate location once locations are ready.
+        // IMPORTANT: Skip this when targetCfi was provided — display(targetCfi) is
+        // already in-flight and will emit PAGE_CHANGED via the 'relocated' listener
+        // once it settles. Reading currentLocation() here races against that navigation
+        // and would emit the *previous* position (e.g. page 17 instead of 25),
+        // which overwrites the saved CFI in SQLite and causes the snap-back bug.
+        if (!targetCfi) {
+          try {
+            var curr = rendition.currentLocation();
+            if (curr && curr.start && curr.start.cfi) {
+              var cfi = curr.start.cfi;
+              var page = book.locations.locationFromCfi(cfi) || 1;
+              var pct = book.locations.percentageFromCfi(cfi);
+              var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
+              var chapterTitle = '';
+              var navItem = book.navigation ? book.navigation.get(curr.start.href) : null;
+              if (navItem && navItem.label) chapterTitle = navItem.label.trim();
+              sendMessage({
+                type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
+                chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
+              });
+            }
+          } catch (err) {}
+        }
 
         sendMessage({ type: 'TOTAL_PAGES', totalPages: total, cachedLocations: savedLocs });
         sendMessage({
@@ -1282,10 +1369,13 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               (msg.bookLoadDurationMs ? `, In-WebView load: ${msg.bookLoadDurationMs}ms` : '') +
               (msg.locationGenTimeMs !== undefined ? `, Location gen (${msg.cachedLocsUsed ? 'cached' : 'generated'}): ${msg.locationGenTimeMs}ms` : '')
             );
-            // Restore saved reading position after locations are generated
+            // Restore saved reading position after locations are generated.
+            // Use the safe restore path (nudge + verify) — displaying the raw
+            // saved boundary CFI makes epub.js land one page early, which caused
+            // the "shows page 25, next goes to 17" snap-back bug.
             if (initialCfiRef.current && webViewRef.current) {
               webViewRef.current.injectJavaScript(
-                `if (window.__bukooCurrentRendition) window.__bukooCurrentRendition.display(${JSON.stringify(initialCfiRef.current)}); true;`
+                `if (window.__bukooRestorePosition) window.__bukooRestorePosition(${JSON.stringify(initialCfiRef.current)}); true;`
               );
             }
             break;

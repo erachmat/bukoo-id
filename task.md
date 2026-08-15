@@ -163,3 +163,17 @@
   - `[x]` Assemble Debug APK (`./gradlew assembleDebug`).
   - `[x]` Verify output APK files, sizes, and timestamps (`app-release.apk` 109MB, `app-debug.apk` 183MB).
   - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`.
+
+# Fix Reader Resume "Snap-Back" Bug (shows page 25, next → 17)
+- `[x]` 1. Root cause
+  - `[x]` Confirmed via browser repro with the bundled epub.js: `rendition.display(savedPointCfi)` on a point CFI that sits exactly on a page boundary positions the content ONE PAGE EARLY, so the saved page counter (25) lies while the actual content is a page behind; pressing "next" advances to the true position and the counter "snaps back" to a lower page (e.g. 17).
+  - `[x]` Fix strategy: nudge the saved CFI forward (+1 char, only when offset > 0) so the anchor lands inside the page; verify the relocated location against the saved one and fall back to `cfiFromLocation(locationFromCfi(savedCfi))` if epub.js still lands one page early (layout-timing race).
+- `[x]` 2. Changes in `apps/mobile/src/screens/reading/ReadingScreen.tsx`
+  - `[x]` Add `nudgeCfiForward()` and `window.__bukooRestorePosition(cfi)` to the WebView bridge (nudge + verify + location fallback).
+  - `[x]` Route the pre-ready display in `__bukooLoadBook` and the READY-triggered position restore through `__bukooRestorePosition`.
+  - `[x]` Route `__bukooDisplay` (TOC / search / bookmark / highlight jumps) through `__bukooRestorePosition` too.
+- `[x]` 3. Verification
+  - `[x]` Browser repro: sample-book (66 locs, reproduces bug) — resume now lands exactly at saved CFI `/3:890` (page 25) instead of one page early (`/3:289`); `next()` moves forward. `filsafat-ajaran-islam` & `perlunya-seorang-imam` (no bug) — no regression, resume lands exactly at saved position.
+  - `[x]` `npm run typecheck --workspace=@bukoo/mobile` (PASSED).
+  - `[x]` `npm run lint --workspace=@bukoo/mobile` (PASSED).
+  - `[x]` `npm run test --workspace=@bukoo/mobile` (No tests configured for mobile yet).
