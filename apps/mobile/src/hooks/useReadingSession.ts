@@ -13,6 +13,11 @@ export interface UseReadingSessionReturn {
   /** Total seconds spent reading this session */
   readingTimeSeconds: number;
   /**
+   * The CFI position where the user left off, loaded from local SQLite on mount.
+   * Empty string when there is no saved position (first open).
+   */
+  initialCfi: string;
+  /**
    * Call this every time the reader reports a new page / CFI position.
    * Updates local SQLite immediately and accumulates the sync queue.
    */
@@ -35,6 +40,7 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
   const [currentPage, setCurrentPage] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
   const [readingTimeSeconds, setReadingTimeSeconds] = useState(0);
+  const [initialCfi, setInitialCfi] = useState('');
 
   // Track whether we were previously offline so we only retry on transition
   const wasOfflineRef = useRef(false);
@@ -51,6 +57,7 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
         setCurrentPage(saved.currentPage);
         setProgressPercent(saved.progressPercent);
         setReadingTimeSeconds(saved.readingTimeSeconds);
+        if (saved.cfiPosition) setInitialCfi(saved.cfiPosition);
       }
     });
 
@@ -59,9 +66,11 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
 
     return () => {
       // Teardown: flush immediately (stopSession handles interval clearing)
-      readingSync.stopSession().catch((err) =>
-        console.warn('[useReadingSession] stopSession on unmount failed:', err)
-      );
+      readingSync.stopSession().catch((err) => {
+        if ((err as { response?: { status?: number } })?.response?.status !== 404) {
+          console.warn('[useReadingSession] stopSession on unmount failed:', err);
+        }
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
@@ -81,9 +90,11 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
       if (isGoingToBackground) {
         // Pause time accumulation and force-flush to server
         readingSync.pauseTimeTracking();
-        readingSync.stopSession().catch((err) =>
-          console.warn('[useReadingSession] stopSession on background failed:', err)
-        );
+        readingSync.stopSession().catch((err) => {
+          if ((err as { response?: { status?: number } })?.response?.status !== 404) {
+            console.warn('[useReadingSession] stopSession on background failed:', err);
+          }
+        });
       } else if (isComingToForeground) {
         // Re-start the session (restores 30s interval and time tracking)
         readingSync.startSession(bookId);
@@ -165,6 +176,7 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
     currentPage,
     progressPercent,
     readingTimeSeconds,
+    initialCfi,
     updateProgress,
   };
 }

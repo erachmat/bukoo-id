@@ -17,8 +17,8 @@
       },
       "env": {
         "APP_ENV": "development",
-        "EXPO_PUBLIC_API_URL": "https://bukooapi-production.up.railway.app/v1",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"
+        "EXPO_PUBLIC_API_URL": "https://bukoo-api.erachmat-dev.workers.dev/v1",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "17547501035-nolk1h8p5qlj7eujr2b9clec2omcvtv7.apps.googleusercontent.com"
       }
     },
     "preview": {
@@ -32,8 +32,8 @@
       },
       "env": {
         "APP_ENV": "preview",
-        "EXPO_PUBLIC_API_URL": "https://bukooapi-production.up.railway.app/v1",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"
+        "EXPO_PUBLIC_API_URL": "https://bukoo-api.erachmat-dev.workers.dev/v1",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "17547501035-nolk1h8p5qlj7eujr2b9clec2omcvtv7.apps.googleusercontent.com"
       }
     },
     "production": {
@@ -47,8 +47,8 @@
       },
       "env": {
         "APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://bukooapi-production.up.railway.app/v1",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"
+        "EXPO_PUBLIC_API_URL": "https://bukoo-api.erachmat-dev.workers.dev/v1",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "17547501035-nolk1h8p5qlj7eujr2b9clec2omcvtv7.apps.googleusercontent.com"
       }
     }
   }

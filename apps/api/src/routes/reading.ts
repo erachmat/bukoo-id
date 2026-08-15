@@ -27,23 +27,26 @@ async function getUserTier(userId: string, db: ReturnType<typeof createDb>): Pro
 }
 
 // ---------------------------------------------------------------------------
-// POST /v1/reading/progress — upsert CFI + progress
+// POST / PUT /v1/reading/progress or /v1/reading/:bookId/progress — upsert CFI + progress
 // ---------------------------------------------------------------------------
 
 const updateProgressSchema = z.object({
-  bookId: z.string().min(1),
+  bookId: z.string().min(1).optional(),
   currentPage: z.number().int().min(0).optional(),
   cfiPosition: z.string().optional(),
   progressPercent: z.number().min(0).max(100),
   reading_time_delta: z.number().int().min(0).default(0), // seconds since last sync
 });
 
-reading.post('/progress', zValidator('json', updateProgressSchema), async (c) => {
+async function handleUpsertProgress(
+  c: import('hono').Context<{ Bindings: Env }>,
+  targetBookId: string,
+  dto: z.infer<typeof updateProgressSchema>
+) {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
-  const dto = c.req.valid('json');
 
-  const book = await db.query.books.findFirst({ where: eq(books.id, dto.bookId) });
+  const book = await db.query.books.findFirst({ where: eq(books.id, targetBookId) });
   if (!book) return c.json({ error: 'Book not found' }, 404);
 
   const userTier = await getUserTier(userId, db);
@@ -52,7 +55,7 @@ reading.post('/progress', zValidator('json', updateProgressSchema), async (c) =>
   }
 
   const existing = await db.query.readingProgress.findFirst({
-    where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, dto.bookId)),
+    where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, targetBookId)),
   });
 
   const totalSeconds = (existing?.readingTimeSeconds ?? 0) + dto.reading_time_delta;
@@ -71,12 +74,12 @@ reading.post('/progress', zValidator('json', updateProgressSchema), async (c) =>
         lastReadAt: now,
         updatedAt: now,
       })
-      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, dto.bookId)));
+      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, targetBookId)));
   } else {
     await db.insert(readingProgress).values({
       id: createId(),
       userId,
-      bookId: dto.bookId,
+      bookId: targetBookId,
       currentPage: dto.currentPage ?? 0,
       totalPages: book.totalPages ?? 0,
       cfiPosition: dto.cfiPosition,
@@ -89,16 +92,39 @@ reading.post('/progress', zValidator('json', updateProgressSchema), async (c) =>
   }
 
   return c.json({ success: true });
+}
+
+// POST /v1/reading/progress (bookId in body)
+reading.post('/progress', zValidator('json', updateProgressSchema), async (c) => {
+  const dto = c.req.valid('json');
+  if (!dto.bookId) return c.json({ error: 'bookId is required' }, 400);
+  return handleUpsertProgress(c, dto.bookId, dto);
+});
+
+// PUT /v1/reading/:bookId/progress (bookId in URL)
+reading.put('/:bookId/progress', zValidator('json', updateProgressSchema), async (c) => {
+  const bookId = c.req.param('bookId');
+  const dto = c.req.valid('json');
+  return handleUpsertProgress(c, bookId, dto);
+});
+
+// POST /v1/reading/:bookId/progress (bookId in URL)
+reading.post('/:bookId/progress', zValidator('json', updateProgressSchema), async (c) => {
+  const bookId = c.req.param('bookId');
+  const dto = c.req.valid('json');
+  return handleUpsertProgress(c, bookId, dto);
 });
 
 // ---------------------------------------------------------------------------
-// GET /v1/reading/progress/:bookId
+// GET /v1/reading/progress/:bookId & GET /v1/reading/:bookId/progress
 // ---------------------------------------------------------------------------
 
-reading.get('/progress/:bookId', async (c) => {
+async function handleGetBookProgress(
+  c: import('hono').Context<{ Bindings: Env }>,
+  bookId: string
+) {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
-  const bookId = c.req.param('bookId');
 
   const book = await db.query.books.findFirst({ where: eq(books.id, bookId) });
   if (!book) return c.json({ error: 'Book not found' }, 404);
@@ -113,13 +139,21 @@ reading.get('/progress/:bookId', async (c) => {
   });
 
   return c.json(progress ?? null);
+}
+
+reading.get('/progress/:bookId', async (c) => {
+  return handleGetBookProgress(c, c.req.param('bookId'));
+});
+
+reading.get('/:bookId/progress', async (c) => {
+  return handleGetBookProgress(c, c.req.param('bookId'));
 });
 
 // ---------------------------------------------------------------------------
-// GET /v1/reading/recent — last 10 in-progress books
+// GET /v1/reading/recent & GET /v1/reading/progress — last 10 in-progress books
 // ---------------------------------------------------------------------------
 
-reading.get('/recent', async (c) => {
+async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env }>) {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
 
@@ -140,6 +174,14 @@ reading.get('/recent', async (c) => {
     .limit(10);
 
   return c.json(results);
+}
+
+reading.get('/recent', async (c) => {
+  return handleGetRecentProgress(c);
+});
+
+reading.get('/progress', async (c) => {
+  return handleGetRecentProgress(c);
 });
 
 // ---------------------------------------------------------------------------

@@ -262,19 +262,29 @@ export class ReadingSync {
         [now, this.bookId]
       );
     } catch (error: unknown) {
-      // Detect offline / network error
-      const networkError = error as { response?: unknown; code?: string; message?: string };
+      const errResponse = (error as { response?: { status?: number; data?: unknown }; code?: string; message?: string });
       const isNetworkError =
-        !networkError.response ||
-        networkError.code === 'ECONNABORTED' ||
-        networkError.message === 'Network Error';
+        !errResponse.response ||
+        errResponse.code === 'ECONNABORTED' ||
+        errResponse.message === 'Network Error';
 
       if (isNetworkError) {
         // Queue for later retry
         await this._queuePendingSync(db, this.bookId, payload);
+      } else if (errResponse.response?.status === 404) {
+        // Book does not exist on server (e.g., local sample/demo book).
+        // Clear delta and mark clean so we don't spam 404 errors every 30s.
+        this.readingTimeDeltaSeconds = 0;
+        await db.runAsync(
+          'UPDATE reading_progress SET isDirty = 0 WHERE bookId = ?',
+          [this.bookId]
+        );
       } else {
-        // Non-network error (e.g. 4xx): log and propagate
-        console.error('[ReadingSync] Server sync error:', (error as { response?: { data?: unknown } }).response?.data ?? (error as Error).message);
+        // Non-network error (e.g. 4xx/5xx): log and propagate
+        console.error(
+          '[ReadingSync] Server sync error:',
+          errResponse.response?.data ?? (error as Error).message
+        );
         throw error;
       }
     }
@@ -306,15 +316,21 @@ export class ReadingSync {
           [new Date().toISOString(), item.bookId]
         );
       } catch (error: unknown) {
-        const networkError = error as { response?: unknown; code?: string; message?: string };
+        const errResponse = (error as { response?: { status?: number; data?: unknown }; code?: string; message?: string });
         const isNetworkError =
-          !networkError.response ||
-          networkError.code === 'ECONNABORTED' ||
-          networkError.message === 'Network Error';
+          !errResponse.response ||
+          errResponse.code === 'ECONNABORTED' ||
+          errResponse.message === 'Network Error';
 
         if (isNetworkError) {
           // Still offline — stop retrying for now
           break;
+        }
+
+        if (errResponse.response?.status === 404) {
+          // Book does not exist on server — remove item from queue
+          await db.runAsync('DELETE FROM pending_syncs WHERE id = ?', [item.id]);
+          continue;
         }
 
         // Non-network error — increment retry counter or drop if too many

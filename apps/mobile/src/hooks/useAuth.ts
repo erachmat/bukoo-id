@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '../stores/authStore';
 import {
@@ -21,7 +22,6 @@ export function useAuthHydration() {
   const [isReady, setIsReady] = useState(false);
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
-  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     const hydrateAuth = async () => {
@@ -42,12 +42,9 @@ export function useAuthHydration() {
               await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
               await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
               clearUser();
-            } else {
-              // Network error or backend offline: preserve stored user profile if present
-              if (user) {
-                setUser(user);
-              }
             }
+            // Network error or backend offline: leave persisted user intact
+            // (onRehydrateStorage will have already set isAuthenticated)
           }
         } else {
           clearUser();
@@ -60,7 +57,8 @@ export function useAuthHydration() {
     };
 
     hydrateAuth();
-  }, [setUser, clearUser, user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount only — user state changes must NOT re-trigger hydration
 
   return isReady;
 }
@@ -124,16 +122,18 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authApi.logout(),
     onSettled: async () => {
-      await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-      
       try {
+        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        // Purge the Zustand-persisted user from AsyncStorage so a stale user
+        // object cannot restore isAuthenticated = true on the next app launch.
+        await AsyncStorage.removeItem('bukoo-auth-storage');
         await GoogleSignin.signOut();
       } catch (err) {
-        console.log('Google Sign-Out error during logout:', err);
+        console.log('Error during logout storage cleanup:', err);
+      } finally {
+        clearUser();
       }
-
-      clearUser();
     },
   });
 }

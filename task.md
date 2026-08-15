@@ -156,4 +156,10 @@
   - `[x]` Add `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_GOOGLE_CLIENT_ID` to `eas.json` under `development`, `preview`, and `production` build profiles.
   - `[x]` Verification complete: typecheck, lint, test across touched workspace `@bukoo/mobile`.
 
-
+# Mobile App APK Build for Testing
+- `[x]` 1. Build Standalone Android APKs (Release & Debug)
+  - `[x]` Update `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` and `eas.json` to active Cloudflare Workers production URL (`https://bukoo-api.erachmat-dev.workers.dev/v1`).
+  - `[x]` Assemble Release APK (`./gradlew assembleRelease`).
+  - `[x]` Assemble Debug APK (`./gradlew assembleDebug`).
+  - `[x]` Verify output APK files, sizes, and timestamps (`app-release.apk` 109MB, `app-debug.apk` 183MB).
+  - `[x]` Verification complete: `npm run typecheck --workspace=@bukoo/mobile`, `npm run lint --workspace=@bukoo/mobile`.

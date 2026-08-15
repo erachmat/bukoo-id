@@ -137,12 +137,12 @@ const EPUB_JS_BRIDGE = `
     window.__bukooLoadPdf(payloadUrl);
   };
 
-  window.__bukooLoadBookFromChunks = function (mimeType, cachedLocs) {
+  window.__bukooLoadBookFromChunks = function (mimeType, cachedLocs, targetCfi) {
     var fullB64 = __bukooChunkBuffer.join('');
     __bukooChunkBuffer = [];
     var payloadUrl = 'data:' + mimeType + ';base64,' + fullB64;
     console.log('[WebView Diagnostic] Assembled EPUB payload length:', payloadUrl.length);
-    window.__bukooLoadBook(payloadUrl, cachedLocs);
+    window.__bukooLoadBook(payloadUrl, cachedLocs, targetCfi);
   };
 
   window.__bukooCurrentPageTurnStyle = 'horizontal';
@@ -447,16 +447,16 @@ const EPUB_JS_BRIDGE = `
       try {
         var start  = location.start;
         var cfi    = start.cfi || '';
-        var page   = 1;
-        var total  = (book && book.locations && book.locations.total > 0) ? book.locations.total : 1;
-        if (book && book.locations && book.locations.total > 0) {
-          var loc = book.locations.locationFromCfi(cfi);
-          if (typeof loc === 'number' && loc > 0) page = loc;
-        } else if (start.displayed) {
-          page = start.displayed.page || 1;
-          total = start.displayed.total || 1;
+        // Ignore relocation events before locations are generated/loaded so state isn't overwritten with fallback values
+        if (!book || !book.locations || book.locations.total <= 0) {
+          return;
         }
-        var pct    = book ? book.locations.percentageFromCfi(cfi) : 0;
+        var page   = 1;
+        var total  = book.locations.total;
+        var loc    = book.locations.locationFromCfi(cfi);
+        if (typeof loc === 'number' && loc > 0) page = loc;
+
+        var pct    = book.locations.percentageFromCfi(cfi);
         var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
         var chapterTitle = '';
         var navItem = (book && book.navigation) ? book.navigation.get(start.href) : null;
@@ -655,7 +655,7 @@ const EPUB_JS_BRIDGE = `
   };
 
   // ── EPUB loader ──
-  window.__bukooLoadBook = function (bookUrl, cachedLocs) {
+  window.__bukooLoadBook = function (bookUrl, cachedLocs, targetCfi) {
     if (typeof ePub === 'undefined') {
       sendMessage({ type: 'ERROR', error: 'epubjs not ready' });
       return;
@@ -688,7 +688,13 @@ const EPUB_JS_BRIDGE = `
       window.__bukooCurrentBook = book;
       window.__bukooCurrentRendition = rendition;
 
-      rendition.display();
+      attachRenditionListeners(rendition, book);
+
+      if (targetCfi) {
+        rendition.display(targetCfi);
+      } else {
+        rendition.display();
+      }
 
       var locStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
       book.ready.then(function () {
@@ -705,6 +711,25 @@ const EPUB_JS_BRIDGE = `
         var totalLoadDuration = Math.round(locEnd - loadStart);
         var total = (book.locations && book.locations.total > 0) ? book.locations.total : (book.spine.items ? book.spine.items.length : 1);
         var savedLocs = book.locations.save();
+
+        // Emit initial PAGE_CHANGED with accurate location once locations are ready
+        try {
+          var curr = rendition.currentLocation();
+          if (curr && curr.start && curr.start.cfi) {
+            var cfi = curr.start.cfi;
+            var page = book.locations.locationFromCfi(cfi) || 1;
+            var pct = book.locations.percentageFromCfi(cfi);
+            var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
+            var chapterTitle = '';
+            var navItem = book.navigation ? book.navigation.get(curr.start.href) : null;
+            if (navItem && navItem.label) chapterTitle = navItem.label.trim();
+            sendMessage({
+              type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
+              chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
+            });
+          }
+        } catch (err) {}
+
         sendMessage({ type: 'TOTAL_PAGES', totalPages: total, cachedLocations: savedLocs });
         sendMessage({
           type: 'READY',
@@ -850,16 +875,22 @@ interface ReadingRouteParams {
 export default function ReadingScreen({ navigation, route }: ReadingScreenProps) {
   const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as ReadingRouteParams;
 
-  const { currentPage, progressPercent, readingTimeSeconds, updateProgress } =
+  const { currentPage, progressPercent, readingTimeSeconds, initialCfi, updateProgress } =
     useReadingSession(bookId);
 
   const webViewRef = useRef<WebView>(null);
   const controlsOpacity = useRef(new Animated.Value(1)).current;
+  // Ref mirrors initialCfi so the READY handler always reads the latest value
+  // even if SQLite resolves after the WebView fires READY.
+  const initialCfiRef = useRef(initialCfi);
 
   // Performance metrics tracking refs
   const mountTimeRef = useRef(performance.now());
   const pageTurnStartTimeRef = useRef<number | null>(null);
   const dataInjectTimeRef = useRef<number | null>(null);
+
+  // Keep the ref in sync with state
+  useEffect(() => { initialCfiRef.current = initialCfi; }, [initialCfi]);
 
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isReady, setIsReady] = useState(false);
@@ -1251,6 +1282,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               (msg.bookLoadDurationMs ? `, In-WebView load: ${msg.bookLoadDurationMs}ms` : '') +
               (msg.locationGenTimeMs !== undefined ? `, Location gen (${msg.cachedLocsUsed ? 'cached' : 'generated'}): ${msg.locationGenTimeMs}ms` : '')
             );
+            // Restore saved reading position after locations are generated
+            if (initialCfiRef.current && webViewRef.current) {
+              webViewRef.current.injectJavaScript(
+                `if (window.__bukooCurrentRendition) window.__bukooCurrentRendition.display(${JSON.stringify(initialCfiRef.current)}); true;`
+              );
+            }
             break;
           }
           case 'TOTAL_PAGES':
@@ -1376,10 +1413,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         }
 
         // Finalize load from chunk buffer
-        // Finalize load from chunk buffer
         const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
+        const targetCfiArg = initialCfiRef.current ? JSON.stringify(initialCfiRef.current) : 'null';
         webViewRef.current.injectJavaScript(
-          `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}); true;`
+          `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}, ${targetCfiArg}); true;`
         );
         return;
       } catch (err) {
@@ -1391,12 +1428,14 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
     // Remote HTTP/HTTPS URL path
     const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
+    const targetCfiArg = initialCfiRef.current ? JSON.stringify(initialCfiRef.current) : 'null';
     webViewRef.current.injectJavaScript(
       `(function(){
         var bookUrl = ${JSON.stringify(localFileUri)};
         var locs = ${locsArg};
+        var targetCfi = ${targetCfiArg};
         if (window.__bukooLoadBook) {
-          window.__bukooLoadBook(bookUrl, locs);
+          window.__bukooLoadBook(bookUrl, locs, targetCfi);
         }
       })(); true;`
     );

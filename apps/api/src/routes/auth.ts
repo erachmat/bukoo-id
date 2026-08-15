@@ -243,7 +243,10 @@ auth.post('/social', zValidator('json', socialAuthSchema), async (c) => {
       const res = await fetch(tokenInfoUrl);
       if (!res.ok) return c.json({ error: 'Google token verification failed' }, 401);
       const info = await res.json() as Record<string, string>;
-      if (info.aud !== c.env.GOOGLE_CLIENT_ID) return c.json({ error: 'Token audience mismatch' }, 401);
+      const allowedClientIds = (c.env.GOOGLE_CLIENT_ID || '').split(',').map((id) => id.trim());
+      if (!allowedClientIds.includes(info.aud) && !allowedClientIds.includes(info.azp)) {
+        return c.json({ error: 'Token audience mismatch' }, 401);
+      }
       email = info.email;
       name = info.name ?? email;
       avatar = info.picture ?? null;

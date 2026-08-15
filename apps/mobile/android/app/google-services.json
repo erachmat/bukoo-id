@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "576187863248",
+    "project_id": "bukoo-15ce3",
+    "storage_bucket": "bukoo-15ce3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576187863248:android:319b30d64afedc461fced5",
+        "android_client_info": {
+          "package_name": "com.erachmat.bukoo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "576187863248-bljgt6u61bafv7url9v7glbcp5oqb4dt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.erachmat.bukoo",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByo1-ml-2RMf2WmCUFIWEiL-biXMGenoU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
