@@ -70,6 +70,28 @@
   - [x] `npm run build` (apps/web) ✅ — `/publisher/dashboard` compiles as dynamic route.
   - [ ] Repo-wide `npm run lint` still fails on PRE-EXISTING errors in untouched files (`middleware.ts`, `catalog-query.ts`, `sidebar-client.tsx`, `auth.config.ts`, etc.) — pre-existing debt, not introduced here. Flagged, not silently skipped.
 
+# Web Vercel → Cloudflare Workers migration — preview checks (2026-08-16)
+
+- [x] A. Register + credentials login → `/library` (test acct `cloudtest@bukoo.app`)
+- [x] B. Publisher book upload (R2) — row in D1 books + cover/epub R2 objects
+  - [x] Fix: covers didn't render — raw R2 key used as `<img src>` with no serving route. Added `lib/cover-url.ts` (`getCoverUrl`) + `/covers/[...key]/route.ts` streaming from `BUKOO_STORAGE`; updated publisher/admin books pages, book-mapper, edit page.
+- [x] C. Reader page — EPUB loads, cover/TOC/page-turn work
+  - [x] Fix 1: `react-reader`/`react-pdf` browser-only `DOMMatrix` crashed SSR on Workers → dynamic imports with `ssr:false` in `reader-shell.tsx`.
+  - [x] Fix 2: epubjs needs `.epub` URL extension (else treats as directory → `META-INF/container.xml` 404) → reader `fileUrl` now `/api/books/[id]/download.epub` + new route.
+- [x] D. Admin CRUD — list/read/update/delete all work
+  - [x] Fix: any UPDATE/DELETE on `books` failed SQLITE_ERROR 7500 — FTS5 `'delete'` special command unsupported in D1; `0001_fts5_books.sql` triggers (`books_ai/au/ad`) broken. Dropped triggers in D1. ⚠️ Migration file still contains them — needs corrective migration for fresh DBs.
+
+# Web Vercel → Cloudflare Workers migration — PROD CUTOVER (2026-08-16) ✅
+
+- [x] 1. Zone `bukoo.id` created + active in Cloudflare; NS switched at Domainesia (vercel-dns.com → Cloudflare).
+- [x] 2. `wrangler.prod.jsonc` with `routes: [{pattern:"bukoo.id", custom_domain:true}]`; `deploy:prod` bakes `NEXT_PUBLIC_SITE_URL=https://bukoo.id`.
+- [x] 3. `npm run deploy:prod` → **https://bukoo.id live** (worker `bukoo-web`, D1 + R2 + ASSETS bindings).
+- [x] 4. Smoke tests pass: home/login 200, credentials login → `/admin`, Google OAuth redirect to bukoo.id callback (authorized), SSL (Google Trust, CN=bukoo.id, → 2026-11-14).
+- [x] 5. Secrets purge: removed legacy `DATABASE_URL`/`BLOB_READ_WRITE_TOKEN` from `apps/web/.env` AND root `.env` (root .env is merged into the bundle by OpenNext), redeployed; 0 occurrences in bundle.
+- [x] 6. Removed `apps/web/vercel.json`; updated `.env.example`, `AGENTS.md`, regenerated `worker-configuration.d.ts` (`wrangler types --env-interface CloudflareEnv`).
+- [ ] 7. (user) Delete Vercel project in dashboard; confirm Neon DB no longer needed.
+- [ ] 8. (after final sign-off) Flip `workers_dev` to false in `wrangler.prod.jsonc` to retire the workers.dev URL.
+
 # Reader Bug Fixes — Medium/Low Cluster (2026-08-16)
 
 - [x] 6. Highlight color consistency (bug 9)

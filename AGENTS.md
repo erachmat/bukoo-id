@@ -10,7 +10,7 @@ BUKOO — mobile reading application. npm workspaces + Turborepo monorepo.
 Run `ls apps` and `ls packages` at the start of any session — this file will not
 always list every app/package. Known apps as of writing:
 - `apps/api` — backend, Dockerized, deployed to Railway. Entry: `dist/main.js`. Health check: `/health`.
-- `apps/web` — Next.js web app, NextAuth, Prisma/Postgres, deployed to Vercel (bukoo-id-web.vercel.app).
+- `apps/web` — Next.js web app (NextAuth v5, Drizzle ORM), **deployed to Cloudflare Workers** → https://bukoo.id (migrated from Vercel 2026-08-16; Vercel decommissioned). DB is **Cloudflare D1** `bukoo-db` via the `DB` binding (NOT Neon/Postgres).
 - mobile app — Expo / React Native (root deps: `expo`, `react-native`, `react` 19).
 
 ## Commands (run from repo root — Turborepo fans these out per workspace)
@@ -30,31 +30,43 @@ To scope to one app: `npm run typecheck --workspace=<app-name>` or `turbo run te
 3. `npm run test --workspace=X`
 If a workspace has no tests, say so explicitly rather than silently skipping — don't claim "tests pass."
 
-## Database / Prisma — hard rules
-This project has already hit a near-miss where `prisma migrate dev` generated a destructive
-`DROP COLUMN` / `ADD COLUMN` pair for what should have been a `RENAME COLUMN`. Treat every
-Prisma migration as dangerous until reviewed.
+## Database — hard rules (D1 via Drizzle, was Prisma/Neon)
+The web app database is **Cloudflare D1** (`bukoo-db`), accessed via the `DB` binding
+in the web worker (`drizzle-orm/d1`). Drizzle migrations live in `packages/db/drizzle/`.
 
-1. Never run migrations against the production database directly.
-2. For any schema change, use `prisma migrate dev --create-only` first — inspect the generated
-   SQL before applying anything.
-3. If the generated SQL contains `DROP COLUMN`/`ADD COLUMN` where you intended a rename,
-   hand-edit the migration to `RENAME COLUMN ... TO ...` instead.
-4. Validate against a Neon branch parented from `production` (not against local/prod directly)
-   before merging. Point `DATABASE_URL` at the branch, apply, verify data survives, then merge.
-5. Never delete or rename a Neon branch used for an open PR's testing.
+1. Never run migrations against the production D1 database directly — use `wrangler d1
+execute` with `--create-only` style review first, and validate generated SQL.
+2. **FTS5 gotcha (critical):** Cloudflare D1 does NOT support the FTS5 special
+   `'delete'` command. Any trigger doing `INSERT INTO ..._fts(...) VALUES ('delete', ...)`
+   breaks ALL writes on the base table with `SQLITE_ERROR 7500`. The old
+   `0001_fts5_books.sql` triggers were dropped from prod D1 (2026-08-16); don't re-add
+   FTS delete-triggers, use `INSERT OR REPLACE` if syncing an FTS index.
+3. `0001_fts5_books.sql` is NOT in the drizzle meta journal (pre-existing quirk).
+4. The web app no longer uses Neon or `DATABASE_URL` — that var was removed from
+   `apps/web/.env` (2026-08-16). `apps/api` may still use its own storage.
 
 ## Environment
-- Copy `.env.example` → `.env` at repo root for local dev of the web app: `DATABASE_URL`,
-  `AUTH_SECRET` (`npx auth secret` to generate), `NEXT_PUBLIC_SITE_URL`.
+- Copy `.env.example` → `.env` at repo root for local dev of the web app: `AUTH_SECRET`
+  (`npx auth secret` to generate), `NEXT_PUBLIC_SITE_URL`. No `DATABASE_URL` needed —
+  local web dev uses D1 bindings via `wrangler dev`.
 - `apps/api` and the mobile app likely need their own `.env` — check for `apps/api/.env.example`
   and an Expo env config; if missing, create one when you add a new required var, and update
   this file.
 - Never commit real secrets. Never print `.env` contents in chat/PR descriptions.
 
 ## Deployment
-- **Web → Vercel**: auto-deploys from `main`; PRs get preview deployments. Don't assume a preview
-  exists until you've checked — link it in the PR if so.
+- **Web → Cloudflare Workers** (`apps/web`): build + deploy from `apps/web`:
+  - Preview/dev worker: `npm run deploy:preview` (name `bukoo-web-preview`).
+  - Production: `npm run deploy:prod` → builds with `NEXT_PUBLIC_SITE_URL=https://bukoo.id`
+    and deploys `bukoo-web` via `wrangler.prod.jsonc` (custom domain `bukoo.id` on the
+    `bukoo.id` zone; D1 `DB`, R2 `BUKOO_STORAGE`, `ASSETS` bindings; `nodejs_compat`).
+  - Secrets on the worker (set via `wrangler secret put`): `AUTH_SECRET`, `AUTH_GOOGLE_ID`,
+    `AUTH_GOOGLE_SECRET`.
+  - R2 covers are served via `/covers/[...key]`; EPUB for the reader via
+    `/api/books/[id]/download.epub` (must end `.epub` for epubjs). Cover URLs must be built
+    with `getCoverUrl()` from `apps/web/src/lib/cover-url.ts`.
+  - `react-reader`/`react-pdf` must stay as `next/dynamic(..., { ssr: false })` — they use
+    browser-only `DOMMatrix` which crashes Workers SSR.
 - **API → Railway**: builds from monorepo root via `apps/api/Dockerfile` (`railway.toml`).
   `startCommand = node dist/main.js`, health check `/health`, restart on failure (max 3 retries).
   If you change the API's build output path or entrypoint, update `railway.toml` in the same PR.

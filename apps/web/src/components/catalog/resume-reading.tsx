@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { readingProgress, books } from '@bukoo/db'
 import { eq, and, desc, gt } from 'drizzle-orm'
 import Link from 'next/link'
@@ -8,6 +8,7 @@ export default async function ResumeReading() {
   const session = await auth()
   if (!session?.user?.id) return null
 
+  const db = getDb()
   // Get Top 5 most recently updated reading progress records
   const readingList = await db
     .select({

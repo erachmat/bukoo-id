@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { books } from '@bukoo/db';
-import { eq, and, desc, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
 import type { LibraryCatalogParams } from '@/lib/library/catalog-params';
 
 /**
@@ -19,6 +19,7 @@ export async function findBooksForLibraryCatalog(
   limit?: number,
 ): Promise<(typeof books.$inferSelect)[]> {
   const { q, genre, access, lang, sort } = filters;
+  const db = getDb();
 
   // Build conditions array for Drizzle
   const conditions: (SQL | undefined)[] = [eq(books.isPublished, true)];
@@ -36,8 +37,6 @@ export async function findBooksForLibraryCatalog(
   // Filter non-undefined conditions
   const definedConditions = conditions.filter((c): c is SQL => c !== undefined);
 
-  let query = db.select().from(books).where(and(...definedConditions));
-
   // Genre filter: SQLite json_each — must use raw SQL since Drizzle doesn't
   // support json_each in WHERE natively yet. We post-filter in JS for simplicity
   // if genre is set (book count is small enough for MVP).
@@ -45,52 +44,34 @@ export async function findBooksForLibraryCatalog(
   let results: (typeof books.$inferSelect)[];
 
   if (genre && genre !== 'Semua') {
-    // Use the D1 HTTP API directly for json_each queries
-    const genreCondition = `json_each.value LIKE ?`;
+    // json_each is not expressible through Drizzle's query builder — build a
+    // parameterized raw query with the sql template (bound safely on D1).
     const genrePattern = `%${genre}%`;
+    const where = sql`b.is_published = 1 AND json_each.value LIKE ${genrePattern}`;
 
-    const langCondition = lang === 'id' ? 'AND b.language = \'ID\'' :
-                           lang === 'en' ? 'AND b.language = \'EN\'' : '';
-    const accessCondition = access === 'free' ? 'AND b.subscription_required = \'FREE\'' :
-                             access === 'premium' ? 'AND b.subscription_required != \'FREE\'' : '';
-    const titleCondition = q
-      ? `AND (b.title LIKE ? OR b.author LIKE ? OR b.description LIKE ?)`
-      : '';
-    const orderClause = sort === 'newest' ? 'ORDER BY b.created_at DESC' : 'ORDER BY b.read_count DESC';
-    const limitClause = limit ? `LIMIT ${limit}` : '';
+    if (lang === 'id') where.append(sql` AND b.language = 'ID'`);
+    else if (lang === 'en') where.append(sql` AND b.language = 'EN'`);
 
-    const sql = `
-      SELECT DISTINCT b.* FROM books b, json_each(b.genre)
-      WHERE b.is_published = 1
-        AND ${genreCondition}
-        ${langCondition}
-        ${accessCondition}
-        ${titleCondition}
-      ${orderClause}
-      ${limitClause}
-    `;
+    if (access === 'free') where.append(sql` AND b.subscription_required = 'FREE'`);
+    else if (access === 'premium') where.append(sql` AND b.subscription_required != 'FREE'`);
 
-    const params: (string | number)[] = [genrePattern];
     if (q) {
-      params.push(`%${q}%`, `%${q}%`, `%${q}%`);
+      const pattern = `%${q}%`;
+      where.append(
+        sql` AND (b.title LIKE ${pattern} OR b.author LIKE ${pattern} OR b.description LIKE ${pattern})`,
+      );
     }
 
-    // Note: db.execute() is available on the D1 HTTP drizzle instance
-    // We need to fall back to the lower-level Cloudflare D1 HTTP API here.
-    // For apps/web, we call the D1 REST endpoint directly to support raw SQL.
-    const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/d1/database/${process.env.CLOUDFLARE_D1_DATABASE_ID}/query`;
+    const orderClause =
+      sort === 'newest' ? sql` ORDER BY b.created_at DESC` : sql` ORDER BY b.read_count DESC`;
+    const limitClause = limit ? sql` LIMIT ${limit}` : sql``;
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.CLOUDFLARE_D1_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ sql, params }),
-    });
+    const rawQuery = sql`
+      SELECT DISTINCT b.* FROM books b, json_each(b.genre)
+      WHERE ${where}
+    `.append(orderClause).append(limitClause);
 
-    const data = await response.json() as { result: [{ results: (typeof books.$inferSelect)[] }] };
-    results = data.result?.[0]?.results ?? [];
+    results = await db.all<typeof books.$inferSelect>(rawQuery);
   } else {
     // Standard Drizzle query for no-genre case
     const orderBy = sort === 'newest' ? desc(books.createdAt) : desc(books.readCount);

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { users as usersTable, subscriptions } from '@bukoo/db'
 import { desc, eq } from 'drizzle-orm'
 import { UserRoleSelect } from './_components/user-role-select'
@@ -14,6 +14,7 @@ const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 export default async function AdminUsersPage() {
+  const db = getDb()
   // Drizzle: select users with their subscription (left join)
   const usersWithSubs = await db
     .select({

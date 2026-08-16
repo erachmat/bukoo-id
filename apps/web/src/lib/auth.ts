@@ -3,9 +3,9 @@ import { authConfig } from '../auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
-import { db } from '@/lib/db';
+import { getDb, type Database } from '@/lib/db';
 import { eq } from 'drizzle-orm';
-import { users } from '@bukoo/db';
+import { users, accounts, sessions, verificationTokens } from '@bukoo/db';
 
 /**
  * Password verification using SubtleCrypto PBKDF2.
@@ -34,10 +34,46 @@ async function verifyPassword(password: string, stored: string): Promise<boolean
   return derived === hashB64;
 }
 
+// The NextAuth Drizzle adapter needs a db instance at module scope, but the D1
+// binding is only available per-request on Workers. Use a lazy proxy that
+// resolves getDb() on each method access. The prototype chain carries a class
+// branded with drizzle's SQLite entity kind so the adapter's `is(db,
+// BaseSQLiteDatabase)` construction check passes without touching a binding.
+const entityKind = Symbol.for('drizzle:entityKind');
+class AdapterDbBrand {}
+Object.defineProperty(AdapterDbBrand, entityKind, { value: 'BaseSQLiteDatabase' });
+
+const adapterDb = new Proxy(Object.create(AdapterDbBrand.prototype), {
+  get(_target, prop) {
+    // Avoid resolving the binding for structural reads at construction time.
+    if (prop === 'dialect') return { name: 'sqlite' };
+    const db = getDb();
+    const value = Reflect.get(db, prop, db);
+    return typeof value === 'function' ? value.bind(db) : value;
+  },
+}) as unknown as Database;
+
+// The adapter's schema types require Auth.js's exact default shapes (e.g.
+// `sessionToken` as PK) which our tables don't fully mirror structurally,
+// though they work at runtime. Pin the adapter's generic to our SQLite db
+// (instantiation expression) and cast the mapping through its schema type —
+// no deep package imports, no `any`.
+const sqliteDrizzleAdapter = DrizzleAdapter<Database>;
+type SqliteAdapterSchema = NonNullable<Parameters<typeof sqliteDrizzleAdapter>[1]>;
+
+const authSchema = {
+  usersTable: users,
+  accountsTable: accounts,
+  sessionsTable: sessions,
+  verificationTokensTable: verificationTokens,
+} as unknown as SqliteAdapterSchema;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  // @auth/drizzle-adapter handles accounts/sessions/verificationTokens tables
-  adapter: DrizzleAdapter(db),
+  // @auth/drizzle-adapter handles accounts/sessions/verificationTokens tables.
+  // The shared schema uses plural table names (users/accounts/sessions/
+  // verification_tokens) — map them explicitly so OAuth hits the real tables.
+  adapter: DrizzleAdapter(adapterDb, authSchema),
   callbacks: {
     ...authConfig.callbacks,
     // Role is a custom field on the users table. On a fresh sign-in (user is
@@ -49,6 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const { token, user } = params;
       if (user) {
         try {
+          const db = getDb();
           const dbUser = await db.query.users.findFirst({
             where: eq(users.id, (user as { id?: string }).id ?? ''),
           });
@@ -74,6 +111,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const db = getDb();
         const user = await db.query.users.findFirst({
           where: eq(users.email, (credentials.email as string).toLowerCase()),
         });

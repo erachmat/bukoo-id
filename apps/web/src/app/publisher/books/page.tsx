@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { books as booksTable } from "@bukoo/db";
 import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { getCoverUrl } from "@/lib/cover-url";
 import { DeletePublisherBookButton } from "./delete-button";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ export default async function PublisherBooksPage() {
     redirect("/login");
   }
 
+  const db = getDb();
   const books = await db
     .select()
     .from(booksTable)
@@ -75,7 +77,7 @@ export default async function PublisherBooksPage() {
                           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             {book.coverKey ? (
                               <img
-                                src={book.coverKey}
+                                src={getCoverUrl(book.coverKey)}
                                 alt={book.title}
                                 style={{ width: "36px", height: "52px", objectFit: "cover", borderRadius: "4px", flexShrink: 0, border: "1px solid var(--border)" }}
                               />

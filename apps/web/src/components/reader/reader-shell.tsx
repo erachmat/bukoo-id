@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Settings, Moon, Sun, FileWarning, Bookmark, Trash2, X } from 'lucide-react'
-import EpubViewer from './epub-viewer'
-import PdfViewer from './pdf-viewer'
+
+// epubjs (react-reader) and pdf.js (react-pdf) rely on browser-only APIs such
+// as DOMMatrix, which are not available in the Workers runtime during SSR.
+// Load both only on the client to avoid "ReferenceError: DOMMatrix is not
+// defined".
+const EpubViewer = dynamic(() => import('./epub-viewer'), { ssr: false })
+const PdfViewer = dynamic(() => import('./pdf-viewer'), { ssr: false })
 
 interface ReaderShellProps {
   book: {

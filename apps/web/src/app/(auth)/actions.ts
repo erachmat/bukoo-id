@@ -1,7 +1,7 @@
 'use server';
 
 import { signIn as nextAuthSignIn, signOut as nextAuthSignOut } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { users } from '@bukoo/db';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
@@ -35,6 +35,7 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
 
+  const db = getDb();
   const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
 
   if (existing) {
@@ -94,6 +95,7 @@ export async function resetPassword(formData: FormData) {
   const email = (formData.get('email') as string).toLowerCase();
   const newPassword = formData.get('password') as string;
 
+  const db = getDb();
   const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
   if (!existing) {
     return redirect(`/forgot-password?error=${encodeURIComponent('Email tidak ditemukan.')}`);

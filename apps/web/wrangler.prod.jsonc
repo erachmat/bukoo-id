@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/wrangler.json",
+  "name": "bukoo-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bukoo-db",
+      "database_id": "84f02aaa-eda5-4a93-ae92-ace4f00af03c"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUKOO_STORAGE",
+      "bucket_name": "bukoo-assets"
+    }
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Keep workers.dev alive during the cutover window as an emergency fallback
+  // (Vercel is being decommissioned, so there's no other rollback). Set this
+  // to false after the bukoo.id smoke tests pass.
+  "workers_dev": true,
+  // Production custom domain. Requires the bukoo.id zone to be active in the
+  // same Cloudflare account (created in the dashboard, NS switched at the
+  // registrar). Cloudflare auto-creates the DNS record + SSL cert for this
+  // custom domain once the zone is active.
+  "routes": [
+    {
+      "pattern": "bukoo.id",
+      "custom_domain": true
+    }
+  ]
+}

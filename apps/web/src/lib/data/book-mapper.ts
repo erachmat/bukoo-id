@@ -1,5 +1,6 @@
 import type { books } from '@bukoo/db'
 import type { MockBook } from '@/lib/data/mock-books'
+import { getCoverUrl } from '@/lib/cover-url'
 
 export function prismaBookToCatalogBook(book: typeof books.$inferSelect): MockBook {
   const genreList = typeof book.genre === 'string' ? JSON.parse(book.genre || '[]') : book.genre
@@ -8,7 +9,7 @@ export function prismaBookToCatalogBook(book: typeof books.$inferSelect): MockBo
     title: book.title,
     author: book.author,
     description: book.description ?? '',
-    coverUrl: book.coverKey ?? '',
+    coverUrl: getCoverUrl(book.coverKey),
     genre: Array.isArray(genreList) ? genreList : [],
     language: book.language,
     year: book.publishedYear ?? 0,

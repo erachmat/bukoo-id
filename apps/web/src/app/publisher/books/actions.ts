@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { books } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -16,41 +17,18 @@ async function uploadToR2(file: File, folder: 'covers' | 'epubs'): Promise<strin
   const ext = file.name.split('.').pop() ?? 'bin';
   const key = `${folder}/${createId()}.${ext}`;
 
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
-  const token = process.env.CLOUDFLARE_R2_TOKEN!;
-
-  const response = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`,
-    {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': file.type || 'application/octet-stream',
-      },
-      body: file.stream(),
-      // @ts-expect-error — required for streaming in server actions
-      duplex: 'half',
-    },
-  );
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`R2 upload failed (${response.status}): ${body}`);
-  }
+  const { env } = getCloudflareContext();
+  await env.BUKOO_STORAGE.put(key, file, {
+    httpMetadata: { contentType: file.type || 'application/octet-stream' },
+  });
 
   return key;
 }
 
 async function deleteFromR2(key: string | null | undefined) {
   if (!key) return;
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
-  const token = process.env.CLOUDFLARE_R2_TOKEN!;
-  await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`,
-    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
-  ).catch(() => {});
+  const { env } = getCloudflareContext();
+  await env.BUKOO_STORAGE.delete(key).catch(() => {});
 }
 
 async function getPublisherUser() {
@@ -68,6 +46,7 @@ async function getPublisherUser() {
 
 export async function createPublisherBook(formData: FormData) {
   const user = await getPublisherUser();
+  const db = getDb();
 
   const title = formData.get('title') as string;
   const author = formData.get('author') as string;
@@ -115,6 +94,7 @@ export async function createPublisherBook(formData: FormData) {
 
 export async function deletePublisherBook(id: string) {
   const user = await getPublisherUser();
+  const db = getDb();
 
   const book = await db.query.books.findFirst({
     where: and(eq(books.id, id), eq(books.publisherUserId, user.id)),

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { books as booksTable, users as usersTable, subscriptions, readingProgress } from '@bukoo/db'
 import { eq, and } from 'drizzle-orm'
 import { prismaBookToCatalogBook } from '@/lib/data/book-mapper'
@@ -16,6 +16,7 @@ import { isBookAccessible } from '@bukoo/shared-types'
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const session = await auth()
+  const db = getDb()
 
   const row = await db.query.books.findFirst({
     where: eq(booksTable.id, resolvedParams.id),

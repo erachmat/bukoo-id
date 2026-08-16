@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { books } from '@bukoo/db';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
@@ -12,9 +13,7 @@ import { createId } from '@paralleldrive/cuid2';
 // ---------------------------------------------------------------------------
 
 /**
- * Uploads a file to Cloudflare R2 via the Cloudflare Images / R2 Workers API.
- * Since apps/web runs on Vercel (no R2 binding), we use the Cloudflare REST API.
- *
+ * Uploads a file to Cloudflare R2 via the BUKOO_STORAGE binding.
  * Returns the R2 object key (e.g. "covers/abc123.jpg") for storage in D1.
  * The public URL is constructed from the R2 public bucket domain.
  */
@@ -22,41 +21,18 @@ async function uploadToR2(file: File, folder: 'covers' | 'epubs'): Promise<strin
   const ext = file.name.split('.').pop() ?? 'bin';
   const key = `${folder}/${createId()}.${ext}`;
 
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
-  const token = process.env.CLOUDFLARE_R2_TOKEN!;
-
-  const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`;
-
-  const response = await fetch(endpoint, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': file.type || 'application/octet-stream',
-    },
-    body: file.stream(),
-    // @ts-expect-error — Next.js 14+ supports duplex on server actions
-    duplex: 'half',
+  const { env } = getCloudflareContext();
+  await env.BUKOO_STORAGE.put(key, file, {
+    httpMetadata: { contentType: file.type || 'application/octet-stream' },
   });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`R2 upload failed (${response.status}): ${body}`);
-  }
 
   return key;
 }
 
 async function deleteFromR2(key: string | null | undefined) {
   if (!key) return;
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME ?? 'bukoo-assets';
-  const token = process.env.CLOUDFLARE_R2_TOKEN!;
-
-  await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`,
-    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
-  ).catch(() => {});
+  const { env } = getCloudflareContext();
+  await env.BUKOO_STORAGE.delete(key).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -64,6 +40,7 @@ async function deleteFromR2(key: string | null | undefined) {
 // ---------------------------------------------------------------------------
 
 export async function createBook(formData: FormData) {
+  const db = getDb();
   const title = formData.get('title') as string;
   const author = formData.get('author') as string;
   const description = formData.get('description') as string;
@@ -108,6 +85,7 @@ export async function createBook(formData: FormData) {
 }
 
 export async function updateBook(id: string, formData: FormData) {
+  const db = getDb();
   const existing = await db.query.books.findFirst({ where: eq(books.id, id) });
   if (!existing) redirect('/admin/books');
 
@@ -156,6 +134,7 @@ export async function updateBook(id: string, formData: FormData) {
 }
 
 export async function deleteBook(id: string) {
+  const db = getDb();
   const book = await db.query.books.findFirst({ where: eq(books.id, id) });
   if (book) {
     await Promise.all([

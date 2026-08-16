@@ -36,8 +36,6 @@
 }
 
 .pub-container {
-  display: grid;
-  grid-template-columns: 260px 1fr;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);

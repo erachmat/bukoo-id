@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { books as booksTable, subscriptions, readingProgress } from '@bukoo/db'
 import { eq, and } from 'drizzle-orm'
 import ReaderShell from '@/components/reader/reader-shell'
@@ -9,6 +9,7 @@ import { isBookAccessible } from '@bukoo/shared-types'
 export default async function ReaderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const session = await auth()
+  const db = getDb()
 
   // Force auth check
   if (!session?.user?.id) {
@@ -49,7 +50,7 @@ export default async function ReaderPage({ params }: { params: Promise<{ id: str
       book={{
         id: book.id,
         title: book.title,
-        fileUrl: book.epubKey ? `/api/books/${book.id}/download` : '#',
+        fileUrl: book.epubKey ? `/api/books/${book.id}/download.epub` : '#',
         fileType: 'EPUB',
       }} 
       initialLocation={initialLocation}

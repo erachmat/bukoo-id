@@ -1,12 +1,14 @@
 import Link from 'next/link'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { books as booksTable } from '@bukoo/db'
 import { desc } from 'drizzle-orm'
+import { getCoverUrl } from '@/lib/cover-url'
 import { DeleteBookButton } from './_components/delete-book-button'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminBooksPage() {
+  const db = getDb()
   const books = await db.select().from(booksTable).orderBy(desc(booksTable.createdAt))
 
   return (
@@ -54,7 +56,7 @@ export default async function AdminBooksPage() {
                 <td style={{ padding: '14px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {book.coverKey ? (
-                      <img src={book.coverKey} alt={book.title} style={{ width: 36, height: 52, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #E8ECF0' }} />
+                      <img src={getCoverUrl(book.coverKey)} alt={book.title} style={{ width: 36, height: 52, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #E8ECF0' }} />
                     ) : (
                       <div style={{ width: 36, height: 52, background: '#F0F2F5', borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#AAB4C0' }}>?</div>
                     )}

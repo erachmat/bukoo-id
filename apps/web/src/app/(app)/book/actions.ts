@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { readingProgress } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
@@ -16,6 +16,7 @@ export async function updateReadingProgress(
     throw new Error('Not authenticated');
   }
 
+  const db = getDb();
   const userId = session.user.id;
   const progressPercent = progress * 100;
   const now = new Date().toISOString();

@@ -1,51 +1,23 @@
 /**
- * apps/web Drizzle D1 HTTP client using sqlite-proxy
+ * apps/web Drizzle D1 client bound to the Cloudflare D1 database.
  *
- * apps/web runs on Vercel (Node.js/Edge). It accesses the Cloudflare D1 database
- * via Cloudflare's D1 REST API using Drizzle's `sqlite-proxy` driver.
+ * apps/web runs on Cloudflare Workers (via @opennextjs/cloudflare). The D1
+ * binding `DB` is exposed through getCloudflareContext() during request
+ * handling (server components / server actions / route handlers).
+ *
+ * Do NOT export a module-level `db` instance — bindings are only available
+ * during a request, so call getDb() inside the request scope (this is also
+ * what keeps each request on a fresh, request-scoped Drizzle handle).
  */
-import { drizzle } from 'drizzle-orm/sqlite-proxy';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { drizzle } from 'drizzle-orm/d1';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
+import type { D1Database } from '@cloudflare/workers-types';
 import * as schema from '@bukoo/db';
 
-function getDb() {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const databaseId = process.env.CLOUDFLARE_D1_DATABASE_ID;
-  const token = process.env.CLOUDFLARE_D1_TOKEN;
+export type Database = DrizzleD1Database<typeof schema>;
 
-  return drizzle(
-    async (sql, params, method) => {
-      if (!accountId || !databaseId || !token) {
-        throw new Error(
-          'Missing Cloudflare D1 env vars: CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_D1_DATABASE_ID, CLOUDFLARE_D1_TOKEN',
-        );
-      }
-
-      const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sql, params }),
-      });
-
-      const data = (await response.json()) as {
-        result: Array<{ results: Record<string, unknown>[] }>;
-      };
-
-      const results = data.result?.[0]?.results ?? [];
-
-      if (method === 'all') {
-        return { rows: results.map((row) => Object.values(row)) };
-      }
-      if (method === 'get') {
-        return { rows: results[0] ? Object.values(results[0]) : [] };
-      }
-      return { rows: [] };
-    },
-    { schema },
-  );
+export function getDb(): Database {
+  const { env } = getCloudflareContext();
+  return drizzle(env.DB as D1Database, { schema });
 }
-
-export const db = getDb();

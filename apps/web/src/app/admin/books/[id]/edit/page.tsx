@@ -1,13 +1,15 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { books as booksTable } from '@bukoo/db'
 import { eq } from 'drizzle-orm'
+import { getCoverUrl } from '@/lib/cover-url'
 import { BookForm } from '../../_components/book-form'
 import { updateBook } from '../../actions'
 
 export default async function EditBookPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
+  const db = getDb()
   const book = await db.query.books.findFirst({ where: eq(booksTable.id, id) })
 
   if (!book) notFound()
@@ -38,7 +40,7 @@ export default async function EditBookPage(props: { params: Promise<{ id: string
           year: book.publishedYear,
           publisher: book.publisher,
           pageCount: book.totalPages,
-          coverUrl: book.coverKey ?? undefined,
+          coverUrl: getCoverUrl(book.coverKey) ?? undefined,
           fileUrl: book.epubKey ?? undefined,
         }}
       />

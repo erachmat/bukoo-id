@@ -40,6 +40,10 @@ export const users = sqliteTable('users', {
   email:               text('email').notNull().unique(),
   password:            text('password'),
   avatar:              text('avatar'),
+  /** NextAuth field — maps to the adapter's `image` property. */
+  image:               text('image'),
+  /** NextAuth field — timestamp of verified email (nullable). */
+  emailVerified:       integer('email_verified', { mode: 'timestamp_ms' }),
   name:                text('name'),
   /** 'USER' | 'ADMIN' | 'CONTENT_MANAGER' | 'PUBLISHER' */
   role:                text('role').notNull().default('USER'),

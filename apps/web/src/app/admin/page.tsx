@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { books as booksTable, users as usersTable } from '@bukoo/db'
 import { count, ne, eq, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboardPage() {
+  const db = getDb()
   const [[{ totalBooks }], [{ totalUsers }], [{ premiumBooks }], [{ freeBooks }]] = await Promise.all([
     db.select({ totalBooks: count() }).from(booksTable),
     db.select({ totalUsers: count() }).from(usersTable),
