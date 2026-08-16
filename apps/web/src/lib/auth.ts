@@ -38,6 +38,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   // @auth/drizzle-adapter handles accounts/sessions/verificationTokens tables
   adapter: DrizzleAdapter(db),
+  callbacks: {
+    ...authConfig.callbacks,
+    // Role is a custom field on the users table. On a fresh sign-in (user is
+    // present), read the current role straight from the DB so OAuth logins
+    // (whose adapter user object may not carry custom fields) get the correct
+    // role instead of silently defaulting to "USER". Only queries when a
+    // sign-in occurs (Node runtime) — the edge middleware never triggers it.
+    async jwt(params) {
+      const { token, user } = params;
+      if (user) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.id, (user as { id?: string }).id ?? ''),
+          });
+          token.role = dbUser?.role || "USER";
+        } catch {
+          token.role = (user as { role?: string }).role || "USER";
+        }
+      }
+      return token;
+    },
+  },
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
