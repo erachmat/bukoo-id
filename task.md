@@ -55,6 +55,21 @@
 - [x] 5. Duplicate listener attachment
   - [x] Removed second `attachRenditionListeners` call in `__bukooLoadBook` (double PAGE_CHANGED / double-firing taps).
 
+# Publisher Dashboard Redesign (dark, reader-insight) — 2026-08-16
+
+- [x] 1. Rewrite `apps/web/src/app/publisher/dashboard/page.tsx`
+  - [x] Replaced royalty-calc dashboard with dark reader-insight dashboard per `publisher/penerbit-dashboard.html` (user decision: replace, fully static data, dark theme).
+  - [x] Widgets: KPI row (Rp 148 jt, 86.240 sesi, 142/320, Tgl 5), top-5 books, rising genres, collection utilization 44/56, 6-month royalty trend, transfer history, transparency note, CTA band.
+  - [x] Kept auth guard (typed cast instead of `any`); `export const dynamic = "force-dynamic"`; CTA links to `/publisher/books/new`.
+- [x] 2. Add `.dash-*` styles to `apps/web/src/app/publisher/publisher.css`
+  - [x] Dark topbar variant (`.dash-topbar`) + dark content (`.dash-main`); all new classes prefixed `.dash-` to avoid clashing with light theme.
+  - [x] Added Plus Jakarta Sans + JetBrains Mono to font import.
+- [x] 3. Verify
+  - [x] `npx tsc --noEmit` (apps/web) ✅
+  - [x] `npx eslint` on changed files ✅ (fixed the `any` in auth guard)
+  - [x] `npm run build` (apps/web) ✅ — `/publisher/dashboard` compiles as dynamic route.
+  - [ ] Repo-wide `npm run lint` still fails on PRE-EXISTING errors in untouched files (`middleware.ts`, `catalog-query.ts`, `sidebar-client.tsx`, `auth.config.ts`, etc.) — pre-existing debt, not introduced here. Flagged, not silently skipped.
+
 # Reader Bug Fixes — Medium/Low Cluster (2026-08-16)
 
 - [x] 6. Highlight color consistency (bug 9)
