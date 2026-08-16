@@ -19,6 +19,7 @@ dist/
 .turbo/
 *.tsbuildinfo
 **/.open-next/
+**/.wrangler/
 
 # Database and secrets
 .env
