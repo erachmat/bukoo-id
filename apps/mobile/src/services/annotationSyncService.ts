@@ -1,8 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { api, ACCESS_TOKEN_KEY } from './api';
 import { highlightService, Highlight } from './highlightService';
 import { bookmarkService, Bookmark } from './bookmarkService';
 
 interface RemoteHighlight {
+  id?: string;
   cfiRange: string;
   text: string;
   color: string;
@@ -10,84 +12,191 @@ interface RemoteHighlight {
 }
 
 interface RemoteBookmark {
+  id?: string;
   cfi: string;
   chapterTitle?: string;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bukoo-api.erachmat-dev.workers.dev/v1';
-
 class AnnotationSyncService {
-  private async getAuthToken(): Promise<string | null> {
-    return AsyncStorage.getItem('userToken');
+  /**
+   * Whether the user has a stored access token. Used to skip network calls
+   * entirely when signed out (offline / demo books) so the 401→refresh flow
+   * is not triggered for every annotation action.
+   */
+  private async isAuthenticated(): Promise<boolean> {
+    return !!(await SecureStore.getItemAsync(ACCESS_TOKEN_KEY));
   }
 
+  /**
+   * Pulls remote highlights and merges them into local storage idempotently
+   * (dedupe by cfiRange). Local-only highlights (pending offline pushes) are
+   * kept. Returns the merged local list.
+   */
   async syncHighlights(bookId: string): Promise<Highlight[]> {
     const localHighlights = await highlightService.getHighlights(bookId);
-    const token = await this.getAuthToken();
-    if (!token) return localHighlights;
+    if (!(await this.isAuthenticated())) return localHighlights;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/reading/${bookId}/highlights`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const remote: RemoteHighlight[] = await res.json();
-        for (const item of remote) {
+      const res = await api.get<RemoteHighlight[]>(`/reading/highlights/${bookId}`);
+      const remote = res.data || [];
+      const localByCfi = new Set(localHighlights.map((h) => h.cfiRange));
+      let changed = false;
+      for (const item of remote) {
+        if (!localByCfi.has(item.cfiRange)) {
           await highlightService.addHighlight(
             bookId,
             item.cfiRange,
             item.text,
-            item.color,
+            item.color || '#FACC15',
             item.note
           );
+          localByCfi.add(item.cfiRange);
+          changed = true;
         }
+      }
+      if (changed) {
+        return highlightService.getHighlights(bookId);
       }
     } catch (e) {
       console.warn('[AnnotationSyncService] Remote highlight fetch failed, fallback to local', e);
     }
 
-    return highlightService.getHighlights(bookId);
+    return localHighlights;
   }
 
+  /**
+   * Adds a highlight locally (deduped) and pushes it to the server if signed in.
+   */
   async pushHighlight(bookId: string, cfiRange: string, text: string, color: string, note?: string): Promise<void> {
-    await highlightService.addHighlight(bookId, cfiRange, text, color, note);
-    const token = await this.getAuthToken();
-    if (!token) return;
+    const existing = await highlightService.getHighlights(bookId);
+    if (!existing.some((h) => h.cfiRange === cfiRange)) {
+      await highlightService.addHighlight(bookId, cfiRange, text, color, note);
+    }
+    if (!(await this.isAuthenticated())) return;
 
     try {
-      await fetch(`${API_BASE_URL}/reading/${bookId}/highlights`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ cfiRange, text, color, note }),
-      });
+      await api.post(`/reading/highlights/${bookId}`, { cfiRange, text, color, note });
     } catch (e) {
       console.warn('[AnnotationSyncService] Remote highlight push failed:', e);
     }
   }
 
-  async syncBookmarks(bookId: string): Promise<Bookmark[]> {
-    const localBookmarks = await bookmarkService.getBookmarks(bookId);
-    const token = await this.getAuthToken();
-    if (!token) return localBookmarks;
+  /**
+   * Deletes a highlight locally (all rows matching the range) and removes it
+   * from the server by resolving the remote id from the cfiRange.
+   */
+  async deleteHighlight(bookId: string, cfiRange: string): Promise<void> {
+    const local = await highlightService.getHighlights(bookId);
+    for (const h of local) {
+      if (h.cfiRange === cfiRange) {
+        await highlightService.removeHighlight(h.id);
+      }
+    }
+    if (!(await this.isAuthenticated())) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/reading/${bookId}/bookmarks`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const remote: RemoteBookmark[] = await res.json();
-        for (const item of remote) {
+      const res = await api.get<RemoteHighlight[]>(`/reading/highlights/${bookId}`);
+      const match = (res.data || []).find((r) => r.cfiRange === cfiRange);
+      if (match && match.id) {
+        await api.delete(`/reading/highlights/${match.id}`);
+      }
+    } catch (e) {
+      console.warn('[AnnotationSyncService] Remote highlight delete failed:', e);
+    }
+  }
+
+  /**
+   * Updates the note on all local highlights matching the range and mirrors it
+   * to the server (PATCH by resolved remote id).
+   */
+  async updateHighlightNote(bookId: string, cfiRange: string, note: string): Promise<void> {
+    const local = await highlightService.getHighlights(bookId);
+    for (const h of local) {
+      if (h.cfiRange === cfiRange) {
+        await highlightService.updateNote(h.id, note);
+      }
+    }
+    if (!(await this.isAuthenticated())) return;
+
+    try {
+      const res = await api.get<RemoteHighlight[]>(`/reading/highlights/${bookId}`);
+      const match = (res.data || []).find((r) => r.cfiRange === cfiRange);
+      if (match && match.id) {
+        await api.patch(`/reading/highlights/${match.id}`, { note });
+      }
+    } catch (e) {
+      console.warn('[AnnotationSyncService] Remote highlight note update failed:', e);
+    }
+  }
+
+  /**
+   * Pulls remote bookmarks and merges them into local storage idempotently
+   * (dedupe by cfi). Returns the merged local list.
+   */
+  async syncBookmarks(bookId: string): Promise<Bookmark[]> {
+    const localBookmarks = await bookmarkService.getBookmarks(bookId);
+    if (!(await this.isAuthenticated())) return localBookmarks;
+
+    try {
+      const res = await api.get<RemoteBookmark[]>(`/reading/bookmarks/${bookId}`);
+      const remote = res.data || [];
+      const localByCfi = new Set(localBookmarks.map((b) => b.cfi));
+      let changed = false;
+      for (const item of remote) {
+        if (!localByCfi.has(item.cfi)) {
           await bookmarkService.addBookmark(bookId, item.cfi, item.chapterTitle || 'Markah');
+          localByCfi.add(item.cfi);
+          changed = true;
         }
+      }
+      if (changed) {
+        return bookmarkService.getBookmarks(bookId);
       }
     } catch (e) {
       console.warn('[AnnotationSyncService] Remote bookmark fetch failed, fallback to local', e);
     }
 
-    return bookmarkService.getBookmarks(bookId);
+    return localBookmarks;
+  }
+
+  /**
+   * Adds a bookmark locally (deduped) and pushes it to the server if signed in.
+   */
+  async pushBookmark(bookId: string, cfi: string, chapterTitle?: string): Promise<void> {
+    const existing = await bookmarkService.getBookmarks(bookId);
+    if (!existing.some((b) => b.cfi === cfi)) {
+      await bookmarkService.addBookmark(bookId, cfi, chapterTitle || 'Markah');
+    }
+    if (!(await this.isAuthenticated())) return;
+
+    try {
+      await api.post(`/reading/bookmarks/${bookId}`, { cfi, chapterTitle });
+    } catch (e) {
+      console.warn('[AnnotationSyncService] Remote bookmark push failed:', e);
+    }
+  }
+
+  /**
+   * Removes a bookmark locally and deletes it from the server by resolved id.
+   */
+  async deleteBookmark(bookId: string, cfi: string): Promise<void> {
+    const local = await bookmarkService.getBookmarks(bookId);
+    for (const b of local) {
+      if (b.cfi === cfi) {
+        await bookmarkService.removeBookmark(bookId, b.cfi);
+      }
+    }
+    if (!(await this.isAuthenticated())) return;
+
+    try {
+      const res = await api.get<RemoteBookmark[]>(`/reading/bookmarks/${bookId}`);
+      const match = (res.data || []).find((r) => r.cfi === cfi);
+      if (match && match.id) {
+        await api.delete(`/reading/bookmarks/${match.id}`);
+      }
+    } catch (e) {
+      console.warn('[AnnotationSyncService] Remote bookmark delete failed:', e);
+    }
   }
 }
 

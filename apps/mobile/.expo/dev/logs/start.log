@@ -7571,3 +7571,100 @@
 {"_e":"metro:client_log","_t":1786447441394,"level":"log","data":["[RN Diagnostic] Disk size: 560428 bytes | b64 length: 747240 chars | RN Read duration: 119ms"]}
 {"_e":"metro:client_log","_t":1786447441395,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
 {"_e":"metro:client_log","_t":1786447441817,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1280ms, In-WebView load: 118ms, Location gen (cached): 108ms"]}
+{"_e":"root:init","_t":1786846450477,"format":"v0-jsonl","version":"56.1.23"}
+{"_e":"devserver:start","_t":1786846450494,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786846452056,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1786846474140,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786846480661,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1786846480661,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786846480667,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786846480767,"id":"1","progress":0.027777777777777776,"total":156,"current":26}
+{"_e":"metro:bundling:progress","_t":1786846480868,"id":"1","progress":0.05144011053246891,"total":291,"current":66}
+{"_e":"metro:bundling:progress","_t":1786846480968,"id":"1","progress":0.1466727025803531,"total":376,"current":144}
+{"_e":"metro:bundling:progress","_t":1786846481068,"id":"1","progress":0.3394941792403746,"total":496,"current":289}
+{"_e":"metro:bundling:progress","_t":1786846481168,"id":"1","progress":0.4272694824509221,"total":615,"current":402}
+{"_e":"metro:bundling:progress","_t":1786846481269,"id":"1","progress":0.46032188686210473,"total":706,"current":479}
+{"_e":"metro:bundling:progress","_t":1786846481369,"id":"1","progress":0.5829937754014054,"total":757,"current":578}
+{"_e":"metro:bundling:progress","_t":1786846481470,"id":"1","progress":0.7034339229968783,"total":806,"current":676}
+{"_e":"metro:bundling:progress","_t":1786846481571,"id":"1","progress":0.707706104893898,"total":926,"current":779}
+{"_e":"metro:bundling:progress","_t":1786846481683,"id":"1","progress":0.707706104893898,"total":950,"current":789}
+{"_e":"metro:bundling:progress","_t":1786846481783,"id":"1","progress":0.7220087540512545,"total":1038,"current":882}
+{"_e":"metro:bundling:progress","_t":1786846481884,"id":"1","progress":0.7427920284950797,"total":1122,"current":967}
+{"_e":"metro:bundling:progress","_t":1786846481984,"id":"1","progress":0.8331685265227105,"total":1158,"current":1057}
+{"_e":"metro:bundling:progress","_t":1786846482084,"id":"1","progress":0.9530661325817008,"total":1179,"current":1151}
+{"_e":"metro:bundling:progress","_t":1786846482185,"id":"1","progress":0.9983242566831243,"total":1193,"current":1192}
+{"_e":"metro:bundling:progress","_t":1786846482737,"id":"1","progress":0.999,"total":1193,"current":1193}
+{"_e":"metro:bundling:progress","_t":1786846482836,"id":"1","progress":0.999,"total":1245,"current":1232}
+{"_e":"metro:bundling:progress","_t":1786846482936,"id":"1","progress":0.999,"total":1250,"current":1249}
+{"_e":"metro:bundling:progress","_t":1786846483479,"id":"1","progress":0.999,"total":1250,"current":1250}
+{"_e":"metro:bundling:done","_t":1786846483605,"id":"1","total":1250,"ms":2943.843017}
+{"_e":"metro:client_log","_t":1786846488731,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1786846505878,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786846507199,"level":"log","data":["[Perf] WebView shell ready duration: 2342ms"]}
+{"_e":"metro:client_log","_t":1786846507450,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 28ms"]}
+{"_e":"metro:client_log","_t":1786846507451,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786846507726,"level":"log","data":["[Perf] Total Time-to-First-Frame: 2863ms, In-WebView load: 89ms, Location gen (cached): 61ms"]}
+{"_e":"metro:client_log","_t":1786846523566,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786846524306,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786846524505,"level":"log","data":["[Perf] Page turn latency: 94ms"]}
+{"_e":"metro:client_log","_t":1786846524713,"level":"log","data":["[Perf] Page turn latency: 101ms"]}
+{"_e":"metro:client_log","_t":1786846524922,"level":"log","data":["[Perf] Page turn latency: 110ms"]}
+{"_e":"metro:client_log","_t":1786846525148,"level":"log","data":["[Perf] Page turn latency: 128ms"]}
+{"_e":"metro:client_log","_t":1786846525860,"level":"log","data":["[Perf] Page turn latency: 110ms"]}
+{"_e":"metro:client_log","_t":1786846543933,"level":"log","data":["[Perf] Page turn latency: 97ms"]}
+{"_e":"metro:client_log","_t":1786846544321,"level":"log","data":["[Perf] Page turn latency: 83ms"]}
+{"_e":"metro:client_log","_t":1786846544757,"level":"log","data":["[Perf] Page turn latency: 167ms"]}
+{"_e":"metro:client_log","_t":1786846545739,"level":"log","data":["[Perf] Page turn latency: 187ms"]}
+{"_e":"metro:client_log","_t":1786846546019,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1786846548465,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1786846549944,"level":"log","data":["[Perf] Page turn latency: 103ms"]}
+{"_e":"metro:client_log","_t":1786846550428,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1786846550642,"level":"log","data":["[Perf] Page turn latency: 97ms"]}
+{"_e":"metro:client_log","_t":1786846551014,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1786846551381,"level":"log","data":["[Perf] Page turn latency: 94ms"]}
+{"_e":"metro:client_log","_t":1786846552086,"level":"log","data":["[Perf] Page turn latency: 87ms"]}
+{"_e":"metro:client_log","_t":1786846552327,"level":"log","data":["[Perf] Page turn latency: 122ms"]}
+{"_e":"metro:client_log","_t":1786846552553,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786846552725,"level":"log","data":["[Perf] Page turn latency: 80ms"]}
+{"_e":"metro:client_log","_t":1786846553082,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786846553790,"level":"log","data":["[Perf] Page turn latency: 374ms"]}
+{"_e":"metro:client_log","_t":1786846554231,"level":"log","data":["[Perf] Page turn latency: 404ms"]}
+{"_e":"metro:client_log","_t":1786846562726,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786846563173,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786846563663,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1786846564123,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786846565546,"level":"log","data":["[Perf] Page turn latency: 204ms"]}
+{"_e":"metro:client_log","_t":1786846565827,"level":"log","data":["[Perf] Page turn latency: 63ms"]}
+{"_e":"metro:client_log","_t":1786846566049,"level":"log","data":["[Perf] Page turn latency: 15ms"]}
+{"_e":"metro:client_log","_t":1786846566765,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1786846566992,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786846567188,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1786846567427,"level":"log","data":["[Perf] Page turn latency: 131ms"]}
+{"_e":"metro:client_log","_t":1786846568249,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786846568713,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786846569156,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786846569615,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786846569863,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1786846570094,"level":"log","data":["[Perf] Page turn latency: 85ms"]}
+{"_e":"metro:client_log","_t":1786846586223,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1786846586864,"level":"log","data":["[Perf] Page turn latency: 89ms"]}
+{"_e":"metro:client_log","_t":1786846587144,"level":"log","data":["[Perf] Page turn latency: 86ms"]}
+{"_e":"metro:client_log","_t":1786846587406,"level":"log","data":["[Perf] Page turn latency: 84ms"]}
+{"_e":"metro:client_log","_t":1786846587902,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1786846588187,"level":"log","data":["[Perf] Page turn latency: 93ms"]}
+{"_e":"metro:client_log","_t":1786846588539,"level":"log","data":["[Perf] Page turn latency: 195ms"]}
+{"_e":"metro:client_log","_t":1786846588729,"level":"log","data":["[Perf] Page turn latency: 82ms"]}
+{"_e":"metro:client_log","_t":1786846588894,"level":"log","data":["[Perf] Page turn latency: 90ms"]}
+{"_e":"metro:client_log","_t":1786846589868,"level":"log","data":["[Perf] Page turn latency: 91ms"]}
+{"_e":"metro:client_log","_t":1786846590074,"level":"log","data":["[Perf] Page turn latency: 95ms"]}
+{"_e":"metro:client_log","_t":1786846590295,"level":"log","data":["[Perf] Page turn latency: 112ms"]}
+{"_e":"metro:client_log","_t":1786846590561,"level":"log","data":["[Perf] Page turn latency: 1ms"]}
+{"_e":"metro:client_log","_t":1786846593107,"level":"log","data":["[Perf] WebView shell ready duration: 500ms"]}
+{"_e":"metro:client_log","_t":1786846593357,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/book_bumi_manusia.epub"]}
+{"_e":"metro:client_log","_t":1786846593468,"level":"log","data":["[Perf] WebView shell ready duration: 861ms"]}
+{"_e":"metro:client_log","_t":1786846593531,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 63ms"]}
+{"_e":"metro:client_log","_t":1786846593533,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786846593564,"level":"log","data":["[RN Diagnostic] Disk size: 546028 bytes | b64 length: 728040 chars | RN Read duration: 81ms"]}
+{"_e":"metro:client_log","_t":1786846593565,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
+{"_e":"metro:client_log","_t":1786846593795,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1186ms, In-WebView load: 41ms, Location gen (cached): 28ms"]}
+{"_e":"metro:bundling:failed","_t":1786846817900,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/ReadingScreen.tsx: Identifier 'webViewShellReady' has already been declared. (1531:8)\n\n  1529 |\n  1530 |   // When everything is ready, inject the EPUB data into the already-loaded WebView\n> 1531 |   const webViewShellReady = useRef(false);\n       |         ^\n  1532 |\n  1533 |   // True when we have a local or remote book URI ready to inject\n  1534 |   const hasBookData = !!localFileUri;","importStack":null,"filename":"src/screens/reading/ReadingScreen.tsx","targetModuleName":null,"originModulePath":null}

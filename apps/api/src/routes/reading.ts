@@ -242,6 +242,24 @@ reading.delete('/highlights/:id', async (c) => {
   return c.json({ success: true });
 });
 
+reading.patch('/highlights/:id', zValidator('json', z.object({ note: z.string().optional() })), async (c) => {
+  const db = createDb(c.env.DB);
+  const userId = c.get('userId');
+  const hlId = c.req.param('id');
+  const dto = c.req.valid('json');
+
+  const hl = await db.query.highlights.findFirst({ where: eq(highlights.id, hlId) });
+  if (!hl || hl.userId !== userId) return c.json({ error: 'Highlight not found' }, 404);
+
+  await db
+    .update(highlights)
+    .set({ note: dto.note ?? hl.note ?? null, updatedAt: new Date().toISOString() })
+    .where(eq(highlights.id, hlId));
+
+  const updated = await db.query.highlights.findFirst({ where: eq(highlights.id, hlId) });
+  return c.json(updated);
+});
+
 // ---------------------------------------------------------------------------
 // Bookmarks
 // ---------------------------------------------------------------------------

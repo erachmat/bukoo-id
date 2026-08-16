@@ -35,6 +35,43 @@
 - [x] 4. Structural Changes (Rendering Strategy Overhaul) — *Requires Explicit Go-Ahead*
   - `[x]` Evaluate moving from single-WebView epubjs rendition to virtualized multi-page or custom paginator engine for sub-16ms native page turns benchmarked against Apple Books.
 
+# Reader Bug Fixes — High-Severity Cluster (2026-08-16)
+
+- [x] 1. Highlight lifecycle
+  - [x] Re-apply highlights after page-turn style change (rendition rebuild) via `__bukooSetHighlights` bridge store.
+  - [x] Wire up dead `HIGHLIGHT_CLICKED` message → opens `HighlightModal`.
+- [x] 2. TOC & navigation
+  - [x] Send `chapterHref` in `PAGE_CHANGED`; TocModal compares normalized hrefs (was always-false CFI vs href).
+  - [x] Resolve TOC/search hrefs → CFI before display (`resolveHrefToCfi`); search fallback emits `item.cfi` not bare href.
+- [x] 3. Reading time accuracy
+  - [x] Freeze ticker when app backgrounded (was empty no-op AppState handler).
+  - [x] Gate ticker on reader `isReady` so loading/failure time is not counted.
+- [x] 4. Annotation sync wiring (bug 8)
+  - [x] Rewrote `annotationSyncService.ts` to use shared `api` axios instance (fixes wrong token key: was AsyncStorage `userToken`, now SecureStore `access_token` via interceptor; inherits `EXPO_PUBLIC_API_URL`).
+  - [x] Made sync idempotent (dedupe by cfiRange / cfi) — was inserting duplicates on every pull.
+  - [x] Added `pushBookmark`, `deleteHighlight`, `deleteBookmark`, `updateHighlightNote` (remote id lookup by cfi).
+  - [x] Added `PATCH /reading/highlights/:id` (note update) to `apps/api/src/routes/reading.ts`.
+  - [x] Wired into `ReadingScreen`: pull on open, push on select/toggle, delete + note sync.
+- [x] 5. Duplicate listener attachment
+  - [x] Removed second `attachRenditionListeners` call in `__bukooLoadBook` (double PAGE_CHANGED / double-firing taps).
+
+# Reader Bug Fixes — Medium/Low Cluster (2026-08-16)
+
+- [x] 6. Highlight color consistency (bug 9)
+  - [x] `TEXT_SELECTED` now stores hex `#FACC15` (was alpha-baked `rgba(250,204,21,0.4)`), so the bridge's single `fill-opacity` is the only opacity source.
+  - [x] Removed dead `__bukooApplyHighlights` (conflicting `fill-opacity: 0.3`).
+- [x] 7. First-open progress percent race (bug 10)
+  - [x] `updateLocalProgress` now takes `percent` and writes it in the same INSERT/UPDATE (`COALESCE`); removed separate `updateProgressPercent` that could run before the INSERT committed.
+- [x] 8. Stale locations cache (bug 11)
+  - [x] `epub_locations_${bookId}` cache now keyed by source fingerprint (local file size / remote URL) via `getBookSourceFingerprint` — re-downloaded books don't reuse stale page maps.
+- [x] 9. Settings effect re-ran on every page turn (bug 12)
+  - [x] Split injection (deps no longer include `currentCfi`; position read from `currentCfiRef`) and AsyncStorage persist (setting-change deps only).
+- [x] 10. Dead code / TDZ cleanup (bugs 14, 15)
+  - [x] Moved `webViewShellReady` ref above `handleMessage`; removed unused `getVerticalScrollTarget` and `dataInjectTimeRef`.
+- [ ] 11. Base64 double-memory (bug 13) — NOT DONE: needs a local HTTP server / streaming loader (large architectural change). Flagged for a dedicated task.
+
+Verification: mobile `tsc --noEmit` ✅, mobile lint ✅ (no errors; fixed one `no-empty`). API untouched this round. No test files exist in either workspace.
+
 # Reader Redesign (Kindle/Apple Books Parity)
 
 - `[x]` Phase 0 — Rendering Architecture Audit & Decision Gate (STOP GATE)

@@ -60,7 +60,16 @@ export const TocModal: React.FC<TocModalProps> = ({
           keyExtractor={(item, idx) => item.id || `toc-${idx}`}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => {
-            const isActive = currentChapterHref && item.href && currentChapterHref.includes(item.href);
+            // Compare the current chapter href against the TOC href, tolerating
+            // path differences (e.g. "chap1.xhtml" vs "text/chap1.xhtml") and
+            // fragment suffixes. The current href is the raw spine href from the
+            // reader, so normalize both sides before comparing.
+            const normalizeHref = (href: string) =>
+              (href || '').split('#')[0].split('/').pop() || '';
+            const isActive =
+              !!currentChapterHref &&
+              !!item.href &&
+              normalizeHref(currentChapterHref) === normalizeHref(item.href);
             const indentPadding = Math.min(item.level * 18, 54);
 
             return (

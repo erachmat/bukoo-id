@@ -36,7 +36,7 @@ export interface UseReadingSessionReturn {
  * - Listens for network recovery and retries any pending offline syncs.
  * - Exposes reactive state (currentPage, progressPercent) that drives the UI.
  */
-export function useReadingSession(bookId: string): UseReadingSessionReturn {
+export function useReadingSession(bookId: string, isReady: boolean = true): UseReadingSessionReturn {
   const [currentPage, setCurrentPage] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
   const [readingTimeSeconds, setReadingTimeSeconds] = useState(0);
@@ -129,25 +129,44 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
   // ── Reading time ticker ─────────────────────────────────────────────────────
 
   useEffect(() => {
-    // Update displayed reading time every second
-    const ticker = setInterval(() => {
-      setReadingTimeSeconds((prev) => prev + 1);
-    }, 1_000);
+    // Only count time while the reader is actually ready (book loaded) AND the
+    // app is in the foreground. Loading, location generation, load failures, and
+    // backgrounding must not inflate the displayed reading time.
+    let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
-    // Pause ticker when app is backgrounded
+    const startTicker = () => {
+      if (intervalHandle) return;
+      intervalHandle = setInterval(() => {
+        setReadingTimeSeconds((prev) => prev + 1);
+      }, 1_000);
+    };
+
+    const stopTicker = () => {
+      if (intervalHandle) {
+        clearInterval(intervalHandle);
+        intervalHandle = null;
+      }
+    };
+
+    if (isReady && appStateRef.current === 'active') {
+      startTicker();
+    }
+
     const handleAppStateForTicker = (nextState: AppStateStatus) => {
       if (nextState === 'active') {
-        // nothing — ticker runs while active
+        if (isReady) startTicker();
+      } else {
+        stopTicker();
       }
     };
 
     const sub = AppState.addEventListener('change', handleAppStateForTicker);
 
     return () => {
-      clearInterval(ticker);
+      stopTicker();
       sub.remove();
     };
-  }, []);
+  }, [isReady]);
 
   // ── updateProgress (exposed to consumer) ────────────────────────────────────
 
@@ -158,16 +177,12 @@ export function useReadingSession(bookId: string): UseReadingSessionReturn {
         setProgressPercent(percent);
       }
 
-      // Persist to SQLite and mark dirty
-      readingSync.updateLocalProgress(page, cfi).catch((err) =>
+      // Persist page, cfi, and percent atomically to SQLite and mark dirty.
+      // Passing percent here avoids a separate UPDATE that could race the
+      // first INSERT and leave the stored percent at 0.
+      readingSync.updateLocalProgress(page, cfi, percent).catch((err) =>
         console.warn('[useReadingSession] updateLocalProgress failed:', err)
       );
-
-      if (percent !== undefined) {
-        readingSync.updateProgressPercent(percent).catch((err) =>
-          console.warn('[useReadingSession] updateProgressPercent failed:', err)
-        );
-      }
     },
     []
   );

@@ -128,8 +128,12 @@ export class ReadingSync {
   /**
    * Saves progress to SQLite immediately and marks the record as dirty
    * (pending server sync). Also accumulates reading time for the current page.
+   *
+   * `percent` (0–100) is written in the same INSERT/UPDATE as the page/cfi so
+   * the first-ever write stores the real percent atomically — previously a
+   * separate UPDATE could run before the INSERT committed, leaving percent 0.
    */
-  async updateLocalProgress(page: number, cfiPosition: string): Promise<void> {
+  async updateLocalProgress(page: number, cfiPosition: string, percent?: number): Promise<void> {
     if (!this.bookId) {
       console.warn('[ReadingSync] updateLocalProgress called without an active session');
       return;
@@ -157,31 +161,20 @@ export class ReadingSync {
         `UPDATE reading_progress
            SET currentPage        = ?,
                cfiPosition        = ?,
+               progressPercent    = COALESCE(?, progressPercent),
                readingTimeSeconds = ?,
                isDirty            = 1
          WHERE bookId = ?`,
-        [page, cfiPosition, totalReadingTime, this.bookId]
+        [page, cfiPosition, percent ?? null, totalReadingTime, this.bookId]
       );
     } else {
       await db.runAsync(
         `INSERT INTO reading_progress
            (bookId, currentPage, cfiPosition, progressPercent, readingTimeSeconds, isDirty)
-         VALUES (?, ?, ?, 0, ?, 1)`,
-        [this.bookId, page, cfiPosition, totalReadingTime]
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        [this.bookId, page, cfiPosition, percent ?? 0, totalReadingTime]
       );
     }
-  }
-
-  /**
-   * Updates the progressPercent field in SQLite (calculated from total pages).
-   */
-  async updateProgressPercent(percent: number): Promise<void> {
-    if (!this.bookId) return;
-    const db = await getDb();
-    await db.runAsync(
-      'UPDATE reading_progress SET progressPercent = ? WHERE bookId = ?',
-      [percent, this.bookId]
-    );
   }
 
   // ── Session stop ────────────────────────────────────────────────────────────

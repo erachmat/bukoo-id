@@ -16,6 +16,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useReadingSession } from '../../hooks/useReadingSession';
 import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
+import { annotationSyncService } from '../../services/annotationSyncService';
 import { bookDownloadService } from '../../services/bookDownload';
 import { MASTER_SAMPLE_BOOKS } from '../book/BookDetailScreen';
 import { COLORS } from '../../constants/COLORS';
@@ -50,6 +51,7 @@ interface EpubMessage {
   error?: string;
   toc?: TocItem[];
   chapterTitle?: string;
+  chapterHref?: string;
   chapterCurrentPage?: number;
   chapterTotalPages?: number;
   text?: string;
@@ -165,21 +167,6 @@ const EPUB_JS_BRIDGE = `
     }, 120);
   }
 
-  // Helper: find the scrollable element inside epub.js iframe for vertical mode
-  function getVerticalScrollTarget() {
-    var viewer = document.getElementById('viewer');
-    if (!viewer) return window;
-    // epub.js scrolled-doc creates an iframe inside #viewer
-    var iframe = viewer.querySelector('iframe');
-    if (iframe && iframe.contentDocument) {
-      var iDoc = iframe.contentDocument;
-      var body = iDoc.body || iDoc.documentElement;
-      return body;
-    }
-    // Fallback: try the viewer div itself
-    return viewer;
-  }
-
   window.__bukooNext = function () {
     if (__bukooPdfState.canvases.length > 0) {
       var nextNum = Math.min(__bukooPdfState.currentNum + 1, __bukooPdfState.total);
@@ -250,10 +237,43 @@ const EPUB_JS_BRIDGE = `
     return cfi.slice(0, m.index) + ':' + off + cfi.slice(m.index + m[0].length);
   }
 
+  // Resolve a bare chapter href (e.g. "chap1.xhtml" or "text/chap1.xhtml") to a
+  // CFI so navigation paths that only have an href (TOC taps, plain-text search
+  // fallback) land on a real position. Returns the input unchanged if it's
+  // already a CFI or can't be resolved.
+  function resolveHrefToCfi(href) {
+    if (typeof href !== 'string' || !href) return href;
+    if (href.indexOf('epubcfi(') === 0) return href;
+    var book = window.__bukooCurrentBook;
+    if (!book || !book.spine) return href;
+    try {
+      var item = book.spine.get(href);
+      if (item && item.href) {
+        // Prefer a location-based CFI so the restore logic can verify the page.
+        if (book.locations && book.locations.total > 0) {
+          var loc = book.locations.locationFromCfi(item.cfi);
+          if (typeof loc === 'number' && loc > 0) {
+            var locCfi = book.locations.cfiFromLocation(loc);
+            if (locCfi) return locCfi;
+          }
+        }
+        return item.cfi;
+      }
+    } catch (e) {}
+    return href;
+  }
+
   window.__bukooRestorePosition = function (cfi) {
     var book = window.__bukooCurrentBook;
     var rendition = window.__bukooCurrentRendition;
     if (!book || !rendition || !cfi) return;
+
+    // Non-CFI targets (bare hrefs) can't be nudged or location-verified — just
+    // display them directly; epub.js resolves hrefs via spine.get().
+    if (typeof cfi !== 'string' || cfi.indexOf('epubcfi(') !== 0) {
+      rendition.display(cfi);
+      return;
+    }
 
     var targetLoc = -1;
     try {
@@ -309,7 +329,10 @@ const EPUB_JS_BRIDGE = `
 
   window.__bukooDisplay = function (t) {
     if (window.__bukooCurrentRendition && t) {
-      window.__bukooRestorePosition(t);
+      // TOC taps and the plain-text search fallback pass a bare href — resolve
+      // it to a CFI so the restore path can verify the landed page.
+      var resolved = resolveHrefToCfi(t);
+      window.__bukooRestorePosition(resolved);
     }
   };
 
@@ -350,9 +373,12 @@ const EPUB_JS_BRIDGE = `
             if (pos !== -1) {
               var start = Math.max(0, pos - 60);
               var end = Math.min(text.length, pos + q.length + 60);
+              // Use the spine item's CFI (not the bare href) so tapping the
+              // result lands on a real position.
+              var fallbackCfi = (item && item.cfi) ? item.cfi : item.href;
               results.push({
                 id: (item.idref || item.href || 'sec') + '_0',
-                cfi: item.href,
+                cfi: fallbackCfi,
                 excerpt: (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : ''),
                 chapterTitle: item.href || '',
               });
@@ -401,6 +427,23 @@ const EPUB_JS_BRIDGE = `
         window.__bukooCurrentRendition.annotations.remove(cfi);
       } catch (err) {}
     }
+  };
+
+  // Highlights are stored on the window so they survive rendition rebuilds.
+  // Changing the page-turn style destroys & recreates the rendition, which
+  // wipes its annotations — re-applying from this list keeps them visible.
+  window.__bukooHighlights = [];
+
+  function applyHighlightsToRendition() {
+    var list = window.__bukooHighlights || [];
+    list.forEach(function (h) {
+      if (h && h.cfiRange) window.__bukooAddHighlight(h.cfiRange, h.color);
+    });
+  }
+
+  window.__bukooSetHighlights = function (highlights) {
+    window.__bukooHighlights = (highlights && Array.isArray(highlights)) ? highlights : [];
+    applyHighlightsToRendition();
   };
 
   window.__bukooSetTheme = function (themeObj) {
@@ -536,11 +579,12 @@ const EPUB_JS_BRIDGE = `
         var pct    = book.locations.percentageFromCfi(cfi);
         var percent = typeof pct === 'number' ? Math.round(pct * 100) : 0;
         var chapterTitle = '';
+        var chapterHref = start.href || '';
         var navItem = (book && book.navigation) ? book.navigation.get(start.href) : null;
         if (navItem && navItem.label) chapterTitle = navItem.label.trim();
         sendMessage({
           type: 'PAGE_CHANGED', page: page, cfi: cfi, percent: percent,
-          chapterTitle: chapterTitle, chapterCurrentPage: page, chapterTotalPages: total,
+          chapterTitle: chapterTitle, chapterHref: chapterHref, chapterCurrentPage: page, chapterTotalPages: total,
         });
       } catch (e) {}
     });
@@ -641,6 +685,9 @@ const EPUB_JS_BRIDGE = `
     if (window.__bukooCurrentTheme) {
       try { rendition.themes.default(window.__bukooCurrentTheme); } catch (e) {}
     }
+
+    // Re-apply stored highlights to the freshly rebuilt rendition.
+    applyHighlightsToRendition();
 
     if (currentCfi) {
       rendition.display(currentCfi);
@@ -831,19 +878,6 @@ const EPUB_JS_BRIDGE = `
       book.loaded.navigation.then(function (nav) {
         sendMessage({ type: 'TOC', toc: nav.toc });
       });
-
-      attachRenditionListeners(rendition, book);
-
-      window.__bukooApplyHighlights = function (highlights) {
-        if (!highlights || !Array.isArray(highlights)) return;
-        highlights.forEach(function (h) {
-          try {
-            rendition.annotations.highlight(h.cfiRange, {}, function () {}, 'bukoo-highlight', {
-              fill: h.color || 'yellow', 'fill-opacity': '0.3',
-            });
-          } catch (e) {}
-        });
-      };
     }).catch(function (err) {
       sendMessage({ type: 'ERROR', error: 'EPUB load failed: ' + String(err) });
     });
@@ -917,6 +951,25 @@ function getCssFontFamily(font: string): string {
   return font;
 }
 
+// Fingerprint for the book source so the cached epub.js locations (page-map)
+// are only reused for the SAME book file. If the file is re-downloaded or the
+// URL changes, the fingerprint changes and stale locations are discarded
+// instead of mapping to wrong pages.
+async function getBookSourceFingerprint(uri: string): Promise<string> {
+  if (!uri) return '';
+  if (uri.startsWith('file://') || uri.startsWith('/')) {
+    try {
+      const info = await FileSystem.getInfoAsync(uri);
+      if (info.exists && 'size' in info && info.size) {
+        return `local:${info.size}`;
+      }
+    } catch (e) {
+      // Fall through to the URL-based fingerprint if the file can't be stat'd.
+    }
+  }
+  return `remote:${uri}`;
+}
+
 // ─── Theme Colors Map ─────────────────────────────────────────────────────────
 
 const themeColors = {
@@ -962,11 +1015,15 @@ interface ReadingRouteParams {
 export default function ReadingScreen({ navigation, route }: ReadingScreenProps) {
   const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as ReadingRouteParams;
 
+  const [isReady, setIsReady] = useState(false);
+
   const { currentPage, progressPercent, readingTimeSeconds, initialCfi, updateProgress } =
-    useReadingSession(bookId);
+    useReadingSession(bookId, isReady);
 
   const webViewRef = useRef<WebView>(null);
   const controlsOpacity = useRef(new Animated.Value(1)).current;
+  // Declared before handleMessage so the SHELL_READY case never hits a TDZ.
+  const webViewShellReady = useRef(false);
   // Ref mirrors initialCfi so the READY handler always reads the latest value
   // even if SQLite resolves after the WebView fires READY.
   const initialCfiRef = useRef(initialCfi);
@@ -974,13 +1031,16 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // Performance metrics tracking refs
   const mountTimeRef = useRef(performance.now());
   const pageTurnStartTimeRef = useRef<number | null>(null);
-  const dataInjectTimeRef = useRef<number | null>(null);
+
+  // Mirrors the latest known position CFI so the settings-sync effect can
+  // preserve position when the page-turn style is switched, without depending
+  // on currentCfi (which changes on every page turn and would re-run the effect).
+  const currentCfiRef = useRef('');
 
   // Keep the ref in sync with state
   useEffect(() => { initialCfiRef.current = initialCfi; }, [initialCfi]);
 
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [isReady, setIsReady] = useState(false);
 
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -992,7 +1052,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
 
-  const appliedHighlightIdsRef = useRef<Set<number>>(new Set());
   const pendingSearchResolver = useRef<((results: SearchResultItem[]) => void) | null>(null);
 
   const handlePerformSearch = useCallback(
@@ -1022,6 +1081,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   
   const [chapterInfo, setChapterInfo] = useState({
     cfi: '',
+    href: '',
     title: '',
     currentPage: 0,
     totalPages: 1,
@@ -1065,12 +1125,21 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const chapterCurrentPage = chapterInfo.currentPage;
   const chapterTotalPages = chapterInfo.totalPages;
 
-  // Load cached book locations (makes book.locations.generate Instant on 2nd+ open)
+  // Load cached book locations (makes book.locations.generate Instant on 2nd+ open).
+  // Keyed by a source fingerprint so a re-downloaded / changed book file does
+  // not reuse stale locations (which would map to wrong pages).
   useEffect(() => {
-    AsyncStorage.getItem(`epub_locations_${bookId}`).then((locs) => {
-      if (locs) setCachedLocations(locs);
-    }).catch(() => {});
-  }, [bookId]);
+    if (!bookId || !localFileUri) return;
+    let cancelled = false;
+    (async () => {
+      const fingerprint = await getBookSourceFingerprint(localFileUri);
+      if (cancelled) return;
+      AsyncStorage.getItem(`epub_locations_${bookId}:${fingerprint}`).then((locs) => {
+        if (locs && !cancelled) setCachedLocations(locs);
+      }).catch(() => {});
+    })();
+    return () => { cancelled = true; };
+  }, [bookId, localFileUri]);
 
   const loadHighlights = useCallback(async () => {
     const hls = await highlightService.getHighlights(bookId);
@@ -1079,9 +1148,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const handleDeleteHighlight = async (id: number) => {
     const target = highlights.find((h) => Number(h.id) === Number(id));
-    await highlightService.removeHighlight(id);
     if (target && webViewRef.current) {
       webViewRef.current.injectJavaScript(`if (window.__bukooRemoveHighlight) window.__bukooRemoveHighlight(${JSON.stringify(target.cfiRange)}); true;`);
+      // Remove locally and mirror the deletion to the server.
+      await annotationSyncService.deleteHighlight(bookId, target.cfiRange);
+    } else {
+      await highlightService.removeHighlight(id);
     }
     loadHighlights();
   };
@@ -1214,24 +1286,36 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     loadHighlights();
   }, [loadBookmarks, loadHighlights]);
 
+  // Pull highlights & bookmarks from the server on open (falls back to local
+  // when signed out / offline — the sync service is local-first).
+  useEffect(() => {
+    if (!bookId) return;
+    let cancelled = false;
+    Promise.all([
+      annotationSyncService.syncHighlights(bookId),
+      annotationSyncService.syncBookmarks(bookId),
+    ]).then(([hls, bms]) => {
+      if (!cancelled) {
+        setHighlights(hls);
+        setBookmarks(bms);
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [bookId]);
+
   useEffect(() => {
     if (!isReady || !webViewRef.current) return;
-    const currentIds = new Set(highlights.map((h) => h.id));
-
-    highlights.forEach((h) => {
-      if (!appliedHighlightIdsRef.current.has(h.id)) {
-        const color = h.color || '#FACC15';
-        webViewRef.current?.injectJavaScript(
-          `if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(h.cfiRange)}, ${JSON.stringify(color)}); true;`
-        );
-        appliedHighlightIdsRef.current.add(h.id);
-      }
-    });
-
-    appliedHighlightIdsRef.current.forEach((id) => {
-      if (!currentIds.has(id)) appliedHighlightIdsRef.current.delete(id);
-    });
-  }, [highlights, isReady]);
+    // Push the full highlight list to the bridge. The bridge stores it on the
+    // window and re-applies it whenever the rendition is rebuilt (e.g. when the
+    // page-turn style changes), so highlights persist across style switches.
+    const payload = highlights.map((h) => ({
+      cfiRange: h.cfiRange,
+      color: h.color || '#FACC15',
+    }));
+    webViewRef.current.injectJavaScript(
+      `if (window.__bukooSetHighlights) window.__bukooSetHighlights(${JSON.stringify(payload)}); true;`
+    );
+  }, [highlights, isReady, pageTurnStyle]);
 
   // Load initial global reader settings from AsyncStorage on mount
   useEffect(() => {
@@ -1252,7 +1336,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }).catch(() => {});
   }, []);
 
-  // Sync typography, theme, and layout settings to WebView and AsyncStorage
+  // Sync typography, theme, and layout settings to the WebView. Runs only when
+  // a setting actually changes (or the reader becomes ready), NOT on every page
+  // turn — the position CFI is read from a ref so style switches still preserve
+  // the current position.
   useEffect(() => {
     if (!isReady || !webViewRef.current) return;
 
@@ -1268,31 +1355,34 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       const themeObj = themes[theme];
       const js = `
         if (window.__bukooSetTheme) window.__bukooSetTheme(${JSON.stringify(themeObj)});
-        if (window.__bukooSetPageTurnStyle) window.__bukooSetPageTurnStyle(${JSON.stringify(pageTurnStyle)}, ${JSON.stringify(currentCfi)});
+        if (window.__bukooSetPageTurnStyle) window.__bukooSetPageTurnStyle(${JSON.stringify(pageTurnStyle)}, ${JSON.stringify(currentCfiRef.current)});
         true;
       `;
       webViewRef.current?.injectJavaScript(js);
-      
-      AsyncStorage.setItem('reader_settings', JSON.stringify({
-        theme,
-        fontSize,
-        fontFamily,
-        pageTurnStyle,
-        lineHeight,
-        textAlign,
-      })).catch(console.error);
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign, isReady, currentCfi]);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign, isReady]);
+
+  // Persist settings to AsyncStorage only when a setting actually changes.
+  useEffect(() => {
+    AsyncStorage.setItem('reader_settings', JSON.stringify({
+      theme,
+      fontSize,
+      fontFamily,
+      pageTurnStyle,
+      lineHeight,
+      textAlign,
+    })).catch(console.error);
+  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
     const isBookmarked = await bookmarkService.isBookmarked(bookId, currentCfi);
     if (isBookmarked) {
-      await bookmarkService.removeBookmark(bookId, currentCfi);
+      await annotationSyncService.deleteBookmark(bookId, currentCfi);
     } else {
-      await bookmarkService.addBookmark(bookId, currentCfi, chapterTitle || 'Unknown Chapter');
+      await annotationSyncService.pushBookmark(bookId, currentCfi, chapterTitle || 'Unknown Chapter');
     }
     loadBookmarks();
   };
@@ -1383,7 +1473,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           case 'TOTAL_PAGES':
             if (msg.totalPages !== undefined) setTotalPages(msg.totalPages);
             if (msg.cachedLocations) {
-              AsyncStorage.setItem(`epub_locations_${bookId}`, msg.cachedLocations).catch(() => {});
+              // Store under a source fingerprint so a changed book file does
+              // not reuse stale locations.
+              const savedLocs = msg.cachedLocations;
+              getBookSourceFingerprint(localFileUri).then((fingerprint) => {
+                AsyncStorage.setItem(`epub_locations_${bookId}:${fingerprint}`, savedLocs).catch(() => {});
+              });
             }
             break;
           case 'TOC':
@@ -1396,8 +1491,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
               pageTurnStartTimeRef.current = null;
             }
             if (msg.page !== undefined && msg.cfi !== undefined) {
+              currentCfiRef.current = msg.cfi;
               setChapterInfo({
                 cfi: msg.cfi,
+                href: msg.chapterHref || '',
                 title: msg.chapterTitle || '',
                 currentPage: msg.chapterCurrentPage ?? 0,
                 totalPages: msg.chapterTotalPages ?? 1,
@@ -1407,8 +1504,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             break;
           case 'TEXT_SELECTED':
             if (msg.text && msg.cfi) {
-              const hlColor = 'rgba(250,204,21,0.4)';
-              highlightService.addHighlight(
+              // Hex color (no baked-in alpha) — the bridge applies a single
+              // fill-opacity, so creation and re-render look identical.
+              const hlColor = '#FACC15';
+              annotationSyncService.pushHighlight(
                 bookId,
                 msg.cfi,
                 msg.text,
@@ -1417,6 +1516,13 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 loadHighlights();
                 webViewRef.current?.injectJavaScript(`if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(msg.cfi)}, ${JSON.stringify(hlColor)}); true;`);
               });
+            }
+            break;
+          case 'HIGHLIGHT_CLICKED':
+            // A highlight in the text was tapped — surface it in the highlights
+            // modal so the user can read the note or edit/remove it.
+            if (msg.cfi) {
+              setShowHighlights(true);
             }
             break;
           case 'SEARCH_RESULTS':
@@ -1450,7 +1556,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress, handleCenterTap, loadHighlights, pageTurnStyle]
+    [bookId, updateProgress, handleCenterTap, loadHighlights, pageTurnStyle, localFileUri]
   );
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
@@ -1460,15 +1566,11 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     [epubJsContent, jsZipContent, theme]
   );
 
-  // When everything is ready, inject the EPUB data into the already-loaded WebView
-  const webViewShellReady = useRef(false);
-
   // True when we have a local or remote book URI ready to inject
   const hasBookData = !!localFileUri;
 
   const injectBookData = useCallback(async () => {
     if (!webViewRef.current || !localFileUri) return;
-    dataInjectTimeRef.current = performance.now();
 
     const isLocalFile = localFileUri.startsWith('file://') || localFileUri.startsWith('/');
 
@@ -1739,7 +1841,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         visible={showToc}
         onClose={() => setShowToc(false)}
         toc={toc}
-        currentChapterHref={currentCfi}
+        currentChapterHref={chapterInfo.href}
         onSelectLocation={jumpToLocation}
       />
 
@@ -1784,9 +1886,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         }))}
         onRemoveHighlight={(id) => handleDeleteHighlight(Number(id))}
         onSaveNote={(id, note) => {
-          highlightService.updateNote(Number(id), note).then(() => {
-            if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
-          });
+          const target = highlights.find((h) => String(h.id) === String(id));
+          const cfiRange = target?.cfiRange;
+          if (cfiRange) {
+            annotationSyncService.updateHighlightNote(bookId, cfiRange, note).then(() => {
+              if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
+            });
+          } else {
+            highlightService.updateNote(Number(id), note).then(() => {
+              if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
+            });
+          }
         }}
         onSelectHighlight={jumpToLocation}
       />
