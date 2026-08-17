@@ -7,17 +7,33 @@ Plan: `docs/superpowers/plans/2026-08-16-store-launch-option-a.md` · Spec: `doc
 - `[x]` 1. SDD docs (spec + plan + ledger)
 - `[x]` 2. Fix `download.epub` security gap (auth + entitlement in route)
 - `[x]` 3. Shared tier helper (`apps/web/src/lib/subscription.ts`) + `/me` subscription payload (API + mobile UserPublicDto)
-- `[x]` 4. Seed `subscription_plans` (4 plans) + `price_yearly` schema + migration `0002_wet_menace.sql` — ⚠️ remote D1 apply pending review
-- `[x]` 5. `api.bukoo.id` branding (wrangler route + eas.json/.env/api.ts/BookDetailScreen) — ⚠️ Cloudflare custom domain + redeploy pending
-- `[x]` 6. Google client ID reconcile (canonical `576187863248-9voo…` matching google-services.json) — ⚠️ verify Android OAuth SHA-1 in console
+- `[x]` 4. Seed `subscription_plans` (4 plans) + `price_yearly` schema + migration `0002_wet_menace.sql` — ✅ APPLIED to remote D1 2026-08-17
+- `[x]` 5. `api.bukoo.id` branding (wrangler route + eas.json/.env/api.ts/BookDetailScreen) — ✅ deployed, both URLs live
+- `[x]` 6. Google client ID reconcile (canonical `576187863248-9voo…`) — ⚠️ verify Android OAuth SHA-1 in console
 - `[x]` 7. `expo-apple-authentication` plugin in app.json — ⚠️ native rebuild required
 - `[x]` 8. Privacy/terms — already exist at `/privasi` + `/syarat-ketentuan` (verified)
 - `[x]` 9. Store-compliant informational subscription UI (SubscriptionScreen/Profile/AiCompanion/BookDetail gating)
-- `[x]` 10. Verify: typecheck ✅ (mobile/web/api/db), lint ✅ (mobile clean, api 0 errors + 2 pre-existing warnings, web changed files clean, db no lint script), tests (none exist — stated), store-compliance scan ✅
+- `[x]` 10. Verify: typecheck/lint/test + store-compliance scan ✅
+- `[x]` 11. `d1_migrations` tracker cleanup ✅ (0001_cultured_shiva + 0002 inserted; `migrations apply` = no-op)
+- `[x]` 12. Fresh-DB FTS corrective migration `0003_fix_fts5_triggers.sql` ✅ (insert-only design; incident + lesson recorded — see ledger)
+- `[x]` 13. **Phase 2 Firebase (code side)**: installed `@react-native-firebase/app|crashlytics|remote-config` v26 modular API, config plugins in app.json, `featureFlags.ts` service + `useFeatureFlags` hook, `home_layout` (carousel|grid) wired into HomeScreen, `pricing_display` (monthly_first|yearly_first) into SubscriptionScreen, `crashReporting.ts`, App.tsx boot hooks, `apk:release`/`distribute:firebase` scripts, `FIREBASE_MVP_TESTING.md` doc. Verified: typecheck ✅ lint ✅ tests none (stated).
+
+## Phase 2 — YOUR next actions (Firebase console, ~10 min)
+- [ ] Firebase console → project `bukoo-15ce3` (NO new project — google-services.json already wired)
+- [ ] App Distribution → create tester group `mvp-testers` + add emails
+- [ ] Remote Config → add parameters: `home_layout` (carousel/grid), `pricing_display` (monthly_first/yearly_first), `onboarding_flow` (full/short)
+- [ ] Crashlytics → Get started (Android)
+- [ ] `cd apps/mobile && npx firebase login` (Google account owning bukoo-15ce3)
+- [ ] Native rebuild: `npm run android` (or `eas build -p android --profile preview`) → SDKs take effect
+- [ ] `npm run apk:release` → `npm run distribute:firebase` → testers install
+- [ ] (optional) Add `@react-native-firebase/analytics` for event-based A/B metrics
 
 ## Manual follow-ups (blocked on accounts/PT/credentials — not code)
-- [ ] Provision `api.bukoo.id` custom domain in Cloudflare + redeploy `bukoo-api` worker
-- [ ] Apply `0002_wet_menace.sql` to remote D1 (review first) + run seed
+- [ ] ⚠️ d1_migrations tracker — ✅ RESOLVED 2026-08-17 (see above)
+- [ ] Verify/register release keystore SHA-1 on Android OAuth client in Google Cloud Console
+- [ ] Xendit account (waiting on PT) → sandbox → Phase 4 webhook/checkout
+- [ ] Phase 0 legal/accounts (PT, D-U-N, Apple, Play) → Phase 6 submission
+- [ ] Note: remote `books` has 0 rows; `books_fts` has harmless orphan rows; rebuild books_fts when real books exist
 - [ ] Verify/register release keystore SHA-1 on Android OAuth client in Google Cloud Console
 - [ ] Xendit account (waiting on PT) → sandbox → Phase 4 webhook/checkout
 - [ ] Phase 0 legal/accounts (PT, D-U-N, Apple, Play) → Phase 6 submission

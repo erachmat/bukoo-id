@@ -12,6 +12,7 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
+import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -25,6 +26,10 @@ export default function HomeScreen() {
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [refreshing, setRefreshing] = useState(false);
+
+  // A/B: home_layout — 'carousel' (current) vs 'grid' (2-column).
+  const homeLayout = useFeatureFlag('home_layout');
+  const isGrid = homeLayout === 'grid';
 
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
   const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
@@ -187,35 +192,68 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Dynamic Category / Trending Books List */}
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.trendingListContent}
-          data={currentBooksData}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.bookCard}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('ReadingStack', {
-                screen: 'BookDetail',
-                params: { bookId: item.id }
-              } as never)}
-            >
-              <View style={styles.coverWrapper}>
-                <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
-                {downloadedBookIds.includes(item.id) && (
-                  <View style={styles.downloadBadge}>
-                    <Text style={styles.downloadBadgeText}>⬇️</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
-              <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        {/* Dynamic Category / Trending Books List — carousel vs grid (A/B) */}
+        {isGrid ? (
+          <FlatList
+            data={currentBooksData}
+            key="grid"
+            numColumns={2}
+            columnWrapperStyle={styles.gridRow}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.gridContent}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.gridCard}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('ReadingStack', {
+                  screen: 'BookDetail',
+                  params: { bookId: item.id }
+                } as never)}
+              >
+                <View style={styles.coverWrapper}>
+                  <Image source={{ uri: item.coverUrl }} style={styles.gridCover} />
+                  {downloadedBookIds.includes(item.id) && (
+                    <View style={styles.downloadBadge}>
+                      <Text style={styles.downloadBadgeText}>⬇️</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+                <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.trendingListContent}
+            data={currentBooksData}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.bookCard}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('ReadingStack', {
+                  screen: 'BookDetail',
+                  params: { bookId: item.id }
+                } as never)}
+              >
+                <View style={styles.coverWrapper}>
+                  <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
+                  {downloadedBookIds.includes(item.id) && (
+                    <View style={styles.downloadBadge}>
+                      <Text style={styles.downloadBadgeText}>⬇️</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+                <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -387,6 +425,24 @@ const styles = StyleSheet.create({
   trendingListContent: {
     paddingHorizontal: 20,
     gap: 8,
+  },
+  gridContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  gridRow: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  gridCard: {
+    flex: 1,
+    maxWidth: '48%',
+  },
+  gridCover: {
+    width: '100%',
+    aspectRatio: 150 / 220,
+    borderRadius: 12,
+    backgroundColor: COLORS.forestCard,
   },
   bookCard: {
     width: 150,

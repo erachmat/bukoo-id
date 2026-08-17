@@ -6,7 +6,9 @@
   "compatibility_flags": ["nodejs_compat"],
 
   // Branded API endpoint: https://api.bukoo.id (custom domain on the bukoo.id zone).
-  // Keep the workers.dev URL working alongside for a grace period, then remove.
+  // Keep the workers.dev URL working alongside for a grace period (existing test
+  // APKs still point at it), then set workers_dev to false and remove.
+  "workers_dev": true,
   "routes": [
     { "pattern": "api.bukoo.id", "custom_domain": true }
   ],

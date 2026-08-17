@@ -36,11 +36,16 @@ in the web worker (`drizzle-orm/d1`). Drizzle migrations live in `packages/db/dr
 
 1. Never run migrations against the production D1 database directly — use `wrangler d1
 execute` with `--create-only` style review first, and validate generated SQL.
-2. **FTS5 gotcha (critical):** Cloudflare D1 does NOT support the FTS5 special
-   `'delete'` command. Any trigger doing `INSERT INTO ..._fts(...) VALUES ('delete', ...)`
-   breaks ALL writes on the base table with `SQLITE_ERROR 7500`. The old
-   `0001_fts5_books.sql` triggers were dropped from prod D1 (2026-08-16); don't re-add
-   FTS delete-triggers, use `INSERT OR REPLACE` if syncing an FTS index.
+2. **FTS5 gotcha (critical):** Cloudflare D1 does NOT support FTS5 `DELETE`/`UPDATE`
+   operations on virtual tables AT ALL — not just the special `'delete'` command, but
+   also plain `DELETE FROM ..._fts WHERE ...` (both throw `SQLITE_ERROR 7500`). Only
+   **INSERT into the FTS index works**. ⚠️ Local miniflare (`wrangler d1 execute --local`)
+   DOES support FTS deletes, so local tests can pass while remote D1 fails — always
+   verify FTS trigger behavior against REMOTE. The only D1-safe sync design (migration
+   `0003_fix_fts5_triggers.sql`, 2026-08-17) is an **insert-only** `AFTER INSERT`
+   trigger; NO delete/update triggers. Soft-removal uses `is_published = 0` (the API
+   search JOIN filters `b.is_published = 1`), and hard-DELETE leaves a harmless orphan
+   FTS row that the JOIN excludes. Do NOT re-add delete/update FTS triggers.
 3. `0001_fts5_books.sql` is NOT in the drizzle meta journal (pre-existing quirk).
 4. The web app no longer uses Neon or `DATABASE_URL` — that var was removed from
    `apps/web/.env` (2026-08-16). `apps/api` may still use its own storage.

@@ -15,6 +15,7 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/authStore';
+import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.78;
@@ -125,7 +126,11 @@ const PLANS: Plan[] = [
 export default function SubscriptionScreen() {
   const navigation = useNavigation();
   const user = useAuthStore((state) => state.user);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  // A/B: pricing_display — which billing cycle is selected by default.
+  const pricingDisplay = useFeatureFlag('pricing_display');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>(
+    pricingDisplay === 'yearly_first' ? 'yearly' : 'monthly'
+  );
   const [activeIndex, setActiveIndex] = useState(0);
 
   const subscription = user?.subscription;

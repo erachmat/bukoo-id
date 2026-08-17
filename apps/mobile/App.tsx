@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,6 +6,8 @@ import { useAuthHydration } from './src/hooks/useAuth';
 import AppNavigator from './src/navigation/AppNavigator';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { COLORS } from './src/constants/COLORS';
+import { initFeatureFlags } from './src/services/featureFlags';
+import { initCrashReporting } from './src/services/crashReporting';
 import { 
   useFonts, 
   PlayfairDisplay_400Regular, 
@@ -29,6 +31,13 @@ export default function App(): React.JSX.Element {
     'DMSans-Medium': DMSans_500Medium,
     'DMSans-Bold': DMSans_700Bold,
   });
+
+  // Firebase: enable crash reporting + load A/B feature flags once on boot.
+  // Both are fire-and-forget — the app renders on local defaults immediately.
+  useEffect(() => {
+    initCrashReporting();
+    initFeatureFlags();
+  }, []);
 
   if (!isReady || !fontsLoaded) {
     return (
