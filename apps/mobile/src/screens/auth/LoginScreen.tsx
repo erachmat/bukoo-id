@@ -33,7 +33,15 @@ import { COLORS } from '../../constants/COLORS';
 // - Android: Android google-services.json
 // Make sure to add them to your native project build directories.
 GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com',
+  // NOTE: `webClientId` must be the SERVER client ID (client_type 3) of the
+  // Android Firebase project that owns google-services.json — here project
+  // `bukoo-15ce3` (576187863248). That file's Android OAuth client carries the
+  // release keystore SHA-1 that Google Play App Signing will use. Do NOT swap
+  // this for the web project's client id (17547501035-...) — that breaks
+  // native Google Sign-In in release builds.
+  webClientId:
+    process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+    '576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com',
   offlineAccess: true,
 });
 

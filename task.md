@@ -1,5 +1,29 @@
 # current integration tasks
 
+# Store Launch — Option A (Free Reader App + Pay on Web) — 2026-08-16
+
+Plan: `docs/superpowers/plans/2026-08-16-store-launch-option-a.md` · Spec: `docs/superpowers/specs/2026-08-16-store-launch-option-a-design.md` · Ledger: `.superpowers/sdd/store-launch-option-a/progress.md`
+
+- `[x]` 1. SDD docs (spec + plan + ledger)
+- `[x]` 2. Fix `download.epub` security gap (auth + entitlement in route)
+- `[x]` 3. Shared tier helper (`apps/web/src/lib/subscription.ts`) + `/me` subscription payload (API + mobile UserPublicDto)
+- `[x]` 4. Seed `subscription_plans` (4 plans) + `price_yearly` schema + migration `0002_wet_menace.sql` — ⚠️ remote D1 apply pending review
+- `[x]` 5. `api.bukoo.id` branding (wrangler route + eas.json/.env/api.ts/BookDetailScreen) — ⚠️ Cloudflare custom domain + redeploy pending
+- `[x]` 6. Google client ID reconcile (canonical `576187863248-9voo…` matching google-services.json) — ⚠️ verify Android OAuth SHA-1 in console
+- `[x]` 7. `expo-apple-authentication` plugin in app.json — ⚠️ native rebuild required
+- `[x]` 8. Privacy/terms — already exist at `/privasi` + `/syarat-ketentuan` (verified)
+- `[x]` 9. Store-compliant informational subscription UI (SubscriptionScreen/Profile/AiCompanion/BookDetail gating)
+- `[x]` 10. Verify: typecheck ✅ (mobile/web/api/db), lint ✅ (mobile clean, api 0 errors + 2 pre-existing warnings, web changed files clean, db no lint script), tests (none exist — stated), store-compliance scan ✅
+
+## Manual follow-ups (blocked on accounts/PT/credentials — not code)
+- [ ] Provision `api.bukoo.id` custom domain in Cloudflare + redeploy `bukoo-api` worker
+- [ ] Apply `0002_wet_menace.sql` to remote D1 (review first) + run seed
+- [ ] Verify/register release keystore SHA-1 on Android OAuth client in Google Cloud Console
+- [ ] Xendit account (waiting on PT) → sandbox → Phase 4 webhook/checkout
+- [ ] Phase 0 legal/accounts (PT, D-U-N, Apple, Play) → Phase 6 submission
+
+# current integration tasks
+
 - `[x]` 1. Consolidate isPremium and subscriptionRequired
   - `[x]` Remove `isPremium` field from `prisma/schema.prisma` in `bukoo-web` and `bukoo-mobile-app`.
   - `[x]` Update all files in `bukoo-web` to use `subscriptionRequired` instead of `isPremium` (forms, actions, views, etc.).
@@ -251,3 +275,17 @@ Verification: mobile `tsc --noEmit` ✅, mobile lint ✅ (no errors; fixed one `
   - `[x]` `npm run typecheck --workspace=@bukoo/mobile` (PASSED).
   - `[x]` `npm run lint --workspace=@bukoo/mobile` (PASSED).
   - `[x]` `npm run test --workspace=@bukoo/mobile` (No tests configured for mobile yet).
+
+# GitHub Push Protection — Secret Leak Remediation (2026-08-16) ✅
+
+- [x] 1. Incident: `git push` blocked by GH013 (push protection) — `apps/web/.open-next/cloudflare/next-env.mjs` contained inlined secrets (`CLOUDFLARE_D1_TOKEN`, `CLOUDFLARE_R2_TOKEN` = same `cfat_` token, `AUTH_SECRET`, `CLOUDFLARE_ACCOUNT_ID`, D1 `database_id`) — OpenNext build output committed in local-only commit `60c7b08`.
+- [x] 2. Remediation (commit was never pushed — `ahead 1` of origin):
+  - [x] Untracked + removed from history: `apps/web/.open-next/`, `apps/web/.wrangler/`, `apps/api/.wrangler/` (26 miniflare state files), `apps/web/.env.production`.
+  - [x] Redacted D1 `database_id` in `apps/web/wrangler.jsonc` + `wrangler.prod.jsonc` → `REPLACE_WITH_D1_DATABASE_ID` (flagged by Cloudflare secret scanner).
+  - [x] `.gitignore`: added `**/.open-next/`, `**/.wrangler/`, `.env.production`.
+  - [x] Rewrote history: `4ba9d2f` (amended) + `d798761` (chore: remove wrangler local state + redact D1 id).
+  - [x] Verified: no real secrets in HEAD tree (remaining grep hits are placeholders/docs/types); pushed `a6f8fb2..d798761` successfully.
+- [ ] 3. (user) Rotate Cloudflare API token (`cfat_…`, D1/R2) — regenerated in Cloudflare dashboard → My Profile → API Tokens; update wherever used.
+- [ ] 4. (user) Rotate `AUTH_SECRET` (worker secret via `wrangler secret put`).
+- [ ] 5. (user) Restore real D1 `database_id` in `apps/web/wrangler.jsonc` + `wrangler.prod.jsonc` (or inject via CI/secret).
+- [ ] 6. (user, optional) Delete Vercel project + confirm Neon no longer needed (from migration section).

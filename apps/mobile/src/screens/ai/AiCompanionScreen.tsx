@@ -6,11 +6,14 @@ import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '../../stores/authStore';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
 export default function AiCompanionScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const user = useAuthStore((state) => state.user);
+  const activeTier = user?.subscription?.active ? user.subscription.tier : (user?.subscriptionTier || 'FREE');
 
   const recommendations = [
     {
@@ -72,7 +75,7 @@ export default function AiCompanionScreen() {
               onPress={() => navigation.navigate('Subscription')}
               activeOpacity={0.8}
             >
-              <Text style={styles.plusBadgeText}>PLUS</Text>
+              <Text style={styles.plusBadgeText}>{activeTier === 'FREE' ? 'GRATIS' : activeTier}</Text>
             </TouchableOpacity>
           </View>
 

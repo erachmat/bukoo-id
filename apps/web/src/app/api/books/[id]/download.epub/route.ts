@@ -1,8 +1,11 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDb } from '@/lib/db';
-import { books } from '@bukoo/db';
+import { books, subscriptions } from '@bukoo/db';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { isBookAccessible } from '@bukoo/shared-types';
+import { tierFromSubscription } from '@/lib/subscription';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,10 +16,10 @@ export const dynamic = 'force-dynamic';
  * archive rather than an unpacked directory (which would make it try to fetch
  * `META-INF/container.xml` and fail).
  *
- * The reader page (`/book/[id]/read`) already enforces authentication and
- * subscription access before rendering, so this route only needs to resolve
- * the book's `epub_key` and stream the object from the `BUKOO_STORAGE`
- * binding.
+ * SECURITY: unlike the previous implementation, this route now enforces
+ * authentication and subscription access itself (it no longer trusts that the
+ * reader page already did). Without this, any authenticated free user could
+ * fetch a paid book's EPUB directly by URL.
  */
 export async function GET(
   _request: Request,
@@ -24,10 +27,26 @@ export async function GET(
 ) {
   const { id } = await params;
 
+  const session = await auth();
+  if (!session?.user?.id) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
   const db = getDb();
-  const book = await db.query.books.findFirst({ where: eq(books.id, id) });
+  const [book, sub] = await Promise.all([
+    db.query.books.findFirst({ where: eq(books.id, id) }),
+    db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, session.user.id),
+    }),
+  ]);
   if (!book || !book.epubKey) {
     return new NextResponse('Not Found', { status: 404 });
+  }
+
+  // Enforce subscription entitlement as the final gate before streaming.
+  const userTier = tierFromSubscription(sub);
+  if (!isBookAccessible(userTier, book.subscriptionRequired)) {
+    return new NextResponse('Forbidden', { status: 403 });
   }
 
   const { env } = getCloudflareContext();

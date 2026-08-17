@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { users } from '@bukoo/db';
+import { users, subscriptions } from '@bukoo/db';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import type { Env } from '../types/env.js';
@@ -18,8 +18,23 @@ usersRouter.get('/me', async (c) => {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
 
-  const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+  const [user, sub] = await Promise.all([
+    db.query.users.findFirst({ where: eq(users.id, userId) }),
+    db.query.subscriptions.findFirst({ where: eq(subscriptions.userId, userId) }),
+  ]);
   if (!user) return c.json({ error: 'User not found' }, 404);
+
+  const active = !!sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING');
+  const subscription = sub
+    ? {
+        active,
+        tier: active ? sub.planId.replace('plan_', '').toUpperCase() : 'FREE',
+        planId: sub.planId,
+        expiresAt: sub.currentPeriodEnd ?? null,
+        status: sub.status,
+        paymentGateway: sub.paymentGateway ?? null,
+      }
+    : null;
 
   return c.json({
     id: user.id,
@@ -29,6 +44,7 @@ usersRouter.get('/me', async (c) => {
     role: user.role,
     onboardingCompleted: user.onboardingCompleted,
     createdAt: user.createdAt,
+    subscription,
   });
 });
 
@@ -54,6 +70,21 @@ usersRouter.patch('/me', zValidator('json', updateUserSchema), async (c) => {
   await db.update(users).set(updates).where(eq(users.id, userId));
 
   const updated = await db.query.users.findFirst({ where: eq(users.id, userId) });
+  const sub = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.userId, userId),
+  });
+  const active = !!sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING');
+  const subscription = sub
+    ? {
+        active,
+        tier: active ? sub.planId.replace('plan_', '').toUpperCase() : 'FREE',
+        planId: sub.planId,
+        expiresAt: sub.currentPeriodEnd ?? null,
+        status: sub.status,
+        paymentGateway: sub.paymentGateway ?? null,
+      }
+    : null;
+
   return c.json({
     id: updated!.id,
     name: updated!.name ?? '',
@@ -62,6 +93,7 @@ usersRouter.patch('/me', zValidator('json', updateUserSchema), async (c) => {
     role: updated!.role,
     onboardingCompleted: updated!.onboardingCompleted,
     createdAt: updated!.createdAt,
+    subscription,
   });
 });
 

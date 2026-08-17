@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '../../stores/authStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.78;
@@ -123,8 +124,26 @@ const PLANS: Plan[] = [
 
 export default function SubscriptionScreen() {
   const navigation = useNavigation();
+  const user = useAuthStore((state) => state.user);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const subscription = user?.subscription;
+  const activeTier = subscription?.active ? subscription.tier : 'FREE';
+  const expiresAt = subscription?.expiresAt ?? null;
+
+  const formatExpiry = (iso: string | null): string => {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return '';
+    }
+  };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -154,7 +173,7 @@ export default function SubscriptionScreen() {
             )}
           </View>
           <Ionicons
-            name="arrow-forward"
+            name="information-circle-outline"
             size={18}
             color={isDark ? COLORS.gold : '#1A1A1A'}
             style={styles.arrowIcon}
@@ -206,12 +225,6 @@ export default function SubscriptionScreen() {
             </View>
           ))}
         </View>
-
-        {/* CTA Upgrade Button */}
-        <TouchableOpacity style={styles.upgradeButton} activeOpacity={0.85}>
-          <Text style={styles.upgradeButtonText}>UPGRADE</Text>
-          <Ionicons name="arrow-forward" size={13} color="#FFFFFF" style={styles.btnArrowIcon} />
-        </TouchableOpacity>
       </View>
     );
   };
@@ -229,6 +242,20 @@ export default function SubscriptionScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Pilih Paket Bukoo</Text>
         <Text style={styles.subtitle}>Mulai Gratis, Upgrade kapan aja</Text>
+      </View>
+
+      {/* Current Subscription Status (informational, from /me) */}
+      <View style={styles.statusBanner}>
+        <Ionicons
+          name={subscription?.active ? 'checkmark-circle' : 'information-circle-outline'}
+          size={16}
+          color={subscription?.active ? '#34D399' : COLORS.gold}
+        />
+        <Text style={styles.statusText}>
+          {subscription?.active
+            ? `Status: ${activeTier} aktif${expiresAt ? ` s/d ${formatExpiry(expiresAt)}` : ''}`
+            : 'Status: Gratis'}
+        </Text>
       </View>
 
       {/* Billing Cycle Toggle */}
@@ -278,6 +305,13 @@ export default function SubscriptionScreen() {
             ]}
           />
         ))}
+      </View>
+
+      {/* Store-compliant neutral note (NOT a purchase link) */}
+      <View style={styles.footerNote}>
+        <Text style={styles.footerNoteText}>
+          Kelola langganan di bukoo.id
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -494,25 +528,33 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     textDecorationLine: 'line-through',
   },
-  upgradeButton: {
-    backgroundColor: COLORS.gold,
-    borderRadius: 24,
-    paddingVertical: 11,
-    marginTop: 8,
+  statusBanner: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#0F261F',
+    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#173D31',
   },
-  upgradeButtonText: {
-    color: '#FFFFFF',
+  statusText: {
+    color: COLORS.cream,
     fontSize: 13,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    letterSpacing: 0.5,
+    fontFamily: FONTS.sansMedium,
   },
-  btnArrowIcon: {
-    transform: [{ rotate: '-45deg' }],
+  footerNote: {
+    alignItems: 'center',
+    paddingBottom: 24,
+  },
+  footerNoteText: {
+    color: '#8BAAA0',
+    fontSize: 12,
+    fontFamily: FONTS.sansRegular,
   },
   paginationContainer: {
     flexDirection: 'row',

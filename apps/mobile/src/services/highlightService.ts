@@ -1,4 +1,4 @@
-import * as SQLite from 'expo-sqlite';
+import { getSharedDb } from './annotationDb';
 
 export interface Highlight {
   id: number;
@@ -11,30 +11,6 @@ export interface Highlight {
 }
 
 class HighlightService {
-  private db: SQLite.SQLiteDatabase | null = null;
-  private isInitialized = false;
-
-  async init() {
-    if (this.isInitialized) return;
-    try {
-      this.db = await SQLite.openDatabaseAsync('bukoo.db');
-      await this.db.execAsync(`
-        CREATE TABLE IF NOT EXISTS highlights (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          bookId TEXT NOT NULL,
-          cfiRange TEXT NOT NULL,
-          text TEXT NOT NULL,
-          color TEXT NOT NULL,
-          note TEXT,
-          createdAt INTEGER NOT NULL
-        );
-      `);
-      this.isInitialized = true;
-    } catch (e) {
-      console.error('[HighlightService] Failed to initialize db', e);
-    }
-  }
-
   async addHighlight(
     bookId: string, 
     cfiRange: string, 
@@ -42,11 +18,9 @@ class HighlightService {
     color: string, 
     note?: string
   ): Promise<void> {
-    await this.init();
-    if (!this.db) return;
-
     try {
-      await this.db.runAsync(
+      const db = await getSharedDb();
+      await db.runAsync(
         'INSERT INTO highlights (bookId, cfiRange, text, color, note, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
         bookId, cfiRange, text, color, note || null, Date.now()
       );
@@ -56,11 +30,9 @@ class HighlightService {
   }
 
   async removeHighlight(id: number): Promise<void> {
-    await this.init();
-    if (!this.db) return;
-
     try {
-      await this.db.runAsync(
+      const db = await getSharedDb();
+      await db.runAsync(
         'DELETE FROM highlights WHERE id = ?',
         id
       );
@@ -70,11 +42,9 @@ class HighlightService {
   }
 
   async getHighlights(bookId: string): Promise<Highlight[]> {
-    await this.init();
-    if (!this.db) return [];
-
     try {
-      const results = await this.db.getAllAsync<Highlight>(
+      const db = await getSharedDb();
+      const results = await db.getAllAsync<Highlight>(
         'SELECT * FROM highlights WHERE bookId = ? ORDER BY createdAt DESC',
         [bookId]
       );
@@ -86,11 +56,9 @@ class HighlightService {
   }
 
   async updateNote(id: number, note: string): Promise<void> {
-    await this.init();
-    if (!this.db) return;
-
     try {
-      await this.db.runAsync(
+      const db = await getSharedDb();
+      await db.runAsync(
         'UPDATE highlights SET note = ? WHERE id = ?',
         [note, id]
       );

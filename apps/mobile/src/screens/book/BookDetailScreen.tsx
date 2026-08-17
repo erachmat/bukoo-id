@@ -393,7 +393,7 @@ export default function BookDetailScreen() {
     if (epubPath.startsWith('http://') || epubPath.startsWith('https://')) {
       return epubPath;
     }
-    const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://bukoo-api.erachmat-dev.workers.dev';
+    const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://api.bukoo.id';
     const domainBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
     return `${domainBaseUrl}/${epubPath.replace(/^\//, '')}`;
   };
@@ -464,6 +464,10 @@ export default function BookDetailScreen() {
   const hasProgress = !!readingProgress;
   const buttonText = hasProgress ? 'Lanjutkan Membaca' : 'Mulai Membaca';
 
+  // Server-computed entitlement: the API returns is_accessible=false for
+  // subscription-gated books when the user lacks the required tier.
+  const isAccessible = book?.is_accessible !== false;
+
   const imageScale = scrollY.interpolate({
     inputRange: [-100, 0, 100],
     outputRange: [1.2, 1, 1],
@@ -525,23 +529,37 @@ export default function BookDetailScreen() {
           </View>
 
           <View style={styles.actionsContainer}>
-            {/* Primary Read button — ALWAYS rendered, never blocked by download state */}
-            <TouchableOpacity 
-              style={styles.primaryButton}
-              onPress={() => navigation.navigate('ReadingStack', {
-                screen: 'Reading',
-                params: {
-                  bookId: displayBook.id,
-                  title: displayBook.title,
-                  localEpubUri: localUri ?? undefined,
-                  epubUrl: displayBook.epubUrl ?? undefined,
-                }
-              })}
-              accessibilityRole="button"
-              accessibilityLabel={buttonText}
-            >
-              <Text style={styles.primaryButtonText}>{buttonText}</Text>
-            </TouchableOpacity>
+            {isAccessible ? (
+              /* Primary Read button — for accessible (FREE or entitled) books */
+              <TouchableOpacity 
+                style={styles.primaryButton}
+                onPress={() => navigation.navigate('ReadingStack', {
+                  screen: 'Reading',
+                  params: {
+                    bookId: displayBook.id,
+                    title: displayBook.title,
+                    localEpubUri: localUri ?? undefined,
+                    epubUrl: displayBook.epubUrl ?? undefined,
+                  }
+                })}
+                accessibilityRole="button"
+                accessibilityLabel={buttonText}
+              >
+                <Text style={styles.primaryButtonText}>{buttonText}</Text>
+              </TouchableOpacity>
+            ) : (
+              /* Subscription-gated book: informational only, no purchase action.
+                 Tapping shows the (non-purchasable) plan info screen. */
+              <TouchableOpacity
+                style={styles.lockedButton}
+                onPress={() => navigation.navigate('Subscription')}
+                accessibilityRole="button"
+                accessibilityLabel="Buku khusus premium"
+              >
+                <Ionicons name="lock-closed" size={16} color="#FFFFFF" />
+                <Text style={styles.lockedButtonText}>Khusus Premium</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Offline download / remove action */}
             {!isDownloaded ? (
@@ -747,6 +765,23 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+  },
+  lockedButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.forestBorder,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  lockedButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',

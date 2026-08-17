@@ -71,10 +71,12 @@ export default function ProfileScreen() {
     }
   };
 
+  const activeTier = user?.subscription?.active ? user.subscription.tier : (user?.subscriptionTier || 'FREE');
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Top Header Bar with Logo & Upgrade CTA */}
+        {/* Top Header Bar with Logo & Subscription Status */}
         <View style={styles.topHeaderBar}>
           <View style={styles.brandContainer}>
             <LogoBukoo size={30} />
@@ -82,14 +84,14 @@ export default function ProfileScreen() {
 
           <View style={styles.topHeaderActions}>
             <View style={styles.plusPill}>
-              <Text style={styles.plusPillText}>PLUS</Text>
+              <Text style={styles.plusPillText}>{activeTier === 'FREE' ? 'GRATIS' : activeTier}</Text>
             </View>
             <TouchableOpacity
               style={styles.upgradeButton}
               onPress={() => navigation.navigate('Subscription')}
               activeOpacity={0.8}
             >
-              <Text style={styles.upgradeButtonText}>UPGRADE ↗</Text>
+              <Text style={styles.upgradeButtonText}>Langganan</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -240,38 +242,6 @@ export default function ProfileScreen() {
                 <Text style={styles.detailsValue}>
                   {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' }) : '-'}
                 </Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.closeModalButton} onPress={() => setActiveModal(null)}>
-              <Text style={styles.closeModalButtonText}>Tutup</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Subscription Modal */}
-      <Modal visible={activeModal === 'subscription'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Langganan BUKOO</Text>
-            <Text style={styles.modalSubtitle}>Nikmati pengalaman membaca tanpa batasan.</Text>
-            <View style={styles.subscriptionStatusCard}>
-              <Text style={styles.subStatusLabel}>Status Langganan Anda:</Text>
-              <Text style={styles.subStatusValue}>{user?.subscriptionTier === 'PREMIUM' ? 'VIP Premium' : 'Free Member'}</Text>
-            </View>
-            <View style={{ gap: 12, marginBottom: 24 }}>
-              <Text style={{ color: COLORS.cream, fontWeight: 'bold', fontSize: 14, fontFamily: FONTS.sansBold }}>Keuntungan Premium:</Text>
-              <View style={styles.perkRow}>
-                <Ionicons name="checkmark-circle" size={18} color={COLORS.gold} />
-                <Text style={styles.perkText}>Akses 10,000+ e-book & audiobook</Text>
-              </View>
-              <View style={styles.perkRow}>
-                <Ionicons name="checkmark-circle" size={18} color={COLORS.gold} />
-                <Text style={styles.perkText}>Sinkronisasi bacaan lintas perangkat</Text>
-              </View>
-              <View style={styles.perkRow}>
-                <Ionicons name="checkmark-circle" size={18} color={COLORS.gold} />
-                <Text style={styles.perkText}>Unduhan luring & bacaan luring</Text>
               </View>
             </View>
             <TouchableOpacity style={styles.closeModalButton} onPress={() => setActiveModal(null)}>

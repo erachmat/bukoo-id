@@ -243,6 +243,8 @@ export const subscriptionPlans = sqliteTable('subscription_plans', {
   id:           text('id').primaryKey(),
   name:         text('name').notNull(),
   priceMonthly: real('price_monthly').notNull(),
+  /** Annual price in IDR (nullable until set for a plan). */
+  priceYearly:  real('price_yearly'),
   currency:     text('currency').notNull().default('IDR'),
   trialDays:    integer('trial_days').notNull().default(7),
   /** JSON-serialized string[] of feature descriptions */

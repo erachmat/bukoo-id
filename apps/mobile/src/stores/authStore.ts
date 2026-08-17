@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export interface UserSubscriptionDto {
+  active: boolean;
+  tier: string;
+  planId: string | null;
+  expiresAt: string | null;
+  status: string | null;
+  paymentGateway: string | null;
+}
+
 export interface UserPublicDto {
   id: string;
   name: string;
@@ -10,6 +19,8 @@ export interface UserPublicDto {
   subscriptionTier: string;
   onboardingCompleted: boolean;
   createdAt: string;
+  /** Server-computed subscription state (from GET /v1/users/me). */
+  subscription?: UserSubscriptionDto | null;
 }
 
 interface AuthState {
