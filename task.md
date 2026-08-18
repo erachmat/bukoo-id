@@ -1,5 +1,12 @@
 # current integration tasks
 
+# Mobile Home Screen Personalization & Quick Resume Widget — 2026-08-18
+
+- `[x]` 1. Quick Resume card component (`QuickResumeCard.tsx`) positioned at top of Home feed.
+- `[x]` 2. Daily reading target card (`ReadingGoalCard.tsx`) integration in `HomeScreen.tsx`.
+- `[x]` 3. Personalized category boosting (`★ Agama`, `★ Fiksi`) & `★ Favorit` badges on book cover thumbnails matching user preferences.
+- `[x]` 4. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Edit Profile & User Preferences Enhancements — 2026-08-18
 
 - `[x]` 1. Avatar presets & profile update service (`userProfileService.ts`).

@@ -13,10 +13,13 @@ import { FONTS } from '../../constants/FONTS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFeatureFlag } from '../../hooks/useFeatureFlags';
+import { QuickResumeCard } from './components/QuickResumeCard';
+import { ReadingGoalCard } from './components/ReadingGoalCard';
+import { userProfileService } from '../../services/userProfileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
-const CATEGORIES = ['Semua', 'Fiksi', 'Self Dev', 'Teknologi', 'Bisnis', 'Sejarah'];
+const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Teknologi', 'Bisnis'];
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -24,6 +27,7 @@ export default function HomeScreen() {
   const isFocused = useIsFocused();
 
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+  const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -39,6 +43,7 @@ export default function HomeScreen() {
     bookDownloadService.getDownloadedBooks()
       .then(setDownloadedBookIds)
       .catch(err => console.error('[HomeScreen] Failed to load downloaded books:', err));
+    userProfileService.getFavoriteGenres().then(setFavoriteGenres);
   }, [isFocused]);
 
   const { data: trendingBooks, refetch: refetchBooks } = useQuery({
@@ -134,22 +139,29 @@ export default function HomeScreen() {
           <Text style={styles.searchPlaceholder}>Cari buku, Penulis, genre...</Text>
         </TouchableOpacity>
 
+        {/* Quick Resume Active Reading Widget */}
+        <QuickResumeCard />
+
+        {/* Daily Reading Target & Streak Card */}
+        <ReadingGoalCard />
+
         {/* Category Pills Scroll */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesScroll}
         >
-          {CATEGORIES.map((cat, idx) => {
+          {Array.from(new Set(['Semua', ...favoriteGenres, ...BASE_CATEGORIES])).map((cat, idx) => {
             const isSelected = selectedCategory === cat;
+            const isFav = favoriteGenres.includes(cat);
             return (
               <TouchableOpacity
                 key={`${cat}-${idx}`}
-                style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
+                style={[styles.categoryPill, isSelected && styles.categoryPillActive, isFav && !isSelected && { borderColor: 'rgba(217, 119, 6, 0.4)' }]}
                 onPress={() => setSelectedCategory(cat)}
               >
-                <Text style={[styles.categoryText, isSelected && styles.categoryTextActive]}>
-                  {cat}
+                <Text style={[styles.categoryText, isSelected && styles.categoryTextActive, isFav && !isSelected && { color: COLORS.gold }]}>
+                  {isFav ? `★ ${cat}` : cat}
                 </Text>
               </TouchableOpacity>
             );
@@ -202,27 +214,35 @@ export default function HomeScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.gridContent}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.gridCard}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('ReadingStack', {
-                  screen: 'BookDetail',
-                  params: { bookId: item.id }
-                } as never)}
-              >
-                <View style={styles.coverWrapper}>
-                  <Image source={{ uri: item.coverUrl }} style={styles.gridCover} />
-                  {downloadedBookIds.includes(item.id) && (
-                    <View style={styles.downloadBadge}>
-                      <Text style={styles.downloadBadgeText}>⬇️</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-              </TouchableOpacity>
-            )}
+            renderItem={({ item }) => {
+              const isMatchFav = item.genre?.some((g: string) => favoriteGenres.includes(g)) || favoriteGenres.some(fg => item.title?.toLowerCase().includes(fg.toLowerCase()));
+              return (
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('ReadingStack', {
+                    screen: 'BookDetail',
+                    params: { bookId: item.id }
+                  } as never)}
+                >
+                  <View style={styles.coverWrapper}>
+                    <Image source={{ uri: item.coverUrl }} style={styles.gridCover} />
+                    {downloadedBookIds.includes(item.id) && (
+                      <View style={styles.downloadBadge}>
+                        <Text style={styles.downloadBadgeText}>⬇️</Text>
+                      </View>
+                    )}
+                    {isMatchFav && (
+                      <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: COLORS.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                        <Text style={{ color: '#0A1A15', fontSize: 9, fontWeight: 'bold' }}>★ Favorit</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+                </TouchableOpacity>
+              );
+            }}
           />
         ) : (
           <FlatList
@@ -231,27 +251,35 @@ export default function HomeScreen() {
             contentContainerStyle={styles.trendingListContent}
             data={currentBooksData}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.bookCard}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('ReadingStack', {
-                  screen: 'BookDetail',
-                  params: { bookId: item.id }
-                } as never)}
-              >
-                <View style={styles.coverWrapper}>
-                  <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
-                  {downloadedBookIds.includes(item.id) && (
-                    <View style={styles.downloadBadge}>
-                      <Text style={styles.downloadBadgeText}>⬇️</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-              </TouchableOpacity>
-            )}
+            renderItem={({ item }) => {
+              const isMatchFav = item.genre?.some((g: string) => favoriteGenres.includes(g)) || favoriteGenres.some(fg => item.title?.toLowerCase().includes(fg.toLowerCase()));
+              return (
+                <TouchableOpacity
+                  style={styles.bookCard}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('ReadingStack', {
+                    screen: 'BookDetail',
+                    params: { bookId: item.id }
+                  } as never)}
+                >
+                  <View style={styles.coverWrapper}>
+                    <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
+                    {downloadedBookIds.includes(item.id) && (
+                      <View style={styles.downloadBadge}>
+                        <Text style={styles.downloadBadgeText}>⬇️</Text>
+                      </View>
+                    )}
+                    {isMatchFav && (
+                      <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: COLORS.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                        <Text style={{ color: '#0A1A15', fontSize: 9, fontWeight: 'bold' }}>★ Favorit</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+                </TouchableOpacity>
+              );
+            }}
           />
         )}
       </ScrollView>
