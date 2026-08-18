@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 interface SidebarProps {
-  user: any;
+  user: {
+    name?: string | null;
+    email?: string | null;
+  };
 }
 
 export function PublisherSidebar({ user }: SidebarProps) {

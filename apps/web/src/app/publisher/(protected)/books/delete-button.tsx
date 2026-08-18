@@ -11,8 +11,8 @@ export function DeletePublisherBookButton({ bookId, bookTitle }: { bookId: strin
     startTransition(async () => {
       try {
         await deletePublisherBook(bookId)
-      } catch (err: any) {
-        alert(err.message || 'Gagal menghapus buku.')
+      } catch (err: unknown) {
+        alert((err as Error).message || 'Gagal menghapus buku.')
       }
     })
   }

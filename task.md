@@ -1,5 +1,26 @@
 # current integration tasks
 
+# Web publisher.bukoo.id & Publisher Portal Implementation — 2026-08-18
+
+- `[x]` 1. Cloudflare Workers domain route pattern for `publisher.bukoo.id` (`wrangler.prod.jsonc`).
+- `[x]` 2. Edge middleware domain routing & role redirection (`middleware.ts`).
+- `[x]` 3. Shared Publisher main navigation menu component (`PublisherNav.tsx`).
+- `[x]` 4. Next.js routes for all 5 planned publisher designs:
+  - `[x]` **Daftar Penerbit** (`/publisher/daftar/page.tsx`)
+  - `[x]` **Dashboard** (`/publisher/dashboard/page.tsx`)
+  - `[x]` **Submit Judul** (`/publisher/submit/page.tsx`)
+  - `[x]` **Kebijakan Royalti** (`/publisher/royalti/page.tsx`)
+  - `[x]` **Panduan Penerbit** (`/publisher/panduan/page.tsx`)
+- `[x]` 5. Verification: `typecheck` ✅ (0 errors), `eslint` ✅ (0 errors), `test` (no test script in apps/web package.json).
+
+# Mobile Audio Companion & Audiobook Player Enhancements — 2026-08-18
+
+- `[x]` 1. Reactive audio player state service (`audioPlayerService.ts`).
+- `[x]` 2. Persistent floating mini audio player bar (`MiniAudioPlayer.tsx`).
+- `[x]` 3. Fullscreen audio player modal sheet (`AudioPlayerModal.tsx`) with 15s skip, playback speed toggle, and sleep timer.
+- `[x]` 4. Integration in `ReadingScreen.tsx` (narration headset button) and `HomeScreen.tsx` (mini player float).
+- `[x]` 5. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Notification & Reading Reminder Center Enhancements — 2026-08-18
 
 - `[x]` 1. Notification feed & daily reminder service (`notificationService.ts`).

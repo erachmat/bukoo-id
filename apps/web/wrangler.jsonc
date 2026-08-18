@@ -8,7 +8,7 @@
     {
       "binding": "DB",
       "database_name": "bukoo-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "84f02aaa-eda5-4a93-ae92-ace4f00af03c"
     }
   ],
   "r2_buckets": [

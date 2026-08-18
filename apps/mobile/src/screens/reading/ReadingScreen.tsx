@@ -27,6 +27,7 @@ import { SearchModal, SearchResultItem } from './components/SearchModal';
 import { SettingsModal, ReaderTheme } from './components/SettingsModal';
 import { HighlightModal } from './components/HighlightModal';
 import { QuickJumpSlider } from './components/QuickJumpSlider';
+import { audioPlayerService } from '../../services/audioPlayerService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1705,6 +1706,24 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <TouchableOpacity
+              style={styles.headerAction}
+              onPress={() => {
+                audioPlayerService.playTrack({
+                  id: `audio-${bookId}`,
+                  bookId: bookId,
+                  bookTitle: title || 'Buku Sastra BUKOO',
+                  bookAuthor: 'Penulis Sastra',
+                  coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
+                  chapterTitle: chapterTitle || 'Bab 1: Pendahuluan Audio',
+                  durationSeconds: 1125,
+                });
+              }}
+              accessibilityLabel="Audio Companion Narasi"
+            >
+              <Ionicons name="headset-outline" size={22} color={COLORS.gold} />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.headerAction} onPress={() => setShowSearch(true)} accessibilityLabel="Cari dalam buku">
               <Ionicons name="search-outline" size={22} color={themeColors[theme].text} />
             </TouchableOpacity>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUKOO — Kebijakan Royalti</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --forest:#1E4035; --forest-d:#122A22; --forest-dd:#0A1A15;
+  --forest-l:#2A5A48; --forest-ll:#34705A; --forest-lll:#4A907A;
+  --amber:#C9952A; --amber-lt:#F0D080;
+  --teal:#00C9A7; --teal-d:#00957A; --coral:#FF6B4A;
+  --cream:#FAF7F2; --text:#F0EDE6;
+  --text-dim:rgba(240,237,230,0.65); --text-muted:rgba(240,237,230,0.35);
+  --border:rgba(201,149,42,0.12); --border-hi:rgba(201,149,42,0.3);
+  --card-bg:rgba(255,255,255,0.04); --card-bg-hi:rgba(255,255,255,0.07);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--forest-dd);color:var(--text);overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;}
+img{display:block;max-width:100%;}
+a{text-decoration:none;color:inherit;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--forest-dd);}
+::-webkit-scrollbar-thumb{background:var(--forest-l);border-radius:3px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size:256px;opacity:0.4;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 60px;position:relative;z-index:2;}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 60px;background:linear-gradient(180deg,rgba(10,26,21,0.95) 0%,transparent 100%);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,149,42,0.08);transition:background .3s;}
+.nav.scrolled{background:rgba(10,26,21,0.98);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--amber);letter-spacing:-1px;}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;}
+.nav-links a{font-size:13px;font-weight:600;color:var(--text-dim);transition:color .2s;letter-spacing:.2px;}
+.nav-links a:hover,.nav-links a.on{color:var(--amber);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.btn-ghost{font-size:13px;font-weight:700;color:var(--text-dim);padding:8px 20px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;transition:all .2s;cursor:pointer;background:transparent;display:inline-block;}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);}
+.btn-cta{font-size:13px;font-weight:800;color:var(--forest-dd);background:var(--amber);padding:9px 24px;border-radius:6px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.2px;display:inline-block;}
+.btn-cta:hover{background:var(--amber-lt);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,149,42,0.35);}
+.btn-lg{font-size:15px;padding:14px 32px;}
+
+.subnav{position:fixed;top:68px;left:0;right:0;z-index:99;background:rgba(18,42,34,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.subnav-in{max-width:1180px;margin:0 auto;padding:0 60px;display:flex;align-items:center;gap:8px;height:52px;overflow-x:auto;}
+.subnav-in::-webkit-scrollbar{height:0;}
+.subnav-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-right:14px;white-space:nowrap;}
+.subnav a{font-size:13px;font-weight:600;color:var(--text-dim);padding:7px 15px;border-radius:100px;white-space:nowrap;transition:all .18s;border:1px solid transparent;}
+.subnav a:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+.subnav a.on{color:var(--forest-dd);background:var(--amber);}
+.subnav-back{margin-left:auto;font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.subnav-back:hover{color:var(--amber);}
+
+.phero{position:relative;padding:170px 0 70px;overflow:hidden;}
+.phero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 15% 0%,rgba(201,149,42,0.13) 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(0,201,167,0.08) 0%,transparent 55%),linear-gradient(180deg,#0A1A15 0%,#122A22 60%,#0A1A15 100%);}
+.phero-grid{position:absolute;inset:0;z-index:0;opacity:.6;background-image:linear-gradient(rgba(201,149,42,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,149,42,0.05) 1px,transparent 1px);background-size:64px 64px;}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;color:var(--amber);margin-bottom:22px;}
+.eyebrow::before{content:'';width:26px;height:1.5px;background:var(--amber);}
+.ph-h1{font-family:'Playfair Display',serif;font-size:clamp(34px,5.5vw,58px);font-weight:700;line-height:1.06;color:#fff;max-width:18ch;}
+.ph-h1 em{font-style:italic;color:var(--amber);}
+.ph-h1 .q{color:var(--text-muted);font-weight:400;}
+.ph-lead{font-size:clamp(15px,1.8vw,19px);color:var(--text-dim);max-width:60ch;margin-top:24px;font-weight:300;line-height:1.7;}
+.ph-lead strong{color:var(--text);font-weight:600;}
+.hero-ctas{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;}
+
+.sec{padding:80px 0;position:relative;}
+.sec.alt{background:var(--forest-d);}
+.sec-head{max-width:720px;margin-bottom:44px;}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+.sec-head.center .eyebrow{justify-content:center;}
+.h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3.6vw,42px);font-weight:700;color:#fff;line-height:1.12;}
+.h2 em{font-style:italic;color:var(--amber);}
+.sec-desc{font-size:16px;color:var(--text-dim);margin-top:18px;line-height:1.7;max-width:62ch;}
+.sec-head.center .sec-desc{margin-left:auto;margin-right:auto;}
+
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:30px;transition:.25s;}
+.pill{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);padding:4px 11px;border:1px solid var(--border-hi);border-radius:100px;display:inline-block;}
+.pill-teal{color:var(--teal);border-color:rgba(0,201,167,.3);}
+.pill-coral{color:var(--coral);border-color:rgba(255,107,74,.3);}
+.disc{background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.24);border-radius:12px;padding:16px 20px;font-size:12.5px;color:var(--text-dim);line-height:1.65;}
+.disc b{color:var(--amber);}
+.callout{background:rgba(0,201,167,.07);border:1px solid rgba(0,201,167,.24);border-radius:12px;padding:18px 20px;font-size:14px;color:var(--text-dim);line-height:1.65;}
+.callout b{color:var(--teal);}
+
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+.fcard{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:30px 26px;transition:.25s;}
+.fcard:hover{transform:translateY(-4px);border-color:var(--border-hi);background:var(--card-bg-hi);}
+.fcard .ic{font-size:28px;margin-bottom:16px;}
+.fcard h4{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:9px;line-height:1.25;}
+.fcard p{font-size:13.5px;color:var(--text-dim);line-height:1.65;}
+.fcard .tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;display:inline-block;}
+
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(201,149,42,.16);border-bottom:1px solid rgba(201,149,42,.16);}
+.statrow .st{padding:26px 22px;border-right:1px solid rgba(255,255,255,.07);}
+.statrow .st:last-child{border-right:none;}
+.st-n{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);font-weight:700;color:var(--amber);line-height:1;}
+.st-n small{font-size:16px;color:var(--text-muted);}
+.st-l{font-size:12.5px;color:var(--text-dim);margin-top:9px;line-height:1.45;}
+
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+.steps.s3{grid-template-columns:repeat(3,1fr);}
+.steps.s5{grid-template-columns:repeat(5,1fr);}
+.steps-line{position:absolute;top:26px;left:11%;right:11%;height:1.5px;background:var(--border);}
+.step{text-align:center;padding:0 16px;position:relative;}
+.step .d{width:52px;height:52px;border-radius:50%;background:var(--forest-dd);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:20px;position:relative;z-index:2;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber);}
+.step h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;}
+.step p{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+
+.checklist{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.checklist li{font-size:14.5px;color:var(--text-dim);display:flex;gap:12px;line-height:1.6;}
+.checklist li::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;}
+.checklist li b{color:var(--text);}
+
+.listcard{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:26px;transition:.2s;display:block;}
+.listcard:hover{border-color:var(--border-hi);background:var(--card-bg-hi);}
+.listcard .meta{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap;}
+.listcard h4{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.25;}
+.listcard p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+.listcard .more{font-size:12.5px;font-weight:700;color:var(--teal);margin-top:14px;display:inline-block;}
+
+.faq{max-width:840px;}
+.faq.center{margin:0 auto;}
+.faq-i{border-bottom:1px solid var(--border);}
+.faq-q{width:100%;text-align:left;background:none;border:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15.5px;font-weight:600;padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.faq-q .ic{color:var(--amber);font-size:22px;flex-shrink:0;transition:transform .2s;}
+.faq-i.open .faq-q .ic{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-a p{font-size:14px;color:var(--text-dim);line-height:1.7;padding:0 0 20px;margin:0;}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+.contact-ch{display:flex;gap:16px;padding:20px;background:var(--card-bg);border:1px solid var(--border);border-radius:13px;margin-bottom:14px;}
+.contact-ch .ic{font-size:22px;flex-shrink:0;}
+.contact-ch h5{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px;}
+.contact-ch p{font-size:13px;color:var(--text-dim);}
+.contact-ch a{color:var(--amber);}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:7px;}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:.18s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--amber);}
+.fg textarea{resize:vertical;min-height:90px;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-submit{width:100%;font-size:15px;font-weight:800;color:var(--forest-dd);background:var(--amber);padding:15px;border-radius:9px;border:none;cursor:pointer;transition:.2s;}
+.form-submit:hover{background:var(--amber-lt);}
+.form-ok{display:none;background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.3);border-radius:12px;padding:24px;text-align:center;}
+.form-ok h4{font-family:'Playfair Display',serif;color:var(--teal);font-size:20px;margin-bottom:8px;}
+.form-ok p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;}
+.chip{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px;}
+.chip .ic{font-size:16px;}
+
+.cband{background:var(--forest);border:1px solid var(--border-hi);border-radius:18px;padding:44px;text-align:center;}
+.cband h3{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,32px);color:#fff;margin-bottom:12px;line-height:1.15;}
+.cband h3 em{font-style:italic;color:var(--amber);}
+.cband p{font-size:15px;color:var(--text-dim);max-width:56ch;margin:0 auto 22px;line-height:1.6;}
+
+.footer{background:var(--forest-dd);border-top:1px solid var(--border);padding:60px 0 30px;position:relative;z-index:2;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--amber);letter-spacing:-0.5px;margin-bottom:12px;}
+.footer-tagline{font-size:13px;color:var(--text-muted);line-height:1.65;max-width:240px;margin-bottom:20px;}
+.social-row{display:flex;gap:10px;}
+.social-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;}
+.social-btn:hover{background:rgba(201,149,42,0.1);border-color:rgba(201,149,42,0.3);}
+.footer-col-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:16px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-links a{font-size:13px;color:var(--text-muted);transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:12px;color:var(--text-muted);}
+.footer-legal{display:flex;gap:24px;}
+.footer-legal a{font-size:12px;color:var(--text-muted);transition:color .2s;}
+.footer-legal a:hover{color:var(--text);}
+
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+.rv.in{opacity:1;transform:none;}
+
+@media(max-width:900px){
+  .wrap{padding:0 24px;} .nav{padding:0 24px;} .nav-links{display:none;}
+  .subnav-in{padding:0 24px;}
+  .phero{padding:150px 0 56px;} .sec{padding:60px 0;}
+  .grid3,.grid4,.grid2{grid-template-columns:1fr;}
+  .statrow{grid-template-columns:1fr 1fr;} .statrow .st{border-right:none;padding:18px;}
+  .statrow .st:nth-child(odd){border-right:1px solid rgba(255,255,255,.07);}
+  .steps,.steps.s3,.steps.s5{grid-template-columns:1fr 1fr;gap:28px 0;} .steps-line{display:none;}
+  .contact-grid{grid-template-columns:1fr;} .fg-row{grid-template-columns:1fr;}
+}
+@media(max-width:560px){ .footer-grid{grid-template-columns:1fr;} .statrow{grid-template-columns:1fr;} .statrow .st:nth-child(odd){border-right:none;} }
+
+
+.formula{background:var(--forest);border:1px solid var(--border-hi);border-radius:14px;padding:30px 34px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(13px,2vw,18px);line-height:2;margin-bottom:40px;}
+.formula .v{color:var(--amber);}.formula .op{color:var(--text-muted);}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:40px;}
+.tier{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:28px;}
+.tier-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.tier-pct{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;line-height:1;}
+.tier.t1 .tier-pct{color:var(--forest-lll);}.tier.t2 .tier-pct{color:var(--amber);}.tier.t3 .tier-pct{color:var(--coral);}
+.tier-badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 11px;border-radius:100px;border:1px solid var(--border-hi);color:var(--text-dim);}
+.tier h4{font-family:'Playfair Display',serif;font-size:18px;color:#fff;margin-bottom:7px;}
+.tier p{font-size:13px;color:var(--text-dim);line-height:1.6;}
+.guar{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.guar-c{display:flex;gap:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:13px;padding:22px;}
+.guar-i{font-size:22px;flex-shrink:0;}
+.guar-c h5{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;}
+.guar-c p{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+
+/* calculator */
+.calc{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;}
+.calc-in{padding:36px;border-right:1px solid var(--border);}
+.calc-out{padding:36px;background:rgba(0,0,0,.22);}
+.cinp{margin-bottom:28px;}
+.cinp:last-child{margin-bottom:0;}
+.cinp-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px;}
+.cinp label{font-size:13px;color:var(--text-dim);font-weight:500;}
+.cinp .val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--amber);}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:100px;background:rgba(255,255,255,.12);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;background:var(--amber);cursor:pointer;border:3px solid var(--forest-dd);box-shadow:0 0 0 1px var(--amber);}
+input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:var(--amber);cursor:pointer;border:3px solid var(--forest-dd);}
+.tbtns{display:flex;gap:8px;}
+.tbtn{flex:1;padding:11px 6px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--text-dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.16s;}
+.tbtn.on{background:var(--amber);border-color:var(--amber);color:var(--forest-dd);}
+.cout-l{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);font-weight:700;margin-bottom:8px;}
+.cout-big{font-family:'Playfair Display',serif;font-size:clamp(34px,5vw,52px);font-weight:700;color:#fff;line-height:1;}
+.cout-sub{font-size:13px;color:var(--text-muted);margin-top:9px;}
+.cbd{margin-top:26px;border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:11px;}
+.cbd-r{display:flex;justify-content:space-between;font-size:13px;}
+.cbd-r span:first-child{color:var(--text-dim);}
+.cbd-r span:last-child{font-family:'JetBrains Mono',monospace;color:var(--text);}
+.cbd-r.tot span:last-child{color:var(--amber);font-weight:700;font-size:15px;}
+
+/* faq */
+.faq{max-width:820px;margin:0 auto;}
+.faq-i{border-bottom:1px solid var(--border);}
+.faq-q{width:100%;text-align:left;background:none;border:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:600;padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.faq-q .ic{color:var(--amber);font-size:22px;flex-shrink:0;transition:transform .2s;}
+.faq-i.open .faq-q .ic{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-a p{font-size:14px;color:var(--text-dim);line-height:1.7;padding:0 0 22px;}
+@media(max-width:900px){.tiers,.guar{grid-template-columns:1fr;}.calc-grid{grid-template-columns:1fr;}.calc-in{border-right:none;border-bottom:1px solid var(--border);}}
+
+</style></head><body>
+<nav class="nav" id="navbar">
+  <a href="bukoo-website.html" class="nav-logo">BUKOO</a>
+  <ul class="nav-links">
+    <li><a href="bukoo-website.html">Beranda</a></li>
+    <li><a href="produk-koleksi.html">Produk</a></li>
+    <li><a href="produk-harga.html">Harga</a></li>
+    <li><a href="penerbit-daftar.html" class="on">Untuk Penerbit</a></li>
+    <li><a href="perusahaan-tentang.html">Perusahaan</a></li>
+    <li><a href="bantuan-pusat.html">Bantuan</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="bantuan-langganan.html" class="btn-ghost">Masuk</a>
+    <a href="produk-harga.html" class="btn-cta">Coba Gratis</a>
+  </div>
+</nav>
+<div class="subnav"><div class="subnav-in"><span class="subnav-tag">Untuk Penerbit</span><a href="penerbit-daftar.html">Daftar Penerbit</a><a href="penerbit-dashboard.html">Dashboard</a><a href="penerbit-royalti.html" class="on">Kebijakan Royalti</a><a href="penerbit-submit.html">Submit Judul</a><a href="penerbit-panduan.html">Panduan Penerbit</a><a href="bukoo-website.html" class="subnav-back">← Kembali ke BUKOO</a></div></div>
+
+<section class="phero" style="padding-bottom:40px;">
+  <div class="phero-bg"></div><div class="phero-grid"></div>
+  <div class="wrap">
+    <span class="eyebrow">Kebijakan Royalti</span>
+    <h1 class="ph-h1">Bagi hasil yang <em>adil</em> dan transparan penuh</h1>
+    <p class="ph-lead">Kami tidak menyembunyikan cara royalti dihitung. Formulanya sederhana, terbuka, dan dapat Anda pantau setiap saat lewat dashboard penerbit.</p>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:24px;">
+  <div class="wrap">
+    <div class="formula rv"><span class="v">Royalti Anda</span> <span class="op">=</span> Revenue Pool <span class="op">×</span> <span class="v">Porsi Pembacaan</span> <span class="op">×</span> <span class="v">Tier %</span></div>
+
+    <div class="sec-head rv" style="margin-bottom:24px;"><span class="eyebrow">Tiga Tier Bagi Hasil</span><h2 class="h2">Semakin dalam komitmen, semakin tinggi <em>bagian Anda</em></h2></div>
+    <div class="tiers rv">
+      <div class="tier t1"><div class="tier-top"><div class="tier-pct">65<span style="font-size:20px">%</span></div><span class="tier-badge">Big Publisher</span></div><h4>Penerbit Besar</h4><p>Katalog luas, judul unggulan, komitmen eksklusif. Tier bagi hasil tertinggi.</p></div>
+      <div class="tier t2"><div class="tier-top"><div class="tier-pct">55<span style="font-size:20px">%</span></div><span class="tier-badge">Growth</span></div><h4>Penerbit Menengah</h4><p>Katalog berkembang dengan judul kuat di genre spesifik. Tier menengah yang kompetitif.</p></div>
+      <div class="tier t3"><div class="tier-top"><div class="tier-pct">50<span style="font-size:20px">%</span></div><span class="tier-badge">Partner</span></div><h4>Penerbit Mitra Baru</h4><p>Titik awal kerjasama. Tier naik seiring performa katalog & komitmen jangka panjang.</p></div>
+    </div>
+
+    <div class="guar rv">
+      <div class="guar-c"><div class="guar-i">🗓️</div><div><h5>Transfer tanggal 5</h5><p>Royalti dibayar rutin tiap tanggal 5, tanpa penundaan.</p></div></div>
+      <div class="guar-c"><div class="guar-i">📈</div><div><h5>Dashboard real-time</h5><p>Pantau pembacaan, share, & royalti berjalan kapan saja.</p></div></div>
+      <div class="guar-c"><div class="guar-i">🤝</div><div><h5>60–70% ke penerbit</h5><p>Janji tetap. Kami transparan soal angka, sekarang & selamanya.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head center rv"><span class="eyebrow">Ilustrasi Potensi</span><h2 class="h2">Perkirakan potensi <em>royalti Anda</em></h2><p class="sec-desc">Geser untuk melihat bagaimana skala pelanggan & porsi pembacaan memengaruhi royalti bulanan. Semua angka bersifat ilustratif.</p></div>
+    <div class="calc rv">
+      <div class="calc-grid">
+        <div class="calc-in">
+          <div class="cinp"><div class="cinp-top"><label>Total pelanggan berbayar BUKOO</label><span class="val" id="vSubs">100.000</span></div><input type="range" id="subs" min="20000" max="1000000" step="10000" value="100000"></div>
+          <div class="cinp"><div class="cinp-top"><label>Porsi pembacaan katalog Anda</label><span class="val" id="vShare">8%</span></div><input type="range" id="share" min="1" max="30" step="1" value="8"></div>
+          <div class="cinp"><div class="cinp-top"><label>Tier bagi hasil Anda</label><span class="val" id="vTier">50%</span></div>
+            <div class="tbtns" id="tbtns"><button class="tbtn" data-t="0.50">50%</button><button class="tbtn" data-t="0.55">55%</button><button class="tbtn" data-t="0.65">65%</button></div>
+          </div>
+        </div>
+        <div class="calc-out">
+          <div class="cout-l">Ilustrasi royalti / bulan</div>
+          <div class="cout-big" id="royOut">Rp 0</div>
+          <div class="cout-sub" id="roySub">— per tahun</div>
+          <div class="cbd">
+            <div class="cbd-r"><span>Gross revenue platform</span><span id="cbGross">—</span></div>
+            <div class="cbd-r"><span>Revenue pool (65%)</span><span id="cbPool">—</span></div>
+            <div class="cbd-r"><span>Porsi katalog Anda</span><span id="cbPorsi">—</span></div>
+            <div class="cbd-r tot"><span>× Tier → Royalti</span><span id="cbRoy">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="disc rv"><b>Catatan transparansi (Radikal Transparansi BUKOO).</b> Aplikasi rilis 3 September 2026 — angka di atas adalah <b>ilustrasi berbasis asumsi</b>, bukan jaminan pendapatan. Asumsi: ARPU campuran Rp 45.000/pelanggan berbayar/bulan; revenue pool 65% dari gross; royalti = pool × porsi pembacaan × tier. Angka nyata bergantung jumlah pelanggan aktual, perilaku baca, & komposisi katalog.</div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head center rv"><span class="eyebrow">Pertanyaan Umum</span><h2 class="h2">FAQ <em>Royalti</em></h2></div>
+    <div class="faq rv">
+      <div class="faq-i"><button class="faq-q">Bagaimana "porsi pembacaan" dihitung?<span class="ic">+</span></button><div class="faq-a"><p>Porsi pembacaan adalah proporsi total sesi baca yang tuntas dari katalog Anda dibanding seluruh pembacaan di platform pada periode itu. Semakin banyak & semakin dalam buku Anda dibaca, semakin besar porsi Anda dari revenue pool.</p></div></div>
+      <div class="faq-i"><button class="faq-q">Kapan dan bagaimana royalti dibayarkan?<span class="ic">+</span></button><div class="faq-a"><p>Royalti dihitung per bulan kalender dan ditransfer setiap tanggal 5 bulan berikutnya ke rekening penerbit. Rincian perhitungan tersedia lengkap di dashboard, sehingga setiap rupiah bisa Anda telusuri.</p></div></div>
+      <div class="faq-i"><button class="faq-q">Bagaimana tier saya bisa naik?<span class="ic">+</span></button><div class="faq-a"><p>Tier ditinjau berkala berdasarkan performa katalog, jumlah judul, dan komitmen kerjasama (mis. eksklusivitas atau jendela rilis). Penerbit yang katalognya konsisten diminati akan naik ke tier bagi hasil yang lebih tinggi.</p></div></div>
+      <div class="faq-i"><button class="faq-q">Apakah ada biaya yang dipotong dari penerbit?<span class="ic">+</span></button><div class="faq-a"><p>Tidak ada biaya pendaftaran, biaya penyimpanan, atau biaya tersembunyi. Bagi hasil sudah bersih: yang Anda lihat di dashboard adalah yang Anda terima. Tidak ada biaya cetak, gudang, atau retur seperti pada distribusi fisik.</p></div></div>
+      <div class="faq-i"><button class="faq-q">Apakah saya tetap mengontrol harga & positioning buku?<span class="ic">+</span></button><div class="faq-a"><p>Ya. Anda menentukan judul mana yang masuk katalog digital, jendela rilisnya, dan dapat memposisikan buku unggulan sebagai premium (mis. lewat tier akses atau kredit buku). Kendali katalog tetap di tangan Anda.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">BUKOO</div>
+        <p class="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
+        <div class="social-row"><div class="social-btn">📘</div><div class="social-btn">📷</div><div class="social-btn">🎵</div><div class="social-btn">🐦</div><div class="social-btn">▶</div></div></div>
+      <div><div class="footer-col-title">Produk</div><ul class="footer-links">
+        <li><a href="produk-koleksi.html">Koleksi Buku</a></li><li><a href="produk-audiobook.html">Audiobook</a></li>
+        <li><a href="produk-originals.html">BUKOO Originals</a></li><li><a href="produk-ai-companion.html">AI Companion</a></li>
+        <li><a href="produk-komunitas.html">Komunitas</a></li><li><a href="produk-harga.html">Harga &amp; Paket</a></li></ul></div>
+      <div><div class="footer-col-title">Perusahaan</div><ul class="footer-links">
+        <li><a href="perusahaan-tentang.html">Tentang BUKOO</a></li><li><a href="perusahaan-karir.html">Karir</a></li>
+        <li><a href="perusahaan-newsroom.html">Newsroom</a></li><li><a href="perusahaan-investor.html">Investor Relations</a></li>
+        <li><a href="perusahaan-blog.html">Blog</a></li><li><a href="perusahaan-kontak.html">Kontak</a></li></ul></div>
+      <div><div class="footer-col-title">Untuk Penerbit</div><ul class="footer-links">
+        <li><a href="penerbit-daftar.html">Daftar Penerbit</a></li><li><a href="penerbit-dashboard.html">Publisher Dashboard</a></li>
+        <li><a href="penerbit-royalti.html">Kebijakan Royalti</a></li><li><a href="penerbit-submit.html">Submit Judul</a></li>
+        <li><a href="penerbit-panduan.html">Panduan Penerbit</a></li></ul></div>
+      <div><div class="footer-col-title">Bantuan</div><ul class="footer-links">
+        <li><a href="bantuan-pusat.html">Pusat Bantuan</a></li><li><a href="bantuan-langganan.html">Cara Berlangganan</a></li>
+        <li><a href="bantuan-pembayaran.html">Pembayaran</a></li><li><a href="bantuan-perangkat.html">Perangkat &amp; App</a></li>
+        <li><a href="bantuan-faq.html">Komunitas FAQ</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><div class="footer-copy">© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</div>
+      <div class="footer-legal"><a href="perusahaan-kontak.html">Kontak</a><a href="bukoo-website.html">Privasi</a><a href="bantuan-pusat.html">Bantuan</a></div></div>
+  </div></footer>
+<script>
+
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+window.addEventListener('scroll',function(){var n=document.getElementById('navbar');if(n){if(window.scrollY>50)n.classList.add('scrolled');else n.classList.remove('scrolled');}});
+document.addEventListener('click',function(e){var q=e.target.closest('.faq-q');if(!q)return;var i=q.parentElement,a=q.nextElementSibling,open=i.classList.contains('open');if(open){i.classList.remove('open');a.style.maxHeight=null;}else{i.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}});
+document.addEventListener('submit',function(e){var f=e.target.closest('.demo-form');if(!f)return;e.preventDefault();var ok=f.querySelector('.form-ok');f.querySelectorAll('.fg,.form-submit').forEach(function(x){x.style.display='none';});if(ok){ok.style.display='block';ok.scrollIntoView({behavior:'smooth',block:'center'});}});
+
+
+var ARPU=45000,POOL=0.65,tier=0.50;
+var subs=document.getElementById('subs'),share=document.getElementById('share'),tb=document.getElementById('tbtns');
+function fmt(n){if(n>=1e9)return 'Rp '+(n/1e9).toLocaleString('id-ID',{maximumFractionDigits:2})+' M';if(n>=1e6)return 'Rp '+(n/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt';return 'Rp '+Math.round(n).toLocaleString('id-ID');}
+function full(n){return 'Rp '+Math.round(n).toLocaleString('id-ID');}
+function calc(){var s=+subs.value,sh=+share.value/100,g=s*ARPU,p=g*POOL,po=p*sh,r=po*tier;
+  document.getElementById('vSubs').textContent=s.toLocaleString('id-ID');
+  document.getElementById('vShare').textContent=(+share.value)+'%';
+  document.getElementById('vTier').textContent=Math.round(tier*100)+'%';
+  document.getElementById('royOut').textContent=fmt(r);
+  document.getElementById('roySub').textContent=full(r*12)+' per tahun (ilustrasi)';
+  document.getElementById('cbGross').textContent=fmt(g)+' /bln';
+  document.getElementById('cbPool').textContent=fmt(p)+' /bln';
+  document.getElementById('cbPorsi').textContent=fmt(po)+' /bln';
+  document.getElementById('cbRoy').textContent=fmt(r)+' /bln';}
+tb.querySelectorAll('.tbtn').forEach(function(b){b.addEventListener('click',function(){tb.querySelectorAll('.tbtn').forEach(function(x){x.classList.remove('on');});b.classList.add('on');tier=+b.dataset.t;calc();});});
+tb.querySelector('[data-t="0.50"]').classList.add('on');
+subs.addEventListener('input',calc);share.addEventListener('input',calc);calc();
+
+</script></body></html>

@@ -24,6 +24,7 @@ const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Tekn
 import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
 import { NotificationModal } from './components/NotificationModal';
 import { notificationService } from '../../services/notificationService';
+import { MiniAudioPlayer } from '../../components/MiniAudioPlayer';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -309,6 +310,8 @@ export default function HomeScreen() {
         onClose={() => setNotifModalVisible(false)}
         onNotificationsChanged={refreshUnreadCount}
       />
+
+      <MiniAudioPlayer />
     </SafeAreaView>
   );
 }

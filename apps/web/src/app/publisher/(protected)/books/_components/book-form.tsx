@@ -24,9 +24,9 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
     startTransition(async () => {
       try {
         await action(fd)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err)
-        setErrorMsg(err.message || 'Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
+        setErrorMsg((err as Error).message || 'Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
       }
     })
   }
