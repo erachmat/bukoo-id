@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { readingSync } from '../services/readingSync';
+import { readingGoalService } from '../services/readingGoalService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,6 +13,10 @@ export interface UseReadingSessionReturn {
   progressPercent: number;
   /** Total seconds spent reading this session */
   readingTimeSeconds: number;
+  /** True when the daily reading goal has been achieved during this session */
+  isGoalAchieved: boolean;
+  /** Dismiss celebration banner */
+  dismissGoalBanner: () => void;
   /**
    * The CFI position where the user left off, loaded from local SQLite on mount.
    * Empty string when there is no saved position (first open).
@@ -26,21 +31,12 @@ export interface UseReadingSessionReturn {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-/**
- * Manages the full lifecycle of a reading session for a single book.
- *
- * - Initialises ReadingSync on mount, tears it down on unmount.
- * - Calls stopSession when the app is backgrounded so the final state
- *   is flushed to the server immediately.
- * - Resumes time tracking when the app returns to the foreground.
- * - Listens for network recovery and retries any pending offline syncs.
- * - Exposes reactive state (currentPage, progressPercent) that drives the UI.
- */
 export function useReadingSession(bookId: string, isReady: boolean = true): UseReadingSessionReturn {
   const [currentPage, setCurrentPage] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
   const [readingTimeSeconds, setReadingTimeSeconds] = useState(0);
   const [initialCfi, setInitialCfi] = useState('');
+  const [isGoalAchieved, setIsGoalAchieved] = useState(false);
 
   // Track whether we were previously offline so we only retry on transition
   const wasOfflineRef = useRef(false);
@@ -138,6 +134,11 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
       if (intervalHandle) return;
       intervalHandle = setInterval(() => {
         setReadingTimeSeconds((prev) => prev + 1);
+        readingGoalService.recordReadingTime(1).then(({ isGoalAchievedNow }) => {
+          if (isGoalAchievedNow) {
+            setIsGoalAchieved(true);
+          }
+        });
       }, 1_000);
     };
 
@@ -177,9 +178,6 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
         setProgressPercent(percent);
       }
 
-      // Persist page, cfi, and percent atomically to SQLite and mark dirty.
-      // Passing percent here avoids a separate UPDATE that could race the
-      // first INSERT and leave the stored percent at 0.
       readingSync.updateLocalProgress(page, cfi, percent).catch((err) =>
         console.warn('[useReadingSession] updateLocalProgress failed:', err)
       );
@@ -187,10 +185,16 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
     []
   );
 
+  const dismissGoalBanner = useCallback(() => {
+    setIsGoalAchieved(false);
+  }, []);
+
   return {
     currentPage,
     progressPercent,
     readingTimeSeconds,
+    isGoalAchieved,
+    dismissGoalBanner,
     initialCfi,
     updateProgress,
   };

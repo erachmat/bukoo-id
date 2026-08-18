@@ -1,5 +1,35 @@
 # current integration tasks
 
+# Mobile Reading Progress & Goal System Enhancements — 2026-08-18
+
+- `[x]` 1. Reading goal & streak persistence service (`readingGoalService.ts`).
+- `[x]` 2. Daily reading target card & 7-day streak indicator (`ReadingGoalCard.tsx`).
+- `[x]` 3. Reading analytics & target selector modal (`ReadingAnalyticsModal.tsx`).
+- `[x]` 4. Integration into `LibraryScreen.tsx` & `ProfileScreen.tsx`.
+- `[x]` 5. Active session reading time ticker & non-intrusive goal celebration banner in `ReadingScreen.tsx`.
+- `[x]` 6. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
+# Mobile Book Detail Screen Improvements — 2026-08-18
+
+- `[x]` 1. Wishlist persistence service (`wishlistService.ts`) & heart toggle button in header.
+- `[x]` 2. "Baca Sampel" (Read Sample) secondary CTA button launching reader in sample mode (`isSample: true`).
+- `[x]` 3. Rating distribution breakdown bar chart & user reviews section (`BookReviewsSection.tsx`).
+- `[x]` 4. "+ Tulis Ulasan" bottom sheet review submission modal (`WriteReviewModal.tsx`) with account guard.
+- `[x]` 5. AI Book Insight card (`AiBookInsightCard.tsx`) with key takeaways and reading duration estimate.
+- `[x]` 6. Related recommendations horizontal carousel (`RelatedBooksCarousel.tsx`).
+- `[x]` 7. Animated floating header bar fading in title on scroll in `BookDetailScreen.tsx`.
+- `[x]` 8. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
+# Mobile Search, Sort, Filter & Reading UX Enhancements — 2026-08-18
+
+- `[x]` 1. Debounced search execution hook (`useDebounce.ts`) & persistent search history service (`searchHistoryService.ts`).
+- `[x]` 2. Filter & Sort Bottom Sheet modal (`FilterModal.tsx`) & active filter chips (`FilterChips.tsx`).
+- `[x]` 3. Enhanced `SearchScreen.tsx` with instant clear input, recent search history chips, active filter pills, and rich empty state.
+- `[x]` 4. Enhanced `LibraryScreen.tsx` with filter tabs ("Semua", "Sedang Dibaca", "Selesai", "Ingin Dibaca", "Diunduh ⬇️"), sorting selector, and offline EPUB download sync.
+- `[x]` 5. Reader settings & theme enhancements (`SettingsModal.tsx`) with OLED Black theme, font size stepper, line height slider, margin presets, and page turn modes.
+- `[x]` 6. Chapter ETA calculation & HUD status readout (`~X mnt tersisa di bab ini`) in `ReadingScreen.tsx`.
+- `[x]` 7. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Store Launch — Option A (Free Reader App + Pay on Web) — 2026-08-16
 
 Plan: `docs/superpowers/plans/2026-08-16-store-launch-option-a.md` · Spec: `docs/superpowers/specs/2026-08-16-store-launch-option-a-design.md` · Ledger: `.superpowers/sdd/store-launch-option-a/progress.md`
@@ -9,23 +39,22 @@ Plan: `docs/superpowers/plans/2026-08-16-store-launch-option-a.md` · Spec: `doc
 - `[x]` 3. Shared tier helper (`apps/web/src/lib/subscription.ts`) + `/me` subscription payload (API + mobile UserPublicDto)
 - `[x]` 4. Seed `subscription_plans` (4 plans) + `price_yearly` schema + migration `0002_wet_menace.sql` — ✅ APPLIED to remote D1 2026-08-17
 - `[x]` 5. `api.bukoo.id` branding (wrangler route + eas.json/.env/api.ts/BookDetailScreen) — ✅ deployed, both URLs live
-- `[x]` 6. Google client ID reconcile (canonical `576187863248-9voo…`) — ⚠️ verify Android OAuth SHA-1 in console
+- `[x]` 6. Google client ID reconcile (canonical `576187863248-9voo…`) — ✅ **VERIFIED 2026-08-18**: Google Sign-In + register work in the distributed APK (debug keystore SHA-1 `5e8f16062…` matches OAuth client). ⚠️ EAS release keystore + Play App Signing SHA-1 registration still pending (only when store builds start — non-blocking for testing)
 - `[x]` 7. `expo-apple-authentication` plugin in app.json — ⚠️ native rebuild required
 - `[x]` 8. Privacy/terms — already exist at `/privasi` + `/syarat-ketentuan` (verified)
 - `[x]` 9. Store-compliant informational subscription UI (SubscriptionScreen/Profile/AiCompanion/BookDetail gating)
 - `[x]` 10. Verify: typecheck/lint/test + store-compliance scan ✅
 - `[x]` 11. `d1_migrations` tracker cleanup ✅ (0001_cultured_shiva + 0002 inserted; `migrations apply` = no-op)
 - `[x]` 12. Fresh-DB FTS corrective migration `0003_fix_fts5_triggers.sql` ✅ (insert-only design; incident + lesson recorded — see ledger)
-- `[x]` 13. **Phase 2 Firebase (code side)**: installed `@react-native-firebase/app|crashlytics|remote-config` v26 modular API, config plugins in app.json, `featureFlags.ts` service + `useFeatureFlags` hook, `home_layout` (carousel|grid) wired into HomeScreen, `pricing_display` (monthly_first|yearly_first) into SubscriptionScreen, `crashReporting.ts`, App.tsx boot hooks, `apk:release`/`distribute:firebase` scripts, `FIREBASE_MVP_TESTING.md` doc. Verified: typecheck ✅ lint ✅ tests none (stated).
+- `[x]` 13. **Phase 2 Firebase (code side)**: installed `@react-native-firebase/app|crashlytics|remote-config` v26 modular API, config plugins in app.json (app/crashlytics — remote-config needs NO plugin), `featureFlags.ts` service + `useFeatureFlags` hook, `home_layout` (carousel|grid) wired into HomeScreen, `pricing_display` (monthly_first|yearly_first) into SubscriptionScreen, `crashReporting.ts`, App.tsx boot hooks, `apk:release`/`distribute:firebase` scripts, `FIREBASE_MVP_TESTING.md` doc. Verified: typecheck ✅ lint ✅ tests none (stated).
+- `[x]` 14. **Phase 2 LIVE**: ✅ 2026-08-18 — distributed `app-release.apk` (debug-signed, Firebase SDKs incl.) to `mvp-testers` on `bukoo-15ce3` (release 1.0.0 (1)). Auth saga: `npx firebase` wrong package → use `npx firebase-tools`; stale token (expired 2025-08-30) → fixed via `npx firebase-tools login --reauth`.
+- `[x]` 15. **Google Sign-In verified in distributed APK**: ✅ user tested login/register successfully (debug keystore SHA-1 already registered on OAuth client).
 
 ## Phase 2 — YOUR next actions (Firebase console, ~10 min)
 - [ ] Firebase console → project `bukoo-15ce3` (NO new project — google-services.json already wired)
 - [ ] App Distribution → create tester group `mvp-testers` + add emails
 - [ ] Remote Config → add parameters: `home_layout` (carousel/grid), `pricing_display` (monthly_first/yearly_first), `onboarding_flow` (full/short)
-- [ ] Crashlytics → Get started (Android)
-- [ ] `cd apps/mobile && npx firebase login` (Google account owning bukoo-15ce3)
-- [ ] Native rebuild: `npm run android` (or `eas build -p android --profile preview`) → SDKs take effect
-- [ ] `npm run apk:release` → `npm run distribute:firebase` → testers install
+- [ ] Crashlytics → Get started (Android) — SDK already in distributed APK, just activate + verify a test crash
 - [ ] (optional) Add `@react-native-firebase/analytics` for event-based A/B metrics
 
 ## Manual follow-ups (blocked on accounts/PT/credentials — not code)

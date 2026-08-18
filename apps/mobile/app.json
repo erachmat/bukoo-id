@@ -34,8 +34,7 @@
       "@react-native-google-signin/google-signin",
       "expo-apple-authentication",
       "@react-native-firebase/app",
-      "@react-native-firebase/crashlytics",
-      "@react-native-firebase/remote-config"
+      "@react-native-firebase/crashlytics"
     ]
   }
 }

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { booksApi, FeaturedBooksResponseDto, BookItemDto } from '../../services/api';
+import { booksApi, FeaturedBooksResponseDto, BookItemDto, SearchFilterParams } from '../../services/api';
 
 export function useFeaturedBooks() {
   return useQuery<FeaturedBooksResponseDto>({
@@ -9,11 +9,14 @@ export function useFeaturedBooks() {
   });
 }
 
-export function useSearchBooks(query: string) {
+export function useSearchBooks(paramsOrQuery: string | SearchFilterParams) {
+  const queryStr = typeof paramsOrQuery === 'string' ? paramsOrQuery : paramsOrQuery.query || '';
+  const filterKey = typeof paramsOrQuery === 'string' ? paramsOrQuery : JSON.stringify(paramsOrQuery);
+
   return useQuery<BookItemDto[]>({
-    queryKey: ['books', 'search', query],
-    queryFn: () => booksApi.search(query),
-    enabled: query.trim().length > 0,
+    queryKey: ['books', 'search', filterKey],
+    queryFn: () => booksApi.search(paramsOrQuery),
+    enabled: queryStr.trim().length > 0 || (typeof paramsOrQuery !== 'string' && Boolean(paramsOrQuery.genre || paramsOrQuery.tier)),
     staleTime: 2 * 60 * 1000,
   });
 }

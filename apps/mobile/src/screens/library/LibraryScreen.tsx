@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
+import { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl, Modal, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -14,19 +14,65 @@ import { Ionicons } from '@expo/vector-icons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
+type LibraryTab = 'semua' | 'sedang_dibaca' | 'selesai' | 'ingin_dibaca' | 'diunduh';
+type LibrarySortOption = 'recent' | 'title' | 'progress';
+
+const DEFAULT_BOOKS_LIST = [
+  {
+    id: 'laut-bercerita',
+    title: 'Laut Bercerita',
+    author: 'Laila S. Chudori',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+    progressPercent: 40,
+    status: 'sedang_dibaca',
+  },
+  {
+    id: 'cage-the-raven',
+    title: 'CAGE THE RAVEN',
+    author: 'Author Name',
+    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
+    progressPercent: 0,
+    status: 'ingin_dibaca',
+  },
+  {
+    id: 'moby-dick-library',
+    title: 'Moby Dick',
+    author: 'Herman Melville',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+    progressPercent: 100,
+    status: 'selesai',
+  },
+  {
+    id: 'authority-library',
+    title: 'AUTHORITY',
+    author: 'Jeff Vandermeer',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+    progressPercent: 0,
+    status: 'ingin_dibaca',
+  },
+];
+
+import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
+import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
+
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<LibraryTab>('semua');
+  const [sortOption, setSortOption] = useState<LibrarySortOption>('recent');
+  const [sortModalVisible, setSortModalVisible] = useState(false);
+  const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
 
   const { data: userLibraryProgress, refetch: refetchLibraryProgress } = useUserLibrary();
 
   useEffect(() => {
     if (isFocused) {
-      bookDownloadService.getDownloadedBooks()
+      bookDownloadService
+        .getDownloadedBooks()
         .then(setDownloadedBookIds)
-        .catch(err => console.error('Failed to load downloaded books:', err));
+        .catch((err) => console.error('Failed to load downloaded books:', err));
     }
   }, [isFocused]);
 
@@ -55,34 +101,60 @@ export default function LibraryScreen() {
     }
   };
 
-  const wantToReadBooks = [
-    {
-      id: 'cage-the-raven',
-      title: 'CAGE THE',
-      author: 'AUTHOR NAME',
-      coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    },
-    {
-      id: 'moby-dick-library',
-      title: 'Moby Dick',
-      author: 'Herman Melville',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    },
-    {
-      id: 'authority-library',
-      title: 'AUTHORITY',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    },
-  ];
+  const allLibraryItems = useMemo(() => {
+    if (books && books.length > 0) {
+      return books.map((b: { id: string; title: string; author: string; coverUrl?: string }) => {
+        const prog = userLibraryProgress?.find((p) => p.bookId === b.id);
+        const percent = prog?.progressPercent ?? 0;
+        let status: LibraryTab = 'ingin_dibaca';
+        if (percent >= 100) status = 'selesai';
+        else if (percent > 0) status = 'sedang_dibaca';
+        return {
+          id: b.id,
+          title: b.title,
+          author: b.author,
+          coverUrl: b.coverUrl || 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+          progressPercent: percent,
+          status,
+        };
+      });
+    }
+    return DEFAULT_BOOKS_LIST;
+  }, [books, userLibraryProgress]);
 
-  const displayWantToRead = (books && books.length > 0) ? books : wantToReadBooks;
+  // Filter books according to active tab
+  const filteredBooks = useMemo(() => {
+    return allLibraryItems.filter((item: { id: string; title: string; author: string; coverUrl: string; progressPercent: number; status: LibraryTab }) => {
+      if (activeTab === 'diunduh') return downloadedBookIds.includes(item.id);
+      if (activeTab === 'sedang_dibaca') return item.status === 'sedang_dibaca';
+      if (activeTab === 'selesai') return item.status === 'selesai';
+      if (activeTab === 'ingin_dibaca') return item.status === 'ingin_dibaca';
+      return true; // 'semua'
+    });
+  }, [allLibraryItems, activeTab, downloadedBookIds]);
 
-  const activeProgress = (userLibraryProgress && userLibraryProgress.length > 0) ? userLibraryProgress[0] : null;
+  // Sort books according to sortOption
+  const sortedBooks = useMemo(() => {
+    return [...filteredBooks].sort((a, b) => {
+      if (sortOption === 'title') return a.title.localeCompare(b.title);
+      if (sortOption === 'progress') return b.progressPercent - a.progressPercent;
+      return 0; // 'recent'
+    });
+  }, [filteredBooks, sortOption]);
+
+  const activeProgress = userLibraryProgress && userLibraryProgress.length > 0 ? userLibraryProgress[0] : null;
   const activeTitle = activeProgress?.bookTitle || 'Laut Bercerita';
-  const activeCover = activeProgress?.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12093551-L.jpg';
+  const activeCover = activeProgress?.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg';
   const activePercent = activeProgress?.progressPercent ?? 40;
-  const activeBookId = activeProgress?.bookId || 'moby-dick';
+  const activeBookId = activeProgress?.bookId || 'laut-bercerita';
+
+  const tabLabels: { id: LibraryTab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+    { id: 'semua', label: 'Semua', icon: 'grid-outline' },
+    { id: 'sedang_dibaca', label: 'Sedang Dibaca', icon: 'book-outline' },
+    { id: 'selesai', label: 'Selesai', icon: 'checkmark-circle-outline' },
+    { id: 'ingin_dibaca', label: 'Ingin Dibaca', icon: 'bookmark-outline' },
+    { id: 'diunduh', label: 'Diunduh ⬇️', icon: 'download-outline' },
+  ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -101,18 +173,23 @@ export default function LibraryScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Rak Buku Saya</Text>
-          <View style={styles.bookCountBadge}>
-            <Ionicons name="book-outline" size={16} color="#6EE7B7" />
-            <Text style={styles.bookCountText}>12 Buku</Text>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.sortIconButton} onPress={() => setSortModalVisible(true)}>
+              <Ionicons name="swap-vertical" size={18} color={COLORS.gold} />
+            </TouchableOpacity>
+            <View style={styles.bookCountBadge}>
+              <Ionicons name="book-outline" size={14} color="#6EE7B7" />
+              <Text style={styles.bookCountText}>{sortedBooks.length} Buku</Text>
+            </View>
           </View>
         </View>
 
+        {/* Daily Reading Target & Streak Card */}
+        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
+
         {/* Featured "Sedang dibaca" Card */}
         <View style={styles.activeCard}>
-          <Image
-            source={{ uri: activeCover }}
-            style={styles.activeCover}
-          />
+          <Image source={{ uri: activeCover }} style={styles.activeCover} />
           <View style={styles.activeInfo}>
             <View style={styles.readingStatusBadge}>
               <Text style={styles.readingStatusText}>Sedang dibaca</Text>
@@ -130,10 +207,12 @@ export default function LibraryScreen() {
             <TouchableOpacity
               style={styles.continueButton}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('ReadingStack', {
-                screen: 'BookDetail',
-                params: { bookId: activeBookId }
-              } as never)}
+              onPress={() =>
+                navigation.navigate('ReadingStack', {
+                  screen: 'BookDetail',
+                  params: { bookId: activeBookId },
+                } as never)
+              }
             >
               <Text style={styles.continueButtonText}>Lanjut Baca</Text>
               <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
@@ -155,7 +234,7 @@ export default function LibraryScreen() {
             <Text style={styles.aiTitle}>Ai Companion</Text>
           </View>
           <Text style={styles.aiQuote}>
-            "Kamu membaca paling fokus membaca diantara jam 20.00 - 22.00. lanjut malam ini?"
+            "Kamu membaca paling fokus di antara jam 20.00 - 22.00. Lanjut malam ini?"
           </Text>
           <TouchableOpacity
             style={styles.aiButton}
@@ -168,23 +247,17 @@ export default function LibraryScreen() {
         </TouchableOpacity>
 
         {/* 3-Card Quick Stats Grid */}
-
         <View style={styles.statsGrid}>
-          {/* Card 1: Buku Selesai */}
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
             <Text style={[styles.statNumber, { color: '#4ADE80' }]}>47</Text>
             <Text style={styles.statLabel}>Buku selesai</Text>
           </View>
-
-          {/* Card 2: Jam Membaca */}
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
             <Text style={[styles.statNumber, { color: '#4ADE80' }]}>312</Text>
             <Text style={styles.statLabel}>Jam Membaca</Text>
           </View>
-
-          {/* Card 3: Hari Streak */}
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
             <Text style={[styles.statNumber, { color: '#4ADE80' }]}>21</Text>
@@ -192,45 +265,134 @@ export default function LibraryScreen() {
           </View>
         </View>
 
-        {/* Ingin dibaca Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>📌 Ingin dibaca</Text>
-          <View style={styles.wantCountBadge}>
-            <Ionicons name="book-outline" size={14} color="#6EE7B7" />
-            <Text style={styles.wantCountText}>4 Buku</Text>
-          </View>
-        </View>
-
-        {/* Horizontal Ingin Dibaca List */}
-        <FlatList
+        {/* Filter Tabs Scroll View */}
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.wantListContent}
-          data={displayWantToRead}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.wantBookCard}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('ReadingStack', {
-                screen: 'BookDetail',
-                params: { bookId: item.id }
-              } as never)}
-            >
-              <View style={styles.coverWrapper}>
-                <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
-                {downloadedBookIds.includes(item.id) && (
-                  <View style={styles.downloadBadge}>
-                    <Text style={styles.downloadBadgeText}>⬇️</Text>
+          contentContainerStyle={styles.tabsScrollContent}
+        >
+          {tabLabels.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tabPill, isActive && styles.tabPillActive]}
+                onPress={() => setActiveTab(tab.id)}
+              >
+                <Ionicons
+                  name={tab.icon}
+                  size={15}
+                  color={isActive ? '#0A1A15' : COLORS.gold}
+                />
+                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{tab.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Library Book Items Grid */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            {activeTab === 'diunduh'
+              ? '📥 Buku Offline (Diunduh)'
+              : activeTab === 'sedang_dibaca'
+              ? '📖 Sedang Dibaca'
+              : activeTab === 'selesai'
+              ? '✅ Selesai Dibaca'
+              : activeTab === 'ingin_dibaca'
+              ? '📌 Ingin Dibaca'
+              : '📚 Semua Koleksi'}
+          </Text>
+          <Text style={styles.sortIndicatorText}>
+            {sortOption === 'recent' ? 'Urutkan: Terakhir Dibaca' : sortOption === 'title' ? 'Urutkan: Judul' : 'Urutkan: Progres'}
+          </Text>
+        </View>
+
+        {sortedBooks.length > 0 ? (
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.wantListContent}
+            data={sortedBooks}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.wantBookCard}
+                activeOpacity={0.8}
+                onPress={() =>
+                  navigation.navigate('ReadingStack', {
+                    screen: 'BookDetail',
+                    params: { bookId: item.id },
+                  } as never)
+                }
+              >
+                <View style={styles.coverWrapper}>
+                  <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
+                  {downloadedBookIds.includes(item.id) && (
+                    <View style={styles.downloadBadge}>
+                      <Text style={styles.downloadBadgeText}>⬇️</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.bookTitle} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                <Text style={styles.bookAuthor} numberOfLines={1}>
+                  {item.author}
+                </Text>
+                {item.progressPercent > 0 && (
+                  <View style={styles.cardMiniProgress}>
+                    <View style={[styles.cardMiniFill, { width: `${item.progressPercent}%` }]} />
                   </View>
                 )}
-              </View>
-              <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
-              <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-            </TouchableOpacity>
-          )}
-        />
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          <View style={styles.emptyTabContainer}>
+            <Ionicons name="folder-open-outline" size={40} color={COLORS.muted} />
+            <Text style={styles.emptyTabText}>Belum ada buku di kategori ini</Text>
+          </View>
+        )}
       </ScrollView>
+
+      {/* Sort Option Modal Sheet */}
+      <Modal visible={sortModalVisible} transparent animationType="fade" onRequestClose={() => setSortModalVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setSortModalVisible(false)}>
+          <View style={styles.sortModalCard}>
+            <Text style={styles.sortModalTitle}>Urutkan Rak Buku</Text>
+            <TouchableOpacity
+              style={[styles.sortOptionRow, sortOption === 'recent' && styles.sortOptionActive]}
+              onPress={() => { setSortOption('recent'); setSortModalVisible(false); }}
+            >
+              <Ionicons name="time-outline" size={18} color={sortOption === 'recent' ? COLORS.gold : COLORS.creamLight} />
+              <Text style={[styles.sortOptionText, sortOption === 'recent' && styles.sortOptionTextActive]}>Terakhir Dibaca</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.sortOptionRow, sortOption === 'title' && styles.sortOptionActive]}
+              onPress={() => { setSortOption('title'); setSortModalVisible(false); }}
+            >
+              <Ionicons name="text-outline" size={18} color={sortOption === 'title' ? COLORS.gold : COLORS.creamLight} />
+              <Text style={[styles.sortOptionText, sortOption === 'title' && styles.sortOptionTextActive]}>Judul (A - Z)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.sortOptionRow, sortOption === 'progress' && styles.sortOptionActive]}
+              onPress={() => { setSortOption('progress'); setSortModalVisible(false); }}
+            >
+              <Ionicons name="stats-chart-outline" size={18} color={sortOption === 'progress' ? COLORS.gold : COLORS.creamLight} />
+              <Text style={[styles.sortOptionText, sortOption === 'progress' && styles.sortOptionTextActive]}>Progres Membaca (% Tinggi-Rendah)</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Reading Analytics Modal Sheet */}
+      <ReadingAnalyticsModal
+        visible={analyticsModalVisible}
+        onClose={() => setAnalyticsModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -249,7 +411,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sortIconButton: {
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: '#0F2922',
+    borderWidth: 1,
+    borderColor: '#173E33',
   },
   title: {
     fontSize: 22,
@@ -278,7 +452,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 18,
-    marginBottom: 24,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: '#173E33',
   },
@@ -307,7 +481,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansMedium,
   },
   activeTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
@@ -364,7 +538,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 18,
-    marginBottom: 24,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: '#173E33',
   },
@@ -398,131 +572,202 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.serifItalic,
     color: COLORS.cream,
     lineHeight: 20,
-    fontStyle: 'italic',
     marginBottom: 14,
   },
   aiButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.gold,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignSelf: 'flex-start',
-    paddingHorizontal: 18,
-    paddingVertical: 9,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
     gap: 6,
   },
   aiButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+    color: COLORS.cream,
+    fontSize: 13,
+    fontFamily: FONTS.sansMedium,
   },
   statsGrid: {
-
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 30,
+    marginHorizontal: 20,
     gap: 10,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
+    padding: 14,
     borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 10,
-    alignItems: 'center',
     borderWidth: 1,
+    alignItems: 'center',
   },
   statIcon: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   statNumber: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    marginBottom: 4,
+    fontFamily: FONTS.sansBold,
+    marginBottom: 2,
   },
   statLabel: {
     fontSize: 11,
-    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
     textAlign: 'center',
+  },
+  tabsScrollContent: {
+    paddingHorizontal: 20,
+    gap: 8,
+    marginBottom: 16,
+  },
+  tabPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    backgroundColor: '#0F2922',
+  },
+  tabPillActive: {
+    backgroundColor: COLORS.gold,
+  },
+  tabText: {
+    color: COLORS.gold,
+    fontSize: 13,
+    fontFamily: FONTS.sansMedium,
+  },
+  tabTextActive: {
+    color: '#0A1A15',
+    fontWeight: 'bold',
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
-  wantCountBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(27, 85, 65, 0.6)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    gap: 4,
-  },
-  wantCountText: {
-    color: '#6EE7B7',
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: FONTS.sansMedium,
+  sortIndicatorText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
   },
   wantListContent: {
     paddingHorizontal: 20,
-    gap: 8,
+    gap: 12,
+    marginBottom: 24,
   },
   wantBookCard: {
-    width: 150,
-  },
-  wantBookCover: {
-    width: 150,
-    height: 220,
-    borderRadius: 12,
-    backgroundColor: COLORS.forestCard,
+    width: 130,
   },
   coverWrapper: {
     position: 'relative',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   bookCover: {
-    width: 150,
-    height: 220,
-    borderRadius: 12,
-    backgroundColor: COLORS.forestCard,
+    width: 130,
+    height: 190,
+    borderRadius: 10,
+  },
+  downloadBadge: {
+    position: 'absolute',
+    bottom: 6,
+    right: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  downloadBadgeText: {
+    fontSize: 11,
   },
   bookTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
+    fontFamily: FONTS.sansMedium,
     color: COLORS.cream,
     marginBottom: 2,
   },
   bookAuthor: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 12,
     color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
   },
-  downloadBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: COLORS.forest,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    justifyContent: 'center',
+  cardMiniProgress: {
+    height: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 2,
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  cardMiniFill: {
+    height: '100%',
+    backgroundColor: COLORS.gold,
+  },
+  emptyTabContainer: {
+    paddingVertical: 32,
     alignItems: 'center',
   },
-  downloadBadgeText: {
-    fontSize: 10,
+  emptyTabText: {
+    color: COLORS.muted,
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  sortModalCard: {
+    width: '100%',
+    backgroundColor: '#0F2922',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#173E33',
+  },
+  sortModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 16,
+  },
+  sortOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#0A1A15',
+  },
+  sortOptionActive: {
+    borderColor: COLORS.gold,
+    borderWidth: 1,
+  },
+  sortOptionText: {
+    fontSize: 14,
+    color: COLORS.creamLight,
+    fontFamily: FONTS.sansMedium,
+  },
+  sortOptionTextActive: {
+    color: COLORS.gold,
+    fontWeight: 'bold',
   },
 });

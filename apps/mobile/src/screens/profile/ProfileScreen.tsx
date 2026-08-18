@@ -15,6 +15,8 @@ import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
+import { ReadingAnalyticsModal } from './components/ReadingAnalyticsModal';
+
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const { mutate: logout } = useLogout();
@@ -24,6 +26,7 @@ export default function ProfileScreen() {
   const [activeModal, setActiveModal] = useState<'account' | 'subscription' | 'preferences' | 'support' | 'about' | null>(null);
   const [newGoalMinutes, setNewGoalMinutes] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
 
   const { data: goalsData } = useQuery({
     queryKey: ['reading', 'goals'],
@@ -165,11 +168,11 @@ export default function ProfileScreen() {
           </View>
 
           {/* Streak Indicator */}
-          <View style={styles.streakCountRow}>
+          <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
             <Ionicons name="flame" size={22} color={COLORS.gold} />
             <Text style={styles.streakCountNumber}>21</Text>
-            <Text style={styles.streakCountText}>Hari Berturut-turut</Text>
-          </View>
+            <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Pencapaian Section */}
@@ -381,6 +384,12 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Reading Analytics Modal */}
+      <ReadingAnalyticsModal
+        visible={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+      />
     </SafeAreaView>
   );
 }

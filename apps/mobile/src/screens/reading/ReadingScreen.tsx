@@ -1017,7 +1017,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const [isReady, setIsReady] = useState(false);
 
-  const { currentPage, progressPercent, readingTimeSeconds, initialCfi, updateProgress } =
+  const { currentPage, progressPercent, readingTimeSeconds, isGoalAchieved, dismissGoalBanner, initialCfi, updateProgress } =
     useReadingSession(bookId, isReady);
 
   const webViewRef = useRef<WebView>(null);
@@ -1681,9 +1681,16 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           </TouchableOpacity>
 
           <View style={styles.headerTitleContainer}>
-            <Text style={[styles.headerTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]} numberOfLines={1}>
-              {chapterTitle || title}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              {route.params?.isSample && (
+                <View style={{ backgroundColor: COLORS.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                  <Text style={{ color: '#0A1A15', fontSize: 10, fontWeight: 'bold' }}>SAMPEL</Text>
+                </View>
+              )}
+              <Text style={[styles.headerTitle, { color: themeColors[theme].text, fontFamily: FONTS.sansBold }]} numberOfLines={1}>
+                {chapterTitle || title}
+              </Text>
+            </View>
             <View style={styles.headerMeta}>
               <Text style={[styles.headerSubtitle, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]} numberOfLines={1}>
                 {isReady && chapterTotalPages > 0 
@@ -1775,6 +1782,47 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           />
         )}
       </View>
+
+      {/* ── Goal Celebration Toast Banner ── */}
+      {isGoalAchieved && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 90,
+            left: 20,
+            right: 20,
+            backgroundColor: '#0F2922',
+            borderColor: COLORS.gold,
+            borderWidth: 1,
+            borderRadius: 16,
+            padding: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            zIndex: 99,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+            <Ionicons name="trophy" size={24} color={COLORS.gold} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: COLORS.cream, fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.serifBold }}>
+                Target Membaca Tercapai! 🎉
+              </Text>
+              <Text style={{ color: COLORS.creamLight, fontSize: 12, fontFamily: FONTS.sansRegular }}>
+                Kamu telah memenuhi target membaca harian hari ini. Pertahankan streak-mu!
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={dismissGoalBanner} style={{ padding: 4 }}>
+            <Ionicons name="close" size={20} color={COLORS.creamLight} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* ── Page Scrubber / QuickJump Slider (toggled via page counter tap) ── */}
       {controlsVisible && showQuickJump && (

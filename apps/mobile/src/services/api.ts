@@ -267,15 +267,57 @@ export interface FeaturedBooksResponseDto {
   new_releases: BookItemDto[];
 }
 
+export interface SearchFilterParams {
+  query?: string;
+  genre?: string;
+  tier?: string;
+  sortBy?: 'popular' | 'newest' | 'rating' | 'alphabetical';
+  minRating?: number;
+}
+
 export const booksApi = {
   getFeatured: async (): Promise<FeaturedBooksResponseDto> => {
     const res = await api.get<FeaturedBooksResponseDto>('/books/featured');
     return res.data;
   },
-  search: async (query: string): Promise<BookItemDto[]> => {
-    if (!query.trim()) return [];
-    const res = await api.get<{ items: BookItemDto[] } | BookItemDto[]>(`/books/search?q=${encodeURIComponent(query)}`);
-    return Array.isArray(res.data) ? res.data : (res.data.items || []);
+  search: async (paramsOrQuery: string | SearchFilterParams): Promise<BookItemDto[]> => {
+    const params: SearchFilterParams =
+      typeof paramsOrQuery === 'string' ? { query: paramsOrQuery } : paramsOrQuery;
+
+    const query = params.query?.trim() || '';
+
+    const queryParts: string[] = [];
+    if (query) queryParts.push(`q=${encodeURIComponent(query)}`);
+    if (params.genre && params.genre !== 'Semua') queryParts.push(`genre=${encodeURIComponent(params.genre)}`);
+    if (params.tier && params.tier !== 'Semua') queryParts.push(`tier=${encodeURIComponent(params.tier)}`);
+    if (params.sortBy) queryParts.push(`sortBy=${encodeURIComponent(params.sortBy)}`);
+    if (params.minRating) queryParts.push(`minRating=${params.minRating}`);
+
+    const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+    const res = await api.get<{ items: BookItemDto[] } | BookItemDto[]>(`/books/search${queryString}`);
+    let items: BookItemDto[] = Array.isArray(res.data) ? res.data : res.data.items || [];
+
+    // Client-side fallback sorting/filtering if backend returns un-filtered list
+    if (params.minRating && params.minRating > 0) {
+      items = items.filter((item) => (item.ratingAverage ?? 4.5) >= (params.minRating || 0));
+    }
+    if (params.tier && params.tier !== 'Semua') {
+      items = items.filter((item) => {
+        if (params.tier === 'Gratis') return !item.subscriptionRequired || item.subscriptionRequired === 'FREE';
+        if (params.tier === 'Bukoo PLUS') return item.subscriptionRequired === 'PLUS' || item.subscriptionRequired === 'PREMIUM';
+        return true;
+      });
+    }
+
+    if (params.sortBy) {
+      items = [...items].sort((a, b) => {
+        if (params.sortBy === 'alphabetical') return a.title.localeCompare(b.title);
+        if (params.sortBy === 'rating') return (b.ratingAverage ?? 0) - (a.ratingAverage ?? 0);
+        return 0;
+      });
+    }
+
+    return items;
   },
   getByGenre: async (genre: string): Promise<BookItemDto[]> => {
     const res = await api.get<BookItemDto[]>(`/books?genre=${encodeURIComponent(genre)}`);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -11,6 +11,11 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
+import { wishlistService } from '../../services/wishlistService';
+import { AiBookInsightCard } from './components/AiBookInsightCard';
+import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
+import { WriteReviewModal } from './components/WriteReviewModal';
+import { RelatedBooksCarousel } from './components/RelatedBooksCarousel';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -344,8 +349,32 @@ export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
     publishedYear: 1980,
     synopsis: 'Eksplorasi memukau tentang alam semesta, sejarah perkembangan ilmu pengetahuan, dan tempat manusia di kosmos.',
     epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  }
+  },
 };
+
+const DEFAULT_REVIEWS: UserReview[] = [
+  {
+    id: 'rev-1',
+    userName: 'Rian Pratama',
+    rating: 5,
+    date: '12 Agt 2026',
+    comment: 'Buku luar biasa yang mengubah cara pandang saya. Sangat direkomendasikan untuk dibaca ulang!',
+  },
+  {
+    id: 'rev-2',
+    userName: 'Siti Rahma',
+    rating: 5,
+    date: '04 Agt 2026',
+    comment: 'Gaya bahasanya sangat mengalir dan membuat penasaran di setiap bab. Karya mahakarya!',
+  },
+  {
+    id: 'rev-3',
+    userName: 'Budi Santoso',
+    rating: 4,
+    date: '28 Jul 2026',
+    comment: 'Alur cerita menarik dengan pesan moral mendalam. Sangat menginspirasi.',
+  },
+];
 
 export default function BookDetailScreen() {
   const route = useRoute<DetailRouteProp>();
@@ -355,7 +384,33 @@ export default function BookDetailScreen() {
   const { download, remove, isDownloading, downloadProgress, localUri, isDownloaded } = useBookDownload(bookId);
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isSavedWishlist, setIsSavedWishlist] = useState(false);
+  const [writeReviewVisible, setWriteReviewVisible] = useState(false);
+  const [userReviews, setUserReviews] = useState<UserReview[]>(DEFAULT_REVIEWS);
+
   const scrollY = React.useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+
+  // Load Wishlist status
+  useEffect(() => {
+    wishlistService.isWishlisted(bookId).then(setIsSavedWishlist);
+  }, [bookId]);
+
+  const handleToggleWishlist = async () => {
+    const isAdded = await wishlistService.toggleWishlist(bookId);
+    setIsSavedWishlist(isAdded);
+  };
+
+  const handleAddReview = (newRating: number, newComment: string) => {
+    const newRev: UserReview = {
+      id: `rev-${Date.now()}`,
+      userName: 'Saya (Pembaca)',
+      rating: newRating,
+      date: 'Baru saja',
+      comment: newComment,
+    };
+    setUserReviews([newRev, ...userReviews]);
+  };
 
   const { data: book, isLoading } = useQuery({
     queryKey: ['book', bookId],
@@ -363,7 +418,7 @@ export default function BookDetailScreen() {
       try {
         const response = await api.get(`/books/${bookId}`);
         return response.data;
-      } catch (e) {
+      } catch {
         return null;
       }
     },
@@ -401,53 +456,46 @@ export default function BookDetailScreen() {
   const rawEpubUrl = book?.epubUrl || book?.fileUrl || sampleFallback.epubUrl || sampleFallback.fileUrl;
   const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl);
 
-  const displayBook = book ? {
-    ...sampleFallback,
-    ...book,
-    synopsis: book.synopsis || sampleFallback.synopsis,
-    epubUrl: resolvedEpubUrl,
-  } : {
-    ...sampleFallback,
-    epubUrl: resolvedEpubUrl,
-  };
-  const insets = useSafeAreaInsets();
+  const displayBook = book
+    ? {
+        ...sampleFallback,
+        ...book,
+        synopsis: book.synopsis || sampleFallback.synopsis,
+        epubUrl: resolvedEpubUrl,
+      }
+    : {
+        ...sampleFallback,
+        epubUrl: resolvedEpubUrl,
+      };
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [120, 220],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const imageScale = scrollY.interpolate({
+    inputRange: [-100, 0, 100],
+    outputRange: [1.2, 1, 1],
+    extrapolate: 'clamp',
+  });
 
   if (isLoading || isLoadingProgress) {
     const shimmerColors = { color1: '#EFECE2', color2: '#DFDAC9' };
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: '#F4F1E8' }]}>
         <View style={{ flex: 1, paddingHorizontal: 24, alignItems: 'center', paddingTop: 40 }}>
-          {/* Header Back Icon Placeholder */}
           <View style={{ alignSelf: 'flex-start', marginBottom: 20 }}>
             <ShimmerPlaceholder width={40} height={40} borderRadius={20} {...shimmerColors} />
           </View>
-
-          {/* Book Cover Placeholder */}
           <ShimmerPlaceholder width={180} height={270} borderRadius={12} style={{ marginBottom: 24 }} {...shimmerColors} />
-
-          {/* Title & Author Placeholders */}
           <ShimmerPlaceholder width={240} height={24} borderRadius={4} style={{ marginBottom: 8 }} {...shimmerColors} />
           <ShimmerPlaceholder width={140} height={16} borderRadius={4} style={{ marginBottom: 24 }} {...shimmerColors} />
-
-          {/* Metadata Row Placeholders */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20, marginBottom: 32 }}>
             <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
             <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
             <ShimmerPlaceholder width={80} height={40} borderRadius={8} {...shimmerColors} />
           </View>
-
-          {/* Synopsis Text Placeholder lines */}
-          <View style={{ width: '100%', gap: 8, marginBottom: 40 }}>
-            <ShimmerPlaceholder width="100%" height={14} borderRadius={4} {...shimmerColors} />
-            <ShimmerPlaceholder width="100%" height={14} borderRadius={4} {...shimmerColors} />
-            <ShimmerPlaceholder width="95%" height={14} borderRadius={4} {...shimmerColors} />
-            <ShimmerPlaceholder width="70%" height={14} borderRadius={4} {...shimmerColors} />
-          </View>
-        </View>
-
-        {/* Sticky bottom CTA Placeholder */}
-        <View style={{ paddingHorizontal: 24, paddingBottom: Math.max(16, insets.bottom + 10) }}>
-          <ShimmerPlaceholder width="100%" height={54} borderRadius={27} {...shimmerColors} />
         </View>
       </SafeAreaView>
     );
@@ -456,53 +504,85 @@ export default function BookDetailScreen() {
   if (!displayBook) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Book not found.</Text>
+        <Text style={styles.errorText}>Buku tidak ditemukan.</Text>
       </SafeAreaView>
     );
   }
 
   const hasProgress = !!readingProgress;
   const buttonText = hasProgress ? 'Lanjutkan Membaca' : 'Mulai Membaca';
-
-  // Server-computed entitlement: the API returns is_accessible=false for
-  // subscription-gated books when the user lacks the required tier.
   const isAccessible = book?.is_accessible !== false;
 
-  const imageScale = scrollY.interpolate({
-    inputRange: [-100, 0, 100],
-    outputRange: [1.2, 1, 1],
-    extrapolate: 'clamp',
-  });
+  const handleOpenReader = (isSampleMode = false) => {
+    navigation.navigate('ReadingStack', {
+      screen: 'Reading',
+      params: {
+        bookId: displayBook.id,
+        title: displayBook.title,
+        localEpubUri: localUri ?? undefined,
+        epubUrl: displayBook.epubUrl ?? undefined,
+        isSample: isSampleMode,
+      },
+    } as never);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Animated.ScrollView 
+      {/* Floating Animated Header */}
+      <Animated.View
+        style={[
+          styles.floatingHeader,
+          {
+            opacity: headerOpacity,
+            paddingTop: Math.max(12, insets.top),
+          },
+        ]}
+      >
+        <TouchableOpacity style={styles.floatingHeaderBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color={COLORS.forest} />
+        </TouchableOpacity>
+        <Text style={styles.floatingHeaderTitle} numberOfLines={1}>
+          {displayBook.title}
+        </Text>
+        <TouchableOpacity style={styles.floatingHeaderBtn} onPress={handleToggleWishlist}>
+          <Ionicons
+            name={isSavedWishlist ? 'heart' : 'heart-outline'}
+            size={22}
+            color={isSavedWishlist ? '#EF4444' : COLORS.forest}
+          />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <Animated.ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: true,
+        })}
         scrollEventThrottle={16}
       >
+        {/* Book Cover Banner */}
         <View style={styles.coverContainer}>
-          <Animated.Image 
-            source={{ uri: displayBook.coverUrl }} 
-            style={[styles.coverImage, { transform: [{ scale: imageScale }] }]} 
+          <Animated.Image
+            source={{ uri: displayBook.coverUrl }}
+            style={[styles.coverImage, { transform: [{ scale: imageScale }] }]}
             resizeMode="cover"
           />
         </View>
 
+        {/* Content Body */}
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{displayBook.title}</Text>
           <Text style={styles.author}>{displayBook.author}</Text>
 
+          {/* Rating Summary */}
           <View style={styles.ratingContainer}>
             <Text style={styles.ratingStar}>⭐</Text>
             <Text style={styles.ratingScore}>{displayBook.ratingAverage?.toFixed(1) || '0.0'}</Text>
             <Text style={styles.ratingCount}>({displayBook.ratingCount || 0} ulasan)</Text>
           </View>
 
+          {/* Genre Tags */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll}>
             {displayBook.genre?.map((g: string) => (
               <View key={g} style={styles.tag}>
@@ -511,6 +591,7 @@ export default function BookDetailScreen() {
             ))}
           </ScrollView>
 
+          {/* Metadata Grid */}
           <View style={styles.metadataRow}>
             <View style={styles.metadataItem}>
               <Text style={styles.metadataLabel}>Halaman</Text>
@@ -528,31 +609,21 @@ export default function BookDetailScreen() {
             </View>
           </View>
 
+          {/* Actions Row: Primary Read, Read Sample, Offline Download */}
           <View style={styles.actionsContainer}>
             {isAccessible ? (
-              /* Primary Read button — for accessible (FREE or entitled) books */
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.primaryButton}
-                onPress={() => navigation.navigate('ReadingStack', {
-                  screen: 'Reading',
-                  params: {
-                    bookId: displayBook.id,
-                    title: displayBook.title,
-                    localEpubUri: localUri ?? undefined,
-                    epubUrl: displayBook.epubUrl ?? undefined,
-                  }
-                })}
+                onPress={() => handleOpenReader(false)}
                 accessibilityRole="button"
                 accessibilityLabel={buttonText}
               >
                 <Text style={styles.primaryButtonText}>{buttonText}</Text>
               </TouchableOpacity>
             ) : (
-              /* Subscription-gated book: informational only, no purchase action.
-                 Tapping shows the (non-purchasable) plan info screen. */
               <TouchableOpacity
                 style={styles.lockedButton}
-                onPress={() => navigation.navigate('Subscription')}
+                onPress={() => navigation.navigate('Subscription' as never)}
                 accessibilityRole="button"
                 accessibilityLabel="Buku khusus premium"
               >
@@ -561,14 +632,30 @@ export default function BookDetailScreen() {
               </TouchableOpacity>
             )}
 
-            {/* Offline download / remove action */}
+            {/* Read Sample Secondary Button */}
+            <TouchableOpacity
+              style={styles.sampleButton}
+              onPress={() => handleOpenReader(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Baca Sampel"
+            >
+              <Ionicons name="book-outline" size={16} color={COLORS.forest} />
+              <Text style={styles.sampleButtonText}>Baca Sampel</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Offline Download Button */}
+          <View style={styles.offlineActionRow}>
             {!isDownloaded ? (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.secondaryButton, isDownloading && styles.secondaryButtonDisabled]}
-                onPress={() => download(displayBook.epubUrl || 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub')}
+                onPress={() =>
+                  download(
+                    displayBook.epubUrl ||
+                      'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub'
+                  )
+                }
                 disabled={isDownloading}
-                accessibilityRole="button"
-                accessibilityLabel="Unduh Offline"
               >
                 {isDownloading ? (
                   <View style={styles.downloadingContainer}>
@@ -576,17 +663,16 @@ export default function BookDetailScreen() {
                     <Text style={styles.secondaryButtonText}>Mengunduh ({Math.round(downloadProgress)}%)</Text>
                   </View>
                 ) : (
-                  <Text style={styles.secondaryButtonText}>Unduh Offline</Text>
+                  <View style={styles.downloadingContainer}>
+                    <Ionicons name="download-outline" size={16} color={COLORS.forest} style={{ marginRight: 6 }} />
+                    <Text style={styles.secondaryButtonText}>Unduh untuk Dibaca Offline</Text>
+                  </View>
                 )}
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity 
-                style={[styles.secondaryButton, { borderColor: '#E53E3E' }]}
-                onPress={() => remove()}
-                accessibilityRole="button"
-                accessibilityLabel="Hapus Unduhan"
-              >
-                <Text style={[styles.secondaryButtonText, { color: '#E53E3E' }]}>Hapus Unduhan</Text>
+              <TouchableOpacity style={[styles.secondaryButton, { borderColor: '#E53E3E' }]} onPress={() => remove()}>
+                <Ionicons name="trash-outline" size={16} color="#E53E3E" style={{ marginRight: 6 }} />
+                <Text style={[styles.secondaryButtonText, { color: '#E53E3E' }]}>Hapus Unduhan Offline</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -597,31 +683,49 @@ export default function BookDetailScreen() {
             </View>
           )}
 
+          {/* Synopsis */}
           <View style={styles.synopsisContainer}>
             <Text style={styles.sectionTitle}>Sinopsis</Text>
-            <Text 
-              style={styles.synopsisText} 
-              numberOfLines={isExpanded ? undefined : 4}
-            >
+            <Text style={styles.synopsisText} numberOfLines={isExpanded ? undefined : 4}>
               {displayBook.synopsis}
             </Text>
             <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
-              <Text style={styles.readMoreText}>
-                {isExpanded ? 'Sembunyikan' : 'Baca Selengkapnya'}
-              </Text>
+              <Text style={styles.readMoreText}>{isExpanded ? 'Sembunyikan' : 'Baca Selengkapnya'}</Text>
             </TouchableOpacity>
           </View>
+
+          {/* AI Companion Insight Card */}
+          <AiBookInsightCard totalPages={displayBook.totalPages || 300} genres={displayBook.genre || ['Fiksi']} />
+
+          {/* User Reviews Section */}
+          <BookReviewsSection
+            ratingAverage={displayBook.ratingAverage || 4.8}
+            ratingCount={userReviews.length + (displayBook.ratingCount || 100)}
+            reviews={userReviews}
+            onOpenWriteReview={() => setWriteReviewVisible(true)}
+          />
+
+          {/* Related Recommendations Carousel */}
+          <RelatedBooksCarousel currentBookId={displayBook.id} />
         </View>
       </Animated.ScrollView>
-      
-      {/* Back Button */}
-      <TouchableOpacity 
-        style={[styles.backButton, { top: Math.max(16, insets.top + 10) }]}
+
+      {/* Top Fixed Back Button */}
+      <TouchableOpacity
+        style={[styles.backButton, { top: Math.max(16, insets.top + 6) }]}
         onPress={() => navigation.goBack()}
         accessibilityLabel="Kembali"
       >
         <Ionicons name="chevron-back" size={24} color={COLORS.forest} />
       </TouchableOpacity>
+
+      {/* Write Review Bottom Modal */}
+      <WriteReviewModal
+        visible={writeReviewVisible}
+        onClose={() => setWriteReviewVisible(false)}
+        bookTitle={displayBook.title}
+        onSubmitReview={handleAddReview}
+      />
     </SafeAreaView>
   );
 }
@@ -630,10 +734,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.cream,
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
   },
   errorText: {
     textAlign: 'center',
@@ -644,11 +744,42 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
+  floatingHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: 'rgba(244, 241, 232, 0.96)',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.sand,
+  },
+  floatingHeaderBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  floatingHeaderTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.forest,
+    textAlign: 'center',
+    marginHorizontal: 8,
+  },
   coverContainer: {
     alignItems: 'center',
     paddingTop: 60,
     paddingBottom: 30,
-    backgroundColor: '#EAE5D9', // slightly darker cream for cover background
+    backgroundColor: '#EAE5D9',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     shadowColor: '#000',
@@ -660,31 +791,31 @@ const styles = StyleSheet.create({
   coverImage: {
     width: 200,
     height: 300,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   contentContainer: {
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.forest,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   author: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONTS.sansMedium,
     color: COLORS.muted,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   ratingContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   ratingStar: {
     fontSize: 16,
@@ -703,7 +834,7 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
   tagsScroll: {
-    marginBottom: 24,
+    marginBottom: 20,
     flexDirection: 'row',
   },
   tag: {
@@ -724,49 +855,50 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: COLORS.creamLight,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.sand,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   metadataItem: {
     alignItems: 'center',
   },
   metadataDivider: {
     width: 1,
-    height: 30,
+    height: 28,
     backgroundColor: COLORS.sand,
   },
   metadataLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: FONTS.sansMedium,
     color: COLORS.muted,
-    marginBottom: 4,
+    marginBottom: 2,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   metadataValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
     color: COLORS.forest,
   },
   actionsContainer: {
     flexDirection: 'row',
-    marginBottom: 30,
+    gap: 10,
+    marginBottom: 12,
   },
   primaryButton: {
     flex: 2,
     backgroundColor: COLORS.ember,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
-    marginRight: 12,
+    justifyContent: 'center',
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
   },
@@ -775,20 +907,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: COLORS.forestBorder,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginRight: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
   lockedButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
   },
-  primaryButtonDisabled: {
-    backgroundColor: COLORS.muted,
+  sampleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.creamLight,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.forest,
+  },
+  sampleButtonText: {
+    color: COLORS.forest,
+    fontSize: 13,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  offlineActionRow: {
+    marginBottom: 20,
   },
   downloadingContainer: {
     flexDirection: 'row',
@@ -802,7 +951,7 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: '#EAE5D9',
     borderRadius: 2,
-    marginTop: -20,
+    marginTop: -12,
     marginBottom: 20,
     overflow: 'hidden',
   },
@@ -811,11 +960,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.ember,
   },
   secondaryButton: {
-    flex: 1,
     backgroundColor: COLORS.creamLight,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.sand,
   },
@@ -824,19 +973,19 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: COLORS.forest,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     fontFamily: FONTS.sansMedium,
   },
   synopsisContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.forest,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   synopsisText: {
     fontSize: 15,
@@ -854,7 +1003,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    left: 20,
+    left: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -868,5 +1017,6 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: 'rgba(27, 58, 45, 0.1)',
+    zIndex: 5,
   },
 });

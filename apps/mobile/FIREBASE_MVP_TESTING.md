@@ -21,12 +21,19 @@ by `app.json`). No new Firebase project is needed.
 
 ## CLI auth (you, once)
 
+> ⚠️ Use the **global** `firebase` command OR `npx firebase-tools`. Do NOT use
+> `npx firebase login` — npm resolves the package `firebase` (the JS SDK, which
+> has no CLI binary) and fails with "could not determine executable to run".
+> The CLI lives in the `firebase-tools` package.
+
 ```bash
-npm install -g firebase-tools   # or: npx firebase-tools
-cd apps/mobile
-npx firebase login              # interactive OAuth — must be the Google account
-                                # that owns project bukoo-15ce3
+# Already installed globally on this machine (v14.8.0):
+firebase login
+# ...or explicitly via npx with the correct package:
+npx firebase-tools login
 ```
+
+Must be the Google account that owns project `bukoo-15ce3`.
 
 ## Build + distribute (me or you)
 
@@ -82,8 +89,12 @@ Console → Remote Config → **A/B Testing** → Create experiment:
 - `src/hooks/useFeatureFlags.ts` — `useFeatureFlag(key)` / `useFeatureFlagsReady()`
 - `src/services/crashReporting.ts` — Crashlytics wrapper
 - `App.tsx` — boots both on startup
-- `app.json` — Firebase config plugins (app, crashlytics, remote-config)
+- `app.json` — Firebase config plugins (app, crashlytics only — remote-config needs NO plugin)
 - `package.json` — `apk:release` + `distribute:firebase` scripts
+
+> ⚠️ Gotcha (2026-08-18): do NOT add `@react-native-firebase/remote-config`
+> to `app.json` plugins — it ships NO config plugin and breaks the gradle
+> `createExpoConfig` task. Remote Config is part of the core `@react-native-firebase/app` native module and needs no plugin entry.
 
 ## Known constraints (honest)
 

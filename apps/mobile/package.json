@@ -13,7 +13,7 @@
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\"",
     "test": "echo 'No tests specified for mobile yet'",
     "apk:release": "cd android && ./gradlew assembleRelease",
-    "distribute:firebase": "firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk --app 1:576187863248:android:319b30d64afedc461fced5 --groups \"mvp-testers\" --release-notes \"BUKOO MVP — Firebase App Distribution build\""
+    "distribute:firebase": "npx firebase-tools appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk --app 1:576187863248:android:319b30d64afedc461fced5 --groups \"mvp-testers\" --release-notes \"BUKOO MVP — Firebase App Distribution build\""
   },
   "dependencies": {
     "@bukoo/shared-types": "*",
