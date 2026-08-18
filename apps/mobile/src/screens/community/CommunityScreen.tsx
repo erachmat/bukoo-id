@@ -1,12 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
+import { RootStackParamList } from '../../navigation/types';
+import { communityService, CommunityPost } from '../../services/communityService';
+import { CreatePostModal } from './components/CreatePostModal';
+import { PostCommentsModal } from './components/PostCommentsModal';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CommunityScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const isFocused = useIsFocused();
+
   const [activeFilter, setActiveFilter] = useState<'Semua' | 'Post' | 'Event'>('Semua');
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [joinedEvents, setJoinedEvents] = useState<string[]>([]);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [activePostForComments, setActivePostForComments] = useState<CommunityPost | null>(null);
+
+  useEffect(() => {
+    if (isFocused) {
+      loadData();
+    }
+  }, [isFocused]);
+
+  const loadData = async () => {
+    const p = await communityService.getPosts();
+    setPosts(p);
+    const events = await communityService.getJoinedEvents();
+    setJoinedEvents(events);
+  };
+
+  const handleToggleLike = async (postId: string) => {
+    const updated = await communityService.toggleLike(postId);
+    setPosts(updated);
+  };
+
+  const handleToggleBookmark = async (postId: string) => {
+    const updated = await communityService.toggleBookmark(postId);
+    setPosts(updated);
+  };
+
+  const handleToggleJoinEvent = async (eventId: string) => {
+    await communityService.toggleJoinEvent(eventId);
+    const events = await communityService.getJoinedEvents();
+    setJoinedEvents(events);
+  };
+
+  const isReadingClubJoined = joinedEvents.includes('event_baca_bareng_jan');
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -15,12 +61,16 @@ export default function CommunityScreen() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.title}>Komunitas Bukoo</Text>
+              <Text style={styles.title}>Komunitas BUKOO</Text>
               <View style={styles.activeUsersBadge}>
                 <Text style={styles.activeUsersText}>4.201 Aktif Hari ini</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.postingButton} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.postingButton}
+              activeOpacity={0.8}
+              onPress={() => setCreateModalVisible(true)}
+            >
               <Ionicons name="add" size={18} color="#FFFFFF" />
               <Text style={styles.postingButtonText}>POSTING</Text>
             </TouchableOpacity>
@@ -33,7 +83,7 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Semua')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Semua' && styles.filterChipTextActive]}>
-                Semua +
+                Semua ✨
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -41,7 +91,7 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Post')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Post' && styles.filterChipTextActive]}>
-                Post
+                Post 📝
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -49,133 +99,142 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Event')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Event' && styles.filterChipTextActive]}>
-                Event
+                Event 📅
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Post Feed Item 1 */}
-        <View style={styles.postCard}>
-          <View style={styles.userHeader}>
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80' }}
-              style={styles.userAvatar}
-            />
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>Rizqi Baihaqi Ahmadi</Text>
-              <Text style={styles.postTime}>Hari ini 19:29</Text>
-            </View>
-            <Text style={styles.timeAgo}>2 jam lalu</Text>
-          </View>
-
-          <View style={styles.bookReferenceTag}>
+        {/* Reading Club Event Card */}
+        {(activeFilter === 'Semua' || activeFilter === 'Event') && (
+          <View style={styles.eventCard}>
             <Image
               source={{ uri: 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
-              style={styles.miniCover}
+              style={styles.eventCover}
             />
-            <View>
-              <Text style={styles.refTitle}>Laut Bercerita</Text>
-              <Text style={styles.refAuthor}>Laila S. Chudori</Text>
+            <View style={styles.eventInfo}>
+              <View style={styles.eventTag}>
+                <Ionicons name="book-outline" size={14} color="#6EE7B7" />
+                <Text style={styles.eventTagText}>Baca Bareng Januari</Text>
+              </View>
+              <Text style={styles.eventBookTitle}>Laut Bercerita</Text>
+              <Text style={styles.eventBookAuthor}>Leila S. Chudori</Text>
+
+              <View style={styles.progressRow}>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBarFill, { width: '62%' }]} />
+                </View>
+              </View>
+              <Text style={styles.progressLabel}>Progress Komunitas: 62%</Text>
+
+              <TouchableOpacity
+                style={[styles.joinButton, isReadingClubJoined && styles.joinedButton]}
+                activeOpacity={0.8}
+                onPress={() => handleToggleJoinEvent('event_baca_bareng_jan')}
+              >
+                <Text style={styles.joinButtonText}>
+                  {isReadingClubJoined ? '✓ Sudah Bergabung' : 'Gabung Baca Bareng'}
+                </Text>
+                {!isReadingClubJoined && <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />}
+              </TouchableOpacity>
             </View>
           </View>
+        )}
 
-          <Text style={styles.postBodyText}>
-            Baru selesai baca Laut bercerita, TERBAIK ✨ 😭, Leila beneran jenius!
-          </Text>
+        {/* Post Feed Items */}
+        {(activeFilter === 'Semua' || activeFilter === 'Post') &&
+          posts.map((post) => (
+            <View key={post.id} style={styles.postCard}>
+              <View style={styles.userHeader}>
+                {post.userAvatar ? (
+                  <Image source={{ uri: post.userAvatar }} style={styles.userAvatar} />
+                ) : (
+                  <View style={[styles.userAvatarPlaceholder, { backgroundColor: COLORS.gold }]}>
+                    <Text style={styles.avatarLetter}>{post.userName.charAt(0).toUpperCase()}</Text>
+                  </View>
+                )}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{post.userName}</Text>
+                  <Text style={styles.postTime}>{post.postTime}</Text>
+                </View>
+                <Text style={styles.timeAgo}>{post.timeAgo}</Text>
+              </View>
 
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="heart-outline" size={20} color={COLORS.muted} />
-              <Text style={styles.actionCount}>500</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="chatbubble-outline" size={18} color={COLORS.muted} />
-              <Text style={styles.actionCount}>500</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionIconOnly}>
-              <Ionicons name="share-outline" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionIconOnly}>
-              <Ionicons name="bookmark-outline" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-          </View>
-        </View>
+              {post.taggedBook && (
+                <TouchableOpacity
+                  style={styles.bookReferenceTag}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    navigation.navigate('ReadingStack', {
+                      screen: 'BookDetail',
+                      params: { bookId: post.taggedBook!.id },
+                    } as never)
+                  }
+                >
+                  <Image source={{ uri: post.taggedBook.coverUrl }} style={styles.miniCover} />
+                  <View>
+                    <Text style={styles.refTitle}>{post.taggedBook.title}</Text>
+                    <Text style={styles.refAuthor}>{post.taggedBook.author}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
 
-        {/* Event Card: Baca Bareng Januari */}
-        <View style={styles.eventCard}>
-          <Image
-            source={{ uri: 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
-            style={styles.eventCover}
-          />
-          <View style={styles.eventInfo}>
-            <View style={styles.eventTag}>
-              <Ionicons name="book-outline" size={14} color="#6EE7B7" />
-              <Text style={styles.eventTagText}>Baca Bareng Januari</Text>
-            </View>
-            <Text style={styles.eventBookTitle}>Laut Bercerita</Text>
-            <Text style={styles.eventBookAuthor}>Laila S. Chudori</Text>
+              <Text style={styles.postBodyText}>{post.content}</Text>
 
-            <View style={styles.progressRow}>
-              <View style={styles.progressBarBackground}>
-                <View style={[styles.progressBarFill, { width: '62%' }]} />
+              {/* Interaction Action Row */}
+              <View style={styles.actionRow}>
+                <TouchableOpacity style={styles.actionItem} onPress={() => handleToggleLike(post.id)}>
+                  <Ionicons
+                    name={post.isLiked ? 'heart' : 'heart-outline'}
+                    size={20}
+                    color={post.isLiked ? '#EF4444' : COLORS.muted}
+                  />
+                  <Text style={[styles.actionCount, post.isLiked && { color: '#EF4444' }]}>
+                    {post.likesCount}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionItem} onPress={() => setActivePostForComments(post)}>
+                  <Ionicons name="chatbubble-outline" size={18} color={COLORS.muted} />
+                  <Text style={styles.actionCount}>{post.commentsCount}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionIconOnly} onPress={() => handleToggleBookmark(post.id)}>
+                  <Ionicons
+                    name={post.isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                    size={20}
+                    color={post.isBookmarked ? COLORS.gold : COLORS.muted}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionIconOnly}>
+                  <Ionicons name="share-outline" size={20} color={COLORS.muted} />
+                </TouchableOpacity>
               </View>
             </View>
-            <Text style={styles.progressLabel}>Progress Komunitas: 62%</Text>
-
-            <TouchableOpacity style={styles.joinButton} activeOpacity={0.8}>
-              <Text style={styles.joinButtonText}>Gabung</Text>
-              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Post Feed Item 2 */}
-        <View style={styles.postCard}>
-          <View style={styles.userHeader}>
-            <View style={[styles.userAvatarPlaceholder, { backgroundColor: COLORS.gold }]}>
-              <Text style={styles.avatarLetter}>D</Text>
-            </View>
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>Dewi Kartika Sari</Text>
-              <Text style={styles.postTime}>Kemarin 15:45</Text>
-            </View>
-            <Text style={styles.timeAgo}>1 hari lalu</Text>
-          </View>
-
-          <View style={styles.bookReferenceTag}>
-            <Image
-              source={{ uri: 'https://covers.openlibrary.org/b/id/8431872-L.jpg' }}
-              style={styles.miniCover}
-            />
-            <View>
-              <Text style={styles.refTitle}>Gagak Merah</Text>
-              <Text style={styles.refAuthor}>Sadie Shink</Text>
-            </View>
-          </View>
-
-          <Text style={styles.postBodyText}>
-            Ada rekomendasi novel misteri bertema detektif yang alurnya tidak bisa ditebak?
-          </Text>
-
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="heart-outline" size={20} color={COLORS.muted} />
-              <Text style={styles.actionCount}>128</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="chatbubble-outline" size={18} color={COLORS.muted} />
-              <Text style={styles.actionCount}>42</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionIconOnly}>
-              <Ionicons name="share-outline" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionIconOnly}>
-              <Ionicons name="bookmark-outline" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-          </View>
-        </View>
+          ))}
       </ScrollView>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        onPostCreated={setPosts}
+      />
+
+      {/* Post Comments Modal */}
+      <PostCommentsModal
+        visible={!!activePostForComments}
+        onClose={() => setActivePostForComments(null)}
+        post={activePostForComments}
+        onCommentsUpdated={(updated) => {
+          setPosts(updated);
+          if (activePostForComments) {
+            const found = updated.find((p) => p.id === activePostForComments.id);
+            if (found) setActivePostForComments(found);
+          }
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -190,8 +249,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 15,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   headerTop: {
     flexDirection: 'row',
@@ -200,33 +259,32 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   activeUsersBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(27, 85, 65, 0.6)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: 'rgba(110, 231, 183, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   activeUsersText: {
     color: '#6EE7B7',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
     fontFamily: FONTS.sansMedium,
   },
   postingButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
     gap: 4,
+    backgroundColor: COLORS.ember,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
   },
   postingButtonText: {
     color: '#FFFFFF',
@@ -236,36 +294,116 @@ const styles = StyleSheet.create({
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
   },
   filterChip: {
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#0F2922',
     borderWidth: 1,
-    borderColor: COLORS.gold,
-    backgroundColor: 'transparent',
+    borderColor: '#173E33',
   },
   filterChipActive: {
     backgroundColor: COLORS.gold,
+    borderColor: COLORS.gold,
   },
   filterChipText: {
-    color: COLORS.gold,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    color: COLORS.creamLight,
     fontFamily: FONTS.sansMedium,
   },
   filterChipTextActive: {
+    color: '#0A1A15',
+    fontWeight: 'bold',
+  },
+  eventCard: {
+    flexDirection: 'row',
+    backgroundColor: '#0F2922',
+    borderRadius: 20,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#173E33',
+    gap: 14,
+  },
+  eventCover: {
+    width: 70,
+    height: 105,
+    borderRadius: 8,
+  },
+  eventInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  eventTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  eventTagText: {
+    color: '#6EE7B7',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  eventBookTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+  },
+  eventBookAuthor: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
+  },
+  progressRow: {
+    marginVertical: 4,
+  },
+  progressBarBackground: {
+    height: 6,
+    backgroundColor: '#1E4D40',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#6EE7B7',
+    borderRadius: 3,
+  },
+  progressLabel: {
+    fontSize: 11,
+    color: COLORS.creamLight,
+    fontFamily: FONTS.sansRegular,
+  },
+  joinButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.ember,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  joinedButton: {
+    backgroundColor: '#10B981',
+  },
+  joinButtonText: {
     color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
   postCard: {
-    backgroundColor: COLORS.forestCard,
-    marginHorizontal: 20,
-    borderRadius: 18,
+    backgroundColor: '#0F2922',
+    borderRadius: 20,
     padding: 16,
-    marginBottom: 18,
+    marginHorizontal: 20,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: COLORS.forestBorder,
+    borderColor: '#173E33',
   },
   userHeader: {
     flexDirection: 'row',
@@ -273,24 +411,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   userAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
   },
   userAvatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
     alignItems: 'center',
-    marginRight: 12,
+    justifyContent: 'center',
   },
   avatarLetter: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: '#0A1A15',
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+    fontSize: 16,
   },
   userInfo: {
     flex: 1,
@@ -300,157 +437,67 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
     color: COLORS.cream,
-    marginBottom: 2,
   },
   postTime: {
-    fontSize: 12,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 11,
     color: COLORS.muted,
   },
   timeAgo: {
-    fontSize: 12,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 11,
     color: COLORS.muted,
   },
   bookReferenceTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.forestDark,
-    borderRadius: 10,
+    gap: 10,
+    backgroundColor: '#0A1A15',
+    borderRadius: 12,
     padding: 8,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#1E4D40',
   },
   miniCover: {
     width: 30,
-    height: 42,
+    height: 45,
     borderRadius: 4,
-    marginRight: 10,
   },
   refTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+    fontFamily: FONTS.serifBold,
     color: COLORS.cream,
   },
   refAuthor: {
-    fontSize: 12,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 11,
     color: COLORS.muted,
   },
   postBodyText: {
-    fontSize: 16,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 14,
+    lineHeight: 22,
     color: COLORS.creamLight,
-    lineHeight: 24,
-    marginBottom: 16,
+    fontFamily: FONTS.sansRegular,
+    marginBottom: 14,
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: COLORS.forestBorder,
+    borderTopColor: '#173E33',
+    paddingTop: 12,
   },
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    marginRight: 24,
   },
   actionCount: {
     fontSize: 13,
-    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
-  },
-  actionIconOnly: {
-    padding: 4,
-  },
-  eventCard: {
-    flexDirection: 'row',
-    backgroundColor: '#0F2B38',
-    marginHorizontal: 20,
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: '#1E4057',
-  },
-  eventCover: {
-    width: 105,
-    height: 150,
-    borderRadius: 10,
-    marginRight: 16,
-  },
-  eventInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  eventTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(27, 85, 65, 0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    gap: 6,
-    marginBottom: 8,
-  },
-  eventTagText: {
-    color: '#6EE7B7',
-    fontSize: 12,
-    fontWeight: '600',
     fontFamily: FONTS.sansMedium,
   },
-  eventBookTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: COLORS.cream,
-    marginBottom: 2,
-  },
-  eventBookAuthor: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
-    marginBottom: 12,
-  },
-  progressRow: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressBarBackground: {
-    flex: 1,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#6EE7B7',
-    borderRadius: 3,
-  },
-  progressLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.sansRegular,
-    color: COLORS.muted,
-    marginBottom: 14,
-  },
-  joinButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.gold,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-  },
-
-  joinButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+  actionIconOnly: {
+    marginRight: 20,
   },
 });

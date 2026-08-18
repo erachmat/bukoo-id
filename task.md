@@ -1,5 +1,13 @@
 # current integration tasks
 
+# Mobile Community & Reading Club Enhancements — 2026-08-18
+
+- `[x]` 1. Community feed & persistence service (`communityService.ts`).
+- `[x]` 2. Post creation modal (`CreatePostModal.tsx`) with post types and BUKOO library book tagging.
+- `[x]` 3. Comments thread modal (`PostCommentsModal.tsx`).
+- `[x]` 4. Full integration in `CommunityScreen.tsx` with interactive likes, bookmarks, and Reading Club ("Baca Bareng") join toggle.
+- `[x]` 5. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile AI Companion & Reading Assistant Enhancements — 2026-08-18
 
 - `[x]` 1. AI knowledge base & conversation service (`aiCompanionService.ts`).
