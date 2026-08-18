@@ -1,5 +1,12 @@
 # current integration tasks
 
+# Mobile Edit Profile & User Preferences Enhancements — 2026-08-18
+
+- `[x]` 1. Avatar presets & profile update service (`userProfileService.ts`).
+- `[x]` 2. Interactive Edit Profile modal (`EditProfileModal.tsx`) with avatar presets carousel, custom image URL input, name validation, and favorite reading genres multi-select.
+- `[x]` 3. Dynamic profile header avatar & "Edit Profil" button in `ProfileScreen.tsx`.
+- `[x]` 4. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Reading Progress & Goal System Enhancements — 2026-08-18
 
 - `[x]` 1. Reading goal & streak persistence service (`readingGoalService.ts`).

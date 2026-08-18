@@ -16,6 +16,8 @@ import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
 import { ReadingAnalyticsModal } from './components/ReadingAnalyticsModal';
+import { EditProfileModal } from './components/EditProfileModal';
+import { AVATAR_PRESETS } from '../../services/userProfileService';
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
@@ -101,18 +103,43 @@ export default function ProfileScreen() {
 
         {/* Profile Avatar & Info Section */}
         <View style={styles.profileSection}>
-          <View style={styles.avatarBorderFrame}>
-            {user?.avatarUrl ? (
+          <TouchableOpacity
+            style={styles.avatarBorderFrame}
+            onPress={() => setActiveModal('account')}
+            activeOpacity={0.8}
+          >
+            {user?.avatarUrl?.startsWith('http://') || user?.avatarUrl?.startsWith('https://') ? (
               <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
-            ) : (
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80' }}
-                style={styles.avatarImage}
-              />
-            )}
-          </View>
+            ) : (() => {
+              const presetObj = AVATAR_PRESETS.find((p) => p.id === user?.avatarUrl) || AVATAR_PRESETS[0];
+              return (
+                <View style={[styles.avatarImage, { backgroundColor: presetObj.bgColor, alignItems: 'center', justifyContent: 'center' }]}>
+                  <Text style={{ fontSize: 36 }}>{presetObj.emoji}</Text>
+                </View>
+              );
+            })()}
+          </TouchableOpacity>
 
-          <Text style={styles.profileNameText}>{user?.name || 'Rizqi Baihaqi Ahmadi'}</Text>
+          <Text style={styles.profileNameText}>{user?.name || 'Pengguna BUKOO'}</Text>
+
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+              backgroundColor: 'rgba(217, 119, 6, 0.15)',
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 14,
+              marginBottom: 14,
+              borderWidth: 1,
+              borderColor: 'rgba(217, 119, 6, 0.3)',
+            }}
+            onPress={() => setActiveModal('account')}
+          >
+            <Ionicons name="create-outline" size={14} color={COLORS.gold} />
+            <Text style={{ color: COLORS.gold, fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.sansBold }}>Edit Profil</Text>
+          </TouchableOpacity>
 
           {/* Quick Stats Row */}
           <View style={styles.quickStatsRow}>
@@ -221,38 +248,8 @@ export default function ProfileScreen() {
       </ScrollView>
 
 
-      {/* Account Modal */}
-      <Modal visible={activeModal === 'account'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Informasi Akun</Text>
-            <View style={{ alignItems: 'center', marginVertical: 20 }}>
-              <View style={[styles.avatarPlaceholder, { marginRight: 0, marginBottom: 12 }]}>
-                <Text style={styles.avatarPlaceholderText}>
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </Text>
-              </View>
-              <Text style={[styles.userName, { textAlign: 'center' }]}>{user?.name || 'Pengguna BUKOO'}</Text>
-              <Text style={[styles.userEmail, { textAlign: 'center' }]}>{user?.email || ''}</Text>
-            </View>
-            <View style={styles.detailsBlock}>
-              <View style={styles.detailsRow}>
-                <Text style={styles.detailsLabel}>Tipe Akun</Text>
-                <Text style={styles.detailsValue}>{user?.subscriptionTier || 'FREE'}</Text>
-              </View>
-              <View style={styles.detailsRow}>
-                <Text style={styles.detailsLabel}>Anggota Sejak</Text>
-                <Text style={styles.detailsValue}>
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' }) : '-'}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.closeModalButton} onPress={() => setActiveModal(null)}>
-              <Text style={styles.closeModalButtonText}>Tutup</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* Edit Profile Modal */}
+      <EditProfileModal visible={activeModal === 'account'} onClose={() => setActiveModal(null)} />
 
       {/* Preferences (Goals) Modal */}
       <Modal visible={activeModal === 'preferences'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
