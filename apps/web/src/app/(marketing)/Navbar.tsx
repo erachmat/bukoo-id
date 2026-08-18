@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
@@ -7,7 +8,8 @@ import { useRouter } from 'next/navigation';
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session, status, update } = useSession();
+  const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
+  const { status, update } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,20 +21,25 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Force a session refetch every time this Navbar mounts.
-  // This ensures that when navigating from /library back to /,
-  // the session state is always fresh and reflects the real auth status.
   useEffect(() => {
     update();
-  }, []);
+  }, [update]);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
   };
 
+  const toggleMobileSub = (key: string) => {
+    setActiveMobileSub(activeMobileSub === key ? null : key);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setActiveMobileSub(null);
+  };
+
   const renderAuthButtons = () => {
     if (status === 'loading') {
-      // Render a ghost placeholder to prevent layout shift
       return <div style={{ width: 160, height: 40 }} />;
     }
     if (status === 'authenticated') {
@@ -55,47 +62,218 @@ export default function Navbar() {
     <>
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`} id="navbar">
         <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>BUKOO</Link>
+
         <ul className="nav-links">
-          <li><Link href="/">Beranda</Link></li>
-          <li><Link href="/koleksi">Koleksi</Link></li>
-          <li><Link href="/originals">BUKOO Originals</Link></li>
-          <li><Link href="/pricing">Harga</Link></li>
-          <li><Link href="/komunitas">Komunitas</Link></li>
-          <li><Link href="/penerbit">Untuk Penerbit</Link></li>
+          {/* 1. Beranda */}
+          <li className="nav-item">
+            <Link href="/" className="nav-link">Beranda</Link>
+          </li>
+
+          {/* 2. Produk (Dropdown) */}
+          <li className="nav-item">
+            <span className="nav-link">
+              Produk
+              <svg className="nav-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <div className="nav-dropdown">
+              <Link href="/koleksi" className="nav-dropdown-item">
+                Koleksi Buku
+                <div className="nav-dropdown-desc">Ribuan e-book terlengkap</div>
+              </Link>
+              <Link href="/audiobook" className="nav-dropdown-item">
+                Audiobook
+                <div className="nav-dropdown-desc">Dengar narasi berkualitas</div>
+              </Link>
+              <Link href="/originals" className="nav-dropdown-item">
+                BUKOO Originals
+                <div className="nav-dropdown-desc">Karya eksklusif BUKOO</div>
+              </Link>
+              <Link href="/ai-companion" className="nav-dropdown-item">
+                AI Companion
+                <div className="nav-dropdown-desc">Asisten membaca pintar</div>
+              </Link>
+              <Link href="/komunitas" className="nav-dropdown-item">
+                Komunitas
+                <div className="nav-dropdown-desc">Klub baca &amp; ulasan</div>
+              </Link>
+            </div>
+          </li>
+
+          {/* 3. Harga */}
+          <li className="nav-item">
+            <Link href="/pricing" className="nav-link">Harga</Link>
+          </li>
+
+          {/* 4. Untuk Penerbit (External redirect) */}
+          <li className="nav-item">
+            <a
+              href="https://publisher.bukoo.id"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-link"
+            >
+              Untuk Penerbit
+            </a>
+          </li>
+
+          {/* 5. Perusahaan (Dropdown) */}
+          <li className="nav-item">
+            <span className="nav-link">
+              Perusahaan
+              <svg className="nav-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <div className="nav-dropdown">
+              <Link href="/tentang" className="nav-dropdown-item">Tentang Kami</Link>
+              <Link href="/karir" className="nav-dropdown-item">Karir</Link>
+              <Link href="/newsroom" className="nav-dropdown-item">Newsroom</Link>
+              <Link href="/investor-relations" className="nav-dropdown-item">Investor Relations</Link>
+              <Link href="/blog" className="nav-dropdown-item">Blog</Link>
+              <Link href="/bantuan#kontak" className="nav-dropdown-item">Kontak</Link>
+            </div>
+          </li>
+
+          {/* 6. Bantuan (Dropdown) */}
+          <li className="nav-item">
+            <span className="nav-link">
+              Bantuan
+              <svg className="nav-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <div className="nav-dropdown">
+              <Link href="/bantuan" className="nav-dropdown-item">Pusat Bantuan</Link>
+              <Link href="/langganan-bantuan" className="nav-dropdown-item">Langganan</Link>
+              <Link href="/pembayaran" className="nav-dropdown-item">Pembayaran</Link>
+              <Link href="/perangkat" className="nav-dropdown-item">Perangkat &amp; App</Link>
+              <Link href="/faq" className="nav-dropdown-item">FAQ</Link>
+            </div>
+          </li>
         </ul>
+
         <div className="nav-right">
           {renderAuthButtons()}
         </div>
+
         <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           ) : (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
           )}
         </div>
       </nav>
+
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="mobile-dropdown">
           <ul className="mobile-dropdown-links">
-            <li><Link href="/" onClick={() => setMobileMenuOpen(false)}>Beranda</Link></li>
-            <li><Link href="/koleksi" onClick={() => setMobileMenuOpen(false)}>Koleksi</Link></li>
-            <li><Link href="/originals" onClick={() => setMobileMenuOpen(false)}>BUKOO Originals</Link></li>
-            <li><Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>Harga</Link></li>
-            <li><Link href="/komunitas" onClick={() => setMobileMenuOpen(false)}>Komunitas</Link></li>
-            <li><Link href="/penerbit" onClick={() => setMobileMenuOpen(false)}>Untuk Penerbit</Link></li>
+            <li>
+              <Link href="/" onClick={closeMobileMenu}>Beranda</Link>
+            </li>
+
+            {/* Produk Submenu Accordion */}
+            <li>
+              <button className="mobile-nav-parent" onClick={() => toggleMobileSub('produk')}>
+                <span>Produk</span>
+                <svg className={`mobile-nav-caret ${activeMobileSub === 'produk' ? 'open' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {activeMobileSub === 'produk' && (
+                <ul className="mobile-nav-sub">
+                  <li><Link href="/koleksi" onClick={closeMobileMenu}>Koleksi Buku</Link></li>
+                  <li><Link href="/audiobook" onClick={closeMobileMenu}>Audiobook</Link></li>
+                  <li><Link href="/originals" onClick={closeMobileMenu}>BUKOO Originals</Link></li>
+                  <li><Link href="/ai-companion" onClick={closeMobileMenu}>AI Companion</Link></li>
+                  <li><Link href="/komunitas" onClick={closeMobileMenu}>Komunitas</Link></li>
+                </ul>
+              )}
+            </li>
+
+            <li>
+              <Link href="/pricing" onClick={closeMobileMenu}>Harga</Link>
+            </li>
+
+            <li>
+              <a
+                href="https://publisher.bukoo.id"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={closeMobileMenu}
+              >
+                Untuk Penerbit
+              </a>
+            </li>
+
+            {/* Perusahaan Submenu Accordion */}
+            <li>
+              <button className="mobile-nav-parent" onClick={() => toggleMobileSub('perusahaan')}>
+                <span>Perusahaan</span>
+                <svg className={`mobile-nav-caret ${activeMobileSub === 'perusahaan' ? 'open' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {activeMobileSub === 'perusahaan' && (
+                <ul className="mobile-nav-sub">
+                  <li><Link href="/tentang" onClick={closeMobileMenu}>Tentang Kami</Link></li>
+                  <li><Link href="/karir" onClick={closeMobileMenu}>Karir</Link></li>
+                  <li><Link href="/newsroom" onClick={closeMobileMenu}>Newsroom</Link></li>
+                  <li><Link href="/investor-relations" onClick={closeMobileMenu}>Investor Relations</Link></li>
+                  <li><Link href="/blog" onClick={closeMobileMenu}>Blog</Link></li>
+                  <li><Link href="/bantuan#kontak" onClick={closeMobileMenu}>Kontak</Link></li>
+                </ul>
+              )}
+            </li>
+
+            {/* Bantuan Submenu Accordion */}
+            <li>
+              <button className="mobile-nav-parent" onClick={() => toggleMobileSub('bantuan')}>
+                <span>Bantuan</span>
+                <svg className={`mobile-nav-caret ${activeMobileSub === 'bantuan' ? 'open' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {activeMobileSub === 'bantuan' && (
+                <ul className="mobile-nav-sub">
+                  <li><Link href="/bantuan" onClick={closeMobileMenu}>Pusat Bantuan</Link></li>
+                  <li><Link href="/langganan-bantuan" onClick={closeMobileMenu}>Langganan</Link></li>
+                  <li><Link href="/pembayaran" onClick={closeMobileMenu}>Pembayaran</Link></li>
+                  <li><Link href="/perangkat" onClick={closeMobileMenu}>Perangkat &amp; App</Link></li>
+                  <li><Link href="/faq" onClick={closeMobileMenu}>FAQ</Link></li>
+                </ul>
+              )}
+            </li>
           </ul>
+
           <div className="mobile-dropdown-actions">
             {status === 'authenticated' ? (
               <>
-                <Link href="/library" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Library</button></Link>
-                <button className="btn-cta" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} style={{ width: '100%' }}>Keluar</button>
+                <Link href="/library" onClick={closeMobileMenu}>
+                  <button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Library</button>
+                </Link>
+                <button className="btn-cta" onClick={() => { handleSignOut(); closeMobileMenu(); }} style={{ width: '100%' }}>Keluar</button>
               </>
             ) : status === 'loading' ? (
               <div style={{ height: 80 }} />
             ) : (
               <>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}><button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Masuk</button></Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}><button className="btn-cta" style={{ width: '100%' }}>Coba Gratis</button></Link>
+                <Link href="/login" onClick={closeMobileMenu}>
+                  <button className="btn-ghost" style={{ width: '100%', marginBottom: '8px' }}>Masuk</button>
+                </Link>
+                <Link href="/register" onClick={closeMobileMenu}>
+                  <button className="btn-cta" style={{ width: '100%' }}>Coba Gratis</button>
+                </Link>
               </>
             )}
           </div>
