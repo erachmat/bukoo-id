@@ -77,7 +77,7 @@ export default function KomunitasPage() {
                   <div>
                     <div style={{ fontSize: '15px', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>Laut Bercerita</div>
                     <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>⭐⭐⭐⭐⭐ 5/5</div>
-                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginTop: '8px', fontStyle: 'italic' }}>"Buku yang sangat mengharukan. Membuka mata tentang sejarah gelap yang tak boleh dilupakan."</p>
+                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginTop: '8px', fontStyle: 'italic' }}>&quot;Buku yang sangat mengharukan. Membuka mata tentang sejarah gelap yang tak boleh dilupakan.&quot;</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>
@@ -96,7 +96,7 @@ export default function KomunitasPage() {
                   </div>
                 </div>
                 <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6', marginBottom: '16px', borderLeft: '3px solid var(--amber)', paddingLeft: '16px' }}>
-                  "You do not rise to the level of your goals. You fall to the level of your systems."
+                  &quot;You do not rise to the level of your goals. You fall to the level of your systems.&quot;
                 </p>
                 <div style={{ fontSize: '13px', color: 'var(--amber)', fontWeight: '600', marginBottom: '16px' }}>— Atomic Habits, Halaman 42</div>
                 <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>

@@ -1,5 +1,3 @@
-import { CallToAction } from '@/components/marketing/CallToAction';
-
 export default function PenerbitPage() {
   return (
     <>

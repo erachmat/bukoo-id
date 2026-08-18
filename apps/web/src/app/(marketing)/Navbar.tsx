@@ -3,14 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
   const { status, update } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
