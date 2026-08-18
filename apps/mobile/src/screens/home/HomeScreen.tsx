@@ -22,6 +22,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Teknologi', 'Bisnis'];
 
 import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
+import { NotificationModal } from './components/NotificationModal';
+import { notificationService } from '../../services/notificationService';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -32,6 +34,8 @@ export default function HomeScreen() {
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [refreshing, setRefreshing] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [notifModalVisible, setNotifModalVisible] = useState(false);
 
   // A/B: home_layout — 'carousel' (current) vs 'grid' (2-column).
   const homeLayout = useFeatureFlag('home_layout');
@@ -40,12 +44,17 @@ export default function HomeScreen() {
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
   const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
 
+  const refreshUnreadCount = () => {
+    notificationService.getUnreadCount().then(setUnreadNotifCount);
+  };
+
   useEffect(() => {
     if (!isFocused) return;
     bookDownloadService.getDownloadedBooks()
       .then(setDownloadedBookIds)
       .catch(err => console.error('[HomeScreen] Failed to load downloaded books:', err));
     userProfileService.getFavoriteGenres().then(setFavoriteGenres);
+    refreshUnreadCount();
   }, [isFocused]);
 
   const { data: trendingBooks, refetch: refetchBooks } = useQuery({
@@ -126,9 +135,17 @@ export default function HomeScreen() {
           <Text style={styles.greetingText}>
             Hi, <Text style={styles.userName}>{user?.name || 'Baihaqi'}</Text>
           </Text>
-          <TouchableOpacity style={styles.notificationButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            activeOpacity={0.7}
+            onPress={() => setNotifModalVisible(true)}
+          >
             <Ionicons name="notifications-outline" size={24} color={COLORS.gold} />
-            <View style={styles.notificationDot} />
+            {unreadNotifCount > 0 && (
+              <View style={{ position: 'absolute', top: 2, right: 2, backgroundColor: '#EF4444', borderRadius: 9, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' }}>{unreadNotifCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -286,6 +303,12 @@ export default function HomeScreen() {
           />
         )}
       </ScrollView>
+
+      <NotificationModal
+        visible={notifModalVisible}
+        onClose={() => setNotifModalVisible(false)}
+        onNotificationsChanged={refreshUnreadCount}
+      />
     </SafeAreaView>
   );
 }

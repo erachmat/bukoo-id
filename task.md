@@ -1,5 +1,12 @@
 # current integration tasks
 
+# Mobile Notification & Reading Reminder Center Enhancements — 2026-08-18
+
+- `[x]` 1. Notification feed & daily reminder service (`notificationService.ts`).
+- `[x]` 2. Notification center drawer modal (`NotificationModal.tsx`) with notification tabs and time preset selectors.
+- `[x]` 3. HomeScreen integration with red unread count badge overlay on bell icon.
+- `[x]` 4. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Offline Mode & Network Sync Banner Enhancements — 2026-08-18
 
 - `[x]` 1. Network connectivity & sync queue hook (`useNetworkStatus.ts`).
