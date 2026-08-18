@@ -1,6 +1,5 @@
 import React from "react";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
-import "../publisher.css";
 
 export const metadata = {
   title: "BUKOO — Kebijakan & Laporan Royalti",

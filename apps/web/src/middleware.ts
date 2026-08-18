@@ -18,13 +18,19 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
 
   // Handle requests on publisher.bukoo.id domain
   if (isPublisherHost) {
-    if (user && user.role === "PUBLISHER" && (pathname === "/" || pathname === "/daftar")) {
+    if (user && user.role === "PUBLISHER" && (pathname === "/" || pathname === "/daftar" || pathname === "/publisher/daftar")) {
       return NextResponse.redirect(new URL("/publisher/dashboard", req.url))
     }
 
-    // Map root path on publisher.bukoo.id to /publisher
+    // Redirect root / to /publisher/daftar
     if (pathname === "/") {
-      return NextResponse.rewrite(new URL("/publisher/daftar", req.url))
+      return NextResponse.redirect(new URL("/publisher/daftar", req.url))
+    }
+
+    // Redirect short paths like /daftar, /royalti, /panduan, /dashboard to /publisher/*
+    const shortPublisherPaths = ["/daftar", "/royalti", "/panduan", "/dashboard", "/submit", "/books"]
+    if (shortPublisherPaths.includes(pathname)) {
+      return NextResponse.redirect(new URL(`/publisher${pathname}`, req.url))
     }
   }
 
