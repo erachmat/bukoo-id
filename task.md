@@ -1,5 +1,13 @@
 # current integration tasks
 
+# Mobile AI Companion & Reading Assistant Enhancements — 2026-08-18
+
+- `[x]` 1. AI knowledge base & conversation service (`aiCompanionService.ts`).
+- `[x]` 2. Interactive AI Q&A Chat section (`AiChatSection.tsx`) with quick prompt chips.
+- `[x]` 3. Chapter summarizer modal (`AiSummaryModal.tsx`) with key takeaways and character map.
+- `[x]` 4. Full tab experience integration in `AiCompanionScreen.tsx` with habit insights and genre-boosted match scores.
+- `[x]` 5. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Home Screen Personalization & Quick Resume Widget — 2026-08-18
 
 - `[x]` 1. Quick Resume card component (`QuickResumeCard.tsx`) positioned at top of Home feed.

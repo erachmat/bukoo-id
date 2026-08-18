@@ -1,48 +1,73 @@
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/authStore';
+import { AiChatSection } from './components/AiChatSection';
+import { AiSummaryModal } from './components/AiSummaryModal';
+import { userProfileService } from '../../services/userProfileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
+const BASE_RECOMMENDATIONS = [
+  {
+    id: 'book_bumi_manusia',
+    title: 'Bumi Manusia',
+    author: 'Pramoedya Ananta Toer',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
+    genre: 'Sejarah',
+    matchPercent: 95,
+  },
+  {
+    id: 'book_cantik_itu_luka',
+    title: 'Cantik Itu Luka',
+    author: 'Eka Kurniawan',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+    genre: 'Fiksi',
+    matchPercent: 92,
+  },
+  {
+    id: 'book_laskar_pelangi',
+    title: 'Laskar Pelangi',
+    author: 'Andrea Hirata',
+    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
+    genre: 'Fiksi',
+    matchPercent: 90,
+  },
+];
+
 export default function AiCompanionScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const isFocused = useIsFocused();
   const user = useAuthStore((state) => state.user);
   const activeTier = user?.subscription?.active ? user.subscription.tier : (user?.subscriptionTier || 'FREE');
 
-  const recommendations = [
-    {
-      id: 'authority-rec',
-      title: 'AUTHORITY',
-      author: 'by Jeff vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-      matchPercent: 90,
-    },
-    {
-      id: 'cage-rec-1',
-      title: 'CAGE THE',
-      author: 'by Jeff vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-      matchPercent: 90,
-    },
-    {
-      id: 'cage-rec-2',
-      title: 'CAGE THE',
-      author: 'by Jeff vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-      matchPercent: 90,
-    },
-  ];
+  const [summaryModalVisible, setSummaryModalVisible] = useState(false);
+  const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isFocused) {
+      userProfileService.getFavoriteGenres().then(setFavoriteGenres);
+    }
+  }, [isFocused]);
+
+  const activeBook = {
+    id: 'book_laut_bercerita',
+    title: 'Laut Bercerita',
+    author: 'Leila S. Chudori',
+    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
+    progressPercent: 40,
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Header Bar with Back Button */}
+        {/* Header Bar */}
         <View style={styles.topHeader}>
           <TouchableOpacity
             style={styles.backButton}
@@ -56,19 +81,19 @@ export default function AiCompanionScreen() {
               <Text style={styles.aiBadgeIconText}>AI</Text>
             </View>
             <Ionicons name="sparkles" size={16} color={COLORS.gold} />
-            <Text style={styles.headerTitle}>Ai Companion</Text>
+            <Text style={styles.headerTitle}>AI Companion & Assistant</Text>
           </View>
         </View>
 
-        {/* Main AI Companion Insight Card */}
+        {/* Main AI Habit & Active Reading Insight Card */}
         <View style={styles.mainInsightCard}>
           <View style={styles.insightHeaderRow}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <Ionicons name="sparkles" size={16} color={COLORS.gold} />
-                <Text style={styles.insightMainTitle}>Ai Companion</Text>
+                <Text style={styles.insightMainTitle}>AI Reading Assistant</Text>
               </View>
-              <Text style={styles.insightSubtitle}>Panduan personal baca Untukmu</Text>
+              <Text style={styles.insightSubtitle}>Panduan personal bacaan untukmu</Text>
             </View>
             <TouchableOpacity
               style={styles.plusBadge}
@@ -80,66 +105,97 @@ export default function AiCompanionScreen() {
           </View>
 
           <Text style={styles.insightQuoteText}>
-            “Kamu membaca paling fokus membaca diantara jam 20.00 - 22.00. lanjut malam ini?”
+            “Jam membacamu paling fokus antara pukul 20.00 - 22.00. Siap lanjut malam ini?”
           </Text>
 
-          {/* Active Reading Sub Card */}
+          {/* Active Reading Progress Sub Card */}
           <View style={styles.activeBookSubCard}>
-            <Image
-              source={{ uri: 'https://covers.openlibrary.org/b/id/12093551-L.jpg' }}
-              style={styles.activeBookCover}
-            />
+            <Image source={{ uri: activeBook.coverUrl }} style={styles.activeBookCover} />
             <View style={styles.activeBookInfo}>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusBadgeText}>Sedang dibaca</Text>
               </View>
-              <Text style={styles.activeBookTitle}>Laut Bercerita</Text>
-              <Text style={styles.activeBookAuthor}>Laila S. Chudori</Text>
+              <Text style={styles.activeBookTitle}>{activeBook.title}</Text>
+              <Text style={styles.activeBookAuthor}>{activeBook.author}</Text>
 
               <View style={styles.progressRow}>
                 <View style={styles.progressBarBackground}>
-                  <View style={[styles.progressBarFill, { width: '40%' }]} />
+                  <View style={[styles.progressBarFill, { width: `${activeBook.progressPercent}%` }]} />
                 </View>
-                <Text style={styles.progressText}>40%</Text>
+                <Text style={styles.progressText}>{activeBook.progressPercent}%</Text>
               </View>
 
               <View style={styles.etaRow}>
-                <Ionicons name="sparkles" size={14} color={COLORS.gold} />
-                <Text style={styles.etaText}>Est. Selesai: 3 Hari lagi</Text>
+                <Ionicons name="time-outline" size={14} color={COLORS.gold} />
+                <Text style={styles.etaText}>Est. Selesai: ~3 Hari lagi</Text>
               </View>
             </View>
           </View>
         </View>
 
-        {/* Rekomendasi untukmu Section */}
+        {/* Interactive AI Chat Section */}
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="chatbubbles-outline" size={18} color={COLORS.gold} />
+          <Text style={styles.sectionTitle}>Tanya AI Companion</Text>
+        </View>
+        <AiChatSection
+          currentBookTitle={activeBook.title}
+          onOpenSummaryModal={() => setSummaryModalVisible(true)}
+        />
+
+        {/* Personalized AI Recommendations */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="sparkles" size={18} color={COLORS.gold} />
-            <Text style={styles.sectionTitle}>Rekomendasi untukmu</Text>
+            <Text style={styles.sectionTitle}>Rekomendasi AI (Berdasarkan Minat)</Text>
           </View>
 
-          {recommendations.map((item, idx) => (
-            <TouchableOpacity
-              key={`${item.id}-${idx}`}
-              style={styles.recommendCard}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('Search')}
-            >
-              <Image source={{ uri: item.coverUrl }} style={styles.recommendCover} />
-              <View style={styles.recommendInfo}>
-                <Text style={styles.recommendTitle}>{item.title}</Text>
-                <Text style={styles.recommendAuthor}>{item.author}</Text>
-                <View style={styles.progressRow}>
-                  <View style={styles.progressBarBackground}>
-                    <View style={[styles.progressBarFill, { width: `${item.matchPercent}%` }]} />
+          {BASE_RECOMMENDATIONS.map((item, idx) => {
+            const isMatchGenre = favoriteGenres.includes(item.genre);
+            const displayMatch = isMatchGenre ? Math.min(99, item.matchPercent + 5) : item.matchPercent;
+            return (
+              <TouchableOpacity
+                key={`${item.id}-${idx}`}
+                style={styles.recommendCard}
+                activeOpacity={0.8}
+                onPress={() =>
+                  navigation.navigate('ReadingStack', {
+                    screen: 'BookDetail',
+                    params: { bookId: item.id },
+                  } as never)
+                }
+              >
+                <Image source={{ uri: item.coverUrl }} style={styles.recommendCover} />
+                <View style={styles.recommendInfo}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={styles.recommendTitle}>{item.title}</Text>
+                    {isMatchGenre && (
+                      <View style={styles.genreMatchBadge}>
+                        <Text style={styles.genreMatchBadgeText}>★ {item.genre}</Text>
+                      </View>
+                    )}
                   </View>
-                  <Text style={styles.progressText}>{item.matchPercent}%</Text>
+                  <Text style={styles.recommendAuthor}>{item.author}</Text>
+                  <View style={styles.progressRow}>
+                    <View style={styles.progressBarBackground}>
+                      <View style={[styles.progressBarFill, { width: `${displayMatch}%` }]} />
+                    </View>
+                    <Text style={styles.progressText}>{displayMatch}% Match</Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
+
+      {/* AI Summary Modal Sheet */}
+      <AiSummaryModal
+        visible={summaryModalVisible}
+        onClose={() => setSummaryModalVisible(false)}
+        bookId={activeBook.id}
+        bookTitle={activeBook.title}
+      />
     </SafeAreaView>
   );
 }
@@ -150,218 +206,214 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.forestDark,
   },
   scrollContent: {
+    paddingHorizontal: 20,
     paddingBottom: 110,
   },
   topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingVertical: 14,
+    marginBottom: 8,
   },
   backButton: {
-    paddingRight: 12,
+    padding: 6,
+    marginRight: 10,
   },
   headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   aiBadgeIcon: {
-    backgroundColor: COLORS.goldPill,
+    backgroundColor: COLORS.gold,
+    borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
   },
   aiBadgeIconText: {
-    color: COLORS.gold,
-    fontSize: 11,
+    color: '#0A1A15',
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
+    fontSize: 10,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: COLORS.white,
-  },
-  mainInsightCard: {
-    backgroundColor: COLORS.forestCard,
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: COLORS.forestBorder,
-  },
-  insightHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  insightMainTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.white,
+    color: COLORS.cream,
+  },
+  mainInsightCard: {
+    backgroundColor: '#0F2922',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#173E33',
+    marginBottom: 20,
+  },
+  insightHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  insightMainTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
   },
   insightSubtitle: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 12,
     color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
   },
   plusBadge: {
-    backgroundColor: COLORS.greenBadge,
+    backgroundColor: 'rgba(217, 119, 6, 0.15)',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(74, 222, 128, 0.3)',
+    borderColor: 'rgba(217, 119, 6, 0.3)',
   },
   plusBadgeText: {
-    color: '#4ADE80',
+    color: COLORS.gold,
     fontSize: 11,
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
   },
   insightQuoteText: {
-    fontSize: 15,
+    fontSize: 14,
     fontStyle: 'italic',
-    fontFamily: FONTS.serifItalic,
-    color: COLORS.white,
-    lineHeight: 22,
-    marginBottom: 18,
+    lineHeight: 20,
+    color: COLORS.creamLight,
+    fontFamily: FONTS.serifRegular,
+    marginBottom: 16,
   },
   activeBookSubCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(11, 25, 20, 0.6)',
+    backgroundColor: '#0A1A15',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
-    borderColor: COLORS.forestBorder,
+    borderColor: '#1E4D40',
+    gap: 12,
   },
   activeBookCover: {
-    width: 85,
-    height: 125,
+    width: 60,
+    height: 90,
     borderRadius: 8,
-    marginRight: 14,
   },
   activeBookInfo: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   statusBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.greenBadge,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 8,
-    marginBottom: 6,
   },
   statusBadgeText: {
-    color: '#6EE7B7',
-    fontSize: 11,
-    fontWeight: '600',
-    fontFamily: FONTS.sansMedium,
+    color: '#10B981',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   activeBookTitle: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.white,
-    marginBottom: 2,
+    color: COLORS.cream,
   },
   activeBookAuthor: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 12,
     color: COLORS.muted,
-    marginBottom: 10,
+    fontFamily: FONTS.sansRegular,
   },
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
+    gap: 8,
   },
   progressBarBackground: {
     flex: 1,
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#1E4D40',
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#4ADE80',
+    backgroundColor: COLORS.gold,
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 13,
+    fontSize: 11,
+    color: COLORS.gold,
     fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: COLORS.white,
   },
   etaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   etaText: {
-    fontSize: 12,
-    color: '#6EE7B7',
-    fontWeight: '500',
-    fontFamily: FONTS.sansMedium,
+    fontSize: 11,
+    color: COLORS.creamLight,
+    fontFamily: FONTS.sansRegular,
   },
   section: {
-    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.white,
+    color: COLORS.cream,
   },
   recommendCard: {
     flexDirection: 'row',
-    backgroundColor: COLORS.forestCard,
+    backgroundColor: '#0F2922',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    alignItems: 'center',
+    padding: 12,
     borderWidth: 1,
-    borderColor: COLORS.forestBorder,
+    borderColor: '#173E33',
+    marginBottom: 10,
+    gap: 12,
   },
   recommendCover: {
-    width: 60,
-    height: 85,
-    borderRadius: 8,
-    marginRight: 14,
-    backgroundColor: COLORS.forestDark,
+    width: 50,
+    height: 75,
+    borderRadius: 6,
   },
   recommendInfo: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   recommendTitle: {
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
-    color: COLORS.white,
-    marginBottom: 2,
+    color: COLORS.cream,
   },
   recommendAuthor: {
-    fontSize: 13,
-    fontFamily: FONTS.sansRegular,
+    fontSize: 12,
     color: COLORS.muted,
-    marginBottom: 10,
+    fontFamily: FONTS.sansRegular,
+  },
+  genreMatchBadge: {
+    backgroundColor: 'rgba(217, 119, 6, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  genreMatchBadgeText: {
+    color: COLORS.gold,
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
-
