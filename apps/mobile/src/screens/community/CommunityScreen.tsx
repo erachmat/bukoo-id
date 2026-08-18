@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, RefreshControl, Share, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,69 +7,185 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../navigation/types';
-import { communityService, CommunityPost } from '../../services/communityService';
+import { useAuthStore } from '../../stores/authStore';
+import { communityService } from '../../services/communityService';
+import { CommunityPostDto, CommunityEventDto, CommunityPostType } from '../../services/api';
 import { CreatePostModal } from './components/CreatePostModal';
 import { PostCommentsModal } from './components/PostCommentsModal';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+const POST_TYPE_LABELS: Record<CommunityPostType, string> = {
+  REVIEW: 'Review',
+  QUOTE: 'Kutipan',
+  DISCUSSION: 'Diskusi',
+  RECOMMENDATION: 'Rekomendasi',
+};
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Baru saja';
+  if (mins < 60) return `${mins} mnt lalu`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} jam lalu`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} hari lalu`;
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+
 export default function CommunityScreen() {
   const navigation = useNavigation<NavigationProp>();
   const isFocused = useIsFocused();
+  const user = useAuthStore((s) => s.user);
 
   const [activeFilter, setActiveFilter] = useState<'Semua' | 'Post' | 'Event'>('Semua');
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [joinedEvents, setJoinedEvents] = useState<string[]>([]);
+  const [postTypeFilter, setPostTypeFilter] = useState<CommunityPostType | null>(null);
+  const [posts, setPosts] = useState<CommunityPostDto[]>([]);
+  const [events, setEvents] = useState<CommunityEventDto[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [activePostForComments, setActivePostForComments] = useState<CommunityPost | null>(null);
+  const [activePostForComments, setActivePostForComments] = useState<CommunityPostDto | null>(null);
+
+  const loadFeed = async (cursor?: string) => {
+    const page = await communityService.getPosts(cursor);
+    if (cursor) {
+      setPosts((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        return [...prev, ...page.items.filter((p) => !seen.has(p.id))];
+      });
+    } else {
+      setPosts(page.items);
+    }
+    setNextCursor(page.nextCursor);
+  };
+
+  const loadEvents = async () => {
+    setEvents(await communityService.getEvents());
+  };
 
   useEffect(() => {
-    if (isFocused) {
-      loadData();
-    }
+    if (!isFocused) return;
+    setIsLoading(true);
+    Promise.all([loadFeed(), loadEvents()])
+      .catch((e) => console.error('[CommunityScreen] load failed:', e))
+      .finally(() => setIsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused]);
 
-  const loadData = async () => {
-    const p = await communityService.getPosts();
-    setPosts(p);
-    const events = await communityService.getJoinedEvents();
-    setJoinedEvents(events);
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([loadFeed(), loadEvents()]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const handleToggleLike = async (postId: string) => {
-    const updated = await communityService.toggleLike(postId);
-    setPosts(updated);
+  const handleLoadMore = async () => {
+    if (!nextCursor || isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      await loadFeed(nextCursor);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
-  const handleToggleBookmark = async (postId: string) => {
-    const updated = await communityService.toggleBookmark(postId);
-    setPosts(updated);
+  const handleToggleLike = async (post: CommunityPostDto) => {
+    try {
+      const updated = await communityService.toggleLike(post);
+      setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    } catch {
+      // optimistic rollback handled in service
+    }
   };
 
-  const handleToggleJoinEvent = async (eventId: string) => {
-    await communityService.toggleJoinEvent(eventId);
-    const events = await communityService.getJoinedEvents();
-    setJoinedEvents(events);
+  const handleToggleBookmark = async (post: CommunityPostDto) => {
+    try {
+      const updated = await communityService.toggleBookmark(post);
+      setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    } catch {
+      // rollback handled in service
+    }
   };
 
-  const isReadingClubJoined = joinedEvents.includes('event_baca_bareng_jan');
+  const handleToggleJoinEvent = async (event: CommunityEventDto) => {
+    try {
+      const updated = await communityService.toggleJoinEvent(event);
+      setEvents((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+    } catch {
+      // rollback handled in service
+    }
+  };
+
+  const handleShare = (post: CommunityPostDto) => {
+    const bookLine = post.book ? `\n📖 ${post.book.title} — ${post.book.author}` : '';
+    Share.share({ message: `"${post.content}" — ${post.user.name} di BUKOO${bookLine}` }).catch(() => {});
+  };
+
+  const handleDeletePost = (post: CommunityPostDto) => {
+    Alert.alert('Hapus Postingan', 'Yakin ingin menghapus postingan ini?', [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await communityService.deletePost(post.id);
+            setPosts((prev) => prev.filter((p) => p.id !== post.id));
+          } catch (e) {
+            console.error('[CommunityScreen] delete post failed:', e);
+          }
+        },
+      },
+    ]);
+  };
+
+  const visiblePosts = postTypeFilter ? posts.filter((p) => p.type === postTypeFilter) : posts;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.gold]}
+            tintColor={COLORS.gold}
+          />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.title}>Komunitas BUKOO</Text>
               <View style={styles.activeUsersBadge}>
-                <Text style={styles.activeUsersText}>4.201 Aktif Hari ini</Text>
+                <Text style={styles.activeUsersText}>
+                  {events.length > 0 ? `${events.length} Baca Bareng aktif` : 'Komunitas pembaca Indonesia'}
+                </Text>
               </View>
             </View>
             <TouchableOpacity
               style={styles.postingButton}
               activeOpacity={0.8}
-              onPress={() => setCreateModalVisible(true)}
+              onPress={() => {
+                if (!user) {
+                  Alert.alert('Masuk Dulu', 'Masuk untuk memposting di Komunitas BUKOO.');
+                  return;
+                }
+                setCreateModalVisible(true);
+              }}
             >
               <Ionicons name="add" size={18} color="#FFFFFF" />
               <Text style={styles.postingButtonText}>POSTING</Text>
@@ -103,123 +219,186 @@ export default function CommunityScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Reading Club Event Card */}
-        {(activeFilter === 'Semua' || activeFilter === 'Event') && (
-          <View style={styles.eventCard}>
-            <Image
-              source={{ uri: 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
-              style={styles.eventCover}
-            />
-            <View style={styles.eventInfo}>
-              <View style={styles.eventTag}>
-                <Ionicons name="book-outline" size={14} color="#6EE7B7" />
-                <Text style={styles.eventTagText}>Baca Bareng Januari</Text>
-              </View>
-              <Text style={styles.eventBookTitle}>Laut Bercerita</Text>
-              <Text style={styles.eventBookAuthor}>Leila S. Chudori</Text>
-
-              <View style={styles.progressRow}>
-                <View style={styles.progressBarBackground}>
-                  <View style={[styles.progressBarFill, { width: '62%' }]} />
-                </View>
-              </View>
-              <Text style={styles.progressLabel}>Progress Komunitas: 62%</Text>
-
+          {/* Post-type sub-filter (uses post.type for real filtering) */}
+          {activeFilter !== 'Event' && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.typeFilterRow}>
               <TouchableOpacity
-                style={[styles.joinButton, isReadingClubJoined && styles.joinedButton]}
-                activeOpacity={0.8}
-                onPress={() => handleToggleJoinEvent('event_baca_bareng_jan')}
+                style={[styles.typeFilterChip, postTypeFilter === null && styles.typeFilterChipActive]}
+                onPress={() => setPostTypeFilter(null)}
               >
-                <Text style={styles.joinButtonText}>
-                  {isReadingClubJoined ? '✓ Sudah Bergabung' : 'Gabung Baca Bareng'}
+                <Text style={[styles.typeFilterText, postTypeFilter === null && styles.typeFilterTextActive]}>
+                  Semua Jenis
                 </Text>
-                {!isReadingClubJoined && <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />}
               </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Post Feed Items */}
-        {(activeFilter === 'Semua' || activeFilter === 'Post') &&
-          posts.map((post) => (
-            <View key={post.id} style={styles.postCard}>
-              <View style={styles.userHeader}>
-                {post.userAvatar ? (
-                  <Image source={{ uri: post.userAvatar }} style={styles.userAvatar} />
-                ) : (
-                  <View style={[styles.userAvatarPlaceholder, { backgroundColor: COLORS.gold }]}>
-                    <Text style={styles.avatarLetter}>{post.userName.charAt(0).toUpperCase()}</Text>
-                  </View>
-                )}
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{post.userName}</Text>
-                  <Text style={styles.postTime}>{post.postTime}</Text>
-                </View>
-                <Text style={styles.timeAgo}>{post.timeAgo}</Text>
-              </View>
-
-              {post.taggedBook && (
+              {(Object.keys(POST_TYPE_LABELS) as CommunityPostType[]).map((type) => (
                 <TouchableOpacity
-                  style={styles.bookReferenceTag}
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    navigation.navigate('ReadingStack', {
-                      screen: 'BookDetail',
-                      params: { bookId: post.taggedBook!.id },
-                    } as never)
-                  }
+                  key={type}
+                  style={[styles.typeFilterChip, postTypeFilter === type && styles.typeFilterChipActive]}
+                  onPress={() => setPostTypeFilter(postTypeFilter === type ? null : type)}
                 >
-                  <Image source={{ uri: post.taggedBook.coverUrl }} style={styles.miniCover} />
-                  <View>
-                    <Text style={styles.refTitle}>{post.taggedBook.title}</Text>
-                    <Text style={styles.refAuthor}>{post.taggedBook.author}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-
-              <Text style={styles.postBodyText}>{post.content}</Text>
-
-              {/* Interaction Action Row */}
-              <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.actionItem} onPress={() => handleToggleLike(post.id)}>
-                  <Ionicons
-                    name={post.isLiked ? 'heart' : 'heart-outline'}
-                    size={20}
-                    color={post.isLiked ? '#EF4444' : COLORS.muted}
-                  />
-                  <Text style={[styles.actionCount, post.isLiked && { color: '#EF4444' }]}>
-                    {post.likesCount}
+                  <Text style={[styles.typeFilterText, postTypeFilter === type && styles.typeFilterTextActive]}>
+                    {POST_TYPE_LABELS[type]}
                   </Text>
                 </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
 
-                <TouchableOpacity style={styles.actionItem} onPress={() => setActivePostForComments(post)}>
-                  <Ionicons name="chatbubble-outline" size={18} color={COLORS.muted} />
-                  <Text style={styles.actionCount}>{post.commentsCount}</Text>
-                </TouchableOpacity>
+        {/* Reading Club Event Cards */}
+        {(activeFilter === 'Semua' || activeFilter === 'Event') &&
+          events.map((event) => (
+            <View key={event.id} style={styles.eventCard}>
+              {event.book?.coverUrl ? (
+                <Image source={{ uri: event.book.coverUrl }} style={styles.eventCover} />
+              ) : (
+                <View style={[styles.eventCover, styles.eventCoverPlaceholder]}>
+                  <Ionicons name="people" size={28} color={COLORS.gold} />
+                </View>
+              )}
+              <View style={styles.eventInfo}>
+                <View style={styles.eventTag}>
+                  <Ionicons name="book-outline" size={14} color="#6EE7B7" />
+                  <Text style={styles.eventTagText}>Baca Bareng</Text>
+                </View>
+                <Text style={styles.eventBookTitle}>{event.book?.title ?? event.title}</Text>
+                <Text style={styles.eventBookAuthor}>{event.book?.author ?? 'BUKOO Reading Club'}</Text>
 
-                <TouchableOpacity style={styles.actionIconOnly} onPress={() => handleToggleBookmark(post.id)}>
-                  <Ionicons
-                    name={post.isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                    size={20}
-                    color={post.isBookmarked ? COLORS.gold : COLORS.muted}
-                  />
-                </TouchableOpacity>
+                <Text style={styles.progressLabel}>
+                  Target: {event.targetProgressPercent}% · {event.joinCount} pembaca bergabung
+                </Text>
 
-                <TouchableOpacity style={styles.actionIconOnly}>
-                  <Ionicons name="share-outline" size={20} color={COLORS.muted} />
+                <TouchableOpacity
+                  style={[styles.joinButton, event.joinedByMe && styles.joinedButton]}
+                  activeOpacity={0.8}
+                  onPress={() => handleToggleJoinEvent(event)}
+                >
+                  <Text style={styles.joinButtonText}>
+                    {event.joinedByMe ? '✓ Sudah Bergabung' : 'Gabung Baca Bareng'}
+                  </Text>
+                  {!event.joinedByMe && <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />}
                 </TouchableOpacity>
               </View>
             </View>
           ))}
+
+        {/* Post Feed Items */}
+        {(activeFilter === 'Semua' || activeFilter === 'Post') && (
+          <>
+            {isLoading && posts.length === 0 ? (
+              <View style={styles.emptyState}>
+                <ActivityIndicator size="small" color={COLORS.gold} />
+              </View>
+            ) : visiblePosts.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="chatbubbles-outline" size={40} color={COLORS.muted} />
+                <Text style={styles.emptyStateText}>
+                  Belum ada postingan di kategori ini. Jadilah yang pertama!
+                </Text>
+              </View>
+            ) : (
+              visiblePosts.map((post) => (
+                <View key={post.id} style={styles.postCard}>
+                  <View style={styles.userHeader}>
+                    {post.user.avatarUrl ? (
+                      <Image source={{ uri: post.user.avatarUrl }} style={styles.userAvatar} />
+                    ) : (
+                      <View style={[styles.userAvatarPlaceholder, { backgroundColor: COLORS.gold }]}>
+                        <Text style={styles.avatarLetter}>{post.user.name.charAt(0).toUpperCase()}</Text>
+                      </View>
+                    )}
+                    <View style={styles.userInfo}>
+                      <Text style={styles.userName}>{post.user.name}</Text>
+                      <Text style={styles.postTime}>{timeAgo(post.createdAt)}</Text>
+                    </View>
+                    {user?.id === post.user.id && (
+                      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePost(post)}>
+                        <Ionicons name="trash-outline" size={16} color={COLORS.muted} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {post.book && (
+                    <TouchableOpacity
+                      style={styles.bookReferenceTag}
+                      activeOpacity={0.8}
+                      onPress={() =>
+                        navigation.navigate('ReadingStack', {
+                          screen: 'BookDetail',
+                          params: { bookId: post.book!.id },
+                        } as never)
+                      }
+                    >
+                      {post.book.coverUrl ? (
+                        <Image source={{ uri: post.book.coverUrl }} style={styles.miniCover} />
+                      ) : (
+                        <View style={[styles.miniCover, styles.miniCoverPlaceholder]}>
+                          <Ionicons name="book" size={18} color={COLORS.gold} />
+                        </View>
+                      )}
+                      <View>
+                        <Text style={styles.refTitle}>{post.book.title}</Text>
+                        <Text style={styles.refAuthor}>{post.book.author}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+
+                  <Text style={styles.postBodyText}>{post.content}</Text>
+
+                  {/* Interaction Action Row */}
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity style={styles.actionItem} onPress={() => handleToggleLike(post)}>
+                      <Ionicons
+                        name={post.likedByMe ? 'heart' : 'heart-outline'}
+                        size={20}
+                        color={post.likedByMe ? '#EF4444' : COLORS.muted}
+                      />
+                      <Text style={[styles.actionCount, post.likedByMe && { color: '#EF4444' }]}>
+                        {post.likeCount}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionItem} onPress={() => setActivePostForComments(post)}>
+                      <Ionicons name="chatbubble-outline" size={18} color={COLORS.muted} />
+                      <Text style={styles.actionCount}>{post.commentCount}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionIconOnly} onPress={() => handleToggleBookmark(post)}>
+                      <Ionicons
+                        name={post.bookmarkedByMe ? 'bookmark' : 'bookmark-outline'}
+                        size={20}
+                        color={post.bookmarkedByMe ? COLORS.gold : COLORS.muted}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionIconOnly} onPress={() => handleShare(post)}>
+                      <Ionicons name="share-outline" size={20} color={COLORS.muted} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+
+            {/* Load more */}
+            {nextCursor && visiblePosts.length > 0 && (
+              <TouchableOpacity style={styles.loadMoreButton} onPress={handleLoadMore} disabled={isLoadingMore}>
+                {isLoadingMore ? (
+                  <ActivityIndicator size="small" color={COLORS.gold} />
+                ) : (
+                  <Text style={styles.loadMoreText}>Muat Lebih Banyak</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </>
+        )}
       </ScrollView>
 
       {/* Create Post Modal */}
       <CreatePostModal
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
-        onPostCreated={setPosts}
+        onPostCreated={(created) => setPosts((prev) => [created, ...prev])}
       />
 
       {/* Post Comments Modal */}
@@ -227,13 +406,11 @@ export default function CommunityScreen() {
         visible={!!activePostForComments}
         onClose={() => setActivePostForComments(null)}
         post={activePostForComments}
-        onCommentsUpdated={(updated) => {
-          setPosts(updated);
-          if (activePostForComments) {
-            const found = updated.find((p) => p.id === activePostForComments.id);
-            if (found) setActivePostForComments(found);
-          }
-        }}
+        onCommentAdded={(postId) =>
+          setPosts((prev) =>
+            prev.map((p) => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p)),
+          )
+        }
       />
     </SafeAreaView>
   );
@@ -317,6 +494,32 @@ const styles = StyleSheet.create({
     color: '#0A1A15',
     fontWeight: 'bold',
   },
+  typeFilterRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingTop: 10,
+  },
+  typeFilterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: '#0F2922',
+    borderWidth: 1,
+    borderColor: '#173E33',
+  },
+  typeFilterChipActive: {
+    backgroundColor: 'rgba(217, 119, 6, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  typeFilterText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.sansMedium,
+  },
+  typeFilterTextActive: {
+    color: COLORS.gold,
+    fontWeight: 'bold',
+  },
   eventCard: {
     flexDirection: 'row',
     backgroundColor: '#0F2922',
@@ -332,6 +535,49 @@ const styles = StyleSheet.create({
     width: 70,
     height: 105,
     borderRadius: 8,
+  },
+  eventCoverPlaceholder: {
+    backgroundColor: '#0A1A15',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+    gap: 10,
+  },
+  emptyStateText: {
+    color: COLORS.muted,
+    fontSize: 13,
+    fontFamily: FONTS.sansRegular,
+    textAlign: 'center',
+    lineHeight: 19,
+  },
+  loadMoreButton: {
+    alignSelf: 'center',
+    backgroundColor: '#0F2922',
+    borderWidth: 1,
+    borderColor: COLORS.gold + '55',
+    borderRadius: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    marginVertical: 8,
+  },
+  loadMoreText: {
+    color: COLORS.gold,
+    fontSize: 13,
+    fontWeight: '600',
+    fontFamily: FONTS.sansMedium,
+  },
+  deleteButton: {
+    padding: 4,
+  },
+  miniCoverPlaceholder: {
+    backgroundColor: '#0A1A15',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   eventInfo: {
     flex: 1,

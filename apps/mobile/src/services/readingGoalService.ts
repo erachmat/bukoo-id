@@ -17,7 +17,7 @@ export interface ReadingGoalsState {
 const DEFAULT_STATE: ReadingGoalsState = {
   targetMinutes: 15,
   dailyLogs: {},
-  streakDays: 3,
+  streakDays: 0,
   lastReadDateStr: null,
 };
 
@@ -103,7 +103,7 @@ export const readingGoalService = {
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const dayLabel = days[d.getDay()];
-      const seconds = state.dailyLogs[dateStr] || (i === 0 ? 600 : i === 1 ? 950 : i === 2 ? 1200 : i === 3 ? 900 : 0);
+      const seconds = state.dailyLogs[dateStr] || 0;
       const minutes = Math.round(seconds / 60);
 
       result.push({

@@ -29,6 +29,13 @@
       "when": 1786953600000,
       "tag": "0003_fix_fts5_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1787058155786,
+      "tag": "0004_pale_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

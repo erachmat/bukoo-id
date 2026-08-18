@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -14,64 +14,53 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 import { useAuthStore } from '../../../stores/authStore';
-import { communityService, CommunityPost } from '../../../services/communityService';
+import { communityService } from '../../../services/communityService';
+import { CommunityPostDto, CommunityPostType, api } from '../../../services/api';
 
 interface CreatePostModalProps {
   visible: boolean;
   onClose: () => void;
-  onPostCreated: (updatedPosts: CommunityPost[]) => void;
+  onPostCreated: (created: CommunityPostDto) => void;
 }
 
-const POST_TYPES: ('Review' | 'Kutipan' | 'Diskusi' | 'Rekomendasi')[] = [
-  'Review',
-  'Kutipan',
-  'Diskusi',
-  'Rekomendasi',
-];
+const POST_TYPES: CommunityPostType[] = ['REVIEW', 'QUOTE', 'DISCUSSION', 'RECOMMENDATION'];
 
-const SELECTABLE_BOOKS = [
-  {
-    id: 'book_laut_bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-  },
-  {
-    id: 'book_bumi_manusia',
-    title: 'Bumi Manusia',
-    author: 'Pramoedya Ananta Toer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-  },
-  {
-    id: 'book_laskar_pelangi',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-  },
-  {
-    id: 'book_filsafat_ajaran_islam',
-    title: 'Filsafat Ajaran Islam',
-    author: 'Hadhrat Mirza Ghulam Ahmad',
-    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
-  },
-  {
-    id: 'atomic-habits',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-  },
-];
+const POST_TYPE_LABELS: Record<CommunityPostType, string> = {
+  REVIEW: 'Review',
+  QUOTE: 'Kutipan',
+  DISCUSSION: 'Diskusi',
+  RECOMMENDATION: 'Rekomendasi',
+};
 
 export function CreatePostModal({ visible, onClose, onPostCreated }: CreatePostModalProps) {
   const { user } = useAuthStore();
-  const [selectedType, setSelectedType] = useState<'Review' | 'Kutipan' | 'Diskusi' | 'Rekomendasi'>('Review');
-  const [selectedBookId, setSelectedBookId] = useState<string>('book_laut_bercerita');
+  const [selectedType, setSelectedType] = useState<CommunityPostType>('REVIEW');
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
+  const [books, setBooks] = useState<{ id: string; title: string; author: string }[]>([]);
   const [content, setContent] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [errorText, setErrorText] = useState('');
 
+  // Load the real catalog for the book tag picker when the modal opens.
+  useEffect(() => {
+    if (!visible) return;
+    setErrorText('');
+    (async () => {
+      try {
+        const res = await api.get<{ items: { id: string; title: string; author: string }[] }>('/books');
+        setBooks(res.data.items || []);
+      } catch {
+        setBooks([]);
+      }
+    })();
+  }, [visible]);
+
   const handlePublish = async () => {
     const trimmed = content.trim();
+    if (!user) {
+      setErrorText('Masuk dulu untuk memposting di Komunitas.');
+      return;
+    }
     if (!trimmed) {
       setErrorText('Konten postingan tidak boleh kosong');
       return;
@@ -80,22 +69,22 @@ export function CreatePostModal({ visible, onClose, onPostCreated }: CreatePostM
     setIsPublishing(true);
     setErrorText('');
 
-    const taggedBook = SELECTABLE_BOOKS.find((b) => b.id === selectedBookId);
-
-    const updated = await communityService.createPost({
-      userName: user?.name || 'Pengguna BUKOO',
-      userAvatar: user?.avatarUrl || undefined,
-      postTime: 'Baru saja',
-      timeAgo: 'Baru saja',
-      type: selectedType,
-      taggedBook,
-      content: trimmed,
-    });
-
-    setIsPublishing(false);
-    setContent('');
-    onPostCreated(updated);
-    onClose();
+    try {
+      const created = await communityService.createPost({
+        type: selectedType,
+        content: trimmed,
+        bookId: selectedBookId ?? undefined,
+      });
+      setContent('');
+      setSelectedBookId(null);
+      onPostCreated(created);
+      onClose();
+    } catch (e) {
+      setErrorText('Gagal memposting. Periksa koneksi internetmu.');
+      console.error('[CreatePostModal] publish failed:', e);
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -126,7 +115,9 @@ export function CreatePostModal({ visible, onClose, onPostCreated }: CreatePostM
                       style={[styles.typePill, isSelected && styles.typePillSelected]}
                       onPress={() => setSelectedType(type)}
                     >
-                      <Text style={[styles.typeText, isSelected && styles.typeTextSelected]}>{type}</Text>
+                      <Text style={[styles.typeText, isSelected && styles.typeTextSelected]}>
+                        {POST_TYPE_LABELS[type]}
+                      </Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -137,20 +128,24 @@ export function CreatePostModal({ visible, onClose, onPostCreated }: CreatePostM
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Tautkan Buku (Opsional)</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.booksScroll}>
-                {SELECTABLE_BOOKS.map((book) => {
-                  const isSelected = selectedBookId === book.id;
-                  return (
-                    <TouchableOpacity
-                      key={book.id}
-                      style={[styles.bookChip, isSelected && styles.bookChipSelected]}
-                      onPress={() => setSelectedBookId(book.id)}
-                    >
-                      <Text style={[styles.bookChipText, isSelected && styles.bookChipTextSelected]}>
-                        {isSelected ? `✓ ${book.title}` : book.title}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {books.length === 0 ? (
+                  <Text style={styles.bookChipText}>Katalog buku belum tersedia saat ini.</Text>
+                ) : (
+                  books.map((book) => {
+                    const isSelected = selectedBookId === book.id;
+                    return (
+                      <TouchableOpacity
+                        key={book.id}
+                        style={[styles.bookChip, isSelected && styles.bookChipSelected]}
+                        onPress={() => setSelectedBookId(isSelected ? null : book.id)}
+                      >
+                        <Text style={[styles.bookChipText, isSelected && styles.bookChipTextSelected]}>
+                          {isSelected ? `✓ ${book.title}` : book.title}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
               </ScrollView>
             </View>
 

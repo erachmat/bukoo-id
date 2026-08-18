@@ -11,8 +11,8 @@ interface ReadingGoalCardProps {
 
 export function ReadingGoalCard({ onOpenAnalytics }: ReadingGoalCardProps) {
   const [targetMinutes, setTargetMinutes] = useState(15);
-  const [todayMinutes, setTodayMinutes] = useState(10);
-  const [streakDays, setStreakDays] = useState(3);
+  const [todayMinutes, setTodayMinutes] = useState(0);
+  const [streakDays, setStreakDays] = useState(0);
   const [weekLogs, setWeekLogs] = useState<{ dayLabel: string; isCompleted: boolean }[]>([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function ReadingGoalCard({ onOpenAnalytics }: ReadingGoalCardProps) {
     setTargetMinutes(state.targetMinutes);
     const todaySec = await readingGoalService.getTodayReadingSeconds();
     setTodayMinutes(Math.round(todaySec / 60));
-    setStreakDays(state.streakDays || 3);
+    setStreakDays(state.streakDays ?? 0);
 
     const logs = await readingGoalService.getWeekLogs();
     setWeekLogs(logs);

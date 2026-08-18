@@ -13,7 +13,7 @@ interface ActiveBookProgress {
   bookTitle?: string;
   bookAuthor?: string;
   bookCoverUrl?: string;
-  progressPercent: number;
+  progressPercent?: number;
   currentPage?: number;
   totalPages?: number;
 }
@@ -35,16 +35,19 @@ const DEFAULT_ACTIVE_BOOK: ActiveBookProgress = {
 export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
   const navigation = useNavigation<NavigationProp>();
   const activeBook = progressData || DEFAULT_ACTIVE_BOOK;
+  const progressPercent = activeBook.progressPercent || 0;
 
   const handleResumeReading = () => {
+    // Route through BookDetail so download/offline EPUB resolution applies.
     navigation.navigate('ReadingStack', {
-      screen: 'Reading',
-      params: {
-        bookId: activeBook.bookId,
-        title: activeBook.bookTitle,
-      },
+      screen: 'BookDetail',
+      params: { bookId: activeBook.bookId },
     } as never);
   };
+
+  const pageInfo = activeBook.currentPage && activeBook.totalPages
+    ? `Hal ${activeBook.currentPage} dari ${activeBook.totalPages}`
+    : undefined;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={handleResumeReading}>
@@ -54,7 +57,7 @@ export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
           <Ionicons name="book" size={12} color={COLORS.gold} />
           <Text style={styles.statusText}>Sedang Dibaca</Text>
         </View>
-        <Text style={styles.percentText}>{activeBook.progressPercent}% selesai</Text>
+        <Text style={styles.percentText}>{progressPercent}% selesai</Text>
       </View>
 
       {/* Main Content Body */}
@@ -73,14 +76,16 @@ export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
 
           {/* Progress Track */}
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${activeBook.progressPercent}%` }]} />
+            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
           </View>
 
           {/* Details & CTA */}
           <View style={styles.footerRow}>
-            <Text style={styles.pageInfo}>
-              Hal {activeBook.currentPage || 142} dari {activeBook.totalPages || 350}
-            </Text>
+            {pageInfo ? (
+              <Text style={styles.pageInfo}>{pageInfo}</Text>
+            ) : (
+              <Text style={styles.pageInfo}>Lanjut dari posisi terakhir</Text>
+            )}
             <View style={styles.resumeButton}>
               <Text style={styles.resumeButtonText}>Lanjut Baca</Text>
               <Ionicons name="arrow-forward" size={14} color="#0A1A15" />

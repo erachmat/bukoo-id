@@ -11,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
-import { aiCompanionService, ChatMessage } from '../../../services/aiCompanionService';
+import { aiCompanionService, ChatMessage, AiChatHistoryTurn } from '../../../services/aiCompanionService';
 
 interface AiChatSectionProps {
   currentBookTitle?: string;
@@ -56,8 +56,17 @@ export function AiChatSection({ currentBookTitle = 'Laut Bercerita', onOpenSumma
     setInputText('');
     setIsLoading(true);
 
-    setTimeout(async () => {
-      const reply = await aiCompanionService.askAiAssistant(textToSend, currentBookTitle);
+    // Build recent conversation history (exclude the static welcome message).
+    const history: AiChatHistoryTurn[] = messages
+      .filter((m) => m.id !== 'msg-1')
+      .slice(-10)
+      .map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      }));
+
+    try {
+      const reply = await aiCompanionService.askAiAssistant(textToSend, currentBookTitle, history);
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
@@ -65,11 +74,13 @@ export function AiChatSection({ currentBookTitle = 'Laut Bercerita', onOpenSumma
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, aiMsg]);
+    } catch (e) {
+      console.error('[AiChatSection] Failed to get AI reply:', e);
+    } finally {
       setIsLoading(false);
-
       // Auto scroll to bottom
       scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 600);
+    }
   };
 
   return (

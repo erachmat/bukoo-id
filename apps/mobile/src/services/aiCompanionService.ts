@@ -8,6 +8,11 @@ export interface ChatMessage {
   bookContext?: string;
 }
 
+export interface AiChatHistoryTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface BookAiInsight {
   bookId: string;
   summary: string;
@@ -80,51 +85,47 @@ const BOOK_KNOWLEDGE_BASE: Record<string, BookAiInsight> = {
 
 export const aiCompanionService = {
   getBookInsight: (bookId: string): BookAiInsight => {
-    return BOOK_KNOWLEDGE_BASE[bookId] || BOOK_KNOWLEDGE_BASE['book_laut_bercerita'];
+    const known = BOOK_KNOWLEDGE_BASE[bookId];
+    if (known) return known;
+    // Honest fallback — never show another book's summary for an unknown book.
+    return {
+      bookId,
+      summary:
+        'Insight untuk buku ini belum tersedia di basis pengetahuan offline. Nyalakan koneksi internet dan tanyakan pada AI Companion untuk rangkuman real-time.',
+      keyTakeaways: [],
+      mainCharacters: [],
+      readingTimeHours: 0,
+    };
   },
 
-  askAiAssistant: async (prompt: string, currentBookTitle?: string): Promise<string> => {
-    const p = prompt.toLowerCase();
-
-    // Check for summaries
-    if (p.includes('rangkum') || p.includes('ringkasan') || p.includes('summary')) {
-      if (p.includes('laskar') || currentBookTitle?.toLowerCase().includes('laskar')) {
-        return BOOK_KNOWLEDGE_BASE['book_laskar_pelangi'].summary;
-      }
-      if (p.includes('bumi') || currentBookTitle?.toLowerCase().includes('bumi')) {
-        return BOOK_KNOWLEDGE_BASE['book_bumi_manusia'].summary;
-      }
-      if (p.includes('filsafat') || currentBookTitle?.toLowerCase().includes('filsafat')) {
-        return BOOK_KNOWLEDGE_BASE['book_filsafat_ajaran_islam'].summary;
-      }
-      return BOOK_KNOWLEDGE_BASE['book_laut_bercerita'].summary;
-    }
-
-    // Check for character questions
-    if (p.includes('karakter') || p.includes('tokoh') || p.includes('siapa')) {
-      return 'Beberapa tokoh utama dalam buku ini meliputi:\n' +
-        '1. **Minke / Biru Laut / Ikal** — Narator dan aktivis utama yang memperjuangkan nilai-nilai keadilan.\n' +
-        '2. **Nyai Ontosoroh / Bu Mus** — Sosok teladan dengan keberanian luar biasa dalam membimbing sesama.';
-    }
-
-    // Check for recommendations
-    if (p.includes('rekomendasi') || p.includes('saran') || p.includes('buku serupa')) {
-      return 'Berdasarkan minat bacaanmu, BUKOO AI merekomendasikan:\n' +
-        '📖 **Cantik Itu Luka** oleh Eka Kurniawan (95% Match)\n' +
-        '📖 **Sapiens** oleh Yuval Noah Harari (92% Match)\n' +
-        '📖 **Perlunya Seorang Imam** oleh Hadhrat Mirza Ghulam Ahmad (90% Match)';
-    }
-
-    // Attempt backend API call if server is connected
+  /**
+   * Sends the user's message to the real backend LLM endpoint (POST /v1/ai/chat).
+   * Falls back to an honest offline reply only when the network/model is unavailable.
+   */
+  askAiAssistant: async (
+    prompt: string,
+    currentBookTitle?: string,
+    history: AiChatHistoryTurn[] = [],
+  ): Promise<string> => {
     try {
-      const response = await api.post('/ai/chat', { prompt, currentBookTitle });
-      if (response.data?.message) {
-        return response.data.message;
+      const response = await api.post('/ai/chat', {
+        message: prompt,
+        bookTitle: currentBookTitle,
+        history,
+      });
+      const reply = response.data?.reply;
+      if (typeof reply === 'string' && reply.trim()) {
+        return reply;
       }
-    } catch {
-      // Fallback response
+      console.warn('[aiCompanionService] AI chat returned an empty reply');
+    } catch (err) {
+      console.warn('[aiCompanionService] AI chat failed, using offline fallback:', err);
     }
 
-    return `Tentu! Berdasarkan analisis BUKOO AI untuk "${currentBookTitle || 'buku favoritmu'}", topik ini mengeksplorasi perjuangan moral, ketabahan manusia, dan pencarian jati diri yang mendalam.`;
+    // Offline / model-unavailable fallback. Clearly not a model answer.
+    return (
+      'Maaf, AI Companion sedang tidak dapat terhubung ke server. ' +
+      'Periksa koneksi internetmu dan coba lagi — atau ketik "rangkum" untuk insight offline yang tersedia.'
+    );
   },
 };

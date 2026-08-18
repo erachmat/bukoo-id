@@ -19,6 +19,8 @@ import readingRouter from './routes/reading.js';
 import goalsRouter from './routes/goals.js';
 import usersRouter from './routes/users.js';
 import aiRouter from './routes/ai.js';
+import communityRouter from './routes/community.js';
+import notificationsRouter from './routes/notifications.js';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -61,6 +63,8 @@ app.route('/v1/reading', readingRouter);
 app.route('/v1/goals', goalsRouter);
 app.route('/v1/users', usersRouter);
 app.route('/v1/ai', aiRouter);
+app.route('/v1/community', communityRouter);
+app.route('/v1/notifications', notificationsRouter);
 
 // ---------------------------------------------------------------------------
 // 404 fallback

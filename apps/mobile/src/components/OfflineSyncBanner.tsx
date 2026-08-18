@@ -39,6 +39,7 @@ export function OfflineSyncBanner() {
     if (isOffline) {
       navigation.navigate('MainTabs', {
         screen: 'Library',
+        params: { tab: 'diunduh' },
       } as never);
     }
   };

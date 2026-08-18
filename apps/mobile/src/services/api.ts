@@ -254,6 +254,7 @@ export interface BookItemDto {
   coverUrl: string;
   publisher?: string;
   synopsis?: string;
+  genre?: string[];
   ratingAverage?: number;
   ratingCount?: number;
   subscriptionRequired?: string;
@@ -328,8 +329,11 @@ export const booksApi = {
 export interface ReadingProgressItemDto {
   bookId: string;
   bookTitle?: string;
+  bookAuthor?: string;
   bookCoverUrl?: string;
   progressPercent?: number;
+  currentPage?: number;
+  totalPages?: number;
   lastReadAt?: string;
 }
 
@@ -340,6 +344,112 @@ export const libraryApi = {
       return res.data;
     } catch {
       return [];
+    }
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Community (posts, comments, likes, bookmarks, reading club events)
+// ---------------------------------------------------------------------------
+
+export type CommunityPostType = 'REVIEW' | 'QUOTE' | 'DISCUSSION' | 'RECOMMENDATION';
+
+export interface CommunityUserDto {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+export interface CommunityBookDto {
+  id: string;
+  title: string;
+  author: string;
+  coverUrl?: string | null;
+}
+
+export interface CommunityPostDto {
+  id: string;
+  type: CommunityPostType;
+  content: string;
+  bookId: string | null;
+  likeCount: number;
+  commentCount: number;
+  bookmarkCount: number;
+  likedByMe: boolean;
+  bookmarkedByMe: boolean;
+  createdAt: string;
+  user: CommunityUserDto;
+  book: CommunityBookDto | null;
+}
+
+export interface CommunityPostsPageDto {
+  items: CommunityPostDto[];
+  nextCursor: string | null;
+}
+
+export interface CommunityCommentDto {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: CommunityUserDto;
+}
+
+export interface CommunityEventDto {
+  id: string;
+  title: string;
+  description: string | null;
+  bookId: string | null;
+  startDate: string;
+  endDate: string;
+  targetProgressPercent: number;
+  joinCount: number;
+  joinedByMe: boolean;
+  book: CommunityBookDto | null;
+}
+
+export const communityApi = {
+  getPosts: async (params?: { type?: CommunityPostType; cursor?: string; limit?: number }): Promise<CommunityPostsPageDto> => {
+    const res = await api.get<CommunityPostsPageDto>('/community/posts', { params });
+    return res.data;
+  },
+  createPost: async (data: { type: CommunityPostType; content: string; bookId?: string }): Promise<CommunityPostDto> => {
+    const res = await api.post<CommunityPostDto>('/community/posts', data);
+    return res.data;
+  },
+  deletePost: async (id: string): Promise<void> => {
+    await api.delete(`/community/posts/${id}`);
+  },
+  setLike: async (postId: string, liked: boolean): Promise<void> => {
+    if (liked) {
+      await api.post(`/community/posts/${postId}/like`);
+    } else {
+      await api.delete(`/community/posts/${postId}/like`);
+    }
+  },
+  setBookmark: async (postId: string, bookmarked: boolean): Promise<void> => {
+    if (bookmarked) {
+      await api.post(`/community/posts/${postId}/bookmark`);
+    } else {
+      await api.delete(`/community/posts/${postId}/bookmark`);
+    }
+  },
+  getComments: async (postId: string): Promise<CommunityCommentDto[]> => {
+    const res = await api.get<CommunityCommentDto[]>(`/community/posts/${postId}/comments`);
+    return res.data;
+  },
+  addComment: async (postId: string, content: string): Promise<CommunityCommentDto> => {
+    const res = await api.post<CommunityCommentDto>(`/community/posts/${postId}/comments`, { content });
+    return res.data;
+  },
+  getEvents: async (): Promise<CommunityEventDto[]> => {
+    const res = await api.get<CommunityEventDto[]>('/community/events');
+    return res.data;
+  },
+  setEventJoin: async (eventId: string, join: boolean): Promise<void> => {
+    if (join) {
+      await api.post(`/community/events/${eventId}/join`);
+    } else {
+      await api.delete(`/community/events/${eventId}/join`);
     }
   },
 };

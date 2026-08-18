@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -8,36 +8,71 @@ import {
   TextInput,
   ScrollView,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 import { useAuthStore } from '../../../stores/authStore';
-import { communityService, CommunityPost } from '../../../services/communityService';
+import { communityService } from '../../../services/communityService';
+import { CommunityPostDto, CommunityCommentDto } from '../../../services/api';
 
 interface PostCommentsModalProps {
   visible: boolean;
   onClose: () => void;
-  post: CommunityPost | null;
-  onCommentsUpdated: (updatedPosts: CommunityPost[]) => void;
+  post: CommunityPostDto | null;
+  onCommentAdded: (postId: string) => void;
 }
 
-export function PostCommentsModal({ visible, onClose, post, onCommentsUpdated }: PostCommentsModalProps) {
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Baru saja';
+  if (mins < 60) return `${mins} mnt lalu`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} jam lalu`;
+  const days = Math.floor(hours / 24);
+  return `${days} hari lalu`;
+}
+
+export function PostCommentsModal({ visible, onClose, post, onCommentAdded }: PostCommentsModalProps) {
   const { user } = useAuthStore();
+  const [comments, setComments] = useState<CommunityCommentDto[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (visible && post) {
+      setComments([]);
+      setIsLoading(true);
+      communityService
+        .getComments(post.id)
+        .then(setComments)
+        .catch(() => setComments([]))
+        .finally(() => setIsLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, post?.id]);
 
   if (!post) return null;
 
   const handleAddComment = async () => {
     const trimmed = commentText.trim();
     if (!trimmed || isSubmitting) return;
+    if (!user) return;
 
     setIsSubmitting(true);
-    const updated = await communityService.addComment(post.id, trimmed, user?.name || 'Pengguna BUKOO');
-    setIsSubmitting(false);
-    setCommentText('');
-    onCommentsUpdated(updated);
+    try {
+      const comment = await communityService.addComment(post.id, trimmed);
+      setComments((prev) => [comment, ...prev]);
+      setCommentText('');
+      onCommentAdded(post.id);
+    } catch (e) {
+      console.error('[PostCommentsModal] add comment failed:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -48,7 +83,7 @@ export function PostCommentsModal({ visible, onClose, post, onCommentsUpdated }:
           <View style={styles.header}>
             <View style={styles.titleRow}>
               <Ionicons name="chatbubbles-outline" size={20} color={COLORS.gold} />
-              <Text style={styles.title}>Komentar ({post.commentsCount})</Text>
+              <Text style={styles.title}>Komentar ({post.commentCount})</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={22} color={COLORS.creamLight} />
@@ -57,23 +92,27 @@ export function PostCommentsModal({ visible, onClose, post, onCommentsUpdated }:
 
           {/* Comments List */}
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            {post.comments.length === 0 ? (
+            {isLoading ? (
+              <View style={styles.emptyContainer}>
+                <ActivityIndicator size="small" color={COLORS.gold} />
+              </View>
+            ) : comments.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Ionicons name="chatbubble-ellipses-outline" size={36} color={COLORS.muted} />
                 <Text style={styles.emptyText}>Belum ada komentar. Jadilah yang pertama berkomentar!</Text>
               </View>
             ) : (
-              post.comments.map((c) => (
+              comments.map((c) => (
                 <View key={c.id} style={styles.commentRow}>
                   <View style={styles.avatar}>
-                    <Text style={styles.avatarLetter}>{c.userName.charAt(0).toUpperCase()}</Text>
+                    <Text style={styles.avatarLetter}>{c.user.name.charAt(0).toUpperCase()}</Text>
                   </View>
                   <View style={styles.commentContent}>
                     <View style={styles.commentHeader}>
-                      <Text style={styles.commentUser}>{c.userName}</Text>
-                      <Text style={styles.commentTime}>{c.timestamp}</Text>
+                      <Text style={styles.commentUser}>{c.user.name}</Text>
+                      <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
                     </View>
-                    <Text style={styles.commentText}>{c.text}</Text>
+                    <Text style={styles.commentText}>{c.content}</Text>
                   </View>
                 </View>
               ))
@@ -89,8 +128,9 @@ export function PostCommentsModal({ visible, onClose, post, onCommentsUpdated }:
               value={commentText}
               onChangeText={setCommentText}
               onSubmitEditing={handleAddComment}
+              editable={!!user}
             />
-            <TouchableOpacity style={styles.sendButton} onPress={handleAddComment} disabled={isSubmitting}>
+            <TouchableOpacity style={styles.sendButton} onPress={handleAddComment} disabled={isSubmitting || !user}>
               <Ionicons name="send" size={16} color="#0A1A15" />
             </TouchableOpacity>
           </View>

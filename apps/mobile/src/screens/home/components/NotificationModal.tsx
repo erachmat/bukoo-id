@@ -12,6 +12,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/types';
 import { notificationService, AppNotification, ReminderSettings } from '../../../services/notificationService';
 
 interface NotificationModalProps {
@@ -20,17 +23,35 @@ interface NotificationModalProps {
   onNotificationsChanged?: () => void;
 }
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 type TabType = 'semua' | 'unread' | 'settings';
 
 const TIME_PRESETS = ['19:00', '20:00', '21:00', '22:00'];
 
+function formatTimestamp(ts: string): string {
+  // Seed notifications use human strings ('Baru saja'); real ones use ISO.
+  if (!/^\d{4}-/.test(ts)) return ts;
+  const diffMs = Date.now() - new Date(ts).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Baru saja';
+  if (mins < 60) return `${mins} mnt lalu`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} jam lalu`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} hari lalu`;
+  return new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+
 export function NotificationModal({ visible, onClose, onNotificationsChanged }: NotificationModalProps) {
+  const navigation = useNavigation<NavigationProp>();
   const [activeTab, setActiveTab] = useState<TabType>('semua');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [reminderSettings, setReminderSettings] = useState<ReminderSettings>({
-    enabled: true,
+    enabled: false,
     timeStr: '20:00',
   });
+  const [reminderMessage, setReminderMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -43,6 +64,7 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
     setNotifications(list);
     const settings = await notificationService.getReminderSettings();
     setReminderSettings(settings);
+    setReminderMessage(null);
   };
 
   const handleMarkAllRead = async () => {
@@ -57,18 +79,46 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
       setNotifications(updated);
       if (onNotificationsChanged) onNotificationsChanged();
     }
+    // Deep-link to the tagged book when present.
+    if (notif.targetBookId) {
+      onClose();
+      navigation.navigate('ReadingStack', {
+        screen: 'BookDetail',
+        params: { bookId: notif.targetBookId },
+      } as never);
+    }
   };
 
   const handleToggleReminder = async (enabled: boolean) => {
     const updated = { ...reminderSettings, enabled };
     setReminderSettings(updated);
-    await notificationService.saveReminderSettings(updated);
+    setReminderMessage(null);
+    try {
+      const saved = await notificationService.saveReminderSettings(updated);
+      setReminderSettings(saved);
+      setReminderMessage(
+        enabled
+          ? 'Pengingat harian aktif. Izin notifikasi mungkin diminta.'
+          : 'Pengingat harian dinonaktifkan.',
+      );
+    } catch (e) {
+      console.error('[NotificationModal] failed to save reminder:', e);
+      setReminderMessage('Gagal menyimpan pengaturan. Coba lagi.');
+      setReminderSettings((prev) => ({ ...prev, enabled: !enabled }));
+    }
   };
 
   const handleSelectTime = async (timeStr: string) => {
     const updated = { ...reminderSettings, timeStr };
     setReminderSettings(updated);
-    await notificationService.saveReminderSettings(updated);
+    setReminderMessage(null);
+    try {
+      await notificationService.saveReminderSettings(updated);
+      setReminderMessage(`Pengingat harian dijadwalkan pukul ${timeStr}.`);
+    } catch (e) {
+      console.error('[NotificationModal] failed to save reminder time:', e);
+      setReminderMessage('Gagal mengubah waktu pengingat. Coba lagi.');
+    }
   };
 
   const displayedList = activeTab === 'unread' ? notifications.filter((n) => !n.isRead) : notifications;
@@ -173,7 +223,7 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
                           <Text style={styles.notifTitle} numberOfLines={1}>
                             {notif.title}
                           </Text>
-                          <Text style={styles.notifTime}>{notif.timestamp}</Text>
+                          <Text style={styles.notifTime}>{formatTimestamp(notif.timestamp)}</Text>
                         </View>
                         <Text style={styles.notifBody}>{notif.body}</Text>
                       </View>
@@ -219,7 +269,11 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
                         );
                       })}
                     </View>
+                    {reminderMessage && <Text style={styles.reminderMessage}>{reminderMessage}</Text>}
                   </View>
+                )}
+                {!reminderSettings.enabled && reminderMessage && (
+                  <Text style={styles.reminderMessage}>{reminderMessage}</Text>
                 )}
               </View>
             )}
@@ -452,5 +506,12 @@ const styles = StyleSheet.create({
   timePillTextActive: {
     color: '#0A1A15',
     fontWeight: 'bold',
+  },
+  reminderMessage: {
+    marginTop: 10,
+    fontSize: 12,
+    color: COLORS.gold,
+    fontFamily: FONTS.sansRegular,
+    lineHeight: 17,
   },
 });

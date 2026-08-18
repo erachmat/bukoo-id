@@ -34,7 +34,14 @@
       "@react-native-google-signin/google-signin",
       "expo-apple-authentication",
       "@react-native-firebase/app",
-      "@react-native-firebase/crashlytics"
+      "@react-native-firebase/crashlytics",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0A1A15"
+        }
+      ]
     ]
   }
 }

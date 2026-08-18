@@ -9,7 +9,7 @@ BUKOO — mobile reading application. npm workspaces + Turborepo monorepo.
 
 Run `ls apps` and `ls packages` at the start of any session — this file will not
 always list every app/package. Known apps as of writing:
-- `apps/api` — backend, Dockerized, deployed to Railway. Entry: `dist/main.js`. Health check: `/health`.
+- `apps/api` — **Cloudflare Worker** backend (Hono), deployed to `api.bukoo.id`. Entry: `src/index.ts` (via `wrangler.jsonc`). Health check: `/health` (auth-free, for Cloudflare). The old `Dockerfile`/`railway.toml`/`apps/api/api` NestJS leftovers are stale — ignore them.
 - `apps/web` — Next.js web app (NextAuth v5, Drizzle ORM), **deployed to Cloudflare Workers** → https://bukoo.id (migrated from Vercel 2026-08-16; Vercel decommissioned). DB is **Cloudflare D1** `bukoo-db` via the `DB` binding (NOT Neon/Postgres).
 - mobile app — Expo / React Native (root deps: `expo`, `react-native`, `react` 19).
 
@@ -72,11 +72,12 @@ execute` with `--create-only` style review first, and validate generated SQL.
     with `getCoverUrl()` from `apps/web/src/lib/cover-url.ts`.
   - `react-reader`/`react-pdf` must stay as `next/dynamic(..., { ssr: false })` — they use
     browser-only `DOMMatrix` which crashes Workers SSR.
-- **API → Railway**: builds from monorepo root via `apps/api/Dockerfile` (`railway.toml`).
-  `startCommand = node dist/main.js`, health check `/health`, restart on failure (max 3 retries).
-  If you change the API's build output path or entrypoint, update `railway.toml` in the same PR.
-- Any change to `apps/api` that could affect the health check response or startup time needs a
-  manual note in the PR — Railway will restart-loop a broken deploy 3x before giving up.
+- **API → Cloudflare Workers** (`apps/api`): `npm run deploy` from `apps/api` → deploys the `bukoo-api`
+  worker (custom domain `api.bukoo.id`; D1 `DB`, R2 `BUKOO_STORAGE`, `AI` bindings; `nodejs_compat`).
+  Secrets via `wrangler secret put`: `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `APPLE_CLIENT_ID`,
+  `MAILCHANNELS_API_KEY`, `MAIL_FROM`. The legacy Railway/Docker config is decommissioned — do not revive it.
+- Any change to `apps/api` that could affect `/health` or startup should be noted in the PR (a broken
+  deploy is caught by Cloudflare health checks, not Railway retries).
 
 ## Coding conventions
 - TypeScript throughout, strict mode assumed — don't introduce `any` to silence errors; fix the type.
@@ -99,7 +100,8 @@ grouped by task with sub-steps). When picking up a task:
 
 ## What NOT to do
 - Don't run destructive Prisma migrations without the Neon-branch validation step above.
-- Don't touch `railway.toml` build/deploy config without understanding it changes the live API.
+- Don't touch `apps/api/wrangler.jsonc` bindings/routes without understanding it changes the live API
+  (`api.bukoo.id`). (Old `railway.toml`/`Dockerfile` are stale leftovers — ignore them.)
 - Don't add new top-level dependencies to root `package.json` — put them in the specific
   app/package's `package.json` unless truly shared across all workspaces.
 - Don't assume a workspace has tests — verify, and flag gaps instead of skipping silently.

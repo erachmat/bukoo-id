@@ -12,7 +12,7 @@ interface ReadingAnalyticsModalProps {
 
 export function ReadingAnalyticsModal({ visible, onClose }: ReadingAnalyticsModalProps) {
   const [targetMinutes, setTargetMinutes] = useState(15);
-  const [streakDays, setStreakDays] = useState(3);
+  const [streakDays, setStreakDays] = useState(0);
   const [weekData, setWeekData] = useState<{ dayLabel: string; minutes: number; isCompleted: boolean }[]>([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function ReadingAnalyticsModal({ visible, onClose }: ReadingAnalyticsModa
   const loadAnalytics = async () => {
     const state = await readingGoalService.getGoalsState();
     setTargetMinutes(state.targetMinutes);
-    setStreakDays(state.streakDays || 3);
+    setStreakDays(state.streakDays ?? 0);
     const logs = await readingGoalService.getWeekLogs();
     setWeekData(logs);
   };

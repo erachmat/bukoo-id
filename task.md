@@ -1,5 +1,27 @@
 # current integration tasks
 
+# Mobile Feature Hardening — Real Data, Real Backend, Real Notifications — 2026-08-18
+
+- `[x]` 1. Migration `0004_pale_yellowjacket.sql` — `users.favorite_genres` + community tables (posts, comments, likes, bookmarks, events, event_joins). Applied local + remote.
+- `[x]` 2. API `users.ts` — `favoriteGenres` in `PATCH/GET /me`, `avatarUrl` alias fix, shared serializer.
+- `[x]` 3. Mobile `userProfileService` — syncs favoriteGenres to server; `hydrateFavoriteGenres()`.
+- `[x]` 4. QuickResume real data — `GET /reading/progress` returns flat DTO (author/cover/pages); `QuickResumeCard` fed from `useUserLibrary`; navigates via BookDetail.
+- `[x]` 5. Removed fake seed data — `streakDays` defaults to 0, `getWeekLogs()` no fabrication; `ReadingGoalCard` tappable on Home.
+- `[x]` 6. Home trending fetch deduped (single `/books/featured`).
+- `[x]` 7. Offline fixes — banner count uses `getUnsyncedCount()`, "Rak Diunduh" selects the Downloads tab via `Library` param, author from real data (typo fixed), stats grid from real local data, `getStorageUsed` wired.
+- `[x]` 8. Network store refactor — single app-wide NetInfo listener (`stores/networkStore.ts`); `useNetworkStatus` + `useReadingSession` are consumers.
+- `[x]` 9. Backend `POST /v1/ai/chat` (Workers AI llama-3-8b, stateless, zod) + vitest (4 tests).
+- `[x]` 10. AI tab registered in `MainTabs` (fixes the Library `navigate('Ai')` crash); `as never` casts removed.
+- `[x]` 11. `aiCompanionService` → real `/ai/chat` with honest offline fallback; conflated character answer removed.
+- `[x]` 12. `AiCompanionScreen` real active book + empty state; generic quote; no fake 600ms delay.
+- `[x]` 13. Backend `routes/community.ts` — posts/comments/likes/bookmarks/events + joins (cursor pagination, optimistic-friendly), mounted at `/v1/community`, vitest (4 tests).
+- `[x]` 14. Mobile `communityApi` + `communityService` rewrite (server-first, AsyncStorage offline cache, optimistic rollback).
+- `[x]` 15. `CommunityScreen` real feed — pull-to-refresh, load-more, post-type filter, share button, relative timestamps, real event cards, delete own post, empty state; `CreatePostModal` real book picker; `PostCommentsModal` server comments.
+- `[x]` 16. Notifications — `expo-notifications` installed + plugin; real daily reminder scheduler with permission flow; foreground handler; tap-to-book deep link; goal-achieved events feed the in-app list.
+- `[x]` 17. `NotificationModal` — schedule feedback, `targetBookId` navigation, ISO timestamps.
+- `[x]` 18. Backend `POST/DELETE /v1/notifications/device-token` (device_tokens upsert) + mobile `registerDeviceToken()`.
+- `[x]` 19. AGENTS.md drift fixed (`apps/api` = Cloudflare Worker/Hono/D1, not Railway); verification: `@bukoo/db` typecheck ✅, `apps/api` typecheck/lint ✅ + tests 8/8 ✅, `apps/mobile` typecheck/lint ✅ (no test script — stated explicitly). API deployed to `api.bukoo.id` (smoke-tested `/health`, community, ai/chat, device-token).
+
 # Web publisher.bukoo.id & Publisher Portal Implementation — 2026-08-18
 
 - `[x]` 1. Cloudflare Workers domain route pattern for `publisher.bukoo.id` (`wrangler.prod.jsonc`).

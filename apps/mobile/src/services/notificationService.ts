@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import { api, getOrCreateDeviceId } from './api';
 
 export interface AppNotification {
   id: string;
@@ -17,47 +20,98 @@ export interface ReminderSettings {
 
 const NOTIFICATIONS_KEY = '@bukoo_notifications';
 const REMINDER_KEY = '@bukoo_reminder_settings';
+const REMINDER_NOTIF_ID = 'bukoo-daily-reading-reminder';
+const MAX_NOTIFICATIONS = 50;
 
+/** Initial seed — real system notifications, not fabricated social activity. */
 const DEFAULT_NOTIFICATIONS: AppNotification[] = [
   {
-    id: 'notif-1',
-    title: '🔥 Pertahankan Streak Membaca!',
-    body: 'Kamu sudah membaca 3 hari berturut-turut. Luangkan 15 menit malam ini untuk mencapai target 4 hari!',
-    timestamp: '2 jam lalu',
+    id: 'notif-welcome',
+    title: '🎉 Selamat Datang di BUKOO',
+    body: 'Nikmati ribuan koleksi e-book, fitur AI Reading Assistant, dan komunitas pembaca Indonesia.',
+    timestamp: 'Baru saja',
     isRead: false,
-    type: 'streak',
-  },
-  {
-    id: 'notif-2',
-    title: '📖 Rilis Baru: Laut Bercerita (Edisi Spesial)',
-    body: 'Buku karya Leila S. Chudori telah tersedia di BUKOO. Mulai baca sampel sekarang!',
-    timestamp: 'Hari ini 09:00',
-    isRead: false,
-    type: 'book',
-    targetBookId: 'book_laut_bercerita',
-  },
-  {
-    id: 'notif-3',
-    title: '💬 Tanggapan Baru di Komunitas',
-    body: 'Siti Rahma mengomentari postinganmu di diskusi Laut Bercerita: "Sangat setuju!..."',
-    timestamp: 'Kemarin 21:15',
-    isRead: true,
-    type: 'community',
-  },
-  {
-    id: 'notif-4',
-    title: '🎉 Selamat Datang di BUKOO Premium',
-    body: 'Nikmati akses tanpa batas ke ribuan koleksi e-book dan fitur AI Reading Assistant.',
-    timestamp: '3 hari lalu',
-    isRead: true,
     type: 'system',
   },
 ];
 
 const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
-  enabled: true,
+  enabled: false,
   timeStr: '20:00',
 };
+
+/** Handles foreground presentation of OS notifications. */
+export function setNotificationHandler(): void {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
+
+function parseTime(timeStr: string): { hour: number; minute: number } {
+  const [h = 20, m = 0] = timeStr.split(':').map((n) => parseInt(n, 10));
+  return { hour: Number.isFinite(h) ? h : 20, minute: Number.isFinite(m) ? m : 0 };
+}
+
+async function scheduleDailyReminder(settings: ReminderSettings): Promise<void> {
+  if (!settings.enabled) {
+    await Notifications.cancelScheduledNotificationAsync(REMINDER_NOTIF_ID).catch(() => {});
+    return;
+  }
+
+  const permission = await Notifications.getPermissionsAsync();
+  let granted = permission.granted;
+  if (!granted) {
+    const requested = await Notifications.requestPermissionsAsync();
+    granted = requested.granted;
+  }
+  if (!granted) return;
+
+  const { hour, minute } = parseTime(settings.timeStr);
+  // Cancel first so re-scheduling with a changed time replaces the old one.
+  await Notifications.cancelScheduledNotificationAsync(REMINDER_NOTIF_ID).catch(() => {});
+  await Notifications.scheduleNotificationAsync({
+    identifier: REMINDER_NOTIF_ID,
+    content: {
+      title: '⏰ Waktunya Membaca',
+      body: 'Jangan lupa capai target membaca harianmu hari ini! 15 menit saja sudah cukup.',
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour,
+      minute,
+    },
+  });
+}
+
+/** Applies the persisted reminder settings on boot (scheduling is not persisted). */
+export async function initReminderScheduler(): Promise<void> {
+  const settings = await notificationService.getReminderSettings();
+  await scheduleDailyReminder(settings);
+}
+
+const EAS_PROJECT_ID = 'a2c42730-2fc3-4a3c-bc70-007233308be5';
+
+/**
+ * Registers this device's push token with the backend (device_tokens table).
+ * Silently no-ops in Expo Go / dev builds where a push token isn't available.
+ */
+export async function registerDeviceToken(): Promise<void> {
+  try {
+    const deviceId = await getOrCreateDeviceId();
+    const platform = Platform.OS === 'ios' ? 'IOS' : 'ANDROID';
+    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: EAS_PROJECT_ID });
+    if (!token) return;
+    await api.post('/notifications/device-token', { token, platform, deviceId });
+  } catch (e) {
+    console.warn('[notificationService] Device token registration skipped:', e);
+  }
+}
 
 export const notificationService = {
   getNotifications: async (): Promise<AppNotification[]> => {
@@ -73,6 +127,24 @@ export const notificationService = {
   getUnreadCount: async (): Promise<number> => {
     const list = await notificationService.getNotifications();
     return list.filter((n) => !n.isRead).length;
+  },
+
+  /** Adds a new in-app notification (prepends, capped). */
+  addNotification: async (notif: Omit<AppNotification, 'id' | 'timestamp' | 'isRead'>): Promise<AppNotification[]> => {
+    const list = await notificationService.getNotifications();
+    const newNotif: AppNotification = {
+      ...notif,
+      id: `notif-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+    const updated = [newNotif, ...list].slice(0, MAX_NOTIFICATIONS);
+    try {
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error('[notificationService] Error saving notification:', e);
+    }
+    return updated;
   },
 
   markAsRead: async (notifId: string): Promise<AppNotification[]> => {
@@ -93,17 +165,20 @@ export const notificationService = {
     try {
       const data = await AsyncStorage.getItem(REMINDER_KEY);
       if (!data) return DEFAULT_REMINDER_SETTINGS;
-      return JSON.parse(data);
+      return { ...DEFAULT_REMINDER_SETTINGS, ...JSON.parse(data) };
     } catch {
       return DEFAULT_REMINDER_SETTINGS;
     }
   },
 
-  saveReminderSettings: async (settings: ReminderSettings): Promise<void> => {
+  /** Persists settings AND (re)schedules/cancels the real OS notification. */
+  saveReminderSettings: async (settings: ReminderSettings): Promise<ReminderSettings> => {
     try {
       await AsyncStorage.setItem(REMINDER_KEY, JSON.stringify(settings));
     } catch (e) {
       console.error('[notificationService] Error saving reminder settings:', e);
     }
+    await scheduleDailyReminder(settings);
+    return settings;
   },
 };

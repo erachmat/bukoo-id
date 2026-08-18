@@ -153,6 +153,11 @@ reading.get('/:bookId/progress', async (c) => {
 // GET /v1/reading/recent & GET /v1/reading/progress — last 10 in-progress books
 // ---------------------------------------------------------------------------
 
+/** R2 cover keys are not public URLs — the web worker serves them at /covers/<key>. */
+function buildCoverUrl(coverKey: string | null): string | null {
+  return coverKey ? `https://bukoo.id/covers/${coverKey}` : null;
+}
+
 async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env }>) {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
@@ -165,6 +170,7 @@ async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env
         title: books.title,
         author: books.author,
         coverKey: books.coverKey,
+        totalPages: books.totalPages,
       },
     })
     .from(readingProgress)
@@ -173,7 +179,18 @@ async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env
     .orderBy(desc(readingProgress.lastReadAt))
     .limit(10);
 
-  return c.json(results);
+  return c.json(
+    results.map(({ progress, book }) => ({
+      bookId: book.id,
+      bookTitle: book.title,
+      bookAuthor: book.author,
+      bookCoverUrl: buildCoverUrl(book.coverKey),
+      progressPercent: progress.progressPercent,
+      currentPage: progress.currentPage,
+      totalPages: book.totalPages ?? progress.totalPages,
+      lastReadAt: progress.lastReadAt,
+    })),
+  );
 }
 
 reading.get('/recent', async (c) => {

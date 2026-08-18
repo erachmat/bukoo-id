@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
-import { api } from '../../services/api';
 import { useFeaturedBooks, useGenreBooks } from '../../hooks/api/useBooksApi';
+import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -15,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 import { QuickResumeCard } from './components/QuickResumeCard';
 import { ReadingGoalCard } from './components/ReadingGoalCard';
+import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
 import { userProfileService } from '../../services/userProfileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
@@ -37,6 +37,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [notifModalVisible, setNotifModalVisible] = useState(false);
+  const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
 
   // A/B: home_layout — 'carousel' (current) vs 'grid' (2-column).
   const homeLayout = useFeatureFlag('home_layout');
@@ -44,6 +45,7 @@ export default function HomeScreen() {
 
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
   const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
+  const { data: libraryProgress } = useUserLibrary();
 
   const refreshUnreadCount = () => {
     notificationService.getUnreadCount().then(setUnreadNotifCount);
@@ -54,26 +56,14 @@ export default function HomeScreen() {
     bookDownloadService.getDownloadedBooks()
       .then(setDownloadedBookIds)
       .catch(err => console.error('[HomeScreen] Failed to load downloaded books:', err));
-    userProfileService.getFavoriteGenres().then(setFavoriteGenres);
+    userProfileService.hydrateFavoriteGenres().then(setFavoriteGenres);
     refreshUnreadCount();
   }, [isFocused]);
-
-  const { data: trendingBooks, refetch: refetchBooks } = useQuery({
-    queryKey: ['books', 'trending'],
-    queryFn: async () => {
-      try {
-        const response = await api.get('/books');
-        return response.data.items || [];
-      } catch {
-        return [];
-      }
-    },
-  });
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchFeatured(), refetchBooks()]);
+      await refetchFeatured();
       const ids = await bookDownloadService.getDownloadedBooks();
       setDownloadedBookIds(ids);
     } catch (e) {
@@ -89,24 +79,27 @@ export default function HomeScreen() {
       title: 'Moby Dick',
       author: 'by herman melvile',
       coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+      genre: [],
     },
     {
       id: 'authority',
       title: 'BOOK 2 OF AUTHORITY',
       author: 'Jeff Vandermeer',
       coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+      genre: [],
     },
     {
       id: 'great-gatsby',
       title: 'The Great Gatsby',
       author: 'F. Scott Fitzgerald',
       coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
+      genre: [],
     },
   ];
 
   const displayTrending = (featuredData?.trending && featuredData.trending.length > 0)
     ? featuredData.trending
-    : ((trendingBooks && trendingBooks.length > 0) ? trendingBooks : defaultTrending);
+    : defaultTrending;
 
   const currentSectionTitle = selectedCategory === 'Semua'
     ? 'Trending Minggu ini🔥'
@@ -161,10 +154,10 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         {/* Quick Resume Active Reading Widget */}
-        <QuickResumeCard />
+        <QuickResumeCard progressData={libraryProgress?.[0] ?? null} />
 
         {/* Daily Reading Target & Streak Card */}
-        <ReadingGoalCard />
+        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
 
         {/* Category Pills Scroll */}
         <ScrollView
@@ -309,6 +302,11 @@ export default function HomeScreen() {
         visible={notifModalVisible}
         onClose={() => setNotifModalVisible(false)}
         onNotificationsChanged={refreshUnreadCount}
+      />
+
+      <ReadingAnalyticsModal
+        visible={analyticsModalVisible}
+        onClose={() => setAnalyticsModalVisible(false)}
       />
 
       <MiniAudioPlayer />

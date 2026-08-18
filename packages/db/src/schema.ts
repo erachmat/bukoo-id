@@ -48,6 +48,8 @@ export const users = sqliteTable('users', {
   /** 'USER' | 'ADMIN' | 'CONTENT_MANAGER' | 'PUBLISHER' */
   role:                text('role').notNull().default('USER'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).notNull().default(false),
+  /** Favorite reading genres — JSON text array e.g. '["Fiksi","Agama"]' */
+  favoriteGenres:      text('favorite_genres').notNull().default('[]'),
   createdAt:           text('created_at').notNull().default(now()),
   updatedAt:           text('updated_at').notNull().default(now()),
 });
@@ -340,22 +342,123 @@ export const otpTokens = sqliteTable('otp_tokens', {
 });
 
 // ---------------------------------------------------------------------------
+// Community (posts, comments, likes, bookmarks, reading clubs)
+// ---------------------------------------------------------------------------
+
+export const communityPosts = sqliteTable(
+  'community_posts',
+  {
+    id:            text('id').primaryKey(),
+    userId:        text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    /** 'REVIEW' | 'QUOTE' | 'DISCUSSION' | 'RECOMMENDATION' */
+    type:          text('type').notNull(),
+    content:       text('content').notNull(),
+    bookId:        text('book_id').references(() => books.id, { onDelete: 'set null' }),
+    likeCount:     integer('like_count').notNull().default(0),
+    commentCount:  integer('comment_count').notNull().default(0),
+    bookmarkCount: integer('bookmark_count').notNull().default(0),
+    createdAt:     text('created_at').notNull().default(now()),
+    updatedAt:     text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('community_posts_user_idx').on(t.userId),
+    index('community_posts_book_idx').on(t.bookId),
+    index('community_posts_created_at_idx').on(t.createdAt),
+  ],
+);
+
+export const communityComments = sqliteTable(
+  'community_comments',
+  {
+    id:        text('id').primaryKey(),
+    postId:    text('post_id').notNull().references(() => communityPosts.id, { onDelete: 'cascade' }),
+    userId:    text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    content:   text('content').notNull(),
+    createdAt: text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    index('community_comments_post_idx').on(t.postId),
+  ],
+);
+
+export const communityLikes = sqliteTable(
+  'community_likes',
+  {
+    postId:    text('post_id').notNull().references(() => communityPosts.id, { onDelete: 'cascade' }),
+    userId:    text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.userId] }),
+  ],
+);
+
+export const communityBookmarks = sqliteTable(
+  'community_bookmarks',
+  {
+    postId:    text('post_id').notNull().references(() => communityPosts.id, { onDelete: 'cascade' }),
+    userId:    text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.userId] }),
+  ],
+);
+
+export const communityEvents = sqliteTable(
+  'community_events',
+  {
+    id:                    text('id').primaryKey(),
+    title:                 text('title').notNull(),
+    description:           text('description'),
+    bookId:                text('book_id').references(() => books.id, { onDelete: 'set null' }),
+    /** ISO date 'YYYY-MM-DD' */
+    startDate:             text('start_date').notNull(),
+    endDate:               text('end_date').notNull(),
+    targetProgressPercent: integer('target_progress_percent').notNull().default(100),
+    createdBy:             text('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    createdAt:             text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    index('community_events_book_idx').on(t.bookId),
+  ],
+);
+
+export const communityEventJoins = sqliteTable(
+  'community_event_joins',
+  {
+    eventId:  text('event_id').notNull().references(() => communityEvents.id, { onDelete: 'cascade' }),
+    userId:   text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    joinedAt: text('joined_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.userId] }),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Relations (for Drizzle relational query API)
 // ---------------------------------------------------------------------------
 
 export const usersRelations = relations(users, ({ one, many }) => ({
-  accounts:        many(accounts),
-  sessions:        many(sessions),
-  readingProgress: many(readingProgress),
-  highlights:      many(highlights),
-  bookmarks:       many(bookmarks),
-  libraryShelves:  many(libraryShelves),
-  refreshTokens:   many(refreshTokens),
-  deviceTokens:    many(deviceTokens),
-  readingGoal:     one(readingGoals, { fields: [users.id], references: [readingGoals.userId] }),
-  readingStreaks:  many(readingStreaks),
-  subscription:    one(subscriptions, { fields: [users.id], references: [subscriptions.userId] }),
-  publishedBooks:  many(books),
+  accounts:            many(accounts),
+  sessions:            many(sessions),
+  readingProgress:     many(readingProgress),
+  highlights:          many(highlights),
+  bookmarks:           many(bookmarks),
+  libraryShelves:      many(libraryShelves),
+  refreshTokens:       many(refreshTokens),
+  deviceTokens:        many(deviceTokens),
+  readingGoal:         one(readingGoals, { fields: [users.id], references: [readingGoals.userId] }),
+  readingStreaks:      many(readingStreaks),
+  subscription:        one(subscriptions, { fields: [users.id], references: [subscriptions.userId] }),
+  publishedBooks:      many(books),
+  communityPosts:      many(communityPosts),
+  communityComments:   many(communityComments),
+  communityLikes:      many(communityLikes),
+  communityBookmarks:  many(communityBookmarks),
+  communityEvents:     many(communityEvents),
+  communityEventJoins: many(communityEventJoins),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -372,6 +475,8 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   highlights:      many(highlights),
   bookmarks:       many(bookmarks),
   shelfBooks:      many(shelfBooks),
+  communityPosts:  many(communityPosts),
+  communityEvents: many(communityEvents),
 }));
 
 export const readingProgressRelations = relations(readingProgress, ({ one }) => ({
@@ -422,4 +527,38 @@ export const readingGoalsRelations = relations(readingGoals, ({ one }) => ({
 
 export const readingStreaksRelations = relations(readingStreaks, ({ one }) => ({
   user: one(users, { fields: [readingStreaks.userId], references: [users.id] }),
+}));
+
+export const communityPostsRelations = relations(communityPosts, ({ one, many }) => ({
+  user:      one(users, { fields: [communityPosts.userId], references: [users.id] }),
+  book:      one(books, { fields: [communityPosts.bookId], references: [books.id] }),
+  comments:  many(communityComments),
+  likes:     many(communityLikes),
+  bookmarks: many(communityBookmarks),
+}));
+
+export const communityCommentsRelations = relations(communityComments, ({ one }) => ({
+  post: one(communityPosts, { fields: [communityComments.postId], references: [communityPosts.id] }),
+  user: one(users, { fields: [communityComments.userId], references: [users.id] }),
+}));
+
+export const communityLikesRelations = relations(communityLikes, ({ one }) => ({
+  post: one(communityPosts, { fields: [communityLikes.postId], references: [communityPosts.id] }),
+  user: one(users, { fields: [communityLikes.userId], references: [users.id] }),
+}));
+
+export const communityBookmarksRelations = relations(communityBookmarks, ({ one }) => ({
+  post: one(communityPosts, { fields: [communityBookmarks.postId], references: [communityPosts.id] }),
+  user: one(users, { fields: [communityBookmarks.userId], references: [users.id] }),
+}));
+
+export const communityEventsRelations = relations(communityEvents, ({ one, many }) => ({
+  book:      one(books, { fields: [communityEvents.bookId], references: [books.id] }),
+  createdBy: one(users, { fields: [communityEvents.createdBy], references: [users.id] }),
+  joins:     many(communityEventJoins),
+}));
+
+export const communityEventJoinsRelations = relations(communityEventJoins, ({ one }) => ({
+  event: one(communityEvents, { fields: [communityEventJoins.eventId], references: [communityEvents.id] }),
+  user:  one(users, { fields: [communityEventJoins.userId], references: [users.id] }),
 }));

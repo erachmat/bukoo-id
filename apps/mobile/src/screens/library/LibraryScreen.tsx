@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl, Modal, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useIsFocused, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
@@ -21,7 +21,7 @@ const DEFAULT_BOOKS_LIST = [
   {
     id: 'laut-bercerita',
     title: 'Laut Bercerita',
-    author: 'Laila S. Chudori',
+    author: 'Leila S. Chudori',
     coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
     progressPercent: 40,
     status: 'sedang_dibaca',
@@ -55,9 +55,12 @@ const DEFAULT_BOOKS_LIST = [
 import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
 import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
+import { readingSync } from '../../services/readingSync';
+import { readingGoalService } from '../../services/readingGoalService';
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteProp<MainTabParamList, 'Library'>>();
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
@@ -65,8 +68,19 @@ export default function LibraryScreen() {
   const [sortOption, setSortOption] = useState<LibrarySortOption>('recent');
   const [sortModalVisible, setSortModalVisible] = useState(false);
   const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
+  const [stats, setStats] = useState({ finishedBooks: 0, totalMinutes: 0, streakDays: 0, storageMb: 0 });
 
   const { data: userLibraryProgress, refetch: refetchLibraryProgress } = useUserLibrary();
+
+  // Allow the offline banner (or any caller) to deep-link into the Downloads tab.
+  useEffect(() => {
+    const tab = route.params?.tab;
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab as LibraryTab);
+      navigation.setParams({ tab: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.tab]);
 
   useEffect(() => {
     if (isFocused) {
@@ -74,6 +88,12 @@ export default function LibraryScreen() {
         .getDownloadedBooks()
         .then(setDownloadedBookIds)
         .catch((err) => console.error('Failed to load downloaded books:', err));
+      readingSync.getFinishedBooksCount().then((c) => setStats((s) => ({ ...s, finishedBooks: c })));
+      readingSync.getTotalReadingMinutes().then((m) => setStats((s) => ({ ...s, totalMinutes: m })));
+      readingGoalService.getGoalsState().then((g) => setStats((s) => ({ ...s, streakDays: g.streakDays ?? 0 })));
+      bookDownloadService.getStorageUsed().then((bytes) =>
+        setStats((s) => ({ ...s, storageMb: Math.round(bytes / (1024 * 1024)) })),
+      );
     }
   }, [isFocused]);
 
@@ -147,6 +167,7 @@ export default function LibraryScreen() {
   const activeTitle = activeProgress?.bookTitle || 'Laut Bercerita';
   const activeCover = activeProgress?.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg';
   const activePercent = activeProgress?.progressPercent ?? 40;
+  const activeAuthor = activeProgress?.bookAuthor || 'Leila S. Chudori';
   const activeBookId = activeProgress?.bookId || 'laut-bercerita';
 
   const tabLabels: { id: LibraryTab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
@@ -197,7 +218,7 @@ export default function LibraryScreen() {
               <Text style={styles.readingStatusText}>Sedang dibaca</Text>
             </View>
             <Text style={styles.activeTitle}>{activeTitle}</Text>
-            <Text style={styles.activeAuthor}>Laila S. Chudori</Text>
+            <Text style={styles.activeAuthor}>{activeAuthor}</Text>
 
             <View style={styles.progressRow}>
               <View style={styles.progressBarBackground}>
@@ -226,7 +247,7 @@ export default function LibraryScreen() {
         <TouchableOpacity
           style={styles.aiCard}
           activeOpacity={0.9}
-          onPress={() => navigation.navigate('Ai' as never)}
+          onPress={() => navigation.navigate('Ai')}
         >
           <View style={styles.aiHeader}>
             <View style={styles.aiBadge}>
@@ -241,29 +262,34 @@ export default function LibraryScreen() {
           <TouchableOpacity
             style={styles.aiButton}
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Ai' as never)}
+            onPress={() => navigation.navigate('Ai')}
           >
             <Text style={styles.aiButtonText}>Lanjut Baca</Text>
             <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         </TouchableOpacity>
 
-        {/* 3-Card Quick Stats Grid */}
+        {/* 3-Card Quick Stats Grid — real local reading data */}
         <View style={styles.statsGrid}>
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>47</Text>
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
             <Text style={styles.statLabel}>Buku selesai</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>312</Text>
-            <Text style={styles.statLabel}>Jam Membaca</Text>
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.totalMinutes}</Text>
+            <Text style={styles.statLabel}>Menit Membaca</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
             <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>21</Text>
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
             <Text style={styles.statLabel}>Hari Streak</Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+            <Ionicons name="download-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.storageMb}</Text>
+            <Text style={styles.statLabel}>MB Offline</Text>
           </View>
         </View>
 

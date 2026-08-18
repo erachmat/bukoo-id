@@ -1,209 +1,176 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  communityApi,
+  CommunityPostDto,
+  CommunityPostType,
+  CommunityEventDto,
+  CommunityCommentDto,
+} from './api';
+import { useAuthStore } from '../stores/authStore';
 
-export interface PostComment {
-  id: string;
-  userName: string;
-  userAvatar?: string;
-  text: string;
-  timestamp: string;
+const POSTS_CACHE_KEY = '@bukoo_community_posts_cache';
+const EVENTS_CACHE_KEY = '@bukoo_community_events_cache';
+
+function isAuthenticated(): boolean {
+  return !!useAuthStore.getState().user;
 }
 
-export interface CommunityPost {
-  id: string;
-  userName: string;
-  userAvatar?: string;
-  postTime: string;
-  timeAgo: string;
-  type: 'Review' | 'Kutipan' | 'Diskusi' | 'Rekomendasi';
-  taggedBook?: {
-    id: string;
-    title: string;
-    author: string;
-    coverUrl: string;
-  };
-  content: string;
-  likesCount: number;
-  commentsCount: number;
-  isLiked?: boolean;
-  isBookmarked?: boolean;
-  comments: PostComment[];
+function cachePosts(posts: CommunityPostDto[]): void {
+  AsyncStorage.setItem(POSTS_CACHE_KEY, JSON.stringify(posts)).catch((e) =>
+    console.error('[communityService] Error caching posts:', e),
+  );
 }
 
-const POSTS_KEY = '@bukoo_community_posts';
-const JOINED_EVENTS_KEY = '@bukoo_joined_events';
+function cacheEvents(events: CommunityEventDto[]): void {
+  AsyncStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify(events)).catch((e) =>
+    console.error('[communityService] Error caching events:', e),
+  );
+}
 
-const DEFAULT_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    userName: 'Rizqi Baihaqi Ahmadi',
-    userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
-    postTime: 'Hari ini 19:29',
-    timeAgo: '2 jam lalu',
-    type: 'Review',
-    taggedBook: {
-      id: 'book_laut_bercerita',
-      title: 'Laut Bercerita',
-      author: 'Leila S. Chudori',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    },
-    content: 'Baru selesai baca Laut Bercerita, TERBAIK ✨ 😭, Leila beneran jenius menggambarkan duka dan perjuangan mahasiswa tahun 1998!',
-    likesCount: 502,
-    commentsCount: 48,
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-1',
-        userName: 'Siti Rahma',
-        text: 'Sangat setuju! Bagian surat dari dasar laut selalu bikin nyesak di dada.',
-        timestamp: '1 jam lalu',
-      },
-      {
-        id: 'c-2',
-        userName: 'Ahmad Fauzi',
-        text: 'Karya mahakarya sastra Indonesia modern. Harus dibaca semua pemuda!',
-        timestamp: '30 mnt lalu',
-      },
-    ],
-  },
-  {
-    id: 'post-2',
-    userName: 'Dewi Kartika Sari',
-    userAvatar: undefined,
-    postTime: 'Kemarin 15:45',
-    timeAgo: '1 hari lalu',
-    type: 'Diskusi',
-    taggedBook: {
-      id: 'book_bumi_manusia',
-      title: 'Bumi Manusia',
-      author: 'Pramoedya Ananta Toer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    },
-    content: 'Karakter Nyai Ontosoroh menurut kalian adalah simbol ketangguhan terbaik dalam sastra Indonesia kan? Bagaimana pendapat teman-teman?',
-    likesCount: 384,
-    commentsCount: 29,
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-3',
-        userName: 'Budi Santoso',
-        text: 'Pasti! Keberanian beliau melawan hukum kolonial sangat menginspirasi.',
-        timestamp: 'Kemarin',
-      },
-    ],
-  },
-];
-
+/**
+ * Server-first community service with a read-through AsyncStorage cache used
+ * only as an offline fallback. Mutations are optimistic with rollback.
+ */
 export const communityService = {
-  getPosts: async (): Promise<CommunityPost[]> => {
-    try {
-      const data = await AsyncStorage.getItem(POSTS_KEY);
-      if (!data) return DEFAULT_POSTS;
-      return JSON.parse(data);
-    } catch {
-      return DEFAULT_POSTS;
+  getPosts: async (cursor?: string): Promise<{ items: CommunityPostDto[]; nextCursor: string | null }> => {
+    if (!isAuthenticated()) {
+      return { items: [], nextCursor: null };
     }
-  },
-
-  createPost: async (newPostData: Omit<CommunityPost, 'id' | 'likesCount' | 'commentsCount' | 'comments'>): Promise<CommunityPost[]> => {
-    const existing = await communityService.getPosts();
-    const newPost: CommunityPost = {
-      ...newPostData,
-      id: `post-${Date.now()}`,
-      likesCount: 0,
-      commentsCount: 0,
-      isLiked: false,
-      isBookmarked: false,
-      comments: [],
-    };
-    const updated = [newPost, ...existing];
     try {
-      await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(updated));
+      const page = await communityApi.getPosts({ cursor });
+      if (cursor) {
+        const cached = await communityService.getCachedPosts();
+        const seen = new Set(cached.map((p) => p.id));
+        cachePosts([...cached, ...page.items.filter((p) => !seen.has(p.id))]);
+      } else {
+        cachePosts(page.items);
+      }
+      return page;
     } catch (e) {
-      console.error('[communityService] Error saving posts:', e);
+      console.warn('[communityService] Feed fetch failed, using cache:', e);
+      const cached = await communityService.getCachedPosts();
+      return { items: cached, nextCursor: null };
     }
-    return updated;
   },
 
-  toggleLike: async (postId: string): Promise<CommunityPost[]> => {
-    const posts = await communityService.getPosts();
-    const updated = posts.map((p) => {
-      if (p.id === postId) {
-        const isLiked = !p.isLiked;
-        return {
-          ...p,
-          isLiked,
-          likesCount: isLiked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1),
-        };
-      }
-      return p;
-    });
-    await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(updated));
-    return updated;
-  },
-
-  toggleBookmark: async (postId: string): Promise<CommunityPost[]> => {
-    const posts = await communityService.getPosts();
-    const updated = posts.map((p) => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          isBookmarked: !p.isBookmarked,
-        };
-      }
-      return p;
-    });
-    await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(updated));
-    return updated;
-  },
-
-  addComment: async (postId: string, commentText: string, userName: string): Promise<CommunityPost[]> => {
-    const posts = await communityService.getPosts();
-    const updated = posts.map((p) => {
-      if (p.id === postId) {
-        const newComment: PostComment = {
-          id: `comment-${Date.now()}`,
-          userName,
-          text: commentText,
-          timestamp: 'Baru saja',
-        };
-        return {
-          ...p,
-          commentsCount: p.commentsCount + 1,
-          comments: [...p.comments, newComment],
-        };
-      }
-      return p;
-    });
-    await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(updated));
-    return updated;
-  },
-
-  getJoinedEvents: async (): Promise<string[]> => {
+  getCachedPosts: async (): Promise<CommunityPostDto[]> => {
     try {
-      const data = await AsyncStorage.getItem(JOINED_EVENTS_KEY);
-      if (!data) return [];
-      return JSON.parse(data);
+      const data = await AsyncStorage.getItem(POSTS_CACHE_KEY);
+      return data ? (JSON.parse(data) as CommunityPostDto[]) : [];
     } catch {
       return [];
     }
   },
 
-  toggleJoinEvent: async (eventId: string): Promise<boolean> => {
-    const joined = await communityService.getJoinedEvents();
-    let updated: string[];
-    let isJoined = false;
+  createPost: async (data: { type: CommunityPostType; content: string; bookId?: string }): Promise<CommunityPostDto> => {
+    const created = await communityApi.createPost(data);
+    const cached = await communityService.getCachedPosts();
+    cachePosts([created, ...cached]);
+    return created;
+  },
 
-    if (joined.includes(eventId)) {
-      updated = joined.filter((id) => id !== eventId);
-      isJoined = false;
-    } else {
-      updated = [...joined, eventId];
-      isJoined = true;
+  deletePost: async (id: string): Promise<void> => {
+    await communityApi.deletePost(id);
+    const cached = await communityService.getCachedPosts();
+    cachePosts(cached.filter((p) => p.id !== id));
+  },
+
+  /** Optimistic like with rollback on failure. */
+  toggleLike: async (post: CommunityPostDto): Promise<CommunityPostDto> => {
+    const nextLiked = !post.likedByMe;
+    const optimistic: CommunityPostDto = {
+      ...post,
+      likedByMe: nextLiked,
+      likeCount: Math.max(0, post.likeCount + (nextLiked ? 1 : -1)),
+    };
+    await communityService._patchCache(optimistic);
+    try {
+      await communityApi.setLike(post.id, nextLiked);
+    } catch (e) {
+      console.warn('[communityService] Like sync failed, rolling back:', e);
+      await communityService._patchCache(post);
+      throw e;
     }
+    return optimistic;
+  },
 
-    await AsyncStorage.setItem(JOINED_EVENTS_KEY, JSON.stringify(updated));
-    return isJoined;
+  /** Optimistic bookmark with rollback on failure. */
+  toggleBookmark: async (post: CommunityPostDto): Promise<CommunityPostDto> => {
+    const nextBookmarked = !post.bookmarkedByMe;
+    const optimistic: CommunityPostDto = { ...post, bookmarkedByMe: nextBookmarked };
+    await communityService._patchCache(optimistic);
+    try {
+      await communityApi.setBookmark(post.id, nextBookmarked);
+    } catch (e) {
+      console.warn('[communityService] Bookmark sync failed, rolling back:', e);
+      await communityService._patchCache(post);
+      throw e;
+    }
+    return optimistic;
+  },
+
+  getComments: async (postId: string): Promise<CommunityCommentDto[]> => {
+    return communityApi.getComments(postId);
+  },
+
+  addComment: async (postId: string, content: string): Promise<CommunityCommentDto> => {
+    const comment = await communityApi.addComment(postId, content);
+    const cached = await communityService.getCachedPosts();
+    cachePosts(
+      cached.map((p) => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p)),
+    );
+    return comment;
+  },
+
+  getEvents: async (): Promise<CommunityEventDto[]> => {
+    if (!isAuthenticated()) return [];
+    try {
+      const events = await communityApi.getEvents();
+      cacheEvents(events);
+      return events;
+    } catch (e) {
+      console.warn('[communityService] Events fetch failed, using cache:', e);
+      try {
+        const data = await AsyncStorage.getItem(EVENTS_CACHE_KEY);
+        return data ? (JSON.parse(data) as CommunityEventDto[]) : [];
+      } catch {
+        return [];
+      }
+    }
+  },
+
+  /** Optimistic event join toggle with rollback on failure. */
+  toggleJoinEvent: async (event: CommunityEventDto): Promise<CommunityEventDto> => {
+    const nextJoined = !event.joinedByMe;
+    const optimistic: CommunityEventDto = {
+      ...event,
+      joinedByMe: nextJoined,
+      joinCount: Math.max(0, event.joinCount + (nextJoined ? 1 : -1)),
+    };
+    await communityService._patchEventCache(optimistic);
+    try {
+      await communityApi.setEventJoin(event.id, nextJoined);
+    } catch (e) {
+      console.warn('[communityService] Event join sync failed, rolling back:', e);
+      await communityService._patchEventCache(event);
+      throw e;
+    }
+    return optimistic;
+  },
+
+  _patchCache: async (post: CommunityPostDto): Promise<void> => {
+    const cached = await communityService.getCachedPosts();
+    cachePosts(cached.map((p) => (p.id === post.id ? post : p)));
+  },
+
+  _patchEventCache: async (event: CommunityEventDto): Promise<void> => {
+    try {
+      const data = await AsyncStorage.getItem(EVENTS_CACHE_KEY);
+      const events: CommunityEventDto[] = data ? JSON.parse(data) : [];
+      cacheEvents(events.map((e) => (e.id === event.id ? event : e)));
+    } catch {
+      // best-effort
+    }
   },
 };
+

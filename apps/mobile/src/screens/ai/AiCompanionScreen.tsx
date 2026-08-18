@@ -11,6 +11,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { AiChatSection } from './components/AiChatSection';
 import { AiSummaryModal } from './components/AiSummaryModal';
 import { userProfileService } from '../../services/userProfileService';
+import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -49,20 +50,26 @@ export default function AiCompanionScreen() {
 
   const [summaryModalVisible, setSummaryModalVisible] = useState(false);
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
+  const { data: libraryProgress } = useUserLibrary();
 
   useEffect(() => {
     if (isFocused) {
-      userProfileService.getFavoriteGenres().then(setFavoriteGenres);
+      userProfileService.hydrateFavoriteGenres().then(setFavoriteGenres);
     }
   }, [isFocused]);
 
-  const activeBook = {
-    id: 'book_laut_bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    progressPercent: 40,
-  };
+  // Real active reading progress (falls back to null → honest empty state).
+  const realActive = libraryProgress && libraryProgress.length > 0 ? libraryProgress[0] : null;
+  const activeBook = realActive
+    ? {
+        id: realActive.bookId,
+        title: realActive.bookTitle ?? 'Buku',
+        author: realActive.bookAuthor ?? '',
+        coverUrl: realActive.bookCoverUrl ?? '',
+        progressPercent: realActive.progressPercent ?? 0,
+      }
+    : null;
+  const remainingPercent = activeBook ? Math.max(0, Math.round(100 - activeBook.progressPercent)) : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -105,32 +112,42 @@ export default function AiCompanionScreen() {
           </View>
 
           <Text style={styles.insightQuoteText}>
-            “Jam membacamu paling fokus antara pukul 20.00 - 22.00. Siap lanjut malam ini?”
+            “Konsistensi lebih penting daripada intensitas — 15 menit membaca setiap hari membangun kebiasaan yang bertahan lama.”
           </Text>
 
-          {/* Active Reading Progress Sub Card */}
-          <View style={styles.activeBookSubCard}>
-            <Image source={{ uri: activeBook.coverUrl }} style={styles.activeBookCover} />
-            <View style={styles.activeBookInfo}>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusBadgeText}>Sedang dibaca</Text>
-              </View>
-              <Text style={styles.activeBookTitle}>{activeBook.title}</Text>
-              <Text style={styles.activeBookAuthor}>{activeBook.author}</Text>
-
-              <View style={styles.progressRow}>
-                <View style={styles.progressBarBackground}>
-                  <View style={[styles.progressBarFill, { width: `${activeBook.progressPercent}%` }]} />
+          {/* Active Reading Progress Sub Card — real data or honest empty state */}
+          {activeBook ? (
+            <View style={styles.activeBookSubCard}>
+              <Image source={{ uri: activeBook.coverUrl }} style={styles.activeBookCover} />
+              <View style={styles.activeBookInfo}>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusBadgeText}>Sedang dibaca</Text>
                 </View>
-                <Text style={styles.progressText}>{activeBook.progressPercent}%</Text>
-              </View>
+                <Text style={styles.activeBookTitle}>{activeBook.title}</Text>
+                <Text style={styles.activeBookAuthor}>{activeBook.author}</Text>
 
-              <View style={styles.etaRow}>
-                <Ionicons name="time-outline" size={14} color={COLORS.gold} />
-                <Text style={styles.etaText}>Est. Selesai: ~3 Hari lagi</Text>
+                <View style={styles.progressRow}>
+                  <View style={styles.progressBarBackground}>
+                    <View style={[styles.progressBarFill, { width: `${activeBook.progressPercent}%` }]} />
+                  </View>
+                  <Text style={styles.progressText}>{activeBook.progressPercent}%</Text>
+                </View>
+
+                <View style={styles.etaRow}>
+                  <Ionicons name="time-outline" size={14} color={COLORS.gold} />
+                  <Text style={styles.etaText}>Sisa {remainingPercent}% untuk tamat</Text>
+                </View>
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.activeBookEmptyCard}>
+              <Ionicons name="book-outline" size={32} color={COLORS.muted} />
+              <Text style={styles.emptyActiveText}>Belum ada buku yang sedang dibaca.</Text>
+              <Text style={styles.emptyActiveSub}>
+                Mulai membaca dan AI Companion akan menampilkan progresmu di sini.
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Interactive AI Chat Section */}
@@ -139,7 +156,7 @@ export default function AiCompanionScreen() {
           <Text style={styles.sectionTitle}>Tanya AI Companion</Text>
         </View>
         <AiChatSection
-          currentBookTitle={activeBook.title}
+          currentBookTitle={activeBook?.title ?? 'bukumu'}
           onOpenSummaryModal={() => setSummaryModalVisible(true)}
         />
 
@@ -193,8 +210,8 @@ export default function AiCompanionScreen() {
       <AiSummaryModal
         visible={summaryModalVisible}
         onClose={() => setSummaryModalVisible(false)}
-        bookId={activeBook.id}
-        bookTitle={activeBook.title}
+        bookId={activeBook?.id ?? ''}
+        bookTitle={activeBook?.title ?? ''}
       />
     </SafeAreaView>
   );
@@ -295,6 +312,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1E4D40',
     gap: 12,
+  },
+  activeBookEmptyCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    backgroundColor: '#0A1A15',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#1E4D40',
+  },
+  emptyActiveText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    textAlign: 'center',
+  },
+  emptyActiveSub: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
+    textAlign: 'center',
+    lineHeight: 17,
   },
   activeBookCover: {
     width: 60,

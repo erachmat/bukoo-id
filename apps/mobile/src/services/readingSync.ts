@@ -387,6 +387,38 @@ export class ReadingSync {
     }
   }
 
+  /**
+   * Number of books that reached 100% progress locally.
+   */
+  async getFinishedBooksCount(): Promise<number> {
+    try {
+      const db = await getDb();
+      const result = await db.getFirstAsync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM reading_progress WHERE progressPercent >= 100'
+      );
+      return result?.count || 0;
+    } catch (e) {
+      console.error('[ReadingSync] Failed to get finished books count', e);
+      return 0;
+    }
+  }
+
+  /**
+   * Total accumulated reading time (minutes) across all local books.
+   */
+  async getTotalReadingMinutes(): Promise<number> {
+    try {
+      const db = await getDb();
+      const result = await db.getFirstAsync<{ totalSeconds: number }>(
+        'SELECT COALESCE(SUM(readingTimeSeconds), 0) as totalSeconds FROM reading_progress'
+      );
+      return Math.round((result?.totalSeconds ?? 0) / 60);
+    } catch (e) {
+      console.error('[ReadingSync] Failed to get total reading minutes', e);
+      return 0;
+    }
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private async _queuePendingSync(

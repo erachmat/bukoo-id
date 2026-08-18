@@ -13,6 +13,52 @@ const summarySchema = z.object({
   chapterTitle: z.string().optional(),
 });
 
+const CHAT_SYSTEM_PROMPT = [
+  'Kamu adalah AI Companion BUKOO, asisten membaca yang ramah dan membantu.',
+  'Bantu pengguna memahami buku yang sedang dibaca, jawab pertanyaan seputar isi buku,',
+  'beri rekomendasi buku serupa, dan dorong kebiasaan membaca.',
+  'Selalu jawab dalam Bahasa Indonesia, ringkas namun informatif.',
+].join(' ');
+
+const chatSchema = z.object({
+  message: z.string().min(1).max(4_000),
+  bookTitle: z.string().max(200).optional(),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().min(1).max(4_000),
+      }),
+    )
+    .max(12)
+    .optional(),
+});
+
+// ---------------------------------------------------------------------------
+// POST /v1/ai/chat — free-form assistant chat (stateless per request)
+// ---------------------------------------------------------------------------
+
+ai.post('/chat', zValidator('json', chatSchema), async (c) => {
+  const { message, bookTitle, history } = c.req.valid('json');
+
+  const context = bookTitle ? `Buku yang sedang dibaca: "${bookTitle}".\n` : '';
+
+  const messages = [
+    { role: 'system' as const, content: CHAT_SYSTEM_PROMPT },
+    ...(history ?? []),
+    { role: 'user' as const, content: `${context}${message}` },
+  ];
+
+  try {
+    const response = await c.env.AI.run('@cf/meta/llama-3-8b-instruct', { messages });
+    const reply = (response as { response: string }).response;
+    return c.json({ reply });
+  } catch (err) {
+    console.error('AI chat error:', err);
+    return c.json({ error: 'AI service unavailable, coba lagi nanti' }, 502);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // POST /v1/ai/companion/summary
 // ---------------------------------------------------------------------------

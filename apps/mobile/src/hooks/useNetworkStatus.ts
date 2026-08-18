@@ -1,6 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
-import { readingSync } from '../services/readingSync';
+import { useNetworkStore } from '../stores/networkStore';
 
 export interface UseNetworkStatusReturn {
   isOffline: boolean;
@@ -8,60 +6,15 @@ export interface UseNetworkStatusReturn {
   pendingSyncCount: number;
 }
 
+/**
+ * Thin selector over the shared network store. The single NetInfo listener is
+ * mounted app-wide in App.tsx (initNetworkListener) — this hook only reads it.
+ */
 export function useNetworkStatus(): UseNetworkStatusReturn {
-  const [isOffline, setIsOffline] = useState(false);
-  const [justReconnected, setJustReconnected] = useState(false);
-  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  const isOffline = useNetworkStore((s) => s.isOffline);
+  const justReconnected = useNetworkStore((s) => s.justReconnected);
+  const pendingSyncCount = useNetworkStore((s) => s.pendingSyncCount);
 
-  const wasOfflineRef = useRef(false);
-  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const checkSyncCount = async () => {
-      try {
-        const count = await readingSync.getPendingSyncCount();
-        setPendingSyncCount(count);
-      } catch {
-        setPendingSyncCount(0);
-      }
-    };
-
-    checkSyncCount();
-
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      const isConnected = !!(state.isConnected && state.isInternetReachable !== false);
-
-      if (!isConnected) {
-        setIsOffline(true);
-        wasOfflineRef.current = true;
-        checkSyncCount();
-      } else {
-        setIsOffline(false);
-
-        if (wasOfflineRef.current) {
-          wasOfflineRef.current = false;
-          setJustReconnected(true);
-
-          // Retry pending syncs
-          readingSync.retryPendingSyncs().then(() => checkSyncCount()).catch(() => {});
-
-          if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-          reconnectTimerRef.current = setTimeout(() => {
-            setJustReconnected(false);
-          }, 3500);
-        }
-      }
-    });
-
-    return () => {
-      unsubscribe();
-      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-    };
-  }, []);
-
-  return {
-    isOffline,
-    justReconnected,
-    pendingSyncCount,
-  };
+  return { isOffline, justReconnected, pendingSyncCount };
 }
+

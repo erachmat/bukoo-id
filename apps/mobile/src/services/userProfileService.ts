@@ -47,6 +47,21 @@ export const userProfileService = {
     }
   },
 
+  /** Pull favorite genres from the server (GET /users/me) and cache locally. */
+  hydrateFavoriteGenres: async (): Promise<string[]> => {
+    try {
+      const res = await api.get('/users/me');
+      const genres = res.data?.favoriteGenres;
+      if (Array.isArray(genres) && genres.length > 0) {
+        await AsyncStorage.setItem(GENRES_STORAGE_KEY, JSON.stringify(genres));
+        return genres;
+      }
+    } catch {
+      // Offline or unauthenticated — keep the local cache.
+    }
+    return userProfileService.getFavoriteGenres();
+  },
+
   updateProfile: async (payload: ProfileUpdatePayload): Promise<UserPublicDto> => {
     const currentStore = useAuthStore.getState();
     const currentUser = currentStore.user;
@@ -70,15 +85,16 @@ export const userProfileService = {
       await userProfileService.saveFavoriteGenres(payload.favoriteGenres);
     }
 
-    // Attempt backend sync via API
+    // Attempt backend sync via API (server stores favoriteGenres as JSON text)
     try {
       const response = await api.patch('/users/me', {
         name: payload.name,
         avatarUrl: payload.avatarUrl,
+        favoriteGenres: payload.favoriteGenres,
       });
-      if (response.data?.user) {
-        currentStore.setUser(response.data.user);
-        return response.data.user;
+      if (response.data?.id) {
+        currentStore.setUser(response.data as UserPublicDto);
+        return response.data as UserPublicDto;
       }
     } catch {
       console.warn('[userProfileService] API sync failed, fallback to local update.');

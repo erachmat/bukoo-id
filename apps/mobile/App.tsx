@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthHydration } from './src/hooks/useAuth';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -8,6 +8,12 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { COLORS } from './src/constants/COLORS';
 import { initFeatureFlags } from './src/services/featureFlags';
 import { initCrashReporting } from './src/services/crashReporting';
+import { initNetworkListener } from './src/stores/networkStore';
+import { setNotificationHandler, initReminderScheduler, registerDeviceToken } from './src/services/notificationService';
+import * as Notifications from 'expo-notifications';
+import { RootStackParamList } from './src/navigation/types';
+import { useAuthStore } from './src/stores/authStore';
+import type { NavigationProp } from '@react-navigation/native';
 import { 
   useFonts, 
   PlayfairDisplay_400Regular, 
@@ -23,6 +29,7 @@ import {
 export default function App(): React.JSX.Element {
   const queryClient = new QueryClient();
   const isReady = useAuthHydration();
+  const navigationRef = useRef(createNavigationContainerRef<RootStackParamList>());
   const [fontsLoaded] = useFonts({
     'PlayfairDisplay-Regular': PlayfairDisplay_400Regular,
     'PlayfairDisplay-SemiBold': PlayfairDisplay_600SemiBold,
@@ -37,6 +44,28 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     initCrashReporting();
     initFeatureFlags();
+    // Single app-wide NetInfo listener feeding the shared network store.
+    initNetworkListener();
+    // Notifications: foreground handler + re-apply the daily reminder schedule.
+    setNotificationHandler();
+    initReminderScheduler().catch((e) => console.warn('[App] initReminderScheduler failed:', e));
+
+    // Register the device push token when signed in (for future server push).
+    if (useAuthStore.getState().isAuthenticated) {
+      registerDeviceToken().catch(() => {});
+    }
+
+    // Deep-link: tapping a notification navigates to the tagged book.
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as { bookId?: string };
+      if (data?.bookId && navigationRef.current?.isReady()) {
+        (navigationRef.current as NavigationProp<RootStackParamList>).navigate('ReadingStack', {
+          screen: 'BookDetail',
+          params: { bookId: data.bookId },
+        } as never);
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   if (!isReady || !fontsLoaded) {
@@ -50,7 +79,7 @@ export default function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <AppNavigator />
         </NavigationContainer>
       </QueryClientProvider>

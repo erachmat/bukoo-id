@@ -10,7 +10,7 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Search: undefined;
-  Library: undefined;
+  Library: { tab?: 'semua' | 'sedang_dibaca' | 'selesai' | 'ingin_dibaca' | 'diunduh' } | undefined;
   Ai: undefined;
   Community: undefined;
   Profile: undefined;

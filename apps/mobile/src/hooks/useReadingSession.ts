@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { readingSync } from '../services/readingSync';
 import { readingGoalService } from '../services/readingGoalService';
+import { notificationService } from '../services/notificationService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,8 +38,6 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
   const [initialCfi, setInitialCfi] = useState('');
   const [isGoalAchieved, setIsGoalAchieved] = useState(false);
 
-  // Track whether we were previously offline so we only retry on transition
-  const wasOfflineRef = useRef(false);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   // ── Bootstrap / teardown ────────────────────────────────────────────────────
@@ -103,24 +101,9 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
   }, [bookId]);
 
   // ── Network recovery ────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      const isConnected = state.isConnected && state.isInternetReachable !== false;
-
-      if (!isConnected) {
-        wasOfflineRef.current = true;
-      } else if (wasOfflineRef.current && isConnected) {
-        // Transitioned from offline → online: retry pending queue
-        wasOfflineRef.current = false;
-        readingSync.retryPendingSyncs().catch((err) =>
-          console.warn('[useReadingSession] retryPendingSyncs failed:', err)
-        );
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  //
+  // Reconnect retries are handled centrally by the app-wide network store
+  // (stores/networkStore.ts) — no per-session NetInfo listener here.
 
   // ── Reading time ticker ─────────────────────────────────────────────────────
 
@@ -137,6 +120,14 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
         readingGoalService.recordReadingTime(1).then(({ isGoalAchievedNow }) => {
           if (isGoalAchievedNow) {
             setIsGoalAchieved(true);
+            // Feed the in-app notification center with a real event.
+            notificationService
+              .addNotification({
+                title: '🎯 Target Membaca Tercapai!',
+                body: 'Kamu mencapai target membaca harian hari ini. Pertahankan streak-mu!',
+                type: 'streak',
+              })
+              .catch(() => {});
           }
         });
       }, 1_000);
