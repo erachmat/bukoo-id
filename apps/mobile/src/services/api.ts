@@ -277,6 +277,10 @@ export interface SearchFilterParams {
 }
 
 export const booksApi = {
+  getRecommendations: async (): Promise<(BookItemDto & { matchPercent?: number; aiReason?: string })[]> => {
+    const res = await api.get('/books/recommendations');
+    return res.data || [];
+  },
   getFeatured: async (): Promise<FeaturedBooksResponseDto> => {
     const res = await api.get<FeaturedBooksResponseDto>('/books/featured');
     return res.data;

@@ -259,7 +259,10 @@ export default function SearchScreen() {
                     } as never)
                   }
                 >
-                  <Image source={{ uri: item.coverUrl }} style={styles.searchResultCover} />
+                  <Image
+                    source={{ uri: item.coverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
+                    style={styles.searchResultCover}
+                  />
                   <View style={styles.searchResultInfo}>
                     <View style={styles.resultTitleRow}>
                       <Text style={styles.searchResultTitle}>{item.title}</Text>

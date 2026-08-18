@@ -12,6 +12,7 @@ import { AiChatSection } from './components/AiChatSection';
 import { AiSummaryModal } from './components/AiSummaryModal';
 import { userProfileService } from '../../services/userProfileService';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
+import { useRecommendedBooks } from '../../hooks/api/useBooksApi';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -51,6 +52,19 @@ export default function AiCompanionScreen() {
   const [summaryModalVisible, setSummaryModalVisible] = useState(false);
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
   const { data: libraryProgress } = useUserLibrary();
+  const { data: apiRecommendations } = useRecommendedBooks();
+
+  const displayRecommendations =
+    apiRecommendations && apiRecommendations.length > 0
+      ? apiRecommendations.map((b) => ({
+          id: b.id,
+          title: b.title,
+          author: b.author,
+          coverUrl: b.coverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
+          genre: Array.isArray(b.genre) && b.genre.length > 0 ? b.genre[0] : 'Fiksi',
+          matchPercent: b.matchPercent || 90,
+        }))
+      : BASE_RECOMMENDATIONS;
 
   useEffect(() => {
     if (isFocused) {
@@ -167,7 +181,7 @@ export default function AiCompanionScreen() {
             <Text style={styles.sectionTitle}>Rekomendasi AI (Berdasarkan Minat)</Text>
           </View>
 
-          {BASE_RECOMMENDATIONS.map((item, idx) => {
+          {displayRecommendations.map((item, idx) => {
             const isMatchGenre = favoriteGenres.includes(item.genre);
             const displayMatch = isMatchGenre ? Math.min(99, item.matchPercent + 5) : item.matchPercent;
             return (

@@ -57,11 +57,12 @@ export default function App(): React.JSX.Element {
 
     // Deep-link: tapping a notification navigates to the tagged book.
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as { bookId?: string };
-      if (data?.bookId && navigationRef.current?.isReady()) {
+      const data = response.notification.request.content.data as { bookId?: string; targetBookId?: string };
+      const targetId = data?.bookId || data?.targetBookId;
+      if (targetId && navigationRef.current?.isReady()) {
         (navigationRef.current as NavigationProp<RootStackParamList>).navigate('ReadingStack', {
           screen: 'BookDetail',
-          params: { bookId: data.bookId },
+          params: { bookId: targetId },
         } as never);
       }
     });

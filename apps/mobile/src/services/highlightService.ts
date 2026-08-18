@@ -21,6 +21,10 @@ class HighlightService {
     try {
       const db = await getSharedDb();
       await db.runAsync(
+        'DELETE FROM deleted_annotations WHERE bookId = ? AND type = "highlight" AND targetCfi = ?',
+        bookId, cfiRange
+      );
+      await db.runAsync(
         'INSERT INTO highlights (bookId, cfiRange, text, color, note, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
         bookId, cfiRange, text, color, note || null, Date.now()
       );
@@ -32,6 +36,16 @@ class HighlightService {
   async removeHighlight(id: number): Promise<void> {
     try {
       const db = await getSharedDb();
+      const item = await db.getFirstAsync<Highlight>(
+        'SELECT * FROM highlights WHERE id = ?',
+        id
+      );
+      if (item) {
+        await db.runAsync(
+          'INSERT INTO deleted_annotations (bookId, type, targetCfi, createdAt) VALUES (?, "highlight", ?, ?)',
+          item.bookId, item.cfiRange, Date.now()
+        );
+      }
       await db.runAsync(
         'DELETE FROM highlights WHERE id = ?',
         id

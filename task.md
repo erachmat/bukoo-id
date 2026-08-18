@@ -1,4 +1,24 @@
-# current integration tasks
+# Mobile Reader UX, Bug Fixes & Recommendation Enhancements — 2026-08-18
+
+- `[x]` 1. Bug Fix: Annotation sync soft-delete propagation in `highlightService.ts`, `bookmarkService.ts`, and `annotationSyncService.ts`.
+- `[x]` 2. Bug Fix: ReadingScreen `isReady` race condition guard on hot-reload/back-nav.
+- `[x]` 3. Bug Fix: TocModal active chapter highlight normalization on first open.
+- `[x]` 4. Bug Fix: QuickJumpSlider optimistic page jump on thumb release.
+- `[x]` 5. UX Flow: Real-time personalized Reading Time Left (WPM) calculation in reader bottom HUD.
+- `[x]` 6. UX Flow: Deep-link handling for daily reading notification taps (`App.tsx`).
+- `[x]` 7. UX Flow: "Lanjut Baca" CTA with progress bar in `BookDetailScreen.tsx`.
+- `[x]` 8. UX Flow: In-reader brightness slider control in `SettingsModal.tsx` & `ReadingScreen.tsx`.
+- `[x]` 9. UX Flow: Native bottom sheet highlight color picker replacing in-WebView HTML toolbar.
+- `[x]` 10. UX Flow: Per-book reader settings override with global fallback.
+- `[x]` 11. UX Flow: Export highlights (copy to clipboard / share text) in `HighlightModal.tsx`.
+- `[x]` 12. UX Flow: Book completion celebration modal when finishing a book (100% progress).
+- `[x]` 13. UX Flow: Search results cover thumbnails in `SearchScreen.tsx`.
+- `[x]` 14. Recommendation: Backend `GET /v1/books/recommendations` route in `apps/api` with D1 SQL genre/history query + AI hybrid scoring (Option C).
+- `[x]` 15. Recommendation: `useRecommendedBooks` hook and real API integration in `AiCompanionScreen.tsx`.
+- `[x]` 16. Recommendation: HomeScreen personalized section title and recommendation feed integration.
+- `[x]` 17. AI Summarizer: Backend `POST /v1/ai/summarize` route + WebView chapter text extraction & `AiSummaryModal.tsx` streaming integration.
+- `[x]` 18. Optimization: Base64 double-memory optimization for EPUB loading in `ReadingScreen.tsx`.
+- `[x]` 19. Verification: Typecheck, lint, and API vitest suite passing across touched workspaces.
 
 # Mobile Feature Hardening — Real Data, Real Backend, Real Notifications — 2026-08-18
 

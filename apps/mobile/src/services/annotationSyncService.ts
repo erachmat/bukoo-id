@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { api, ACCESS_TOKEN_KEY } from './api';
 import { highlightService, Highlight } from './highlightService';
 import { bookmarkService, Bookmark } from './bookmarkService';
+import { getSharedDb } from './annotationDb';
 
 interface RemoteHighlight {
   id?: string;
@@ -27,6 +28,31 @@ class AnnotationSyncService {
     return !!(await SecureStore.getItemAsync(ACCESS_TOKEN_KEY));
   }
 
+  private async getTombstones(bookId: string, type: 'highlight' | 'bookmark'): Promise<Set<string>> {
+    try {
+      const db = await getSharedDb();
+      const rows = await db.getAllAsync<{ targetCfi: string }>(
+        'SELECT targetCfi FROM deleted_annotations WHERE bookId = ? AND type = ?',
+        [bookId, type]
+      );
+      return new Set(rows.map((r) => r.targetCfi));
+    } catch {
+      return new Set();
+    }
+  }
+
+  private async clearTombstone(bookId: string, type: 'highlight' | 'bookmark', targetCfi: string): Promise<void> {
+    try {
+      const db = await getSharedDb();
+      await db.runAsync(
+        'DELETE FROM deleted_annotations WHERE bookId = ? AND type = ? AND targetCfi = ?',
+        [bookId, type, targetCfi]
+      );
+    } catch (e) {
+      console.warn('[AnnotationSyncService] clearTombstone failed:', e);
+    }
+  }
+
   /**
    * Pulls remote highlights and merges them into local storage idempotently
    * (dedupe by cfiRange). Local-only highlights (pending offline pushes) are
@@ -39,10 +65,25 @@ class AnnotationSyncService {
     try {
       const res = await api.get<RemoteHighlight[]>(`/reading/highlights/${bookId}`);
       const remote = res.data || [];
+      const tombstones = await this.getTombstones(bookId, 'highlight');
+
+      // Sync local deletions to remote
+      for (const tombstoneCfi of tombstones) {
+        const match = remote.find((r) => r.cfiRange === tombstoneCfi);
+        if (match && match.id) {
+          try {
+            await api.delete(`/reading/highlights/${match.id}`);
+          } catch (e) {
+            console.warn('[AnnotationSyncService] Failed to sync deleted highlight:', e);
+          }
+        }
+        await this.clearTombstone(bookId, 'highlight', tombstoneCfi);
+      }
+
       const localByCfi = new Set(localHighlights.map((h) => h.cfiRange));
       let changed = false;
       for (const item of remote) {
-        if (!localByCfi.has(item.cfiRange)) {
+        if (!tombstones.has(item.cfiRange) && !localByCfi.has(item.cfiRange)) {
           await highlightService.addHighlight(
             bookId,
             item.cfiRange,
@@ -140,10 +181,25 @@ class AnnotationSyncService {
     try {
       const res = await api.get<RemoteBookmark[]>(`/reading/bookmarks/${bookId}`);
       const remote = res.data || [];
+      const tombstones = await this.getTombstones(bookId, 'bookmark');
+
+      // Sync local deletions to remote
+      for (const tombstoneCfi of tombstones) {
+        const match = remote.find((r) => r.cfi === tombstoneCfi);
+        if (match && match.id) {
+          try {
+            await api.delete(`/reading/bookmarks/${match.id}`);
+          } catch (e) {
+            console.warn('[AnnotationSyncService] Failed to sync deleted bookmark:', e);
+          }
+        }
+        await this.clearTombstone(bookId, 'bookmark', tombstoneCfi);
+      }
+
       const localByCfi = new Set(localBookmarks.map((b) => b.cfi));
       let changed = false;
       for (const item of remote) {
-        if (!localByCfi.has(item.cfi)) {
+        if (!tombstones.has(item.cfi) && !localByCfi.has(item.cfi)) {
           await bookmarkService.addBookmark(bookId, item.cfi, item.chapterTitle || 'Markah');
           localByCfi.add(item.cfi);
           changed = true;

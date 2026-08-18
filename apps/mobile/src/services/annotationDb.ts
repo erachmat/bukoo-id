@@ -45,6 +45,14 @@ export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
           chapterTitle TEXT,
           createdAt INTEGER NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS deleted_annotations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          bookId TEXT NOT NULL,
+          type TEXT NOT NULL,
+          targetCfi TEXT NOT NULL,
+          createdAt INTEGER NOT NULL
+        );
       `);
       _db = db;
       return db;

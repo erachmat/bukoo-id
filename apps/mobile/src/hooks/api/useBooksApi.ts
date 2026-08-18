@@ -29,3 +29,11 @@ export function useGenreBooks(genre: string) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export function useRecommendedBooks() {
+  return useQuery<(BookItemDto & { matchPercent?: number; aiReason?: string })[]>({
+    queryKey: ['books', 'recommendations'],
+    queryFn: booksApi.getRecommendations,
+    staleTime: 10 * 60 * 1000,
+  });
+}

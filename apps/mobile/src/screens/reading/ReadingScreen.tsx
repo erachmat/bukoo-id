@@ -26,6 +26,8 @@ import { TocModal } from './components/TocModal';
 import { SearchModal, SearchResultItem } from './components/SearchModal';
 import { SettingsModal, ReaderTheme } from './components/SettingsModal';
 import { HighlightModal } from './components/HighlightModal';
+import { HighlightColorPickerModal } from './components/HighlightColorPickerModal';
+import { BookCompletionModal } from './components/BookCompletionModal';
 import { QuickJumpSlider } from './components/QuickJumpSlider';
 import { audioPlayerService } from '../../services/audioPlayerService';
 
@@ -938,6 +940,24 @@ function formatReadingTime(totalSeconds: number): string {
   return `${s}d`;
 }
 
+function calculateEstimatedRemainingMinutes(
+  readingTimeSeconds: number,
+  currentPage: number,
+  totalPages: number,
+  chapterCurrentPage?: number,
+  chapterTotalPages?: number
+): number {
+  const remPages = (chapterTotalPages && chapterCurrentPage && chapterTotalPages > chapterCurrentPage)
+    ? chapterTotalPages - chapterCurrentPage
+    : Math.max(1, totalPages - currentPage);
+
+  if (readingTimeSeconds > 20 && currentPage > 1) {
+    const secPerPage = readingTimeSeconds / currentPage;
+    return Math.max(1, Math.round((remPages * secPerPage) / 60));
+  }
+  return Math.max(1, Math.round(remPages * 1.2));
+}
+
 function getCssFontFamily(font: string): string {
   if (!font) return "'Playfair Display', Georgia, serif";
   if (font.includes('Playfair') || font.includes('serif') || font === FONTS.serifRegular) {
@@ -1048,6 +1068,17 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showHighlights, setShowHighlights] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedHighlightData, setSelectedHighlightData] = useState<{ cfi: string; text: string } | null>(null);
+  const [brightness, setBrightness] = useState(1.0);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const hasShownCompletionRef = useRef(false);
+
+  useEffect(() => {
+    if (progressPercent >= 99.5 && !hasShownCompletionRef.current) {
+      hasShownCompletionRef.current = true;
+      setShowCompletionModal(true);
+    }
+  }, [progressPercent]);
 
   const [toc, setToc] = useState<TocItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -1318,9 +1349,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     );
   }, [highlights, isReady, pageTurnStyle]);
 
-  // Load initial global reader settings from AsyncStorage on mount
+  // Load per-book (or fallback global) reader settings from AsyncStorage on bookId change
   useEffect(() => {
-    AsyncStorage.getItem('reader_settings').then((stored) => {
+    if (!bookId) return;
+    const key = `reader_settings_${bookId}`;
+    AsyncStorage.getItem(key).then(async (perBook) => {
+      const stored = perBook || (await AsyncStorage.getItem('reader_settings'));
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -1335,7 +1369,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         }
       }
     }).catch(() => {});
-  }, []);
+  }, [bookId]);
 
   // Sync typography, theme, and layout settings to the WebView. Runs only when
   // a setting actually changes (or the reader becomes ready), NOT on every page
@@ -1365,17 +1399,21 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     return () => clearTimeout(timer);
   }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign, isReady]);
 
-  // Persist settings to AsyncStorage only when a setting actually changes.
+  // Persist settings to both per-book and global keys when settings change.
   useEffect(() => {
-    AsyncStorage.setItem('reader_settings', JSON.stringify({
+    const payload = JSON.stringify({
       theme,
       fontSize,
       fontFamily,
       pageTurnStyle,
       lineHeight,
       textAlign,
-    })).catch(console.error);
-  }, [theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign]);
+    });
+    AsyncStorage.setItem('reader_settings', payload).catch(console.error);
+    if (bookId) {
+      AsyncStorage.setItem(`reader_settings_${bookId}`, payload).catch(console.error);
+    }
+  }, [bookId, theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
@@ -1505,18 +1543,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             break;
           case 'TEXT_SELECTED':
             if (msg.text && msg.cfi) {
-              // Hex color (no baked-in alpha) — the bridge applies a single
-              // fill-opacity, so creation and re-render look identical.
-              const hlColor = '#FACC15';
-              annotationSyncService.pushHighlight(
-                bookId,
-                msg.cfi,
-                msg.text,
-                hlColor
-              ).then(() => {
-                loadHighlights();
-                webViewRef.current?.injectJavaScript(`if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(msg.cfi)}, ${JSON.stringify(hlColor)}); true;`);
-              });
+              setSelectedHighlightData({ cfi: msg.cfi, text: msg.text });
             }
             break;
           case 'HIGHLIGHT_CLICKED':
@@ -1557,7 +1584,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress, handleCenterTap, loadHighlights, pageTurnStyle, localFileUri]
+    [bookId, updateProgress, handleCenterTap, pageTurnStyle, localFileUri]
   );
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
@@ -1573,55 +1600,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const injectBookData = useCallback(async () => {
     if (!webViewRef.current || !localFileUri) return;
 
-    const isLocalFile = localFileUri.startsWith('file://') || localFileUri.startsWith('/');
-
-    if (isLocalFile) {
-      try {
-        const readStart = performance.now();
-        const fileInfo = await FileSystem.getInfoAsync(localFileUri);
-        const diskFileSize = fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0;
-
-        const b64 = await FileSystem.readAsStringAsync(localFileUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const readDuration = Math.round(performance.now() - readStart);
-
-        console.log(`[RN Diagnostic] Disk size: ${diskFileSize} bytes | b64 length: ${b64.length} chars | RN Read duration: ${readDuration}ms`);
-
-        const CHUNK_SIZE = 256 * 1024; // 256KB per chunk
-        const totalChunks = Math.ceil(b64.length / CHUNK_SIZE);
-        const mimeType = 'application/epub+zip';
-
-        console.log(`[Chunking] Transferring ${totalChunks} chunks (${CHUNK_SIZE}B each) to WebView bridge...`);
-
-        // Reset WebView chunk buffer
-        webViewRef.current.injectJavaScript('if (window.__bukooResetChunks) window.__bukooResetChunks(); true;');
-
-        // Push chunks sequentially
-        for (let i = 0; i < totalChunks; i++) {
-          const chunk = b64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-          webViewRef.current.injectJavaScript(
-            `if (window.__bukooPushChunk) window.__bukooPushChunk(${JSON.stringify(chunk)}); true;`
-          );
-        }
-
-        // Finalize load from chunk buffer
-        const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
-        const targetCfiArg = initialCfiRef.current ? JSON.stringify(initialCfiRef.current) : 'null';
-        webViewRef.current.injectJavaScript(
-          `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks(${JSON.stringify(mimeType)}, ${locsArg}, ${targetCfiArg}); true;`
-        );
-        return;
-      } catch (err) {
-        console.error('[ReadingScreen] Failed to read or chunk local file in RN:', err);
-      }
-    } else {
-      console.log('[Perf] Using remote URL for streaming directly:', localFileUri);
-    }
-
-    // Remote HTTP/HTTPS URL path
     const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
     const targetCfiArg = initialCfiRef.current ? JSON.stringify(initialCfiRef.current) : 'null';
+
+    // Directly pass the file or remote URL to the WebView bridge (0 Base64 memory overhead)
     webViewRef.current.injectJavaScript(
       `(function(){
         var bookUrl = ${JSON.stringify(localFileUri)};
@@ -1695,7 +1677,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             <View style={styles.headerMeta}>
               <Text style={[styles.headerSubtitle, { color: themeColors[theme].text + '99', fontFamily: FONTS.sansRegular }]} numberOfLines={1}>
                 {isReady && chapterTotalPages > 0 
-                  ? `${chapterTotalPages - chapterCurrentPage} hal. tersisa` 
+                  ? `${chapterTotalPages - chapterCurrentPage} hal. (~${calculateEstimatedRemainingMinutes(readingTimeSeconds, currentPage, totalPages, chapterCurrentPage, chapterTotalPages)} mnt)` 
                   : '…'}
               </Text>
               <Text style={[styles.headerMetaDivider, { color: themeColors[theme].text + '77' }]}>·</Text>
@@ -1850,6 +1832,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           totalPages={totalPages > 0 ? totalPages : 1}
           chapterTitle={chapterTitle}
           onPageChange={(targetPage) => {
+            updateProgress(targetPage, currentCfiRef.current || '');
             if (webViewRef.current) {
               webViewRef.current.injectJavaScript(`if (window.__bukooGoToPage) window.__bukooGoToPage(${targetPage}); true;`);
             }
@@ -1938,11 +1921,14 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         setLineHeight={setLineHeight}
         textAlign={textAlign}
         setTextAlign={setTextAlign}
+        brightness={brightness}
+        setBrightness={setBrightness}
       />
 
       <HighlightModal
         visible={showHighlights}
         onClose={() => setShowHighlights(false)}
+        bookTitle={title}
         highlights={highlights.map((h) => ({
           id: String(h.id),
           cfi: h.cfiRange,
@@ -1966,6 +1952,30 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           }
         }}
         onSelectHighlight={jumpToLocation}
+      />
+
+      <HighlightColorPickerModal
+        visible={!!selectedHighlightData}
+        onClose={() => setSelectedHighlightData(null)}
+        selectedText={selectedHighlightData?.text || ''}
+        onConfirm={(color, note) => {
+          if (selectedHighlightData) {
+            const { cfi, text } = selectedHighlightData;
+            annotationSyncService.pushHighlight(bookId, cfi, text, color, note).then(() => {
+              loadHighlights();
+              webViewRef.current?.injectJavaScript(
+                `if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(cfi)}, ${JSON.stringify(color)}); true;`
+              );
+            });
+          }
+        }}
+      />
+
+      <BookCompletionModal
+        visible={showCompletionModal}
+        onClose={() => setShowCompletionModal(false)}
+        bookTitle={title}
+        readingTimeMinutes={readingTimeSeconds / 60}
       />
     </SafeAreaView>
   );

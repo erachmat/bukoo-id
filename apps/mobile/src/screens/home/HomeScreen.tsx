@@ -102,7 +102,7 @@ export default function HomeScreen() {
     : defaultTrending;
 
   const currentSectionTitle = selectedCategory === 'Semua'
-    ? 'Trending Minggu ini🔥'
+    ? (favoriteGenres.length > 0 ? `Rekomendasi ${favoriteGenres[0]} & Trending 📚` : 'Trending Minggu ini🔥')
     : `Buku ${selectedCategory}`;
 
   const currentBooksData = (selectedCategory !== 'Semua' && categoryBooks && categoryBooks.length > 0)

@@ -128,4 +128,25 @@ export const aiCompanionService = {
       'Periksa koneksi internetmu dan coba lagi — atau ketik "rangkum" untuk insight offline yang tersedia.'
     );
   },
+
+  summarizeChapter: async (
+    chapterText: string,
+    bookTitle?: string,
+    chapterTitle?: string
+  ): Promise<string> => {
+    try {
+      const response = await api.post('/ai/summarize', {
+        chapterText: chapterText.slice(0, 10_000),
+        bookTitle,
+        chapterTitle,
+      });
+      const summary = response.data?.summary;
+      if (typeof summary === 'string' && summary.trim()) {
+        return summary;
+      }
+    } catch (err) {
+      console.warn('[aiCompanionService] Chapter summarize failed:', err);
+    }
+    return 'Gagal memuat rangkuman bab. Pastikan koneksi internet terhubung dan coba lagi.';
+  },
 };

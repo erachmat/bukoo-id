@@ -13,6 +13,10 @@ class BookmarkService {
     try {
       const db = await getSharedDb();
       await db.runAsync(
+        'DELETE FROM deleted_annotations WHERE bookId = ? AND type = "bookmark" AND targetCfi = ?',
+        bookId, cfi
+      );
+      await db.runAsync(
         'INSERT INTO bookmarks (bookId, cfi, chapterTitle, createdAt) VALUES (?, ?, ?, ?)',
         bookId, cfi, chapterTitle, Date.now()
       );
@@ -24,6 +28,10 @@ class BookmarkService {
   async removeBookmark(bookId: string, cfi: string): Promise<void> {
     try {
       const db = await getSharedDb();
+      await db.runAsync(
+        'INSERT INTO deleted_annotations (bookId, type, targetCfi, createdAt) VALUES (?, "bookmark", ?, ?)',
+        bookId, cfi, Date.now()
+      );
       await db.runAsync(
         'DELETE FROM bookmarks WHERE bookId = ? AND cfi = ?',
         bookId, cfi

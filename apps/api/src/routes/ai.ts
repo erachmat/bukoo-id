@@ -95,4 +95,40 @@ ai.post('/companion/summary', zValidator('json', summarySchema), async (c) => {
   return c.json({ summary: (response as { response: string }).response });
 });
 
+ai.post('/summarize', zValidator('json', summarySchema), async (c) => {
+  const { chapterText, bookTitle, chapterTitle } = c.req.valid('json');
+
+  const context = [
+    bookTitle && `Judul buku: "${bookTitle}"`,
+    chapterTitle && `Bab: "${chapterTitle}"`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const prompt = [
+    context,
+    `Berikut adalah isi bab yang perlu dirangkum:\n\n${chapterText}`,
+    `\nBuatkan rangkuman singkat (3–5 poin utama) dalam Bahasa Indonesia, tulis dalam format poin-poin jelas yang membantu pembaca memahami isi bab ini.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  try {
+    const response = await c.env.AI.run('@cf/meta/llama-3-8b-instruct', {
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Kamu adalah asisten membaca yang membantu pengguna memahami isi buku. Berikan rangkuman yang jelas, informatif, dan mudah dipahami dalam Bahasa Indonesia.',
+        },
+        { role: 'user', content: prompt },
+      ],
+    });
+    return c.json({ summary: (response as { response: string }).response });
+  } catch (err) {
+    console.error('AI summarize error:', err);
+    return c.json({ error: 'AI service unavailable, coba lagi nanti' }, 502);
+  }
+});
+
 export default ai;

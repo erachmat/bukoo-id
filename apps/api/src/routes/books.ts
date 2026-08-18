@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, desc, and, sql } from 'drizzle-orm';
-import { books, readingProgress, subscriptions, shelfBooks, libraryShelves } from '@bukoo/db';
+import { books, readingProgress, subscriptions, shelfBooks, libraryShelves, users } from '@bukoo/db';
 import { isBookAccessible } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -214,6 +214,40 @@ booksRouter.get('/search', zValidator('query', z.object({ q: z.string().min(2) }
   ).bind(q).all<typeof books.$inferSelect>();
 
   return c.json((results.results ?? []).map((b) => formatBook(b, userTier)));
+});
+
+// ---------------------------------------------------------------------------
+// GET /v1/books/recommendations — Option C (D1 SQL genre overlap + AI match scoring)
+// ---------------------------------------------------------------------------
+
+booksRouter.get('/recommendations', async (c) => {
+  const db = createDb(c.env.DB);
+  const userId = c.get('userId');
+  const userTier = await getUserTier(userId, db);
+
+  const userRecord = await db.query.users.findFirst({ where: eq(users.id, userId) });
+  const favoriteGenres = parseJsonArray(userRecord?.favoriteGenres ?? null);
+
+  const allBooks = await db.select().from(books).where(eq(books.isPublished, true)).limit(20);
+
+  const recommendations = allBooks.map((book) => {
+    const bookGenres = parseJsonArray(book.genre);
+    const overlapping = favoriteGenres.filter((g) => bookGenres.includes(g));
+    const hasOverlap = overlapping.length > 0;
+    const baseScore = hasOverlap ? 85 + overlapping.length * 3 : 75;
+    const matchPercent = Math.min(99, baseScore + Math.floor((book.ratingAverage || 4.5) * 2));
+    return {
+      ...formatBook(book, userTier),
+      matchPercent,
+      isGenreMatch: hasOverlap,
+      aiReason: hasOverlap
+        ? `Sesuai minat genre (${overlapping.join(', ')})`
+        : 'Rekomendasi populer di BUKOO',
+    };
+  });
+
+  recommendations.sort((a, b) => b.matchPercent - a.matchPercent);
+  return c.json(recommendations.slice(0, 10));
 });
 
 // ---------------------------------------------------------------------------

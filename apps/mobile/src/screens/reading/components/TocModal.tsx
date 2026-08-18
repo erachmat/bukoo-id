@@ -64,12 +64,20 @@ export const TocModal: React.FC<TocModalProps> = ({
             // path differences (e.g. "chap1.xhtml" vs "text/chap1.xhtml") and
             // fragment suffixes. The current href is the raw spine href from the
             // reader, so normalize both sides before comparing.
-            const normalizeHref = (href: string) =>
-              (href || '').split('#')[0].split('/').pop() || '';
+            const normalizeHref = (href: string) => {
+              if (!href) return '';
+              try {
+                const decoded = decodeURIComponent(href);
+                return decoded.split('#')[0].split('?')[0].split('/').pop()?.toLowerCase() || '';
+              } catch {
+                return href.split('#')[0].split('?')[0].split('/').pop()?.toLowerCase() || '';
+              }
+            };
+            const currentNorm = normalizeHref(currentChapterHref || '');
+            const itemNorm = normalizeHref(item.href || '');
             const isActive =
-              !!currentChapterHref &&
-              !!item.href &&
-              normalizeHref(currentChapterHref) === normalizeHref(item.href);
+              (!!currentNorm && !!itemNorm && currentNorm === itemNorm) ||
+              (!currentNorm && flatToc[0]?.href === item.href);
             const indentPadding = Math.min(item.level * 18, 54);
 
             return (

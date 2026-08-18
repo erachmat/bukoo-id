@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, FlatList, TextInput, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
@@ -18,6 +18,7 @@ interface HighlightModalProps {
   visible: boolean;
   onClose: () => void;
   highlights: HighlightItem[];
+  bookTitle?: string;
   onRemoveHighlight: (id: string) => void;
   onSaveNote: (id: string, note: string) => void;
   onSelectHighlight: (cfi: string) => void;
@@ -27,6 +28,7 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
   visible,
   onClose,
   highlights,
+  bookTitle = 'Buku BUKOO',
   onRemoveHighlight,
   onSaveNote,
   onSelectHighlight,
@@ -45,15 +47,36 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
     setNoteText('');
   };
 
+  const handleExport = async () => {
+    if (highlights.length === 0) return;
+    const formatted = highlights
+      .map((h, i) => `${i + 1}. "${h.text}"${h.note ? `\n   Catatan: ${h.note}` : ''}`)
+      .join('\n\n');
+    const textToShare = `Catatan & Sorotan Bacaan BUKOO — ${bookTitle}:\n\n${formatted}`;
+    try {
+      await Share.share({ message: textToShare, title: `Sorotan ${bookTitle}` });
+    } catch (e) {
+      console.error('[HighlightModal] Export failed', e);
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Sorotan & Catatan</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={COLORS.cream} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            {highlights.length > 0 && (
+              <TouchableOpacity onPress={handleExport} style={styles.exportButton}>
+                <Ionicons name="share-outline" size={20} color={COLORS.gold} />
+                <Text style={styles.exportButtonText}>Ekspor</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color={COLORS.cream} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Highlight List */}
@@ -246,6 +269,20 @@ const styles = StyleSheet.create({
   },
   actionBtnText: {
     fontSize: 12,
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.gold,
+  },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#12332A',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  exportButtonText: {
+    fontSize: 13,
     fontFamily: FONTS.sansMedium,
     color: COLORS.gold,
   },

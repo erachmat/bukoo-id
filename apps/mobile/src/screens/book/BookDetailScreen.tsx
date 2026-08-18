@@ -12,6 +12,7 @@ import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 import { wishlistService } from '../../services/wishlistService';
+import { readingSync, ReadingProgress } from '../../services/readingSync';
 import { AiBookInsightCard } from './components/AiBookInsightCard';
 import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
 import { WriteReviewModal } from './components/WriteReviewModal';
@@ -440,6 +441,14 @@ export default function BookDetailScreen() {
     },
   });
 
+  const [localProgress, setLocalProgress] = useState<ReadingProgress | null>(null);
+
+  useEffect(() => {
+    if (bookId) {
+      readingSync.getLocalProgress(bookId).then(setLocalProgress);
+    }
+  }, [bookId]);
+
   const sampleFallback = MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
 
   const resolveEpubUrl = (url?: string) => {
@@ -509,8 +518,9 @@ export default function BookDetailScreen() {
     );
   }
 
-  const hasProgress = !!readingProgress;
-  const buttonText = hasProgress ? 'Lanjutkan Membaca' : 'Mulai Membaca';
+  const progressPct = readingProgress?.progressPercent ?? localProgress?.progressPercent ?? 0;
+  const hasProgress = progressPct > 0;
+  const buttonText = hasProgress ? `Lanjut Baca · ${Math.round(progressPct)}%` : 'Mulai Membaca';
   const isAccessible = book?.is_accessible !== false;
 
   const handleOpenReader = (isSampleMode = false) => {
