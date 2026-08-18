@@ -21,6 +21,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 
 const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Teknologi', 'Bisnis'];
 
+import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
+
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<NavigationProp>();
@@ -106,6 +108,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <OfflineSyncBanner />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

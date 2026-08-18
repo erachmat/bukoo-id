@@ -372,6 +372,21 @@ export class ReadingSync {
     }
   }
 
+  /**
+   * Returns the count of pending offline sync items queued in SQLite.
+   */
+  async getPendingSyncCount(): Promise<number> {
+    try {
+      const db = await getDb();
+      const result = await db.getFirstAsync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM pending_syncs'
+      );
+      return result?.count || 0;
+    } catch {
+      return 0;
+    }
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private async _queuePendingSync(

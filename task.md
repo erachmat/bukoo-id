@@ -1,5 +1,13 @@
 # current integration tasks
 
+# Mobile Offline Mode & Network Sync Banner Enhancements — 2026-08-18
+
+- `[x]` 1. Network connectivity & sync queue hook (`useNetworkStatus.ts`).
+- `[x]` 2. Animated status banner component (`OfflineSyncBanner.tsx`) with amber offline banner & green reconnection toast.
+- `[x]` 3. 1-tap shortcut to view downloaded EPUBs in Library tab when offline.
+- `[x]` 4. Screen integration in `HomeScreen.tsx` & `LibraryScreen.tsx`.
+- `[x]` 5. Verification: `typecheck` ✅ (0 errors), `lint` ✅ (0 errors, 0 warnings), `test` (no tests specified for mobile workspace yet).
+
 # Mobile Community & Reading Club Enhancements — 2026-08-18
 
 - `[x]` 1. Community feed & persistence service (`communityService.ts`).

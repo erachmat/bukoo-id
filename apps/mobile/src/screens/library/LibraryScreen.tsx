@@ -54,6 +54,7 @@ const DEFAULT_BOOKS_LIST = [
 
 import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
+import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -158,6 +159,7 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <OfflineSyncBanner />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
