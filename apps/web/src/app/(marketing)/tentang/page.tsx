@@ -1,34 +1,149 @@
-import type { Metadata } from 'next'
-import { MarketingDocPage } from '@/components/marketing/MarketingDocPage'
-
-export const metadata: Metadata = {
-  title: 'Tentang BUKOO',
-}
+import Link from 'next/link';
 
 export default function TentangPage() {
   return (
-    <MarketingDocPage
-      eyebrow="Perusahaan"
-      title="Tentang BUKOO"
-      intro="Kami percaya bahwa akses terhadap bacaan berkualitas memperkaya kehidupan dan membuka peluang bagi setiap orang."
-    >
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginTop: 8, marginBottom: 12 }}>Cerita kami</h2>
-      <p style={{ marginBottom: 20 }}>
-        BUKOO lahir dari keinginan untuk membuat buku digital mudah diakses oleh pembaca di Indonesia—dengan koleksi yang luas,
-        pengalaman membaca yang nyaman, dan model langganan yang adil bagi pembaca maupun penerbit.
-      </p>
+    <>
+      {/* Subnav */}
+      <div className="subnav">
+        <div className="subnav-in">
+          <span className="subnav-tag">Perusahaan</span>
+          <Link href="/tentang" className="on">Tentang BUKOO</Link>
+          <Link href="/karir">Karir</Link>
+          <Link href="/newsroom">Newsroom</Link>
+          <Link href="/investor-relations">Investor Relations</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/bantuan#kontak">Kontak</Link>
+        </div>
+      </div>
 
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginTop: 28, marginBottom: 12 }}>Misi</h2>
-      <p style={{ marginBottom: 20 }}>
-        Menghubungkan pembaca dengan ribuan judul bacaan digital melalui platform yang aman, andal, dan terus berkembang—sambil
-        mendukung ekosistem penerbitan Indonesia.
-      </p>
+      {/* Hero */}
+      <section className="phero">
+        <div className="phero-bg"></div>
+        <div className="phero-grid"></div>
+        <div className="wrap">
+          <span className="eyebrow">Perusahaan · Tentang BUKOO</span>
+          <h1 className="ph-h1">Akses buku adalah <em>hak dasar</em>, bukan hak istimewa</h1>
+          <p className="ph-lead">
+            BUKOO lahir dari satu keyakinan: tidak ada orang Indonesia yang boleh kehilangan akses ke pengetahuan hanya karena harga sebuah buku. Kami membangun gerakan, bukan sekadar platform.
+          </p>
+        </div>
+      </section>
 
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginTop: 28, marginBottom: 12 }}>Visi</h2>
-      <p>
-        Menjadi platform langganan buku digital pilihan utama di Asia Tenggara, dikenal karena kualitas layanan, kurasi konten,
-        dan komunitas pembaca yang aktif.
-      </p>
-    </MarketingDocPage>
-  )
+      {/* Story */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Cerita Kami</span>
+            <h2 className="h2">Kenapa <em>BUKOO</em> ada</h2>
+          </div>
+          <div className="story">
+            <p>
+              Semuanya bermula di <strong>Gramedia Matraman</strong>. Seseorang memegang novel Pramoedya, membacanya sebentar, lalu meletakkannya kembali. Harganya <strong>Rp 95.000</strong> — setara anggaran makan seminggu. Bukan karena tak ingin membaca, tapi karena harus memilih.
+            </p>
+            <p className="pull">
+              &quot;Membaca adalah perjalanan. Tapi hari ini, satu buku fisik bisa menjadi pembatas antara seseorang dan pengetahuan. Kami tidak menerima itu.&quot;
+            </p>
+            <p>
+              BUKOO ada untuk membongkar pembatas itu — lewat harga terjangkau mulai <strong>Rp 29.900/bulan</strong>, koleksi yang dikurasi, teknologi yang ramah, dan ekosistem yang adil bagi penerbit. Kami tidak menjual platform. Kami membangun gerakan: <strong>Indonesia Membaca Lagi</strong>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Statrow */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="statrow">
+            <div className="st">
+              <div className="st-n">2026</div>
+              <div className="st-l">Tahun peluncuran (3 September)</div>
+            </div>
+            <div className="st">
+              <div className="st-n">1<small>Jt</small></div>
+              <div className="st-l">Target subscriber 36 bulan</div>
+            </div>
+            <div className="st">
+              <div className="st-n">50</div>
+              <div className="st-l">Target penerbit mitra</div>
+            </div>
+            <div className="st">
+              <div className="st-n">2.000<small>+</small></div>
+              <div className="st-l">Target judul kurasi</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Values */}
+      <section className="sec alt">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Nilai Kami</span>
+            <h2 className="h2">Enam nilai yang <em>memandu</em></h2>
+          </div>
+          <div className="vchips">
+            <span className="vchip">Obsesi pada Pembaca</span>
+            <span className="vchip">Transparansi Radikal</span>
+            <span className="vchip">Bias Towards Action</span>
+            <span className="vchip">Literasi untuk Semua</span>
+            <span className="vchip">Tim Kecil, Dampak Besar</span>
+            <span className="vchip">Rayakan Kemenangan Kecil</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Tim Kami</span>
+            <h2 className="h2">Orang di balik <em>gerakan</em></h2>
+          </div>
+          <div className="team">
+            <div className="tm">
+              <div className="tm-av">RA</div>
+              <h4>Rizqi Baihaqi Ahmadi</h4>
+              <p>Founder &amp; CEO</p>
+            </div>
+            <div className="tm">
+              <div className="tm-av">ER</div>
+              <h4>Eko Rachmat</h4>
+              <p>CTO &amp; Co-Founder</p>
+            </div>
+            <div className="tm">
+              <div className="tm-av">AS</div>
+              <h4>Ahmad Syarifudin</h4>
+              <p>Direktur Marketing &amp; Komunikasi</p>
+            </div>
+            <div className="tm">
+              <div className="tm-av">RP</div>
+              <h4>M. Rizky Pontoh</h4>
+              <p>Direktur Legal</p>
+            </div>
+            <div className="tm">
+              <div className="tm-av">MM</div>
+              <h4>Muhammad Mustofa</h4>
+              <p>Publisher Relations / Editor</p>
+            </div>
+            <div className="tm">
+              <div className="tm-av">AM</div>
+              <h4>Ahmad Mustafa</h4>
+              <p>Komisaris</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Band */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="cband">
+            <h3>Ingin tumbuh bersama kami?</h3>
+            <p>Lihat peluang berkarier, atau hubungi tim kami langsung.</p>
+            <Link href="/karir" className="btn-cta btn-lg">Lihat karir →</Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }

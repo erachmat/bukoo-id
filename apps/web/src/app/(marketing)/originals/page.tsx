@@ -1,139 +1,117 @@
-import { BookRow } from '@/components/marketing/BookRow';
-import { CallToAction } from '@/components/marketing/CallToAction';
-import { originalBooks } from '@/components/marketing/bookData';
+import Link from 'next/link';
 
 export default function OriginalsPage() {
-  const terbaru = originalBooks.slice(0, 3);
-  const segeraHadir = originalBooks.slice(3, 6);
-
   return (
     <>
-      {/* ══════════════════════════════════════
-     CINEMATIC HERO
-══════════════════════════════════════ */}
-      <section style={{ 
-        padding: '180px 24px 80px', 
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        background: '#0a0a0a' // Darker cinematic background
-      }}>
-        {/* Cinematic glow */}
-        <div style={{
-          position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)',
-          width: '800px', height: '500px', 
-          background: 'radial-gradient(ellipse at top, rgba(201,149,42,0.15) 0%, transparent 60%)',
-          zIndex: 0, pointerEvents: 'none'
-        }}></div>
+      {/* Subnav */}
+      <div className="subnav">
+        <div className="subnav-in">
+          <span className="subnav-tag">Produk</span>
+          <Link href="/koleksi">Koleksi Buku</Link>
+          <Link href="/audiobook">Audiobook</Link>
+          <Link href="/originals" className="on">BUKOO Originals</Link>
+          <Link href="/ai-companion">AI Companion</Link>
+          <Link href="/komunitas">Komunitas</Link>
+          <Link href="/pricing">Harga &amp; Paket</Link>
+        </div>
+      </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ 
-            display: 'inline-block',
-            padding: '6px 16px',
-            background: 'rgba(201,149,42,0.1)',
-            border: '1px solid rgba(201,149,42,0.3)',
-            borderRadius: '20px',
-            color: 'var(--amber)',
-            fontSize: '12px',
-            fontWeight: '700',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            marginBottom: '24px'
-          }}>
-            Hanya di BUKOO
-          </div>
-          
-          <h1 style={{
-            fontSize: '56px',
-            fontWeight: '800',
-            color: '#fff',
-            lineHeight: '1.1',
-            letterSpacing: '-1.5px',
-            marginBottom: '24px'
-          }}>
-            Karya Eksklusif<br />
-            <em style={{ color: 'var(--amber)', fontStyle: 'normal' }}>Penulis Terbaik Indonesia</em>
-          </h1>
-          <p style={{
-            fontSize: '20px',
-            color: 'rgba(255,255,255,0.7)',
-            marginBottom: '40px',
-            lineHeight: '1.6',
-            maxWidth: '600px',
-            margin: '0 auto 48px'
-          }}>
-            Nikmati cerita-cerita baru yang belum pernah diterbitkan di mana pun. Dikurasi ketat untuk pengalaman membaca premium.
+      {/* Hero */}
+      <section className="phero">
+        <div className="phero-bg"></div>
+        <div className="phero-grid"></div>
+        <div className="wrap">
+          <span className="eyebrow">Produk · BUKOO Originals</span>
+          <h1 className="ph-h1">Karya eksklusif, <em>hanya di BUKOO</em></h1>
+          <p className="ph-lead">
+            BUKOO Originals adalah karya penulis Indonesia yang hanya bisa Anda baca di sini. Kami tidak sekadar mendistribusikan buku — kami membantu melahirkannya.
           </p>
-
-          <button className="price-cta-btn price-cta-filled" style={{ 
-            display: 'inline-block',
-            background: 'var(--amber)', 
-            color: 'var(--forest-dd)', 
-            width: 'auto', 
-            padding: '16px 40px',
-            fontSize: '18px',
-            border: 'none',
-            boxShadow: '0 10px 30px rgba(201,149,42,0.3)'
-          }}>
-            Mulai Baca Sekarang
-          </button>
+          <div className="hero-ctas">
+            <Link href="/pricing" className="btn-cta btn-lg">Baca di Premium →</Link>
+            <Link href="/bantuan#kontak" className="btn-ghost btn-lg">Untuk penulis</Link>
+          </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-     WHY ORIGINALS
-══════════════════════════════════════ */}
-      <section style={{ padding: '80px 24px', background: 'var(--bg)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
-          
-          <div style={{ padding: '32px', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>✍️</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#fff', marginBottom: '12px' }}>Penulis Ternama</h3>
-            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>Karya original dari penulis best-seller Indonesia seperti Dee Lestari, Puthut EA, dan banyak lagi.</p>
+      {/* What is Originals */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Apa Itu Originals</span>
+            <h2 className="h2">Bukan mendistribusikan — <em>melahirkan</em> karya</h2>
           </div>
-          
-          <div style={{ padding: '32px', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>✨</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#fff', marginBottom: '12px' }}>Kualitas Kurasi Ketat</h3>
-            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>Setiap naskah melewati proses editing profesional untuk memastikan standar literasi tertinggi.</p>
+          <div className="grid3">
+            <div className="fcard">
+              <div className="ic">✍️</div>
+              <h4>Suara baru Indonesia</h4>
+              <p>Ruang bagi penulis berbakat untuk menerbitkan karya orisinal ke jutaan pembaca.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🎓</div>
+              <h4>Mentoring editor senior</h4>
+              <p>Program pendampingan bersama editor berpengalaman agar karya matang.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">📣</div>
+              <h4>Promosi premium</h4>
+              <p>Peluncuran khusus &amp; sorotan untuk debut, bukan sekadar diunggah lalu dilupakan.</p>
+            </div>
           </div>
-          
-          <div style={{ padding: '32px', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>🎧</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#fff', marginBottom: '12px' }}>Tersedia Audiobook</h3>
-            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>Sebagian besar BUKOO Originals langsung rilis beserta versi audiobook eksklusifnya.</p>
-          </div>
-
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-     BOOK ROWS
-══════════════════════════════════════ */}
-      <div style={{ background: '#0a0a0a', paddingTop: '40px', paddingBottom: '40px' }}>
-        <BookRow 
-          title="✦ Rilis Bulan Ini" 
-          badge="Terbaru" 
-          badgeColor="var(--amber)"
-          badgeBorderColor="rgba(201,149,42,0.3)"
-          books={terbaru} 
-        />
+      {/* Process Steps */}
+      <section className="sec alt">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Perjalanan Sebuah Original</span>
+            <h2 className="h2">Dari naskah ke <em>pembaca</em></h2>
+          </div>
+          <div className="steps">
+            <div className="steps-line"></div>
+            <div className="step">
+              <div className="d">01</div>
+              <h4>Call for submissions</h4>
+              <p>Dibuka dua kali setahun untuk naskah orisinal terpilih.</p>
+            </div>
+            <div className="step">
+              <div className="d">02</div>
+              <h4>Kurasi &amp; mentoring</h4>
+              <p>Naskah terpilih didampingi editor senior hingga siap terbit.</p>
+            </div>
+            <div className="step">
+              <div className="d">03</div>
+              <h4>Rilis eksklusif</h4>
+              <p>Terbit perdana di BUKOO dengan promosi peluncuran khusus.</p>
+            </div>
+            <div className="step">
+              <div className="d">04</div>
+              <h4>Jalur ke fisik</h4>
+              <p>Setelah jendela eksklusif, karya dapat didistribusikan ke penerbit fisik.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <BookRow 
-          title="Segera Hadir" 
-          badge="Pre-Save" 
-          badgeColor="rgba(255,255,255,0.8)"
-          badgeBorderColor="rgba(255,255,255,0.2)"
-          books={segeraHadir} 
-        />
-      </div>
+      {/* Callout */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="callout">
+            Untuk pembaca: BUKOO Originals tersedia di tier <b>Premium</b>. Untuk penulis: kami membuka jalur penerbitan yang adil, dengan pendampingan dan promosi — <b>bicara dengan tim kami</b> lewat halaman Kontak.
+          </div>
+        </div>
+      </section>
 
-      {/* ══════════════════════════════════════
-     FINAL CTA
-══════════════════════════════════════ */}
-      <div style={{ marginTop: '80px' }}>
-        <CallToAction />
-      </div>
+      {/* CTA Band */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="cband">
+            <h3>Baca karya yang tak ada di tempat lain</h3>
+            <p>BUKOO Originals hadir eksklusif di tier Premium, Rp 79.900/bulan.</p>
+            <Link href="/pricing" className="btn-cta btn-lg">Lihat paket Premium →</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

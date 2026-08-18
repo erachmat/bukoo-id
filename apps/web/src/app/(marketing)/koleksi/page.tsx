@@ -1,104 +1,142 @@
-import { BookRow } from '@/components/marketing/BookRow';
-import { CallToAction } from '@/components/marketing/CallToAction';
-import { 
-  trendingBooks, 
-  originalBooks, 
-  sastraIndonesiaBooks, 
-  selfDevBooks 
-} from '@/components/marketing/bookData';
+import Link from 'next/link';
 
 export default function KoleksiPage() {
   return (
     <>
-      {/* ══════════════════════════════════════
-     KOLEKSI HERO
-══════════════════════════════════════ */}
-      <section style={{ 
-        padding: '160px 24px 60px', 
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Simple background glows */}
-        <div style={{
-          position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)',
-          width: '600px', height: '400px', background: 'radial-gradient(circle, rgba(0,201,167,0.1) 0%, transparent 70%)',
-          zIndex: 0, pointerEvents: 'none'
-        }}></div>
+      {/* Subnav */}
+      <div className="subnav">
+        <div className="subnav-in">
+          <span className="subnav-tag">Produk</span>
+          <Link href="/koleksi" className="on">Koleksi Buku</Link>
+          <Link href="/audiobook">Audiobook</Link>
+          <Link href="/originals">BUKOO Originals</Link>
+          <Link href="/ai-companion">AI Companion</Link>
+          <Link href="/komunitas">Komunitas</Link>
+          <Link href="/pricing">Harga &amp; Paket</Link>
+        </div>
+      </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{
-            fontSize: '48px',
-            fontWeight: '700',
-            color: '#fff',
-            lineHeight: '1.2',
-            letterSpacing: '-1px',
-            marginBottom: '16px'
-          }}>
-            Eksplorasi <em style={{ color: 'var(--amber)', fontStyle: 'normal' }}>Koleksi</em> Kami
-          </h1>
-          <p style={{
-            fontSize: '18px',
-            color: 'rgba(255,255,255,0.7)',
-            marginBottom: '40px',
-            lineHeight: '1.6'
-          }}>
-            Jelajahi lebih dari 2.000+ judul dari berbagai genre. Temukan bacaan favoritmu berikutnya.
+      {/* Hero */}
+      <section className="phero">
+        <div className="phero-bg"></div>
+        <div className="phero-grid"></div>
+        <div className="wrap">
+          <span className="eyebrow">Produk · Koleksi Buku</span>
+          <h1 className="ph-h1">Ribuan judul kurasi, <em>satu langganan</em></h1>
+          <p className="ph-lead">
+            Lebih dari 2.000 judul pilihan tim editorial BUKOO — dari sastra Indonesia terbaik hingga non-fiksi kontemporer dunia. Bukan katalog acak, tapi koleksi yang dikurasi dengan cinta.
           </p>
-
-          {/* Category Pills */}
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'center',
-            flexWrap: 'wrap'
-          }}>
-            <span style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '14px', color: '#fff', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)' }}>Semua</span>
-            <span style={{ padding: '8px 16px', background: 'rgba(0,201,167,0.1)', color: 'var(--teal)', borderRadius: '20px', fontSize: '14px', cursor: 'pointer', border: '1px solid rgba(0,201,167,0.3)' }}>Fiksi</span>
-            <span style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '14px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}>Non-Fiksi</span>
-            <span style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '14px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}>Self-Development</span>
-            <span style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '14px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}>Bisnis</span>
-            <span style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '14px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}>Sejarah</span>
+          <div className="hero-ctas">
+            <Link href="/pricing" className="btn-cta btn-lg">Lihat paket →</Link>
+            <Link href="/register" className="btn-ghost btn-lg">Coba gratis</Link>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-     BOOK ROWS
-══════════════════════════════════════ */}
-      <BookRow 
-        title="🔥 Sedang Trending" 
-        badge="Terpopuler" 
-        books={trendingBooks} 
-      />
+      {/* Statrow */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="statrow">
+            <div className="st">
+              <div className="st-n">2.000<small>+</small></div>
+              <div className="st-l">Judul kurasi di katalog (target)</div>
+            </div>
+            <div className="st">
+              <div className="st-n">50</div>
+              <div className="st-l">Penerbit mitra &amp; target mitra</div>
+            </div>
+            <div className="st">
+              <div className="st-n">8<small>+</small></div>
+              <div className="st-l">Genre utama</div>
+            </div>
+            <div className="st">
+              <div className="st-n">100<small>%</small></div>
+              <div className="st-l">Lokalisasi Rupiah</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <BookRow 
-        title="✦ BUKOO Originals" 
-        badge="Eksklusif" 
-        badgeColor="var(--teal)"
-        badgeBorderColor="rgba(0,201,167,.3)"
-        books={originalBooks} 
-      />
+      {/* Genre Grid */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Jelajahi Genre</span>
+            <h2 className="h2">Koleksi untuk <em>setiap pembaca</em></h2>
+            <p className="sec-desc">Apa pun minat baca Anda, ada rak yang menunggu untuk dijelajahi.</p>
+          </div>
+          <div className="grid3">
+            <div className="fcard">
+              <div className="ic">📖</div>
+              <h4>Sastra Indonesia</h4>
+              <p>Laut Bercerita, Bumi Manusia, Gadis Kretek, Laskar Pelangi — karya sastra terbaik bangsa dalam satu rak.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🚀</div>
+              <h4>Self-development</h4>
+              <p>Atomic Habits, Psychology of Money, Deep Work dalam edisi Indonesia — bertumbuh setiap hari.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">💼</div>
+              <h4>Bisnis &amp; Keuangan</h4>
+              <p>Wawasan bisnis, investasi, dan karier dari penulis lokal maupun internasional.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🔬</div>
+              <h4>Sains &amp; Akademik</h4>
+              <p>Buku sains populer hingga referensi akademik untuk pelajar &amp; mahasiswa.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🧒</div>
+              <h4>Anak &amp; Remaja</h4>
+              <p>Koleksi yang aman &amp; mendidik, lengkap dengan parental control di tier Keluarga.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">📜</div>
+              <h4>Sejarah &amp; Biografi</h4>
+              <p>Kisah tokoh &amp; peristiwa yang membentuk Indonesia dan dunia.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <BookRow 
-        title="🇮🇩 Sastra Indonesia Terbaik" 
-        badge="Pilihan Editor" 
-        badgeColor="#A855F7"
-        badgeBorderColor="rgba(168,85,247,.3)"
-        books={sastraIndonesiaBooks} 
-      />
+      {/* Editorial curation */}
+      <section className="sec alt">
+        <div className="wrap">
+          <div className="sec-head">
+            <span className="eyebrow">Cara Kami Mengkurasi</span>
+            <h2 className="h2">Kualitas <em>di atas</em> kuantitas</h2>
+          </div>
+          <div className="grid3">
+            <div className="fcard">
+              <div className="ic">🎯</div>
+              <h4>Dikurasi, bukan dikumpulkan</h4>
+              <p>Setiap buku dipilih tim editorial yang membaca — kualitas selalu di atas kuantitas.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🇮🇩</div>
+              <h4>Fokus konten lokal</h4>
+              <p>Prioritas pada literatur Indonesia &amp; royalti adil untuk penerbit lokal.</p>
+            </div>
+            <div className="fcard">
+              <div className="ic">🔄</div>
+              <h4>Selalu bertambah</h4>
+              <p>Judul baru masuk rutin dari 50 penerbit mitra &amp; target mitra kami.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <BookRow 
-        title="🧠 Self-Development Populer" 
-        books={selfDevBooks} 
-      />
-
-      {/* ══════════════════════════════════════
-     FINAL CTA
-══════════════════════════════════════ */}
-      <div style={{ marginTop: '80px' }}>
-        <CallToAction />
-      </div>
+      {/* CTA Band */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="cband">
+            <h3>Mulai jelajahi ribuan judul hari ini</h3>
+            <p>Coba gratis 7 hari, tanpa kartu kredit. Batalkan kapan saja.</p>
+            <Link href="/pricing" className="btn-cta btn-lg">Lihat semua paket →</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
