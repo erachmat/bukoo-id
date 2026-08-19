@@ -1275,10 +1275,21 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         // Real book (epubKey → auth-protected API download): fetch the file
         // with the Bearer token on the native side, then open it locally.
         if (bookId && isMounted) {
-          const localPath = await bookDownloadService.downloadBookForReading(bookId);
-          if (localPath && isMounted) {
-            console.log('[ReadingScreen] Opened authenticated download locally:', localPath);
-            setLocalFileUri(localPath);
+          try {
+            const localPath = await bookDownloadService.downloadBookForReading(bookId);
+            if (localPath && isMounted) {
+              console.log('[ReadingScreen] Opened authenticated download locally:', localPath);
+              setLocalFileUri(localPath);
+              return;
+            }
+          } catch (e) {
+            // Surface the REAL reason (e.g. expired session, HTTP 401/404,
+            // corrupt file) instead of a generic "Gagal memuat buku".
+            console.error('[ReadingScreen] Failed to download book for reading:', e);
+            if (isMounted) {
+              const msg = e instanceof Error ? e.message : String(e);
+              setLoadError(msg || 'Gagal memuat buku. Periksa koneksi atau unduh kembali.');
+            }
             return;
           }
         }

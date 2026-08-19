@@ -7668,3 +7668,107 @@
 {"_e":"metro:client_log","_t":1786846593565,"level":"log","data":["[Chunking] Transferring 3 chunks (262144B each) to WebView bridge..."]}
 {"_e":"metro:client_log","_t":1786846593795,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1186ms, In-WebView load: 41ms, Location gen (cached): 28ms"]}
 {"_e":"metro:bundling:failed","_t":1786846817900,"id":null,"message":"SyntaxError: /home/erachmat/Projects/bukoo/apps/mobile/src/screens/reading/ReadingScreen.tsx: Identifier 'webViewShellReady' has already been declared. (1531:8)\n\n  1529 |\n  1530 |   // When everything is ready, inject the EPUB data into the already-loaded WebView\n> 1531 |   const webViewShellReady = useRef(false);\n       |         ^\n  1532 |\n  1533 |   // True when we have a local or remote book URI ready to inject\n  1534 |   const hasBookData = !!localFileUri;","importStack":null,"filename":"src/screens/reading/ReadingScreen.tsx","targetModuleName":null,"originModulePath":null}
+{"_e":"root:init","_t":1787133642032,"format":"v0-jsonl","version":"56.1.23"}
+{"_e":"devserver:start","_t":1787133642055,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787133643927,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787133664770,"atlas":false,"workers":6,"host":"::","port":8082}
+{"_e":"metro:bundling:started","_t":1787133731118,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1787133731119,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787133731132,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787133731241,"id":"1","progress":0.04000000000000001,"total":65,"current":13}
+{"_e":"metro:bundling:progress","_t":1787133731342,"id":"1","progress":0.04000000000000001,"total":296,"current":58}
+{"_e":"metro:bundling:progress","_t":1787133731442,"id":"1","progress":0.05616626014901934,"total":346,"current":82}
+{"_e":"metro:bundling:progress","_t":1787133731542,"id":"1","progress":0.19983930623384083,"total":472,"current":211}
+{"_e":"metro:bundling:progress","_t":1787133731643,"id":"1","progress":0.3200909017125233,"total":555,"current":314}
+{"_e":"metro:bundling:progress","_t":1787133731744,"id":"1","progress":0.35667438271604934,"total":648,"current":387}
+{"_e":"metro:bundling:progress","_t":1787133731844,"id":"1","progress":0.4746087796634944,"total":749,"current":516}
+{"_e":"metro:bundling:progress","_t":1787133731946,"id":"1","progress":0.4746087796634944,"total":780,"current":537}
+{"_e":"metro:bundling:progress","_t":1787133732047,"id":"1","progress":0.5368101166552298,"total":808,"current":592}
+{"_e":"metro:bundling:progress","_t":1787133732147,"id":"1","progress":0.643095521482415,"total":828,"current":664}
+{"_e":"metro:bundling:progress","_t":1787133732248,"id":"1","progress":0.6992254592070372,"total":873,"current":730}
+{"_e":"metro:bundling:progress","_t":1787133732349,"id":"1","progress":0.6992254592070372,"total":903,"current":755}
+{"_e":"metro:bundling:progress","_t":1787133732453,"id":"1","progress":0.7206533553875237,"total":920,"current":781}
+{"_e":"metro:bundling:progress","_t":1787133732553,"id":"1","progress":0.7437921670725903,"total":945,"current":815}
+{"_e":"metro:bundling:progress","_t":1787133732653,"id":"1","progress":0.7437921670725903,"total":1055,"current":882}
+{"_e":"metro:bundling:progress","_t":1787133732782,"id":"1","progress":0.7437921670725903,"total":1096,"current":900}
+{"_e":"metro:bundling:progress","_t":1787133732884,"id":"1","progress":0.7437921670725903,"total":1110,"current":910}
+{"_e":"metro:bundling:progress","_t":1787133732987,"id":"1","progress":0.7437921670725903,"total":1131,"current":939}
+{"_e":"metro:bundling:progress","_t":1787133733087,"id":"1","progress":0.7437921670725903,"total":1159,"current":982}
+{"_e":"metro:bundling:progress","_t":1787133733187,"id":"1","progress":0.7540394167601345,"total":1185,"current":1029}
+{"_e":"metro:bundling:progress","_t":1787133733287,"id":"1","progress":0.7540394167601345,"total":1232,"current":1068}
+{"_e":"metro:bundling:progress","_t":1787133733447,"id":"1","progress":0.7540394167601345,"total":1268,"current":1095}
+{"_e":"metro:bundling:progress","_t":1787133733549,"id":"1","progress":0.7692040757619343,"total":1285,"current":1127}
+{"_e":"metro:bundling:progress","_t":1787133733667,"id":"1","progress":0.7901234567901234,"total":1305,"current":1160}
+{"_e":"metro:bundling:progress","_t":1787133733769,"id":"1","progress":0.8679957036337502,"total":1317,"current":1227}
+{"_e":"metro:bundling:progress","_t":1787133733870,"id":"1","progress":0.9051309348058734,"total":1337,"current":1272}
+{"_e":"metro:bundling:progress","_t":1787133733972,"id":"1","progress":0.914626260460068,"total":1352,"current":1293}
+{"_e":"metro:bundling:progress","_t":1787133734081,"id":"1","progress":0.9739895537190084,"total":1375,"current":1357}
+{"_e":"metro:bundling:progress","_t":1787133734181,"id":"1","progress":0.989858812348738,"total":1377,"current":1370}
+{"_e":"metro:bundling:progress","_t":1787133734282,"id":"1","progress":0.9970972439111474,"total":1377,"current":1375}
+{"_e":"metro:bundling:progress","_t":1787133734381,"id":"1","progress":0.9985533455781486,"total":1382,"current":1381}
+{"_e":"metro:bundling:progress","_t":1787133734568,"id":"1","progress":0.999,"total":1382,"current":1382}
+{"_e":"metro:bundling:done","_t":1787133734728,"id":"1","total":1382,"ms":3610.198462}
+{"_e":"metro:client_log","_t":1787133751274,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1787133752864,"level":"log","data":["[featureFlags] Remote Config no update"]}
+{"_e":"metro:client_log","_t":1787133818791,"level":"log","data":["[Perf] WebView shell ready duration: 1712ms"]}
+{"_e":"metro:client_log","_t":1787133820554,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787133820767,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787134015634,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787134015991,"level":"log","data":["[Perf] WebView shell ready duration: 612ms"]}
+{"_e":"metro:client_log","_t":1787134016233,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:server_log","_t":1787134093584,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"metro:client_log","_t":1787134097235,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787134097643,"level":"log","data":["[Perf] WebView shell ready duration: 634ms"]}
+{"_e":"metro:client_log","_t":1787134097849,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787134118557,"level":"log","data":["[Perf] WebView shell ready duration: 540ms"]}
+{"_e":"metro:client_log","_t":1787134119818,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-2.epub"]}
+{"_e":"metro:client_log","_t":1787134120010,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787134183632,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787134184004,"level":"log","data":["[Perf] WebView shell ready duration: 605ms"]}
+{"_e":"metro:client_log","_t":1787134184102,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787134617436,"level":"error","data":["[TypeError: Cannot read property 'avatarUrl' of undefined]"]}
+{"_e":"metro:server_log","_t":1787134703796,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.erachmat.bukoo","Infinix X6728 - 15 - API 35","60"]}
+{"_e":"metro:bundling:started","_t":1787134712735,"id":"5","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1787134712735,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1787134712817,"id":"5","total":1,"ms":81.973988}
+{"_e":"root:init","_t":1787134890913,"format":"v0-jsonl","version":"56.1.23"}
+{"_e":"devserver:start","_t":1787134890932,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787134892884,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787134918296,"atlas":false,"workers":6,"host":"::","port":8083}
+{"_e":"metro:bundling:started","_t":1787134950486,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1787134950488,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787134950494,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787134950599,"id":"1","progress":0.054931640625,"total":64,"current":15}
+{"_e":"metro:bundling:progress","_t":1787134950702,"id":"1","progress":0.054931640625,"total":295,"current":51}
+{"_e":"metro:bundling:progress","_t":1787134950802,"id":"1","progress":0.054931640625,"total":347,"current":74}
+{"_e":"metro:bundling:progress","_t":1787134950902,"id":"1","progress":0.13582512288126253,"total":426,"current":157}
+{"_e":"metro:bundling:progress","_t":1787134951003,"id":"1","progress":0.29935663743119645,"total":541,"current":296}
+{"_e":"metro:bundling:progress","_t":1787134951103,"id":"1","progress":0.3758971575711703,"total":641,"current":393}
+{"_e":"metro:bundling:progress","_t":1787134951205,"id":"1","progress":0.457233560090703,"total":735,"current":497}
+{"_e":"metro:bundling:progress","_t":1787134951305,"id":"1","progress":0.5067799028374855,"total":833,"current":593}
+{"_e":"metro:bundling:progress","_t":1787134951405,"id":"1","progress":0.7164273637386727,"total":866,"current":733}
+{"_e":"metro:bundling:progress","_t":1787134951509,"id":"1","progress":0.7164273637386727,"total":918,"current":764}
+{"_e":"metro:bundling:progress","_t":1787134951610,"id":"1","progress":0.7164273637386727,"total":972,"current":781}
+{"_e":"metro:bundling:progress","_t":1787134951755,"id":"1","progress":0.7164273637386727,"total":1022,"current":849}
+{"_e":"metro:bundling:progress","_t":1787134951855,"id":"1","progress":0.7164273637386727,"total":1076,"current":887}
+{"_e":"metro:bundling:progress","_t":1787134951955,"id":"1","progress":0.7164273637386727,"total":1157,"current":949}
+{"_e":"metro:bundling:progress","_t":1787134952060,"id":"1","progress":0.7427148304335749,"total":1194,"current":1029}
+{"_e":"metro:bundling:progress","_t":1787134952169,"id":"1","progress":0.7469595093763642,"total":1223,"current":1057}
+{"_e":"metro:bundling:progress","_t":1787134952269,"id":"1","progress":0.7657936677309418,"total":1297,"current":1135}
+{"_e":"metro:bundling:progress","_t":1787134952375,"id":"1","progress":0.7977737603305786,"total":1320,"current":1179}
+{"_e":"metro:bundling:progress","_t":1787134952475,"id":"1","progress":0.9237824564696209,"total":1338,"current":1286}
+{"_e":"metro:bundling:progress","_t":1787134952575,"id":"1","progress":0.9722337281070085,"total":1359,"current":1340}
+{"_e":"metro:bundling:progress","_t":1787134952678,"id":"1","progress":0.9826467503002169,"total":1377,"current":1365}
+{"_e":"metro:bundling:progress","_t":1787134952777,"id":"1","progress":0.9970972439111474,"total":1377,"current":1375}
+{"_e":"metro:bundling:progress","_t":1787134953180,"id":"1","progress":0.9985480945652959,"total":1377,"current":1376}
+{"_e":"metro:bundling:progress","_t":1787134953293,"id":"1","progress":0.999,"total":1382,"current":1382}
+{"_e":"metro:bundling:done","_t":1787134953464,"id":"1","total":1382,"ms":2976.135455}
+{"_e":"metro:client_log","_t":1787134965622,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1787134966319,"level":"log","data":["[featureFlags] Remote Config no update"]}
+{"_e":"metro:server_log","_t":1787134972834,"level":"info","data":["Launching DevTools..."]}
+{"_e":"metro:client_log","_t":1787134985696,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787134986848,"level":"log","data":["[Perf] WebView shell ready duration: 1583ms"]}
+{"_e":"metro:client_log","_t":1787134987121,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787134995893,"level":"log","data":["[Perf] WebView shell ready duration: 490ms"]}
+{"_e":"metro:client_log","_t":1787134997864,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787134998021,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}

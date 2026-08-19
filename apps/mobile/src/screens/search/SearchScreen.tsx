@@ -53,7 +53,7 @@ export default function SearchScreen() {
     };
   }, [debouncedSearchQuery, filters]);
 
-  const { data: searchResults, isLoading: isSearching } = useSearchBooks(searchParams);
+  const { data: searchResults, isLoading: isSearching, isError: searchError, refetch: refetchSearch } = useSearchBooks(searchParams);
 
   const cleanCategory = selectedCategory.replace('🔥', '').trim();
   const { data: genreBooks } = useGenreBooks(cleanCategory);
@@ -203,6 +203,17 @@ export default function SearchScreen() {
             {isSearching ? (
               <View style={styles.loadingContainer}>
                 <Text style={styles.loadingText}>Mencari buku...</Text>
+              </View>
+            ) : searchError ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="cloud-offline-outline" size={48} color={COLORS.muted} />
+                <Text style={styles.emptyTitle}>Terjadi kesalahan</Text>
+                <Text style={styles.emptySub}>
+                  Tidak dapat memuat hasil pencarian. Periksa koneksi kamu.
+                </Text>
+                <TouchableOpacity style={styles.resetSearchButton} onPress={() => refetchSearch()}>
+                  <Text style={styles.resetSearchText}>Coba Lagi</Text>
+                </TouchableOpacity>
               </View>
             ) : searchResultsWithCover.length > 0 ? (
               searchResultsWithCover.map((item: BookItemDto) => (

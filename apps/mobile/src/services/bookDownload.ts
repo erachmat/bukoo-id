@@ -77,12 +77,9 @@ class BookDownloadService {
     const remoteUrl = this.getDownloadUrl(bookId);
     const cached = await this.getLocalBookPath(bookId, remoteUrl);
     if (cached) return cached;
-    try {
-      return await this.downloadBook(bookId, remoteUrl, onProgress);
-    } catch (e) {
-      console.error(`[BookDownloadService] Failed to download book ${bookId} for reading:`, e);
-      return null;
-    }
+    // NOTE: let failures propagate to the reader so it can surface the REAL
+    // reason (e.g. an expired session) instead of a generic "failed to load".
+    return this.downloadBook(bookId, remoteUrl, onProgress);
   }
 
   async downloadBook(

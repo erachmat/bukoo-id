@@ -1,3 +1,14 @@
+# Fix DSC Search 500 & Reader Load Error — 2026-08-19
+
+- [x] 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-fix-dsc-search-reader*`, `.superpowers/sdd/fix-dsc-search-reader/`).
+- [x] 2. Root cause A (search `Dead` → 500): `/search` used raw `SELECT b.*` (snake_case) but `formatBook`/`isBookAccessible` read camelCase → `subscriptionRequired` undefined → `.toUpperCase()` threw. Fixed with shared `bookColumns` aliased projection (also applied to the `GET /v1/books` genre branch — same 500 confirmed live via `?genre=Fiksi`).
+- [x] 3. Root cause B (search `Dead Smoker` → []): FTS5 phrase + `unicode61` no stemming (`smoker` ≠ `smokers`). Fixed with `buildFtsQuery` (quoted prefix tokens `"<token>"*` joined by AND) — injection-safe.
+- [x] 4. Reader "Gagal memuat buku": server proven healthy (download 200 + valid EPUB w/ QA token); mobile swallowed real error. `downloadBookForReading` now propagates; `ReadingScreen` surfaces real message.
+- [x] 5. Mobile `SearchScreen` — `isError` state ("Terjadi kesalahan" + Coba Lagi) instead of misleading empty state.
+- [x] 6. Verification: API typecheck ✅ / lint 0 errors / tests 8/8 ✅; mobile typecheck ✅ / lint ✅ (no test script — stated). **Deployed** `bukoo-api` (versions 739bf34d → c0cfc336). Live: `q=Dead`→3, `q=Dead Smoker`→3, `q=Dead Smokers`→3, `q=xyzzy`→0, injection probe safe; `?genre=Fiksi`→3 (was 500); `/health` 200; download dsc-1 200 + PK magic.
+- [x] 7. Cleanup: both QA users deleted from prod D1; temp files removed.
+- [ ] 8. (manual/device QA) Rebuild/reinstall mobile app → search "Dead" shows 3 results; "Mulai membaca" opens reader (or now shows the real error message for diagnosis).
+
 # Insert Dead Smokers Club Books (PDF → EPUB) — 2026-08-19
 
 - `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-dsc-books-insertion*`, `.superpowers/sdd/dsc-books-insertion/`). User-approved.

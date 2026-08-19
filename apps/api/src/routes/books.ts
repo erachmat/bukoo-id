@@ -63,6 +63,24 @@ function formatBook(book: typeof books.$inferSelect, userTier: string, progress?
   };
 }
 
+/**
+ * Aliased projection mapping raw `books` snake_case columns → the camelCase
+ * shape formatBook()/isBookAccessible() expect. Drizzle does this mapping for
+ * us, but raw `SELECT b.*` does NOT — `b.subscriptionRequired` would be
+ * undefined and isBookAccessible() throws on `bookRequiredTier.toUpperCase()`.
+ * Use this in any hand-written SQL that feeds formatBook().
+ */
+const bookColumns = `
+       b.id, b.title, b.author, b.publisher, b.description, b.synopsis, b.isbn,
+       b.cover_key AS coverKey, b.epub_key AS epubKey,
+       b.genre, b.tags, b.language,
+       b.published_year AS publishedYear, b.total_pages AS totalPages,
+       b.read_count AS readCount, b.rating_average AS ratingAverage,
+       b.rating_count AS ratingCount, b.read_time_minutes AS readTimeMinutes,
+       b.is_published AS isPublished, b.is_available_offline AS isAvailableOffline,
+       b.subscription_required AS subscriptionRequired,
+       b.created_at AS createdAt, b.updated_at AS updatedAt`;
+
 // ---------------------------------------------------------------------------
 // GET /v1/books
 // ---------------------------------------------------------------------------
@@ -104,7 +122,7 @@ booksRouter.get('/', zValidator('query', querySchema), async (c) => {
   let results: typeof books.$inferSelect[];
   if (genre) {
     const stmt = c.env.DB.prepare(
-      `SELECT b.* FROM books b, json_each(b.genre) 
+      `SELECT ${bookColumns} FROM books b, json_each(b.genre)
        WHERE b.is_published = 1 AND json_each.value = ?
        ${language ? 'AND b.language = ?' : ''}
        ORDER BY b.${orderBy.replace(' ', ' ')}
@@ -199,19 +217,44 @@ booksRouter.get('/featured', async (c) => {
 // GET /v1/books/search — SQLite FTS5
 // ---------------------------------------------------------------------------
 
+/**
+ * Builds a tolerant, injection-safe FTS5 MATCH query from a raw user string.
+ *
+ * FTS5 parses a bare multi-word string as a PHRASE (adjacent, in-order tokens)
+ * and the `unicode61` tokenizer does NO stemming — so "dead smoker" would never
+ * match "Dead Smokers Club". We therefore split on whitespace and turn every
+ * token into a quoted prefix term (`"<token>"*`) joined with AND, which matches
+ * partial/plural forms ("smoker*" hits "smokers") in any order. Quoting each
+ * token also neutralizes FTS5 operator characters (quotes, `*`, `AND`/`OR`/`NOT`,
+ * parens, `:`, `^`, `+`, `-`) so user input cannot alter match semantics.
+ *
+ * Returns '' when no usable tokens remain (caller should short-circuit).
+ */
+function buildFtsQuery(raw: string): string {
+  const tokens = raw
+    .split(/\s+/)
+    .map((t) => t.replace(/["*^():+-]/g, '').trim())
+    .filter((t) => t.length > 0 && !/^(AND|OR|NOT|NEAR)$/i.test(t))
+    .map((t) => `"${t}"*`);
+  return tokens.join(' AND ');
+}
+
 booksRouter.get('/search', zValidator('query', z.object({ q: z.string().min(2) })), async (c) => {
   const userId = c.get('userId');
   const db = createDb(c.env.DB);
   const { q } = c.req.valid('query');
   const userTier = await getUserTier(userId, db);
 
+  const matchQuery = buildFtsQuery(q);
+  if (!matchQuery) return c.json([]);
+
   const results = await c.env.DB.prepare(
-    `SELECT b.* FROM books b
+    `SELECT ${bookColumns} FROM books b
      INNER JOIN books_fts f ON b.id = f.id
      WHERE books_fts MATCH ? AND b.is_published = 1
      ORDER BY rank
      LIMIT 20`
-  ).bind(q).all<typeof books.$inferSelect>();
+  ).bind(matchQuery).all<typeof books.$inferSelect>();
 
   return c.json((results.results ?? []).map((b) => formatBook(b, userTier)));
 });
