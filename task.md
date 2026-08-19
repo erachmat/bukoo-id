@@ -1,3 +1,12 @@
+# Web Google Login Fix (accounts.id NOT NULL bug) — 2026-08-20
+
+- `[x]` 1. Root cause confirmed live: NextAuth DrizzleAdapter `linkAccount()` inserts into `accounts` WITHOUT `id`; `accounts.id` is a bare `TEXT PRIMARY KEY` → remote D1 throws `NOT NULL constraint failed: accounts.id` (7500). Broke web Google login; orphaned user rows (4 found) then caused register "sudah terdaftar" + login "salah" errors.
+- `[x]` 2. Fix: `$defaultFn(() => createId())` on `accounts.id` + `sessions.id` in `packages/db/src/schema.ts` (client-side; NO D1 migration — `drizzle-kit check` clean); added `@paralleldrive/cuid2@^2.2.2` to `packages/db/package.json`.
+- `[x]` 3. Verified: db typecheck/build/db:check ✅; web typecheck+lint ✅ (0 errors); api typecheck+lint+test ✅ 14/14; `toSQL` proof both adapter inserts now generate cuid2 id.
+- `[x]` 4. Deployed: commit `12460dc` → `npm run deploy:prod` → worker version `71c72e03` live at `bukoo.id`; bundle contains fix; smoke `/login` `/register` `/api/auth/session` `/library` → 200.
+- `[ ]` 5. (manual/user) Real Google login click-through on `bukoo.id` → `/library` + new `accounts` row; previously-orphaned user (e.g. `baihaqi.r@gmail.com`) re-login succeeds. Orphan users self-heal on next Google login.
+- `[ ]` 6. (follow-up, optional) UX copy for passwordless accounts ("sudah terdaftar"/"salah" messages are technically correct but confusing).
+
 # Share to Social Media (IG Story) — 2026-08-20
 
 - `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-20-share-to-social*`, `.superpowers/sdd/share-to-social/`). User-approved ("Start implementation").
