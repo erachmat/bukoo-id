@@ -3,19 +3,6 @@ import Link from 'next/link';
 export default function AudiobookPage() {
   return (
     <>
-      {/* Subnav */}
-      <div className="subnav">
-        <div className="subnav-in">
-          <span className="subnav-tag">Produk</span>
-          <Link href="/koleksi">Koleksi Buku</Link>
-          <Link href="/audiobook" className="on">Audiobook</Link>
-          <Link href="/originals">BUKOO Originals</Link>
-          <Link href="/ai-companion">AI Companion</Link>
-          <Link href="/komunitas">Komunitas</Link>
-          <Link href="/pricing">Harga &amp; Paket</Link>
-        </div>
-      </div>
-
       {/* Hero */}
       <section className="phero">
         <div className="phero-bg"></div>

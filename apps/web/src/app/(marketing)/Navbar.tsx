@@ -130,7 +130,7 @@ export default function Navbar() {
               <Link href="/newsroom" className="nav-dropdown-item">Newsroom</Link>
               <Link href="/investor-relations" className="nav-dropdown-item">Investor Relations</Link>
               <Link href="/blog" className="nav-dropdown-item">Blog</Link>
-              <Link href="/bantuan#kontak" className="nav-dropdown-item">Kontak</Link>
+              <Link href="/kontak" className="nav-dropdown-item">Kontak</Link>
             </div>
           </li>
 
@@ -229,7 +229,7 @@ export default function Navbar() {
                   <li><Link href="/newsroom" onClick={closeMobileMenu}>Newsroom</Link></li>
                   <li><Link href="/investor-relations" onClick={closeMobileMenu}>Investor Relations</Link></li>
                   <li><Link href="/blog" onClick={closeMobileMenu}>Blog</Link></li>
-                  <li><Link href="/bantuan#kontak" onClick={closeMobileMenu}>Kontak</Link></li>
+                  <li><Link href="/kontak" onClick={closeMobileMenu}>Kontak</Link></li>
                 </ul>
               )}
             </li>

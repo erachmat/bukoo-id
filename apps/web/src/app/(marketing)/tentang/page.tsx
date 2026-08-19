@@ -3,19 +3,6 @@ import Link from 'next/link';
 export default function TentangPage() {
   return (
     <>
-      {/* Subnav */}
-      <div className="subnav">
-        <div className="subnav-in">
-          <span className="subnav-tag">Perusahaan</span>
-          <Link href="/tentang" className="on">Tentang BUKOO</Link>
-          <Link href="/karir">Karir</Link>
-          <Link href="/newsroom">Newsroom</Link>
-          <Link href="/investor-relations">Investor Relations</Link>
-          <Link href="/blog">Blog</Link>
-          <Link href="/bantuan#kontak">Kontak</Link>
-        </div>
-      </div>
-
       {/* Hero */}
       <section className="phero">
         <div className="phero-bg"></div>

@@ -32,9 +32,9 @@ export default function MarketingLayout({
             <div className="footer-col-title">Produk</div>
             <ul className="footer-links">
               <li><Link href="/koleksi">Koleksi Buku</Link></li>
-              <li><a href="#">Audiobook</a></li>
+              <li><Link href="/audiobook">Audiobook</Link></li>
               <li><Link href="/originals">BUKOO Originals</Link></li>
-              <li><a href="#">AI Companion</a></li>
+              <li><Link href="/ai-companion">AI Companion</Link></li>
               <li><Link href="/komunitas">Komunitas</Link></li>
               <li><Link href="/pricing">Harga &amp; Paket</Link></li>
             </ul>
@@ -48,18 +48,18 @@ export default function MarketingLayout({
               <li><Link href="/newsroom">Newsroom</Link></li>
               <li><Link href="/investor-relations">Investor Relations</Link></li>
               <li><Link href="/blog">Blog</Link></li>
-              <li><Link href="/bantuan#kontak">Kontak</Link></li>
+              <li><Link href="/kontak">Kontak</Link></li>
             </ul>
           </div>
 
           <div>
             <div className="footer-col-title">Untuk Penerbit</div>
             <ul className="footer-links">
-              <li><Link href="/penerbit">Daftar Penerbit</Link></li>
-              <li><a href="#">Publisher Dashboard</a></li>
-              <li><a href="#">Kebijakan Royalti</a></li>
-              <li><a href="#">Submit Judul</a></li>
-              <li><a href="#">Panduan Penerbit</a></li>
+              <li><a href="https://publisher.bukoo.id" target="_blank" rel="noopener noreferrer">Daftar Penerbit</a></li>
+              <li><a href="https://publisher.bukoo.id" target="_blank" rel="noopener noreferrer">Publisher Dashboard</a></li>
+              <li><a href="https://publisher.bukoo.id" target="_blank" rel="noopener noreferrer">Kebijakan Royalti</a></li>
+              <li><a href="https://publisher.bukoo.id" target="_blank" rel="noopener noreferrer">Submit Judul</a></li>
+              <li><a href="https://publisher.bukoo.id" target="_blank" rel="noopener noreferrer">Panduan Penerbit</a></li>
             </ul>
           </div>
 
@@ -67,10 +67,10 @@ export default function MarketingLayout({
             <div className="footer-col-title">Bantuan</div>
             <ul className="footer-links">
               <li><Link href="/bantuan">Pusat Bantuan</Link></li>
-              <li><Link href="/pricing">Cara Berlangganan</Link></li>
-              <li><a href="#">Pembayaran</a></li>
-              <li><a href="#">Perangkat &amp; App</a></li>
-              <li><Link href="/komunitas">Komunitas FAQ</Link></li>
+              <li><Link href="/langganan-bantuan">Cara Berlangganan</Link></li>
+              <li><Link href="/pembayaran">Pembayaran</Link></li>
+              <li><Link href="/perangkat">Perangkat &amp; App</Link></li>
+              <li><Link href="/faq">Komunitas FAQ</Link></li>
             </ul>
           </div>
         </div>
