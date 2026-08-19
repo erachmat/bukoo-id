@@ -32,8 +32,8 @@ export function LibraryGenreChips({ activeGenre }: { activeGenre: string }) {
         const display = genreDisplayMap[g] || g
         
         let bg = selected ? '#00C9A7' : 'rgba(255,255,255,0.05)'
-        let color = selected ? '#00181A' : 'rgba(255,255,255,0.75)'
-        let border = selected ? 'none' : '1px solid rgba(255,255,255,0.1)'
+        const color = selected ? '#00181A' : 'rgba(255,255,255,0.75)'
+        const border = selected ? 'none' : '1px solid rgba(255,255,255,0.1)'
         
         // Special styling for 'Semua' / Trending when active
         if (selected && g === 'Semua') {

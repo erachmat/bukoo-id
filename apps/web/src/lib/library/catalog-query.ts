@@ -76,7 +76,7 @@ export async function findBooksForLibraryCatalog(
     // Standard Drizzle query for no-genre case
     const orderBy = sort === 'newest' ? desc(books.createdAt) : desc(books.readCount);
 
-    let baseQuery = db.select().from(books).where(and(...definedConditions)).orderBy(orderBy);
+    const baseQuery = db.select().from(books).where(and(...definedConditions)).orderBy(orderBy);
 
     results = await (limit ? baseQuery.limit(limit) : baseQuery);
 

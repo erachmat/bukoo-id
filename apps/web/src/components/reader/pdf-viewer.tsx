@@ -5,8 +5,7 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import { updateReadingProgress } from '@/app/(app)/book/actions'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 // Standard setup for the unpkg worker consistent with react-pdf's pdf.js version
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -26,15 +25,14 @@ export default function PdfViewer({ bookId, fileUrl, location, onLocationChange,
     location ? parseInt(location.toString(), 10) || 1 : 1
   )
 
-  // Handle location changes from parent (e.g. clicking a bookmark)
-  useEffect(() => {
-    if (location) {
-      const p = parseInt(location.toString(), 10)
-      if (!isNaN(p) && p !== pageNumber) {
-        setPageNumber(p)
-      }
-    }
-  }, [location])
+  // Handle location changes from parent (e.g. clicking a bookmark).
+  // "Adjust state when props change" pattern — avoids react-hooks/set-state-in-effect.
+  const [prevLocation, setPrevLocation] = useState(location)
+  if (location !== prevLocation) {
+    setPrevLocation(location)
+    const p = parseInt(location.toString(), 10)
+    if (!isNaN(p)) setPageNumber(p)
+  }
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages)

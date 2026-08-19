@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Settings, Moon, Sun, FileWarning, Bookmark, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Settings, FileWarning, Bookmark, Trash2, X } from 'lucide-react'
 
 // epubjs (react-reader) and pdf.js (react-pdf) rely on browser-only APIs such
 // as DOMMatrix, which are not available in the Workers runtime during SSR.
@@ -43,15 +43,37 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
   const [location, setLocation] = useState<string | number>(initialLocation || (book.fileType === 'PDF' ? 1 : 0))
   const [showSidebar, setShowSidebar] = useState(false)
   const [activeTab, setActiveTab] = useState<'tampilan' | 'bookmarks' | 'sorotan'>('tampilan')
-  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('sepia')
-  
+  // Load persisted reader settings + annotations from LocalStorage (client-only).
+  // Lazy initializers keep the reads out of effects (avoids react-hooks/set-state-in-effect).
+  const readStored = <T,>(key: string): T | null => {
+    if (typeof window === 'undefined') return null
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? (JSON.parse(raw) as T) : null
+    } catch {
+      return null
+    }
+  }
+
+  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>(
+    () => readStored<{ theme?: 'light' | 'dark' | 'sepia' }>('bukoo-reader-settings')?.theme ?? 'sepia',
+  )
+
   // Typography states
-  const [fontSize, setFontSize] = useState<string>('100%')
-  const [fontFamily, setFontFamily] = useState<string>('serif')
+  const [fontSize, setFontSize] = useState<string>(
+    () => readStored<{ fontSize?: string }>('bukoo-reader-settings')?.fontSize ?? '100%',
+  )
+  const [fontFamily, setFontFamily] = useState<string>(
+    () => readStored<{ fontFamily?: string }>('bukoo-reader-settings')?.fontFamily ?? 'serif',
+  )
 
   // Annotations lists
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([])
-  const [highlights, setHighlights] = useState<HighlightItem[]>([])
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(
+    () => readStored<BookmarkItem[]>(`bukoo-bookmarks-${book.id}`) ?? [],
+  )
+  const [highlights, setHighlights] = useState<HighlightItem[]>(
+    () => readStored<HighlightItem[]>(`bukoo-highlights-${book.id}`) ?? [],
+  )
 
   // Selection states
   const [selectedText, setSelectedText] = useState<{ cfiRange: string; text: string } | null>(null)
@@ -59,33 +81,6 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
   const [selectedNote, setSelectedNote] = useState<string>('')
 
   const [chapter, setChapter] = useState<string>('Memuat...')
-
-  // Load configuration and data from LocalStorage
-  useEffect(() => {
-    const storedSettings = localStorage.getItem('bukoo-reader-settings')
-    if (storedSettings) {
-      try {
-        const parsed = JSON.parse(storedSettings)
-        if (parsed.theme) setTheme(parsed.theme)
-        if (parsed.fontSize) setFontSize(parsed.fontSize)
-        if (parsed.fontFamily) setFontFamily(parsed.fontFamily)
-      } catch (e) {}
-    }
-
-    const storedBm = localStorage.getItem(`bukoo-bookmarks-${book.id}`)
-    if (storedBm) {
-      try {
-        setBookmarks(JSON.parse(storedBm))
-      } catch (e) {}
-    }
-
-    const storedHl = localStorage.getItem(`bukoo-highlights-${book.id}`)
-    if (storedHl) {
-      try {
-        setHighlights(JSON.parse(storedHl))
-      } catch (e) {}
-    }
-  }, [book.id])
 
   if (!book.fileUrl) {
     return (
@@ -107,7 +102,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
     const current = localStorage.getItem('bukoo-reader-settings')
     let parsed = {}
     if (current) {
-      try { parsed = JSON.parse(current) } catch (e) {}
+      try { parsed = JSON.parse(current) } catch {}
     }
     const updated = { ...parsed, [key]: value }
     localStorage.setItem('bukoo-reader-settings', JSON.stringify(updated))
@@ -150,12 +145,14 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
         ? `Halaman ${locStr}` 
         : `${chapter === 'Memuat...' ? 'Lokasi' : chapter} (${locStr.substring(0, 10)}...)`
       
+      /* eslint-disable react-hooks/purity -- Date.now() runs in an event handler, not during render */
       const newBm: BookmarkItem = {
         id: Date.now().toString(),
         location: locStr,
         label,
         createdAt: Date.now()
       }
+      /* eslint-enable react-hooks/purity */
       const updated = [newBm, ...bookmarks]
       setBookmarks(updated)
       localStorage.setItem(`bukoo-bookmarks-${book.id}`, JSON.stringify(updated))
@@ -298,7 +295,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
                       ].map((t) => (
                         <button
                           key={t.id}
-                          onClick={() => handleSetTheme(t.id as any)}
+                          onClick={() => handleSetTheme(t.id as 'light' | 'dark' | 'sepia')}
                           className={`h-10 rounded border text-xs font-semibold flex items-center justify-center transition-all ${t.class} ${
                             theme === t.id ? 'ring-2 ring-[#00C9A7] border-transparent scale-102 font-bold' : ''
                           }`}
@@ -415,7 +412,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
                         </button>
                       </div>
                       <blockquote className="text-xs italic pl-2.5 border-l-2 border-[#00C9A7] opacity-80 line-clamp-3">
-                        "{selectedText.text}"
+                        “{selectedText.text}”
                       </blockquote>
                       
                       {/* Color bubbles */}
@@ -482,7 +479,7 @@ export default function ReaderShell({ book, initialLocation }: ReaderShellProps)
                             className="cursor-pointer"
                           >
                             <blockquote className="text-xs italic opacity-85 line-clamp-3">
-                              "{hl.text}"
+                              “{hl.text}”
                             </blockquote>
                             {hl.note && (
                               <div className="mt-2 text-xs font-semibold p-2.5 rounded bg-black/5 dark:bg-white/5 border border-inherit/30">

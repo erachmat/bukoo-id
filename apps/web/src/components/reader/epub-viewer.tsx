@@ -4,6 +4,34 @@ import { useState, useEffect, useRef } from 'react'
 import { ReactReader } from 'react-reader'
 import { updateReadingProgress } from '@/app/(app)/book/actions'
 
+interface EpubHighlight {
+  cfiRange: string
+  text: string
+  color: string
+  note?: string
+}
+
+interface EpubRendition {
+  location: { start?: { percentage?: number } } | null
+  annotations: {
+    remove: (cfiRange: string, type: string) => void
+    add: (
+      type: string,
+      cfiRange: string,
+      data?: object,
+      cb?: (...args: unknown[]) => unknown,
+      className?: string,
+      styles?: object,
+    ) => unknown
+  }
+  themes: {
+    fontSize: (size: string) => void
+    font: (family: string) => void
+  }
+  prev: () => void
+  next: () => void
+}
+
 interface EpubViewerProps {
   bookId: string
   fileUrl: string
@@ -12,7 +40,7 @@ interface EpubViewerProps {
   theme: 'light' | 'dark' | 'sepia'
   fontSize: string
   fontFamily: string
-  highlights: any[]
+  highlights: EpubHighlight[]
   onTextSelected: (cfiRange: string, text: string) => void
   onChapterChange?: (title: string) => void
 }
@@ -30,7 +58,7 @@ export default function EpubViewer({
   onChapterChange 
 }: EpubViewerProps) {
   const [progress, setProgress] = useState<number>(0)
-  const renditionRef = useRef<any>(null)
+  const renditionRef = useRef<EpubRendition | null>(null)
   
   // Debounce syncing progress to DB
   useEffect(() => {
@@ -48,8 +76,7 @@ export default function EpubViewer({
     if (renditionRef.current) {
       const locationInfo = renditionRef.current.location
       if (locationInfo && locationInfo.start) {
-        const percentage = locationInfo.start.percentage
-        setProgress(percentage)
+        setProgress(locationInfo.start.percentage ?? 0)
       }
     }
   }
@@ -63,7 +90,7 @@ export default function EpubViewer({
     highlights.forEach((hl) => {
       try {
         rendition.annotations.remove(hl.cfiRange, 'highlight')
-      } catch (e) {}
+      } catch {}
     })
 
     // Apply new highlights

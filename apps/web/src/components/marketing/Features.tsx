@@ -84,7 +84,7 @@ export function Features() {
                   <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', lineHeight: '1.6' }}>Apa inti dari bab 4 Atomic Habits?</div>
                 </div>
                 <div style={{ background: 'rgba(0,201,167,.08)', border: '1px solid rgba(0,201,167,.12)', borderRadius: '10px', padding: '12px', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)', lineHeight: '1.6' }}><strong style={{ color: 'var(--teal)' }}>Bab 4 — Hukum Ketiga:</strong> "Buat Itu Mudah". Clear menjelaskan bahwa frekuensi lebih penting dari waktu. 20 latihan singkat &gt; 1 latihan panjang. <span style={{ color: 'var(--amber)' }}>💡 Insight kunci: lingkungan = motivasi.</span></div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)', lineHeight: '1.6' }}><strong style={{ color: 'var(--teal)' }}>Bab 4 — Hukum Ketiga:</strong> “Buat Itu Mudah”. Clear menjelaskan bahwa frekuensi lebih penting dari waktu. 20 latihan singkat &gt; 1 latihan panjang. <span style={{ color: 'var(--amber)' }}>💡 Insight kunci: lingkungan = motivasi.</span></div>
                 </div>
                 {/* Input bar */}
                 <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '8px', height: '38px', display: 'flex', alignItems: 'center', padding: '0 12px', justifyContent: 'space-between' }}>
@@ -144,7 +144,7 @@ export function Features() {
                 {/* Post */}
                 <div style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.05)', borderRadius: '8px', padding: '10px' }}>
                   <div style={{ fontSize: '10px', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>Andi S. · 2j lalu</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.6)', lineHeight: '1.5', marginBottom: '6px' }}>"Bab habit stacking benar-benar game changer! 🔥 Siapa yang udah coba?"</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.6)', lineHeight: '1.5', marginBottom: '6px' }}>“Bab habit stacking benar-benar game changer! 🔥 Siapa yang udah coba?”</div>
                   <div style={{ display: 'flex', gap: '12px', fontSize: '9px', color: 'rgba(255,255,255,.3)' }}>
                     <span>❤️ 24</span><span>💬 6</span><span>🔖 Simpan</span>
                   </div>
