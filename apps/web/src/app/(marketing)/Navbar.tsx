@@ -104,16 +104,14 @@ export default function Navbar() {
             <Link href="/pricing" className="nav-link">Harga</Link>
           </li>
 
-          {/* 4. Untuk Penerbit (External redirect) */}
+          {/* 4. Untuk Penerbit */}
           <li className="nav-item">
-            <a
-              href="penerbit-daftar.html"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/publisher/daftar"
               className="nav-link"
             >
               Untuk Penerbit
-            </a>
+            </Link>
           </li>
 
           {/* 5. Perusahaan (Dropdown) */}
@@ -204,14 +202,12 @@ export default function Navbar() {
             </li>
 
             <li>
-              <a
-                href="penerbit-daftar.html"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/publisher/daftar"
                 onClick={closeMobileMenu}
               >
                 Untuk Penerbit
-              </a>
+              </Link>
             </li>
 
             {/* Perusahaan Submenu Accordion */}
