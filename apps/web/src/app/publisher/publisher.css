@@ -878,7 +878,7 @@ td.td-pct {
   background: var(--forest-dd);
   color: var(--text);
   min-height: 100vh;
-  padding-top: 120px;
+  padding-top: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -1035,6 +1035,8 @@ td.td-pct {
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 40px;
+  position: relative;
+  z-index: 2;
 }
 
 .pub-hero {
@@ -1339,7 +1341,7 @@ td.td-pct {
    ─────────────────────────────────────────────── */
 .phero {
   position: relative;
-  padding: 140px 0 70px;
+  padding: 100px 0 50px;
   overflow: hidden;
 }
 
