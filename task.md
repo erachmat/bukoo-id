@@ -1,3 +1,13 @@
+# Insert Dead Smokers Club Books (PDF → EPUB) — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-dsc-books-insertion*`, `.superpowers/sdd/dsc-books-insertion/`). User-approved.
+- `[x]` 2. Converted 3 manuscript PDFs → EPUB (PyMuPDF + ebooklib; no calibre): DSC 1 → 19 chapters, DSC 2 → 22 chapters, DSC 3 → chunks (no headings). Metadata (Adham T. Fusama / fjm Penerbit / ISBN / id) embedded; front covers cropped from spreads.
+- `[x]` 3. Validated: valid EPUB zips, nav/TOC/cover present, 247k/252k/340k chars, 180/245/216 KB.
+- `[x]` 4. Uploaded to **production R2**: `epubs/dsc-{1,2,3}.epub` + `covers/dsc-{1,2,3}-cover.jpg`.
+- `[x]` 5. Inserted **production D1**: `dsc-1`/`dsc-2`/`dsc-3` (FREE, published, ID, Fiksi/Novel, ISBNs, total_pages 192/196/294).
+- `[x]` 6. Verified: D1 rows + FTS (3) ✅; covers 200 image/jpeg ✅; EPUBs 200 application/epub+zip + PK magic ✅; download route 401 unauthenticated ✅.
+- `[ ]` 7. (manual/device QA) Open `Dead Smokers Club` in the app → detail + Mulai Membaca renders; offline download appears in "Diunduh".
+
 # Real EPUB Reading (Mobile) — Authenticated Book Access — 2026-08-19
 
 - `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-real-epub-reading*`, `.superpowers/sdd/real-epub-reading/`). User-approved.
