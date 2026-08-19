@@ -1,0 +1,106 @@
+name: Deploy Web
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel in-flight runs for the same ref
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ── 1. Preview worker on PRs (bukoo-web-preview) ────────────────────────────
+  preview:
+    name: Deploy Preview (bukoo-web-preview)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build + deploy preview worker
+        run: npm run --workspace=apps/web deploy:preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Post preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = 'https://bukoo-web-preview.erachmat-dev.workers.dev';
+            const body = `🌤️ **Preview deployed** — ${url} (commit \`${context.sha.slice(0, 7)}\`)`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(url));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # ── 2. Production deploy on main (bukoo.id) ─────────────────────────────────
+  # Gating: merge to main is blocked by branch protection until CI status checks
+  # (lint / typecheck / test / db-check) pass, so no CI re-run is needed here.
+  prod:
+    name: Deploy Production (bukoo.id)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (OpenNext) + deploy (wrangler.prod.jsonc)
+        run: npm run --workspace=apps/web deploy:prod
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test https://bukoo.id
+        run: |
+          code=$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 120 https://bukoo.id)
+          echo "https://bukoo.id -> HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Smoke test failed: expected HTTP 200, got $code"
+            exit 1
+          fi

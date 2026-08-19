@@ -1,0 +1,51 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+
+# Cancel in-flight runs for the same ref
+concurrency:
+  group: deploy-api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ── 1. Deploy bukoo-api worker on main (api.bukoo.id) ───────────────────────
+  # Gating: merge to main is blocked by branch protection until CI status checks
+  # (lint / typecheck / test / db-check) pass, so no CI re-run is needed here.
+  deploy:
+    name: Deploy (api.bukoo.id)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy worker (wrangler.jsonc)
+        run: npm run --workspace=apps/api deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test /health
+        run: |
+          body=$(curl -fsS --max-time 120 https://api.bukoo.id/health)
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"' || {
+            echo "::error::Health check failed: /health did not return {\"status\":\"ok\"}"
+            exit 1
+          }

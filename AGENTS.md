@@ -35,7 +35,9 @@ The web app database is **Cloudflare D1** (`bukoo-db`), accessed via the `DB` bi
 in the web worker (`drizzle-orm/d1`). Drizzle migrations live in `packages/db/drizzle/`.
 
 1. Never run migrations against the production D1 database directly — use `wrangler d1
-execute` with `--create-only` style review first, and validate generated SQL.
+execute` with `--create-only` style review first, and validate generated SQL. The only
+   sanctioned path to apply a migration remotely is the manual `migrate-d1.yml` GitHub
+   Actions workflow (generate → `--remote --dry-run` review → apply only when confirmed).
 2. **FTS5 gotcha (critical):** Cloudflare D1 does NOT support FTS5 `DELETE`/`UPDATE`
    operations on virtual tables AT ALL — not just the special `'delete'` command, but
    also plain `DELETE FROM ..._fts WHERE ...` (both throw `SQLITE_ERROR 7500`). Only
@@ -78,6 +80,24 @@ execute` with `--create-only` style review first, and validate generated SQL.
   `MAILCHANNELS_API_KEY`, `MAIL_FROM`. The legacy Railway/Docker config is decommissioned — do not revive it.
 - Any change to `apps/api` that could affect `/health` or startup should be noted in the PR (a broken
   deploy is caught by Cloudflare health checks, not Railway retries).
+
+## CI/CD (GitHub Actions)
+All pipelines live in `.github/workflows/`:
+- **`ci.yml`** — runs on every PR + push to `main`: `lint` → `typecheck` → `test` (turbo), plus
+  `db-check` (`drizzle-kit check` drift check). No service containers — API tests mock D1/R2/AI.
+- **`deploy-web.yml`** — `preview` job deploys `bukoo-web-preview` on PRs (URL posted as a PR
+  comment); `prod` job deploys `bukoo-web` on push to `main` via `deploy:prod`, then smoke-tests
+  `https://bukoo.id` (expect 200).
+- **`deploy-api.yml`** — deploys `bukoo-api` on push to `main` (`wrangler deploy`), then
+  smoke-tests `https://api.bukoo.id/health`.
+- **`migrate-d1.yml`** — MANUAL (`workflow_dispatch`): generates pending Drizzle migrations,
+  prints a `--remote --dry-run` diff for review, and applies only when `apply_remote=true`.
+  This is the ONLY sanctioned path for applying D1 migrations (see Database hard rules).
+- Required GitHub repo secrets: `CLOUDFLARE_API_TOKEN` (scoped to Workers Scripts/Routes Edit,
+  D1 Edit, R2 Edit, Account Settings Read) and `CLOUDFLARE_ACCOUNT_ID`.
+- Worker runtime secrets (AUTH_*, JWT_SECRET, GOOGLE_*, APPLE_*, MAILCHANNELS_*, MAIL_FROM)
+  stay managed via `wrangler secret put` — CI deploys preserve them, never re-put them in CI.
+- CI runs on **Node 22 LTS**.
 
 ## Coding conventions
 - TypeScript throughout, strict mode assumed — don't introduce `any` to silence errors; fix the type.

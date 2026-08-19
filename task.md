@@ -1,3 +1,16 @@
+# CI/CD for Web & API (Cloudflare Workers) — 2026-08-19
+
+- `[x]` 1. Design decisions: split workflows; auto-deploy on main; preview on PRs; drop mobile EAS; manual migrations.
+- `[x]` 2. `ci.yml` — lint / typecheck / test / drizzle drift check on PR + main push (no service containers).
+- `[x]` 3. `deploy-web.yml` — preview worker on PRs (+ PR comment) & prod deploy on main (+ smoke test).
+- `[x]` 4. `deploy-api.yml` — prod deploy on main + `/health` smoke test.
+- `[x]` 5. `migrate-d1.yml` — manual D1 migration workflow (generate → dry-run review → apply on confirm).
+- `[x]` 6. Removed stale `.github/workflows/deploy.yml` (Railway + Prisma + Postgres/Redis; no web deploy).
+- `[x]` 7. AGENTS.md — CI/CD section + required GitHub secrets documented.
+- [ ] 8. (user) GitHub repo secrets: `CLOUDFLARE_API_TOKEN` (Workers Scripts/Routes Edit, D1 Edit, R2 Edit, Account Settings Read) + `CLOUDFLARE_ACCOUNT_ID`.
+- [ ] 9. (user) Enable branch protection required checks on main: `lint`, `typecheck`, `test`, `db-check`.
+- [ ] 10. (verify) Push a PR → ci.yml green + preview deploy; merge to main → prod web + api deploy + smoke tests; run migrate-d1.yml (dry-run) once.
+
 # Mobile Reader UX, Bug Fixes & Recommendation Enhancements — 2026-08-18
 
 - `[x]` 1. Bug Fix: Annotation sync soft-delete propagation in `highlightService.ts`, `bookmarkService.ts`, and `annotationSyncService.ts`.
