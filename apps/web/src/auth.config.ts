@@ -9,16 +9,19 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
+    authorized() {
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role || "USER"
       }
       return token
     },
-    async session({ session, token }: { session: any, token: any }) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub
-        session.user.role = token.role
+        session.user.id = token.sub as string
+        (session.user as { role?: string }).role = token.role as string
       }
       return session
     },
