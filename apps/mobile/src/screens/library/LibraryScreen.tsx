@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useIsFocused, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { api } from '../../services/api';
+import { api, BookItemDto } from '../../services/api';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { bookDownloadService } from '../../services/bookDownload';
 import { getCoverUrl } from '../../services/coverUrl';
@@ -13,7 +13,7 @@ import { FONTS } from '../../constants/FONTS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type LibraryTab = 'semua' | 'sedang_dibaca' | 'selesai' | 'ingin_dibaca' | 'diunduh';
 type LibrarySortOption = 'recent' | 'title' | 'progress';
@@ -21,6 +21,8 @@ type LibrarySortOption = 'recent' | 'title' | 'progress';
 import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
 import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
+import ResponsiveContainer from '../../components/ResponsiveContainer';
+import { useIsTablet } from '../../hooks/useResponsive';
 import { readingSync } from '../../services/readingSync';
 import { readingGoalService } from '../../services/readingGoalService';
 
@@ -28,6 +30,7 @@ export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp<MainTabParamList, 'Library'>>();
   const isFocused = useIsFocused();
+  const isTablet = useIsTablet();
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<LibraryTab>('semua');
@@ -67,8 +70,10 @@ export default function LibraryScreen() {
     queryKey: ['books', 'library'],
     queryFn: async () => {
       try {
-        const response = await api.get('/books');
-        return response.data.items || [];
+        const response = await api.get<BookItemDto[] | { items?: BookItemDto[] }>('/books');
+        // GET /v1/books returns a bare array — guard against the old { items } assumption.
+        const data = response.data;
+        return Array.isArray(data) ? data : (data?.items ?? []);
       } catch {
         return [];
       }
@@ -90,7 +95,7 @@ export default function LibraryScreen() {
 
   const allLibraryItems = useMemo(() => {
     if (books && books.length > 0) {
-      return books.map((b: { id: string; title: string; author: string; coverUrl?: string; coverKey?: string | null }) => {
+      return books.map((b) => {
         const prog = userLibraryProgress?.find((p) => p.bookId === b.id);
         const percent = prog?.progressPercent ?? 0;
         let status: LibraryTab = 'ingin_dibaca';
@@ -100,7 +105,7 @@ export default function LibraryScreen() {
           id: b.id,
           title: b.title,
           author: b.author,
-          coverUrl: getCoverUrl(b.coverKey) || b.coverUrl || '',
+          coverUrl: getCoverUrl(b.coverKey) || '',
           progressPercent: percent,
           status,
         };
@@ -144,6 +149,21 @@ export default function LibraryScreen() {
     { id: 'diunduh', label: 'Diunduh', icon: 'download-outline' },
   ];
 
+  const statCards: { icon: keyof typeof Ionicons.glyphMap; color: string; value: number; label: string }[] = [
+    { icon: 'book-outline', color: '#4ADE80', value: stats.finishedBooks, label: 'Buku selesai' },
+    { icon: 'time-outline', color: '#4ADE80', value: stats.totalMinutes, label: 'Menit Membaca' },
+    { icon: 'flame-outline', color: '#4ADE80', value: stats.streakDays, label: 'Hari Streak' },
+    { icon: 'download-outline', color: '#4ADE80', value: stats.storageMb, label: 'MB Offline' },
+  ];
+
+  const renderStatCard = (s: (typeof statCards)[number]) => (
+    <View key={s.label} style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+      <Ionicons name={s.icon} size={24} color={s.color} style={styles.statIcon} />
+      <Text style={[styles.statNumber, { color: s.color }]}>{s.value}</Text>
+      <Text style={styles.statLabel}>{s.label}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <OfflineSyncBanner />
@@ -159,6 +179,7 @@ export default function LibraryScreen() {
           />
         }
       >
+        <ResponsiveContainer>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Rak Buku Saya</Text>
@@ -201,7 +222,7 @@ export default function LibraryScreen() {
                   navigation.navigate('ReadingStack', {
                     screen: 'BookDetail',
                     params: { bookId: activeBookId },
-                  } as never)
+                  })
                 }
               >
                 <Text style={styles.continueButtonText}>Lanjut Baca</Text>
@@ -237,35 +258,16 @@ export default function LibraryScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
 
-        {/* 4-Card Quick Stats Grid (2 x 2) — real local reading data */}
+        {/* 4-Card Quick Stats Grid — 2x2 on phones, single 4-card row on tablets */}
         <View style={styles.statsGrid}>
-          {/* Row 1: Buku selesai & Menit Membaca */}
-          <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
-              <Text style={styles.statLabel}>Buku selesai</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.totalMinutes}</Text>
-              <Text style={styles.statLabel}>Menit Membaca</Text>
-            </View>
-          </View>
-
-          {/* Row 2: Hari Streak & MB Offline */}
-          <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
-              <Text style={styles.statLabel}>Hari Streak</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="download-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.storageMb}</Text>
-              <Text style={styles.statLabel}>MB Offline</Text>
-            </View>
-          </View>
+          {isTablet ? (
+            <View style={styles.statsRow}>{statCards.map(renderStatCard)}</View>
+          ) : (
+            <>
+              <View style={styles.statsRow}>{statCards.slice(0, 2).map(renderStatCard)}</View>
+              <View style={styles.statsRow}>{statCards.slice(2).map(renderStatCard)}</View>
+            </>
+          )}
         </View>
 
         {/* Filter Tabs Scroll View */}
@@ -297,7 +299,7 @@ export default function LibraryScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
             {activeTab === 'diunduh'
-              ? 'Buku Offline (Diunduh)'
+              ? 'Buku Offline'
               : activeTab === 'sedang_dibaca'
                 ? 'Sedang Dibaca'
                 : activeTab === 'selesai'
@@ -326,7 +328,7 @@ export default function LibraryScreen() {
                   navigation.navigate('ReadingStack', {
                     screen: 'BookDetail',
                     params: { bookId: item.id },
-                  } as never)
+                  })
                 }
               >
                 <View style={styles.coverWrapper}>
@@ -357,6 +359,7 @@ export default function LibraryScreen() {
             <Text style={styles.emptyTabText}>Belum ada buku di kategori ini</Text>
           </View>
         )}
+        </ResponsiveContainer>
       </ScrollView>
 
       {/* Sort Option Modal Sheet */}

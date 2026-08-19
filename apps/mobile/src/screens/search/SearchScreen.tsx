@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, ScrollVi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList, MainTabParamList } from '../../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,7 +16,7 @@ import { FilterChips } from './components/FilterChips';
 import { SearchFilterParams, BookItemDto } from '../../services/api';
 import { getCoverUrl } from '../../services/coverUrl';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const CATEGORIES = ['Trending🔥', 'Fiksi', 'Self Dev', 'Teknologi', 'Bisnis', 'Sastra'];
 
@@ -61,11 +61,11 @@ export default function SearchScreen() {
   // Real data only — R2 coverKey is mapped to a public cover URL.
   const genreBooksWithCover = (genreBooks ?? []).map((b: BookItemDto) => ({
     ...b,
-    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+    coverUrl: getCoverUrl(b.coverKey) || '',
   }));
   const searchResultsWithCover = (searchResults ?? []).map((b: BookItemDto) => ({
     ...b,
-    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+    coverUrl: getCoverUrl(b.coverKey) || '',
   }));
 
   const handleSelectRecentSearch = (term: string) => {
@@ -216,7 +216,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
               </View>
             ) : searchResultsWithCover.length > 0 ? (
-              searchResultsWithCover.map((item: BookItemDto) => (
+              searchResultsWithCover.map((item) => (
                 <TouchableOpacity
                   key={item.id}
                   style={styles.searchResultItem}
@@ -224,7 +224,7 @@ export default function SearchScreen() {
                     navigation.navigate('ReadingStack', {
                       screen: 'BookDetail',
                       params: { bookId: item.id },
-                    } as never)
+                    })
                   }
                 >
                   <Image
@@ -275,7 +275,7 @@ export default function SearchScreen() {
                       navigation.navigate('ReadingStack', {
                         screen: 'BookDetail',
                         params: { bookId: item.id },
-                      } as never)
+                      })
                     }
                   >
                     <Image source={{ uri: item.coverUrl }} style={styles.exploreBookCover} />

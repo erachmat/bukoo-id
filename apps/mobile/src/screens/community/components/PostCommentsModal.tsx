@@ -102,20 +102,23 @@ export function PostCommentsModal({ visible, onClose, post, onCommentAdded }: Po
                 <Text style={styles.emptyText}>Belum ada komentar. Jadilah yang pertama berkomentar!</Text>
               </View>
             ) : (
-              comments.map((c) => (
-                <View key={c.id} style={styles.commentRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarLetter}>{c.user.name.charAt(0).toUpperCase()}</Text>
-                  </View>
-                  <View style={styles.commentContent}>
-                    <View style={styles.commentHeader}>
-                      <Text style={styles.commentUser}>{c.user.name}</Text>
-                      <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
+              comments.map((c) => {
+                const authorName = c.user?.name ?? 'Pembaca BUKOO';
+                return (
+                  <View key={c.id} style={styles.commentRow}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarLetter}>{authorName.charAt(0).toUpperCase()}</Text>
                     </View>
-                    <Text style={styles.commentText}>{c.content}</Text>
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeader}>
+                        <Text style={styles.commentUser}>{authorName}</Text>
+                        <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
+                      </View>
+                      <Text style={styles.commentText}>{c.content}</Text>
+                    </View>
                   </View>
-                </View>
-              ))
+                );
+              })
             )}
           </ScrollView>
 

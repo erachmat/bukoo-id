@@ -1,16 +1,15 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getDb } from '@/lib/db'
-import { books as booksTable, users as usersTable, subscriptions, readingProgress } from '@bukoo/db'
+import { books as booksTable, subscriptions, readingProgress } from '@bukoo/db'
 import { eq, and } from 'drizzle-orm'
-import { prismaBookToCatalogBook } from '@/lib/data/book-mapper'
+import { bookRowToCatalogBook } from '@/lib/data/book-mapper'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Star, BookOpen, Globe, ArrowLeft, BookmarkPlus, Share2 } from 'lucide-react'
+import { Star, BookOpen, Globe, ArrowLeft, BookmarkPlus, Share2, Lock } from 'lucide-react'
 
 import { auth } from '@/lib/auth'
-import { Lock } from 'lucide-react'
 import { isBookAccessible } from '@bukoo/shared-types'
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +45,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   // Access Check
   const canRead = isBookAccessible(userTier, row.subscriptionRequired)
 
-  const book = prismaBookToCatalogBook(row)
+  const book = bookRowToCatalogBook(row)
   const hasStarted = userProgress && userProgress.progressPercent > 0
 
   return (

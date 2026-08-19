@@ -1,6 +1,33 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { useAuthStore, UserPublicDto } from '../stores/authStore';
+import type {
+  AuthUserDto,
+  BookDto,
+  BookFeaturedResponse,
+  ReadingProgressRecentDto,
+  CommunityPostType,
+  CommunityUserDto,
+  CommunityBookDto,
+  CommunityPostDto,
+  CommunityPostsPageDto,
+  CommunityCommentDto,
+  CommunityEventDto,
+} from '@bukoo/shared-types';
+import { useAuthStore, toUserDto } from '../stores/authStore';
+
+// Shared DTOs — single source of truth: @bukoo/shared-types (mirrors apps/api).
+export type BookItemDto = BookDto;
+export type FeaturedBooksResponseDto = BookFeaturedResponse;
+export type ReadingProgressItemDto = ReadingProgressRecentDto;
+export type {
+  CommunityPostType,
+  CommunityUserDto,
+  CommunityBookDto,
+  CommunityPostDto,
+  CommunityPostsPageDto,
+  CommunityCommentDto,
+  CommunityEventDto,
+};
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://api.bukoo.id/v1';
 
@@ -59,11 +86,12 @@ export async function ensureFreshAccessToken(): Promise<string | null> {
 export interface AuthResponseDto {
   accessToken: string;
   refreshToken: string;
-  user: UserPublicDto;
+  expiresIn: number;
+  user: AuthUserDto;
 }
 
 export interface RegisterResponseDto {
-  user: UserPublicDto;
+  user: AuthUserDto;
   accessToken?: string;
   refreshToken?: string;
 }
@@ -174,7 +202,7 @@ api.interceptors.response.use(
 
         // Update user state
         if (user) {
-          useAuthStore.getState().setUser(user);
+          useAuthStore.getState().setUser(toUserDto(user));
         }
 
         isRefreshing = false;
@@ -276,27 +304,6 @@ export const authApi = {
   },
 };
 
-export interface BookItemDto {
-  id: string;
-  title: string;
-  author: string;
-  coverUrl: string;
-  publisher?: string;
-  synopsis?: string;
-  genre?: string[];
-  ratingAverage?: number;
-  ratingCount?: number;
-  subscriptionRequired?: string;
-  is_accessible?: boolean;
-}
-
-export interface FeaturedBooksResponseDto {
-  continue_reading: BookItemDto[];
-  editors_choice: BookItemDto[];
-  trending: BookItemDto[];
-  new_releases: BookItemDto[];
-}
-
 export interface SearchFilterParams {
   query?: string;
   genre?: string;
@@ -375,17 +382,6 @@ export const booksApi = {
   },
 };
 
-export interface ReadingProgressItemDto {
-  bookId: string;
-  bookTitle?: string;
-  bookAuthor?: string;
-  bookCoverUrl?: string;
-  progressPercent?: number;
-  currentPage?: number;
-  totalPages?: number;
-  lastReadAt?: string;
-}
-
 export const libraryApi = {
   getReadingProgress: async (): Promise<ReadingProgressItemDto[]> => {
     try {
@@ -400,61 +396,6 @@ export const libraryApi = {
 // ---------------------------------------------------------------------------
 // Community (posts, comments, likes, bookmarks, reading club events)
 // ---------------------------------------------------------------------------
-
-export type CommunityPostType = 'REVIEW' | 'QUOTE' | 'DISCUSSION' | 'RECOMMENDATION';
-
-export interface CommunityUserDto {
-  id: string;
-  name: string;
-  avatarUrl: string | null;
-}
-
-export interface CommunityBookDto {
-  id: string;
-  title: string;
-  author: string;
-  coverUrl?: string | null;
-}
-
-export interface CommunityPostDto {
-  id: string;
-  type: CommunityPostType;
-  content: string;
-  bookId: string | null;
-  likeCount: number;
-  commentCount: number;
-  bookmarkCount: number;
-  likedByMe: boolean;
-  bookmarkedByMe: boolean;
-  createdAt: string;
-  user: CommunityUserDto;
-  book: CommunityBookDto | null;
-}
-
-export interface CommunityPostsPageDto {
-  items: CommunityPostDto[];
-  nextCursor: string | null;
-}
-
-export interface CommunityCommentDto {
-  id: string;
-  content: string;
-  createdAt: string;
-  user: CommunityUserDto;
-}
-
-export interface CommunityEventDto {
-  id: string;
-  title: string;
-  description: string | null;
-  bookId: string | null;
-  startDate: string;
-  endDate: string;
-  targetProgressPercent: number;
-  joinCount: number;
-  joinedByMe: boolean;
-  book: CommunityBookDto | null;
-}
 
 export const communityApi = {
   getPosts: async (params?: { type?: CommunityPostType; cursor?: string; limit?: number }): Promise<CommunityPostsPageDto> => {

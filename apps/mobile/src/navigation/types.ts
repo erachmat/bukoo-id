@@ -25,7 +25,6 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   AuthStack: NavigatorScreenParams<AuthStackParamList>;
   ReadingStack: NavigatorScreenParams<ReadingStackParamList>;
-  ReadingScreen: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; totalPages?: number; isSample?: boolean };
   Profile: undefined;
   Subscription: undefined;
   Search: undefined;

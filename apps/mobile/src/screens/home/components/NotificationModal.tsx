@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentProps } from 'react';
 import {
   Modal,
   View,
@@ -85,7 +85,7 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
       navigation.navigate('ReadingStack', {
         screen: 'BookDetail',
         params: { bookId: notif.targetBookId },
-      } as never);
+      });
     }
   };
 
@@ -124,7 +124,7 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
   const displayedList = activeTab === 'unread' ? notifications.filter((n) => !n.isRead) : notifications;
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const getTypeIcon = (type: AppNotification['type']) => {
+  const getTypeIcon = (type: AppNotification['type']): { name: ComponentProps<typeof Ionicons>['name']; color: string } => {
     switch (type) {
       case 'streak':
         return { name: 'flame', color: '#EF4444' };
@@ -216,7 +216,7 @@ export function NotificationModal({ visible, onClose, onNotificationsChanged }: 
                       activeOpacity={0.8}
                     >
                       <View style={[styles.iconCircle, { backgroundColor: iconInfo.color + '20' }]}>
-                        <Ionicons name={iconInfo.name as never} size={18} color={iconInfo.color} />
+                        <Ionicons name={iconInfo.name} size={18} color={iconInfo.color} />
                       </View>
                       <View style={styles.notifContent}>
                         <View style={styles.notifHeaderRow}>

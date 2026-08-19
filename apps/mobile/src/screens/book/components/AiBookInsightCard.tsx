@@ -39,10 +39,10 @@ export function AiBookInsightCard({ totalPages, genres }: AiBookInsightCardProps
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <View style={styles.badge}>
+        {/* <View style={styles.badge}>
           <Text style={styles.badgeText}>AI INSIGHT</Text>
         </View>
-        <Ionicons name="sparkles" size={16} color={COLORS.gold} />
+        <Ionicons name="sparkles" size={16} color={COLORS.gold} /> */}
         <Text style={styles.headerTitle}>Mengapa Kamu Suka Buku Ini?</Text>
       </View>
 

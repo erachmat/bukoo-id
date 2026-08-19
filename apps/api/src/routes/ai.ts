@@ -7,6 +7,11 @@ import type { Env } from '../types/env.js';
 const ai = new Hono<{ Bindings: Env }>();
 ai.use('*', authMiddleware);
 
+// ⚠️ Do NOT revert to '@cf/meta/llama-3-8b-instruct' — it was deprecated by
+// Cloudflare on 2026-05-30 and every AI.run() call throws `5028` (route → 502).
+// All three AI routes use the supported successor below.
+const AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+
 const summarySchema = z.object({
   chapterText: z.string().min(10).max(10_000),
   bookTitle: z.string().optional(),
@@ -50,7 +55,7 @@ ai.post('/chat', zValidator('json', chatSchema), async (c) => {
   ];
 
   try {
-    const response = await c.env.AI.run('@cf/meta/llama-3-8b-instruct', { messages });
+    const response = await c.env.AI.run(AI_MODEL, { messages });
     const reply = (response as { response: string }).response;
     return c.json({ reply });
   } catch (err) {
@@ -81,7 +86,7 @@ ai.post('/companion/summary', zValidator('json', summarySchema), async (c) => {
     .filter(Boolean)
     .join('\n');
 
-  const response = await c.env.AI.run('@cf/meta/llama-3-8b-instruct', {
+  const response = await c.env.AI.run(AI_MODEL, {
     messages: [
       {
         role: 'system',
@@ -114,7 +119,7 @@ ai.post('/summarize', zValidator('json', summarySchema), async (c) => {
     .join('\n');
 
   try {
-    const response = await c.env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    const response = await c.env.AI.run(AI_MODEL, {
       messages: [
         {
           role: 'system',

@@ -2,10 +2,11 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, desc, and, sql } from 'drizzle-orm';
-import { books, readingProgress, subscriptions, shelfBooks, libraryShelves, users } from '@bukoo/db';
-import { isBookAccessible } from '@bukoo/shared-types';
+import { books, readingProgress, shelfBooks, libraryShelves, users } from '@bukoo/db';
+import { isBookAccessible, type BookDto, type SubscriptionTier } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { getUserTier } from '../lib/tier.js';
 import type { Env } from '../types/env.js';
 
 const booksRouter = new Hono<{ Bindings: Env }>();
@@ -23,18 +24,7 @@ function parseJsonArray(value: string | null): string[] {
   try { return JSON.parse(value); } catch { return []; }
 }
 
-/** Resolves the user's active subscription tier from D1 */
-async function getUserTier(userId: string, db: ReturnType<typeof createDb>): Promise<string> {
-  const sub = await db.query.subscriptions.findFirst({
-    where: eq(subscriptions.userId, userId),
-  });
-  if (sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING')) {
-    return sub.planId.replace('plan_', '').toUpperCase();
-  }
-  return 'FREE';
-}
-
-function formatBook(book: typeof books.$inferSelect, userTier: string, progress?: number | null, shelfSlug?: string | null) {
+function formatBook(book: typeof books.$inferSelect, userTier: string, progress?: number | null, shelfSlug?: string | null): BookDto {
   return {
     id: book.id,
     title: book.title,
@@ -54,7 +44,7 @@ function formatBook(book: typeof books.$inferSelect, userTier: string, progress?
     readCount: book.readCount,
     readTimeMinutes: book.readTimeMinutes,
     isPublished: book.isPublished,
-    subscriptionRequired: book.subscriptionRequired,
+    subscriptionRequired: book.subscriptionRequired as SubscriptionTier,
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     is_accessible: isBookAccessible(userTier, book.subscriptionRequired),
@@ -125,7 +115,7 @@ booksRouter.get('/', zValidator('query', querySchema), async (c) => {
       `SELECT ${bookColumns} FROM books b, json_each(b.genre)
        WHERE b.is_published = 1 AND json_each.value = ?
        ${language ? 'AND b.language = ?' : ''}
-       ORDER BY b.${orderBy.replace(' ', ' ')}
+       ORDER BY b.${orderBy}
        LIMIT ? OFFSET ?`
     );
     const args: unknown[] = [genre];

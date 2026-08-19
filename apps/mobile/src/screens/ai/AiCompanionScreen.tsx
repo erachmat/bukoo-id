@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MainTabParamList, RootStackParamList } from '../../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,13 +15,13 @@ import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { useRecommendedBooks } from '../../hooks/api/useBooksApi';
 import { getCoverUrl } from '../../services/coverUrl';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function AiCompanionScreen() {
   const navigation = useNavigation<NavigationProp>();
   const isFocused = useIsFocused();
   const user = useAuthStore((state) => state.user);
-  const activeTier = user?.subscription?.active ? user.subscription.tier : (user?.subscriptionTier || 'FREE');
+  const activeTier = user?.subscription?.active ? user.subscription.tier : 'FREE';
 
   const [summaryModalVisible, setSummaryModalVisible] = useState(false);
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
@@ -33,7 +33,7 @@ export default function AiCompanionScreen() {
       id: b.id,
       title: b.title,
       author: b.author,
-      coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+      coverUrl: getCoverUrl(b.coverKey) || '',
       genre: Array.isArray(b.genre) && b.genre.length > 0 ? b.genre[0] : 'Fiksi',
       matchPercent: b.matchPercent || 90,
     }));
@@ -70,10 +70,6 @@ export default function AiCompanionScreen() {
             <Ionicons name="arrow-back" size={24} color={COLORS.gold} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
-            <View style={styles.aiBadgeIcon}>
-              <Text style={styles.aiBadgeIconText}>AI</Text>
-            </View>
-            <Ionicons name="sparkles" size={16} color={COLORS.gold} />
             <Text style={styles.headerTitle}>AI Companion & Assistant</Text>
           </View>
         </View>
@@ -166,7 +162,7 @@ export default function AiCompanionScreen() {
                     navigation.navigate('ReadingStack', {
                       screen: 'BookDetail',
                       params: { bookId: item.id },
-                    } as never)
+                    })
                   }
                 >
                   <Image source={{ uri: item.coverUrl }} style={styles.recommendCover} />

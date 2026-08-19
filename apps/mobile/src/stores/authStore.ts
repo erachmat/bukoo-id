@@ -1,35 +1,28 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export interface UserSubscriptionDto {
-  active: boolean;
-  tier: string;
-  planId: string | null;
-  expiresAt: string | null;
-  status: string | null;
-  paymentGateway: string | null;
-}
-
-export interface UserPublicDto {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  subscriptionTier: string;
-  onboardingCompleted: boolean;
-  createdAt: string;
-  /** Server-computed subscription state (from GET /v1/users/me). */
-  subscription?: UserSubscriptionDto | null;
-}
+import type { AuthUserDto, UserDto } from '@bukoo/shared-types';
 
 interface AuthState {
-  user: UserPublicDto | null;
+  user: UserDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setUser: (user: UserPublicDto) => void;
+  setUser: (user: UserDto) => void;
   clearUser: () => void;
   setLoading: (isLoading: boolean) => void;
+}
+
+/**
+ * Convert an auth-response user (login/register/refresh — no subscription or
+ * favorite genres yet) into the full /users/me shape. The full profile is
+ * hydrated later via GET /v1/users/me.
+ */
+export function toUserDto(user: AuthUserDto): UserDto {
+  return {
+    ...user,
+    favoriteGenres: [],
+    subscription: null,
+  };
 }
 
 export const useAuthStore = create<AuthState>()(

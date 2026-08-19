@@ -21,7 +21,7 @@ export function RelatedBooksCarousel({ currentBookId }: RelatedBooksCarouselProp
     .slice(0, 5)
     .map((b) => ({
       ...b,
-      coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+      coverUrl: getCoverUrl(b.coverKey) || '',
     }));
 
   if (relatedList.length === 0) {
@@ -45,7 +45,7 @@ export function RelatedBooksCarousel({ currentBookId }: RelatedBooksCarouselProp
               navigation.push('ReadingStack', {
                 screen: 'BookDetail',
                 params: { bookId: item.id },
-              } as never)
+              })
             }
           >
             <Image source={{ uri: item.coverUrl }} style={styles.coverImage} />

@@ -12,6 +12,7 @@ import { communityService } from '../../services/communityService';
 import { CommunityPostDto, CommunityEventDto, CommunityPostType } from '../../services/api';
 import { CreatePostModal } from './components/CreatePostModal';
 import { PostCommentsModal } from './components/PostCommentsModal';
+import ResponsiveContainer from '../../components/ResponsiveContainer';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -128,7 +129,8 @@ export default function CommunityScreen() {
 
   const handleShare = (post: CommunityPostDto) => {
     const bookLine = post.book ? `\n📖 ${post.book.title} — ${post.book.author}` : '';
-    Share.share({ message: `"${post.content}" — ${post.user.name} di BUKOO${bookLine}` }).catch(() => { });
+    const authorName = post.user?.name ?? 'Pembaca BUKOO';
+    Share.share({ message: `"${post.content}" — ${authorName} di BUKOO${bookLine}` }).catch(() => { });
   };
 
   const handleDeletePost = (post: CommunityPostDto) => {
@@ -165,6 +167,7 @@ export default function CommunityScreen() {
           />
         }
       >
+        <ResponsiveContainer>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -301,18 +304,18 @@ export default function CommunityScreen() {
               visiblePosts.map((post) => (
                 <View key={post.id} style={styles.postCard}>
                   <View style={styles.userHeader}>
-                    {post.user.avatarUrl ? (
+                    {post.user?.avatarUrl ? (
                       <Image source={{ uri: post.user.avatarUrl }} style={styles.userAvatar} />
                     ) : (
                       <View style={[styles.userAvatarPlaceholder, { backgroundColor: COLORS.gold }]}>
-                        <Text style={styles.avatarLetter}>{post.user.name.charAt(0).toUpperCase()}</Text>
+                        <Text style={styles.avatarLetter}>{(post.user?.name ?? 'Pembaca BUKOO').charAt(0).toUpperCase()}</Text>
                       </View>
                     )}
                     <View style={styles.userInfo}>
-                      <Text style={styles.userName}>{post.user.name}</Text>
+                      <Text style={styles.userName}>{post.user?.name ?? 'Pembaca BUKOO'}</Text>
                       <Text style={styles.postTime}>{timeAgo(post.createdAt)}</Text>
                     </View>
-                    {user?.id === post.user.id && (
+                    {user?.id === post.user?.id && (
                       <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePost(post)}>
                         <Ionicons name="trash-outline" size={16} color={COLORS.muted} />
                       </TouchableOpacity>
@@ -327,7 +330,7 @@ export default function CommunityScreen() {
                         navigation.navigate('ReadingStack', {
                           screen: 'BookDetail',
                           params: { bookId: post.book!.id },
-                        } as never)
+                        })
                       }
                     >
                       {post.book.coverUrl ? (
@@ -392,6 +395,7 @@ export default function CommunityScreen() {
             )}
           </>
         )}
+        </ResponsiveContainer>
       </ScrollView>
 
       {/* Create Post Modal */}

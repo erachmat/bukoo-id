@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { prismaBookToCatalogBook } from '@/lib/data/book-mapper'
+import { bookRowToCatalogBook } from '@/lib/data/book-mapper'
 import { parseLibraryCatalogParams } from '@/lib/library/catalog-params'
 import { findBooksForLibraryCatalog } from '@/lib/library/catalog-query'
 import { BookCatalogCard } from '@/components/catalog/book-catalog-card'
@@ -19,7 +19,7 @@ export default async function LibraryPage(props: {
 
   const limit = raw.limit ? Number(raw.limit) : 6
   const books = await findBooksForLibraryCatalog(filters, limit)
-  const catalogBooks = books.map(prismaBookToCatalogBook)
+  const catalogBooks = books.map(bookRowToCatalogBook)
 
   const hasMore = catalogBooks.length === limit
   const nextLimit = limit + 6

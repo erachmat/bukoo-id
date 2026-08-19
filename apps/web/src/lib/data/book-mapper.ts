@@ -1,8 +1,26 @@
 import type { books } from '@bukoo/db'
-import type { MockBook } from '@/lib/data/mock-books'
 import { getCoverUrl } from '@/lib/cover-url'
 
-export function prismaBookToCatalogBook(book: typeof books.$inferSelect): MockBook {
+/**
+ * Catalog book DTO used by the reader-app UI (library grid + book detail).
+ * Resolves the API's coverKey to a CDN URL.
+ */
+export type CatalogBook = {
+  id: string
+  title: string
+  author: string
+  description: string
+  coverUrl: string
+  genre: string[]
+  language: string
+  year: number
+  pageCount: number
+  readCount: number
+  isPremium: boolean
+  subscriptionRequired?: string
+}
+
+export function bookRowToCatalogBook(book: typeof books.$inferSelect): CatalogBook {
   const genreList = typeof book.genre === 'string' ? JSON.parse(book.genre || '[]') : book.genre
   return {
     id: book.id,

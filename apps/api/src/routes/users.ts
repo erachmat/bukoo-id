@@ -5,63 +5,11 @@ import { eq } from 'drizzle-orm';
 import { users, subscriptions } from '@bukoo/db';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { serializeUser } from '../lib/user-serializers.js';
 import type { Env } from '../types/env.js';
 
 const usersRouter = new Hono<{ Bindings: Env }>();
 usersRouter.use('*', authMiddleware);
-
-/** Favorite genres are stored as a JSON text column; parse defensively on read. */
-function parseFavoriteGenres(raw: string | null): string[] {
-  try {
-    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(parsed) ? parsed.filter((g): g is string => typeof g === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
-function serializeUser(
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    avatar: string | null;
-    role: string;
-    onboardingCompleted: boolean;
-    favoriteGenres: string | null;
-    createdAt: string;
-  },
-  sub: {
-    planId: string;
-    currentPeriodEnd: string | null;
-    status: string;
-    paymentGateway: string | null;
-  } | null,
-) {
-  const active = !!sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING');
-  const subscription = sub
-    ? {
-        active,
-        tier: active ? sub.planId.replace('plan_', '').toUpperCase() : 'FREE',
-        planId: sub.planId,
-        expiresAt: sub.currentPeriodEnd ?? null,
-        status: sub.status,
-        paymentGateway: sub.paymentGateway ?? null,
-      }
-    : null;
-
-  return {
-    id: user.id,
-    name: user.name ?? '',
-    email: user.email,
-    avatarUrl: user.avatar,
-    role: user.role,
-    onboardingCompleted: user.onboardingCompleted,
-    favoriteGenres: parseFavoriteGenres(user.favoriteGenres),
-    createdAt: user.createdAt,
-    subscription,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // GET /v1/users/me

@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList, MainTabParamList } from '../navigation/types';
+import { RootStackParamList } from '../navigation/types';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { FONTS } from '../constants/FONTS';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function OfflineSyncBanner() {
   const navigation = useNavigation<NavigationProp>();
@@ -40,7 +40,7 @@ export function OfflineSyncBanner() {
       navigation.navigate('MainTabs', {
         screen: 'Library',
         params: { tab: 'diunduh' },
-      } as never);
+      });
     }
   };
 

@@ -1,3 +1,143 @@
+# Share to Social Media (IG Story) — 2026-08-20
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-20-share-to-social*`, `.superpowers/sdd/share-to-social/`). User-approved ("Start implementation").
+- `[x]` 2. Deps: `react-native-share@^12.3.1` + `react-native-view-shot@^5.1.1` in `apps/mobile/package.json` (autolink only, **no prebuild**).
+- `[x]` 3. Share core: `services/shareService.ts`, `components/share/ShareCard.tsx` (4 variants), `components/share/ShareSheetModal.tsx`.
+- `[x]` 4. Book Detail: share icon in floating header → book + progress cards; link `bukoo.id/book/<id>`.
+- `[x]` 5. Profile: share icon in "Pencapaian" → stats card; link `bukoo.id`.
+- `[x]` 6. Reader: wire `BookCompletionModal.onShareAchievement` → achievement card (lazy cover fetch).
+- `[x]` 7. Verification: mobile tsc ✅ / lint 0 errors 0 warnings ✅ / test (no script — stated); `./gradlew assembleDebug` BUILD SUCCESSFUL (autolink confirmed, no prebuild).
+- `[ ]` 8. (manual/device QA) All 4 cards → IG Story sticker + link; generic share sheet; IG-not-installed fallback.
+
+# Tablet-Responsive Layouts — 4 Tab Screens — 2026-08-20
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-20-tablet-responsive*`, `.superpowers/sdd/tablet-responsive/`). User-approved.
+- `[x]` 2. Shared infra: `constants/LAYOUT.ts` (`TABLET_BREAKPOINT=600`, `MAX_CONTENT_WIDTH=720`), `hooks/useResponsive.ts` (`useIsTablet`/`useResponsive`), `components/ResponsiveContainer.tsx`.
+- `[x]` 3. `MainTabs` tab bar capped (720) + centered on tablet via `marginHorizontal:'auto'`; phone unchanged.
+- `[x]` 4. `HomeScreen` wrapped in container; A/B grid 2→3 cols on tablet (dynamic key remount, `gridCardTablet` maxWidth 31%).
+- `[x]` 5. `LibraryScreen` wrapped in container; stats grid 2×2 → 4-in-row on tablet.
+- `[x]` 6. `CommunityScreen` wrapped in container; single-column feed kept.
+- `[x]` 7. `ProfileScreen` wrapped in container; profile header + streak side-by-side on tablet; avatar 90→110; inline modals maxWidth →440. (EditProfile/ReadingAnalytics are bottom sheets — no change.)
+- `[x]` 8. Verification: mobile tsc ✅ / lint 0 errors ✅ / test (no script — stated). Portrait-only maintained.
+- `[ ]` 9. (manual/device QA) Tablet portrait ~800–1024dp: content centered 720, tab bar capped+centered, Home grid 3-col, Library stats 4-in-row, Profile 2-col, modals ≤440; phone ~390 unchanged.
+
+# Mobile Launcher & Splash Icon Swap — 2026-08-20
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-20-mobile-icon-splash-swap*`, `.superpowers/sdd/mobile-icon-splash-swap/`). User-approved.
+- `[x]` 2. Expo assets: `icon.png` (1024) + `adaptive-icon.png` (512/1024) ← `assets/bukoo-icon-rounded.png`; new `splash-icon.png` ← `assets/bukoo-logo-transparent.png`.
+- `[x]` 3. Native launcher: `ic_launcher.webp` + `ic_launcher_round.webp` (48–192) + `ic_launcher_foreground.webp` (108–432, content 50%) regenerated.
+- `[x]` 4. Native splash: `drawable-*/splashscreen_logo.png` (288–1152) regenerated fit-to-height. No prebuild; XML/theme/manifest untouched.
+- `[x]` 5. Verification: `file`/`identify` all assets ✅; `./gradlew assembleDebug` BUILD SUCCESSFUL ✅; mobile tsc ✅ / lint ✅ / test (no script — stated).
+- `[ ]` 6. (manual/device QA) Cold launch: launcher shows new rounded icon; splash shows new transparent logo.
+
+# Shared Types → Real DTO Contract — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-shared-types-dto-refactor*`, `.superpowers/sdd/shared-types-dto-refactor/`). User-approved.
+- `[x]` 2. `@bukoo/shared-types` rewritten as the real contract (`BookDto`, `UserDto`/`AuthUserDto`, reading/goals/community DTOs; `SubscriptionTier` + `'PREMIUM'`; `isBookAccessible` kept). dist rebuilt.
+- `[x]` 3. Mobile `services/api.ts` re-exports shared DTOs (local type aliases); `AuthResponseDto` + `expiresIn`.
+- `[x]` 4. Mobile `authStore` → shared `UserDto`; new `toUserDto()` adapter at 6 auth setUser sites; dead `subscriptionTier` branches removed.
+- `[x]` 5. Mobile: 5 `b as { coverKey }` casts removed; inline Library book-shape type removed.
+- `[x]` 6. **Bug fixes**: Library tab permanently-empty (`/books` bare array) + CreatePostModal empty book picker + ProfileScreen goal shape; deleted dead `ReadingGoalsWidget.tsx`.
+- `[x]` 7. Web `lib/subscription.ts` → shared `SubscriptionTier` (`type Tier = SubscriptionTier`).
+- `[x]` 8. API DTO builders annotated: `formatBook(): BookDto`, `serializeUser(): UserDto`, `toUserPublic(): AuthUserDto`.
+- `[x]` 9. Verification: shared-types typecheck+build ✅; API tsc/lint/tests **14/14** ✅; mobile tsc/lint ✅ (no test script — stated); web tsc/lint 0 errors ✅ (no test script — stated). Greps: removed symbols → 0.
+- `[ ]` 10. (manual/device QA) Library tab now shows real books; CreatePost book picker lists books; profile goal shows saved value; login still works end-to-end.
+
+# Mobile Type-Safety Cleanup — Remove `as any` / `as never` / Double-Casts — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-mobile-type-safety*`, `.superpowers/sdd/mobile-type-safety/`). User-approved.
+- `[x]` 2. Removed **all 18 type-unsafe casts** (13× `as never` nav, `ReadingScreen as any`, `WebView as unknown as ComponentType<any>`, `Ionicons name as never`, `navigate('Subscription' as never)`).
+- `[x]` 3. Root cause of nav casts: `NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>` intersection broke `navigate` overloads → changed 5 screens to `RootStackParamList` (verified no tab-only routes navigated).
+- `[x]` 4. Killed the **dead root `ReadingScreen` route** (never navigated; reader opens via `ReadingStack` → `'Reading'`); retyped `ReadingScreen` to `ReadingStackParamList['Reading']`; dropped `as any`.
+- `[x]` 5. `getTypeIcon` return annotated with `ComponentProps<typeof Ionicons>['name']`.
+- `[x]` 6. Verification: mobile tsc ✅ / lint ✅ / test (no test script — stated). Grep for `as never|as any|as unknown as|ComponentType<any>` → **0 hits**.
+- `[ ]` 7. (manual/device QA) Home → book → reader opens; Library/Search/Community nav unchanged; banner offline shortcut → "Diunduh" tab.
+
+# API Helper Consolidation — Tier, Cover URL, User Serializers — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-api-helper-consolidation*`, `.superpowers/sdd/api-helper-consolidation/`). User-approved.
+- `[x]` 2. New `src/lib/tier.ts` (`getUserTier`) — was duplicated in books.ts + reading.ts.
+- `[x]` 3. New `src/lib/cover-url.ts` (`buildCoverUrl`) — was duplicated in reading.ts + community.ts.
+- `[x]` 4. New `src/lib/user-serializers.ts` (`parseFavoriteGenres`, `toUserPublic`, `serializeUser`; `serializeUser` reuses `toUserPublic`).
+- `[x]` 5. All 5 route files import from libs; local defs + now-unused imports removed.
+- `[x]` 6. Verification: API tsc ✅ / lint 0 errors / tests **14/14** ✅. Greps: 0 local helper defs in routes; lib exports present. No deploy.
+
+# Web Quick Wins — Dead Code, Legacy Scripts, Misleading Names — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-web-cleanup-quick-wins*`, `.superpowers/sdd/web-cleanup-quick-wins/`). User-approved.
+- `[x]` 2. Deleted dead components: `book-card.tsx`, `header-search.tsx` (+ `layout/` dir), `ComingSoonPage.tsx`.
+- `[x]` 3. `mock-books.ts` deleted; `MockBook` type relocated to `book-mapper.ts` as **`CatalogBook`**; fake `mockBooks` array (Unsplash) removed.
+- `[x]` 4. Renamed `prismaBookToCatalogBook` → **`bookRowToCatalogBook`** (mapper + 2 callers).
+- `[x]` 5. Deleted legacy `scripts/` (3 files) + 12 `backup-*.dump` files.
+- `[x]` 6. Book detail page: dropped unused `users as usersTable`; merged two `lucide-react` imports.
+- `[x]` 7. `@base-ui/react` **kept** (roadmap correction — actively used by 9 UI files).
+- `[x]` 8. Verification: web tsc ✅ / lint 0 errors (18 pre-existing warnings) / **no test script — stated explicitly**. Greps: removed symbols → 0 hits; `CatalogBook|bookRowToCatalogBook` → 4 expected files only.
+
+# API Quick Wins — Stale Leftovers, No-ops, Streak Simplification — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-api-cleanup-quick-wins*`, `.superpowers/sdd/api-cleanup-quick-wins/`). User-approved.
+- `[x]` 2. Deleted stale NestJS leftover `apps/api/api/index.ts` + `api/` dir (uncompilable, excluded from tsconfig).
+- `[x]` 3. `apps/api/.env.example` rewritten as truthful worker-secrets doc (`.dev.vars` local / `wrangler secret put` prod); no `PORT`/`DATABASE_URL`/`NODE_ENV`. Real `.env` untouched.
+- `[x]` 4. Root `.gitignore` — added `.dev.vars` (was NOT ignored; prevents secret commits).
+- `[x]` 5. `books.ts` — removed no-op `orderBy.replace(' ', ' ')`.
+- `[x]` 6. `goals.ts` `/streak/current` — convoluted loop → pure `computeCurrentStreak()` (`src/lib/streak.ts`), behavior-preserving.
+- `[x]` 7. New `src/lib/streak.test.ts` (6 tests).
+- `[x]` 8. Verification: API tsc ✅ / lint 0 errors (4 pre-existing no-console warnings) / tests **14/14** ✅. Greps: NestJS leftovers → 0, stale env keys → 0, `orderBy.replace` → 0, `api/` gone, `.dev.vars` ignored. No deploy.
+
+# Mobile Quick Wins — Dead Code, Fake Data, Stale Artifacts — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-mobile-cleanup-quick-wins*`, `.superpowers/sdd/mobile-cleanup-quick-wins/`). User-approved (favorite-genre fallback = **Option A** honest empty).
+- `[x]` 2. Deleted dead `StoreScreen.tsx` (388 LOC, unregistered) + `store/` dir.
+- `[x]` 3. `ProfileScreen` fake stats → real local data (`readingSync` + `readingGoalService`): quick stats (finished / jam baca), **Follower stat removed** (no data source), streak section = real `getWeekLogs()` + `streakDays` ("Minggu Ini", non-functional chevrons removed), Pencapaian grid real values.
+- `[x]` 4. `HomeScreen` name fallback `'Baihaqi'` → `'Pembaca BUKOO'`.
+- `[x]` 5. `ReadingScreen` — removed `[Perf]` (×3) + `[WebView Diagnostic]` (×2) logs + now-unused timing refs; `console.error`/`warn` error handlers kept.
+- `[x]` 6. `.env.example` — real vars only (`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_GOOGLE_CLIENT_ID`); Supabase + misnamed Google var removed.
+- `[x]` 7. Favorite-genre fallback → Option A: `userProfileService.getFavoriteGenres()` → `[]`; `EditProfileModal` seeds `[]`.
+- `[x]` 8. Verification: mobile tsc ✅ / lint ✅ (no test script — stated). Greps: `StoreScreen|Baihaqi|[Perf]|[WebView Diagnostic]` → 0 hits; `SUPABASE` in `.env.example` → 0; `store/` dir gone.
+- `[ ]` 9. (manual/device QA) Profile tab shows real stats (0 on fresh install); Home greeting shows "Pembaca BUKOO" when unnamed; reader loads normally; Edit Profile genre picker starts empty.
+
+# Hide Reader Audio Icon & Fix Home Category Filter — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-hide-reader-audio-fix-home-category-filter*`, `.superpowers/sdd/hide-reader-audio-fix-home-category-filter/`).
+- `[x]` 2. **Hide 'Audio book' headset icon** — removed the `headset-outline` button ("Audio Companion Narasi") from the `ReadingScreen` header action row + the now-unused `audioPlayerService` import. Audio companion still reachable via Home `MiniAudioPlayer` (owns `AudioPlayerModal`).
+- `[x]` 3. **Home category filter root cause** — backend `GET /v1/books?genre=…` verified correct (prod: `Fiksi`→3, `Agama`→0, none→3). Bug was client-side in `HomeScreen`: when a category returned **0 books** it fell back to `trendingBooks`, so e.g. "Agama" showed the same unfiltered trending list. Fixed: selected category always shows `categoryBooks` (empty → "Belum ada buku dalam kategori X" empty state); trending only under "Semua".
+- `[x]` 4. Verification: mobile typecheck ✅ / lint ✅ (no test script — stated). QA user `qa-genre-20260819@example.com` used to probe prod endpoint, then deleted (0 rows) + temp files removed. No backend change / no deploy.
+- `[ ]` 5. (manual/device QA) Metro reload → headset icon gone from reader top bar; "Fiksi" filters to Fiksi books; "Agama"/empty categories show the empty state instead of trending.
+
+# Fix AI Companion 502 (Deprecated Model) — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-fix-ai-companion-502*`, `.superpowers/sdd/fix-ai-companion-502/`). User-approved.
+- `[x]` 2. **Root cause** (reproduced via `wrangler dev` + remote AI binding): `@cf/meta/llama-3-8b-instruct` was **deprecated by Cloudflare on 2026-05-30** → `AI.run` throws `5028` → `/v1/ai/chat` returns 502 → mobile `aiCompanionService` shows the offline fallback. Same dead model id in all 3 AI routes (`/chat`, `/companion/summary`, `/summarize`).
+- `[x]` 3. Fix (`apps/api/src/routes/ai.ts`): swapped to `@cf/meta/llama-3.3-70b-instruct-fp8-fast` (canonical fast Llama-3.3 chat, confirmed not-deprecated in the live catalog) in all 3 `AI.run` calls + deprecation comment. No mobile change needed.
+- `[x]` 4. Verification: API typecheck ✅ / lint 0 errors / tests 8/8 ✅. **Live**: `/v1/ai/chat` → 200 (Indonesian reply), `/v1/ai/summarize` → 200 (structured summary). Temp `.dev.vars`/token cleaned up.
+- `[ ]` 5. (deploy) Redeploy `bukoo-api` (`npm run deploy` from `apps/api`) → smoke `/v1/ai/chat` 200 on prod.
+
+# Fix Community Comment Posting Crash — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-fix-community-comment-posting*`, `.superpowers/sdd/fix-community-comment-posting/`). User-approved.
+- `[x]` 2. **Root cause**: `POST /v1/community/posts/:id/comments` returned the raw Drizzle row (`{ id, postId, userId, content, createdAt }` — no `user` object). `PostCommentsModal` prepends it to the list and renders `c.user.name` → `Cannot read property 'name' of undefined`. `GET .../comments` already returned the correct DTO, so only the freshly posted comment crashed.
+- `[x]` 3. **Sibling bug (same class)**: `POST /posts` returned a raw post row (no `user`/`book`/`likedByMe`/`bookmarkedByMe`) → would crash `CommunityScreen` on post creation. Fixed both.
+- `[x]` 4. API fix (`apps/api/src/routes/community.ts`): both POST create endpoints now select joined author (+ book for posts) and return the same DTO shape as their GET counterparts.
+- `[x]` 5. Mobile defensive rendering: `PostCommentsModal.tsx` + `CommunityScreen.tsx` guard `user?.name ?? 'Pembaca BUKOO'`, `avatarUrl`, `id` so a stale deployed API can't crash the app.
+- `[x]` 6. Verification: API typecheck ✅ / lint 0 errors / tests 8/8 ✅; mobile typecheck ✅ / lint ✅ (no test script — stated). **Local smoke test**: `POST /posts/:id/comments` → 201 with `user` object; `POST /posts` → 201 with `user` + `book`; temp `.dev.vars`/token/seed cleaned up.
+- `[ ]` 7. (deploy) Redeploy `bukoo-api` so production returns the fixed DTO (mobile is already protected by defensive rendering).
+
+# Fix White Splash Screen — 2026-08-19
+
+- [x] 1. Root cause: `splashscreen_background` = `#FFFFFF` AND the `splashscreen_logo.png` images had a white background baked in (100% opaque, corners pure white) → white splash that clashed with the green branding.
+- [x] 2. `values/colors.xml`: `splashscreen_background` → `#0B1914` (BUKOO deep forest, matches `iconBackground` + `COLORS.forestDark`).
+- [x] 3. Regenerated all 5 `splashscreen_logo.png` (288/432/576/864/1152) — white stripped via soft alpha threshold → transparent bg, gray wordmark kept.
+- [x] 4. New `drawable/splash_background.xml` (layer-list: green color + centered transparent logo); `Theme.App.SplashScreen` windowBackground now points at it (was the raw PNG, which would have shown white behind the now-transparent logo).
+- [x] 5. Verified: XMLs valid; splash preview = gray logo centered on `#0B1914`; JS root view already `#0B1914` → seamless green→green.
+- [ ] 6. (manual) Rebuild/reinstall (`npm run android`) → splash is dark green with the BUKOO wordmark, no white.
+
+# Fix Android Launcher Icon Too Big — 2026-08-19
+
+- [x] 1. Root cause: `assets/adaptive-icon.png` was a full-bleed 1024×1024 artwork (green square badge + gold logo, 93.8% opaque) used as the adaptive-foreground → launcher mask clipped it with zero safe-zone margin → icon looked zoomed in / too big.
+- [x] 2. Regenerated `adaptive-icon.png` (artwork scaled to 50%, centered, transparent surround → inside the Android ~66% safe zone) and the 5 per-density `ic_launcher_foreground.webp` (108/162/216/324/432 px, lossless RGBA). Legacy `icon.png`/`ic_launcher.webp` untouched (full-bleed is correct for legacy squares).
+- [x] 3. Verified: content bbox now 50% centered; masked previews (circle/squircle/rounded-square) show the badge fully visible with dark `#0B1914` background; git diff = only the 6 icon files.
+- [ ] 4. (manual) Rebuild/reinstall (`npm run android`); if the launcher still shows the old icon, remove/re-add the shortcut (launcher icon cache).
+
 # Reader UX & Search Filter Fixes — 2026-08-19
 
 - [x] 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-reader-ux-search-fixes*`, `.superpowers/sdd/reader-ux-search-fixes/`).

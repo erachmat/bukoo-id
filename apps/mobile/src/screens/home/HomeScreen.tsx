@@ -10,15 +10,17 @@ import { BookItemDto } from '../../services/api';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
-import { RootStackParamList, MainTabParamList } from '../../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 import { QuickResumeCard } from './components/QuickResumeCard';
 import { ReadingGoalCard } from './components/ReadingGoalCard';
+import ResponsiveContainer from '../../components/ResponsiveContainer';
+import { useIsTablet } from '../../hooks/useResponsive';
 import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
 import { userProfileService } from '../../services/userProfileService';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Teknologi', 'Bisnis'];
 
@@ -44,6 +46,7 @@ export default function HomeScreen() {
   // A/B: home_layout — 'carousel' (current) vs 'grid' (2-column).
   const homeLayout = useFeatureFlag('home_layout');
   const isGrid = homeLayout === 'grid';
+  const isTablet = useIsTablet();
 
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
   const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
@@ -78,7 +81,7 @@ export default function HomeScreen() {
   // Real data only — R2 coverKey is mapped to a public cover URL.
   const toBookWithCover = (b: BookItemDto) => ({
     ...b,
-    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+    coverUrl: getCoverUrl(b.coverKey) || '',
   });
 
   const trendingBooks = (featuredData?.trending ?? []).map(toBookWithCover);
@@ -88,8 +91,9 @@ export default function HomeScreen() {
     ? (favoriteGenres.length > 0 ? `Rekomendasi & Trending` : 'Trending Minggu ini')
     : `Buku ${selectedCategory}`;
 
-  const currentBooksData = (selectedCategory !== 'Semua' && categoryBooks && categoryBooks.length > 0)
-    ? categoryBooks.map(toBookWithCover)
+  const isCategorySelected = selectedCategory !== 'Semua';
+  const currentBooksData = isCategorySelected
+    ? (categoryBooks ?? []).map(toBookWithCover)
     : trendingBooks;
 
   return (
@@ -107,10 +111,11 @@ export default function HomeScreen() {
           />
         }
       >
+        <ResponsiveContainer>
         {/* Top Greeting Header */}
         <View style={styles.header}>
           <Text style={styles.greetingText}>
-            Hi, <Text style={styles.userName}>{user?.name || 'Baihaqi'}</Text>
+            Hi, <Text style={styles.userName}>{user?.name || 'Pembaca BUKOO'}</Text>
           </Text>
           <TouchableOpacity
             style={styles.notificationButton}
@@ -173,7 +178,7 @@ export default function HomeScreen() {
             onPress={() => navigation.navigate('ReadingStack', {
               screen: 'BookDetail',
               params: { bookId: heroBook.id }
-            } as never)}
+            })}
           >
             <View style={styles.heroContent}>
               <View style={styles.heroBadge}>
@@ -211,7 +216,11 @@ export default function HomeScreen() {
         {currentBooksData.length === 0 && (
           <View style={styles.emptyContainer}>
             <Ionicons name="book-outline" size={40} color={COLORS.muted} />
-            <Text style={styles.emptyText}>Belum ada buku — nantikan koleksi BUKOO!</Text>
+            <Text style={styles.emptyText}>
+              {isCategorySelected
+                ? `Belum ada buku dalam kategori ${selectedCategory}`
+                : 'Belum ada buku — nantikan koleksi BUKOO!'}
+            </Text>
           </View>
         )}
 
@@ -219,8 +228,8 @@ export default function HomeScreen() {
         {isGrid ? (
           <FlatList
             data={currentBooksData}
-            key="grid"
-            numColumns={2}
+            key={isTablet ? 'grid-tablet' : 'grid-phone'}
+            numColumns={isTablet ? 3 : 2}
             columnWrapperStyle={styles.gridRow}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.gridContent}
@@ -229,12 +238,12 @@ export default function HomeScreen() {
               const isMatchFav = item.genre?.some((g: string) => favoriteGenres.includes(g)) || favoriteGenres.some(fg => item.title?.toLowerCase().includes(fg.toLowerCase()));
               return (
                 <TouchableOpacity
-                  style={styles.gridCard}
+                  style={[styles.gridCard, isTablet && styles.gridCardTablet]}
                   activeOpacity={0.8}
                   onPress={() => navigation.navigate('ReadingStack', {
                     screen: 'BookDetail',
                     params: { bookId: item.id }
-                  } as never)}
+                  })}
                 >
                   <View style={styles.coverWrapper}>
                     <Image source={{ uri: item.coverUrl }} style={styles.gridCover} />
@@ -271,7 +280,7 @@ export default function HomeScreen() {
                   onPress={() => navigation.navigate('ReadingStack', {
                     screen: 'BookDetail',
                     params: { bookId: item.id }
-                  } as never)}
+                  })}
                 >
                   <View style={styles.coverWrapper}>
                     <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
@@ -293,6 +302,7 @@ export default function HomeScreen() {
             }}
           />
         )}
+        </ResponsiveContainer>
       </ScrollView>
 
       <NotificationModal
@@ -502,6 +512,9 @@ const styles = StyleSheet.create({
   gridCard: {
     flex: 1,
     maxWidth: '48%',
+  },
+  gridCardTablet: {
+    maxWidth: '31%',
   },
   gridCover: {
     width: '100%',

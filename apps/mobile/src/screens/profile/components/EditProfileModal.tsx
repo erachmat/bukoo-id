@@ -41,7 +41,7 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
   const [selectedAvatarId, setSelectedAvatarId] = useState<string>('preset_pembaca');
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string>('');
   const [useCustomUrlMode, setUseCustomUrlMode] = useState<boolean>(false);
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(['Fiksi', 'Agama']);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [nameError, setNameError] = useState('');
 

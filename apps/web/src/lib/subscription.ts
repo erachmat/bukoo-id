@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { subscriptions } from '@bukoo/db';
-import { isBookAccessible } from '@bukoo/shared-types';
+import { isBookAccessible, type SubscriptionTier } from '@bukoo/shared-types';
 import type { Database } from '@/lib/db';
 
 /**
@@ -19,8 +19,8 @@ export type SubscriptionRow = {
   currentPeriodEnd: string | null;
 };
 
-/** Tier strings must match `TIER_ORDER` in @bukoo/shared-types. */
-export type Tier = 'FREE' | 'PELAJAR' | 'PERSONAL' | 'PLUS' | 'FAMILY' | 'PREMIUM';
+/** Canonical tier — from @bukoo/shared-types (matches TIER_ORDER + D1 tiers). */
+export type Tier = SubscriptionTier;
 
 const ACTIVE_STATUSES = new Set(['ACTIVE', 'TRIALING']);
 

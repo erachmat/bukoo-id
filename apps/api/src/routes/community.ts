@@ -14,6 +14,7 @@ import {
 } from '@bukoo/db';
 import { createDb } from '../db/index.js';
 import { createId } from '../lib/cuid.js';
+import { buildCoverUrl } from '../lib/cover-url.js';
 import { authMiddleware } from '../middleware/auth.js';
 import type { Env } from '../types/env.js';
 
@@ -21,11 +22,6 @@ const community = new Hono<{ Bindings: Env }>();
 community.use('*', authMiddleware);
 
 const POST_TYPES = ['REVIEW', 'QUOTE', 'DISCUSSION', 'RECOMMENDATION'] as const;
-
-/** R2 cover keys are not public URLs — the web worker serves them at /covers/<key>. */
-function buildCoverUrl(coverKey: string | null): string | null {
-  return coverKey ? `https://bukoo.id/covers/${coverKey}` : null;
-}
 
 // ---------------------------------------------------------------------------
 // GET /v1/community/posts — cursor-paginated feed
@@ -124,8 +120,42 @@ community.post('/posts', zValidator('json', createPostSchema), async (c) => {
 
   const id = createId();
   await db.insert(communityPosts).values({ id, userId, type, content, bookId: bookId ?? null });
-  const created = await db.query.communityPosts.findFirst({ where: eq(communityPosts.id, id) });
-  return c.json(created, 201);
+
+  const created = await db
+    .select({
+      post: communityPosts,
+      user: { id: users.id, name: users.name, avatar: users.avatar },
+      book: { id: books.id, title: books.title, author: books.author, coverKey: books.coverKey },
+    })
+    .from(communityPosts)
+    .innerJoin(users, eq(communityPosts.userId, users.id))
+    .leftJoin(books, eq(communityPosts.bookId, books.id))
+    .where(eq(communityPosts.id, id));
+
+  const row = created[0];
+  return c.json(
+    {
+      id: row.post.id,
+      type: row.post.type,
+      content: row.post.content,
+      bookId: row.post.bookId,
+      likeCount: row.post.likeCount,
+      commentCount: row.post.commentCount,
+      bookmarkCount: row.post.bookmarkCount,
+      likedByMe: false,
+      bookmarkedByMe: false,
+      createdAt: row.post.createdAt,
+      user: {
+        id: row.user.id,
+        name: row.user.name ?? 'Pembaca BUKOO',
+        avatarUrl: row.user.avatar,
+      },
+      book: row.book
+        ? { id: row.book.id, title: row.book.title, author: row.book.author, coverUrl: buildCoverUrl(row.book.coverKey) }
+        : null,
+    },
+    201,
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -298,8 +328,27 @@ community.post('/posts/:id/comments', zValidator('json', createCommentSchema), a
     .set({ commentCount: post.commentCount + 1 })
     .where(eq(communityPosts.id, postId));
 
-  const created = await db.query.communityComments.findFirst({ where: eq(communityComments.id, id) });
-  return c.json(created, 201);
+  const created = await db
+    .select({
+      id: communityComments.id,
+      content: communityComments.content,
+      createdAt: communityComments.createdAt,
+      user: { id: users.id, name: users.name, avatar: users.avatar },
+    })
+    .from(communityComments)
+    .innerJoin(users, eq(communityComments.userId, users.id))
+    .where(eq(communityComments.id, id));
+
+  const row = created[0];
+  return c.json(
+    {
+      id: row.id,
+      content: row.content,
+      createdAt: row.createdAt,
+      user: { id: row.user.id, name: row.user.name ?? 'Pembaca BUKOO', avatarUrl: row.user.avatar },
+    },
+    201,
+  );
 });
 
 community.delete('/comments/:id', async (c) => {

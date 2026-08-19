@@ -12,7 +12,7 @@ interface ActiveBookProgress {
   bookId: string;
   bookTitle?: string;
   bookAuthor?: string;
-  bookCoverUrl?: string;
+  bookCoverUrl?: string | null;
   progressPercent?: number;
   currentPage?: number;
   totalPages?: number;
@@ -38,7 +38,7 @@ export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
     navigation.navigate('ReadingStack', {
       screen: 'BookDetail',
       params: { bookId: activeBook.bookId },
-    } as never);
+    });
   };
 
   const pageInfo = activeBook.currentPage && activeBook.totalPages

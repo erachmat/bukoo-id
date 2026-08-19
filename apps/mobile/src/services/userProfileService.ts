@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from './api';
-import { useAuthStore, UserPublicDto } from '../stores/authStore';
+import type { UserDto } from '@bukoo/shared-types';
+import { useAuthStore } from '../stores/authStore';
 
 export interface AvatarPreset {
   id: string;
@@ -32,10 +33,10 @@ export const userProfileService = {
   getFavoriteGenres: async (): Promise<string[]> => {
     try {
       const data = await AsyncStorage.getItem(GENRES_STORAGE_KEY);
-      if (!data) return ['Fiksi', 'Agama'];
+      if (!data) return [];
       return JSON.parse(data);
     } catch {
-      return ['Fiksi', 'Agama'];
+      return [];
     }
   },
 
@@ -62,17 +63,18 @@ export const userProfileService = {
     return userProfileService.getFavoriteGenres();
   },
 
-  updateProfile: async (payload: ProfileUpdatePayload): Promise<UserPublicDto> => {
+  updateProfile: async (payload: ProfileUpdatePayload): Promise<UserDto> => {
     const currentStore = useAuthStore.getState();
     const currentUser = currentStore.user;
 
-    const updatedUser: UserPublicDto = {
+    const updatedUser: UserDto = {
       id: currentUser?.id || 'usr_local',
       name: payload.name ?? currentUser?.name ?? 'Pengguna BUKOO',
       email: currentUser?.email || '',
       avatarUrl: payload.avatarUrl !== undefined ? payload.avatarUrl : (currentUser?.avatarUrl ?? null),
-      subscriptionTier: currentUser?.subscriptionTier || 'FREE',
+      role: currentUser?.role ?? 'USER',
       onboardingCompleted: currentUser?.onboardingCompleted ?? true,
+      favoriteGenres: payload.favoriteGenres ?? currentUser?.favoriteGenres ?? [],
       createdAt: currentUser?.createdAt || new Date().toISOString(),
       subscription: currentUser?.subscription ?? null,
     };
@@ -93,8 +95,8 @@ export const userProfileService = {
         favoriteGenres: payload.favoriteGenres,
       });
       if (response.data?.id) {
-        currentStore.setUser(response.data as UserPublicDto);
-        return response.data as UserPublicDto;
+        currentStore.setUser(response.data as UserDto);
+        return response.data as UserDto;
       }
     } catch {
       console.warn('[userProfileService] API sync failed, fallback to local update.');

@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import type { MockBook } from '@/lib/data/mock-books'
+import type { CatalogBook } from '@/lib/data/book-mapper'
 
-export function BookCatalogCard({ book }: { book: MockBook }) {
+export function BookCatalogCard({ book }: { book: CatalogBook }) {
   const [hovered, setHovered] = useState(false)
 
   return (

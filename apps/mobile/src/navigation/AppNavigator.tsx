@@ -18,8 +18,7 @@ function ReadingStackNavigator() {
   return (
     <ReadingStack.Navigator screenOptions={{ headerShown: false }}>
       <ReadingStack.Screen name="BookDetail" component={BookDetailScreen} />
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <ReadingStack.Screen name="Reading" component={ReadingScreen as any} />
+      <ReadingStack.Screen name="Reading" component={ReadingScreen} />
     </ReadingStack.Navigator>
   );
 }
@@ -35,11 +34,6 @@ export default function AppNavigator() {
           <Stack.Screen name="MainTabs" component={MainTabs} />
           <Stack.Screen name="Search" component={SearchScreen} />
           <Stack.Screen name="ReadingStack" component={ReadingStackNavigator} />
-          <Stack.Screen 
-            name="ReadingScreen" 
-            component={ReadingScreen}
-            options={{ presentation: 'fullScreenModal' }}
-          />
           <Stack.Screen 
             name="Profile" 
             component={ProfileScreen}

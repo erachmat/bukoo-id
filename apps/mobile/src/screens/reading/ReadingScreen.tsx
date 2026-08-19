@@ -18,7 +18,8 @@ import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
 import { annotationSyncService } from '../../services/annotationSyncService';
 import { bookDownloadService } from '../../services/bookDownload';
-import { API_URL } from '../../services/api';
+import { API_URL, api } from '../../services/api';
+import { getCoverUrl } from '../../services/coverUrl';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,15 +29,16 @@ import { SettingsModal, ReaderTheme } from './components/SettingsModal';
 import { HighlightModal } from './components/HighlightModal';
 import { HighlightColorPickerModal } from './components/HighlightColorPickerModal';
 import { BookCompletionModal } from './components/BookCompletionModal';
+import { ShareSheetModal } from '../../components/share/ShareSheetModal';
+import { bookShareLink } from '../../services/shareService';
 import { QuickJumpSlider } from './components/QuickJumpSlider';
-import { audioPlayerService } from '../../services/audioPlayerService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/types';
+import { ReadingStackParamList } from '../../navigation/types';
 
-type ReadingScreenProps = NativeStackScreenProps<RootStackParamList, 'ReadingScreen'>;
+type ReadingScreenProps = NativeStackScreenProps<ReadingStackParamList, 'Reading'>;
 
 interface TocItem {
   id?: string;
@@ -138,7 +140,6 @@ const EPUB_JS_BRIDGE = `
     var fullB64 = __bukooChunkBuffer.join('');
     __bukooChunkBuffer = [];
     var payloadUrl = 'data:' + mimeType + ';base64,' + fullB64;
-    console.log('[WebView Diagnostic] Assembled PDF payload length:', payloadUrl.length, 'b64 length:', fullB64.length);
     window.__bukooLoadPdf(payloadUrl);
   };
 
@@ -146,7 +147,6 @@ const EPUB_JS_BRIDGE = `
     var fullB64 = __bukooChunkBuffer.join('');
     __bukooChunkBuffer = [];
     var payloadUrl = 'data:' + mimeType + ';base64,' + fullB64;
-    console.log('[WebView Diagnostic] Assembled EPUB payload length:', payloadUrl.length);
     window.__bukooLoadBook(payloadUrl, cachedLocs, targetCfi);
   };
 
@@ -1064,10 +1064,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // even if SQLite resolves after the WebView fires READY.
   const initialCfiRef = useRef(initialCfi);
 
-  // Performance metrics tracking refs
-  const mountTimeRef = useRef(performance.now());
-  const pageTurnStartTimeRef = useRef<number | null>(null);
-
   // Mirrors the latest known position CFI so the settings-sync effect can
   // preserve position when the page-turn style is switched, without depending
   // on currentCfi (which changes on every page turn and would re-run the effect).
@@ -1087,12 +1083,35 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const hasShownCompletionRef = useRef(false);
 
+  const [shareVisible, setShareVisible] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [achievementCoverUrl, setAchievementCoverUrl] = useState<string | undefined>(undefined);
+
   useEffect(() => {
     if (progressPercent >= 99.5 && !hasShownCompletionRef.current) {
       hasShownCompletionRef.current = true;
       setShowCompletionModal(true);
     }
   }, [progressPercent]);
+
+  /** Fetches the book cover on demand (route params carry no cover), then opens the share sheet. */
+  const handleShareAchievement = async () => {
+    if (shareLoading) return;
+    setShareLoading(true);
+    try {
+      let coverUrl: string | undefined;
+      try {
+        const res = await api.get(`/books/${bookId}`);
+        coverUrl = getCoverUrl(res.data?.coverKey) || res.data?.coverUrl || undefined;
+      } catch {
+        coverUrl = undefined;
+      }
+      setAchievementCoverUrl(coverUrl);
+      setShareVisible(true);
+    } finally {
+      setShareLoading(false);
+    }
+  };
 
   const [toc, setToc] = useState<TocItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -1461,12 +1480,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [controlsOpacity, pageTurnStyle]);
 
   const handleLeftTap = useCallback(() => {
-    pageTurnStartTimeRef.current = performance.now();
     webViewRef.current?.injectJavaScript('window.__bukooPrev && window.__bukooPrev(); true;');
   }, []);
 
   const handleRightTap = useCallback(() => {
-    pageTurnStartTimeRef.current = performance.now();
     webViewRef.current?.injectJavaScript('window.__bukooNext && window.__bukooNext(); true;');
   }, []);
 
@@ -1496,12 +1513,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         switch (msg.type) {
           case 'READY': {
             setIsReady(true);
-            const totalTtff = Math.round(performance.now() - mountTimeRef.current);
-            console.log(
-              `[Perf] Total Time-to-First-Frame: ${totalTtff}ms` +
-              (msg.bookLoadDurationMs ? `, In-WebView load: ${msg.bookLoadDurationMs}ms` : '') +
-              (msg.locationGenTimeMs !== undefined ? `, Location gen (${msg.cachedLocsUsed ? 'cached' : 'generated'}): ${msg.locationGenTimeMs}ms` : '')
-            );
             // Restore saved reading position after locations are generated.
             // Use the safe restore path (nudge + verify) — displaying the raw
             // saved boundary CFI makes epub.js land one page early, which caused
@@ -1528,11 +1539,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             if (msg.toc) setToc(msg.toc);
             break;
           case 'PAGE_CHANGED':
-            if (pageTurnStartTimeRef.current !== null) {
-              const latency = Math.round(performance.now() - pageTurnStartTimeRef.current);
-              console.log(`[Perf] Page turn latency: ${latency}ms`);
-              pageTurnStartTimeRef.current = null;
-            }
             if (msg.page !== undefined && msg.cfi !== undefined) {
               currentCfiRef.current = msg.cfi;
               setChapterInfo({
@@ -1579,7 +1585,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           case 'SHELL_READY':
             // Bridge script is ready — try injecting book data if available
             webViewShellReady.current = true;
-            console.log(`[Perf] WebView shell ready duration: ${Math.round(performance.now() - mountTimeRef.current)}ms`);
             break;
           default:
             break;
@@ -1675,8 +1680,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     }
   }, [isReady]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const WebViewComponent = WebView as unknown as React.ComponentType<any>;
+  const WebViewComponent = WebView;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors[theme].bg }]} edges={['top', 'left', 'right']}>
@@ -1727,24 +1731,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <TouchableOpacity
-              style={styles.headerAction}
-              onPress={() => {
-                audioPlayerService.playTrack({
-                  id: `audio-${bookId}`,
-                  bookId: bookId,
-                  bookTitle: title || 'Buku',
-                  bookAuthor: '',
-                  coverUrl: '',
-                  chapterTitle: chapterTitle || 'Bab 1',
-                  durationSeconds: 1125,
-                });
-              }}
-              accessibilityLabel="Audio Companion Narasi"
-            >
-              <Ionicons name="headset-outline" size={22} color={COLORS.gold} />
-            </TouchableOpacity>
-
             <TouchableOpacity style={styles.headerAction} onPress={() => setShowSearch(true)} accessibilityLabel="Cari dalam buku">
               <Ionicons name="search-outline" size={22} color={themeColors[theme].text} />
             </TouchableOpacity>
@@ -2005,6 +1991,26 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         onClose={() => setShowCompletionModal(false)}
         bookTitle={title}
         readingTimeMinutes={readingTimeSeconds / 60}
+        onShareAchievement={handleShareAchievement}
+      />
+
+      {/* Share to social media — completion achievement card */}
+      <ShareSheetModal
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        options={[
+          {
+            key: 'achievement',
+            label: 'Kartu Prestasi',
+            data: {
+              variant: 'achievement',
+              title: title || 'Buku BUKOO',
+              coverUrl: achievementCoverUrl,
+              readingTimeMinutes: readingTimeSeconds / 60,
+            },
+          },
+        ]}
+        link={bookShareLink(bookId)}
       />
     </SafeAreaView>
   );

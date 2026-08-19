@@ -10,6 +10,7 @@ import { hashPassword, verifyPassword } from '../lib/password.js';
 import { signJwt } from '../lib/jwt.js';
 import { createId } from '../lib/cuid.js';
 import { sendOtpEmail } from '../lib/mail.js';
+import { toUserPublic } from '../lib/user-serializers.js';
 import { authMiddleware } from '../middleware/auth.js';
 import type { Env } from '../types/env.js';
 
@@ -89,18 +90,6 @@ async function issueTokenPair(
   });
 
   return { accessToken, refreshToken: opaqueToken, expiresIn: 900 };
-}
-
-function toUserPublic(user: typeof users.$inferSelect) {
-  return {
-    id: user.id,
-    name: user.name ?? '',
-    email: user.email,
-    avatarUrl: user.avatar,
-    role: user.role,
-    onboardingCompleted: user.onboardingCompleted,
-    createdAt: user.createdAt,
-  };
 }
 
 // ---------------------------------------------------------------------------

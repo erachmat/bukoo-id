@@ -3,6 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './types';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/COLORS';
+import { MAX_CONTENT_WIDTH } from '../constants/LAYOUT';
+import { useIsTablet } from '../hooks/useResponsive';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
@@ -12,6 +14,44 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabs() {
+  const isTablet = useIsTablet();
+
+  const tabBarStyle = isTablet
+    ? {
+        position: 'absolute' as const,
+        bottom: Platform.OS === 'ios' ? 24 : 14,
+        left: 0,
+        right: 0,
+        marginHorizontal: 'auto' as const,
+        maxWidth: MAX_CONTENT_WIDTH,
+        height: Platform.OS === 'ios' ? 68 : 64,
+        backgroundColor: 'rgba(11, 25, 20, 0.98)',
+        borderRadius: 36,
+        borderTopWidth: 0,
+        paddingBottom: 0,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.45,
+        shadowRadius: 20,
+        elevation: 12,
+      }
+    : {
+        position: 'absolute' as const,
+        bottom: Platform.OS === 'ios' ? 24 : 14,
+        left: 16,
+        right: 16,
+        height: Platform.OS === 'ios' ? 68 : 64,
+        backgroundColor: 'rgba(11, 25, 20, 0.98)',
+        borderRadius: 36,
+        borderTopWidth: 0,
+        paddingBottom: 0,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.45,
+        shadowRadius: 20,
+        elevation: 12,
+      };
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -31,22 +71,7 @@ export default function MainTabs() {
           paddingTop: 6,
           paddingBottom: 2,
         },
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: Platform.OS === 'ios' ? 24 : 14,
-          left: 16,
-          right: 16,
-          height: Platform.OS === 'ios' ? 68 : 64,
-          backgroundColor: 'rgba(11, 25, 20, 0.98)',
-          borderRadius: 36,
-          borderTopWidth: 0,
-          paddingBottom: 0,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.45,
-          shadowRadius: 20,
-          elevation: 12,
-        },
+        tabBarStyle,
       }}
     >
       <Tab.Screen

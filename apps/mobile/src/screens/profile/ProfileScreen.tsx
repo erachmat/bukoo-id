@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useLogout } from '../../hooks/useAuth';
@@ -12,23 +12,51 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { LogoBukoo } from '../../assets/logo/LogoBukoo';
+import { readingSync } from '../../services/readingSync';
+import { readingGoalService } from '../../services/readingGoalService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
 import { ReadingAnalyticsModal } from './components/ReadingAnalyticsModal';
 import { EditProfileModal } from './components/EditProfileModal';
+import ResponsiveContainer from '../../components/ResponsiveContainer';
+import { useIsTablet } from '../../hooks/useResponsive';
 import { AVATAR_PRESETS } from '../../services/userProfileService';
+import { ShareSheetModal, ShareSheetOption } from '../../components/share/ShareSheetModal';
+import { appShareLink } from '../../services/shareService';
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const { mutate: logout } = useLogout();
   const navigation = useNavigation<NavigationProp>();
   const queryClient = useQueryClient();
+  const isTablet = useIsTablet();
 
   const [activeModal, setActiveModal] = useState<'account' | 'subscription' | 'preferences' | 'support' | 'about' | null>(null);
   const [newGoalMinutes, setNewGoalMinutes] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
+  const [stats, setStats] = useState({ finishedBooks: 0, totalMinutes: 0, streakDays: 0 });
+  const [weekLogs, setWeekLogs] = useState<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const [finishedBooks, totalMinutes, goals, week] = await Promise.all([
+        readingSync.getFinishedBooksCount(),
+        readingSync.getTotalReadingMinutes(),
+        readingGoalService.getGoalsState(),
+        readingGoalService.getWeekLogs(),
+      ]);
+      if (!mounted) return;
+      setStats({ finishedBooks, totalMinutes, streakDays: goals.streakDays ?? 0 });
+      setWeekLogs(week);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const { data: goalsData } = useQuery({
     queryKey: ['reading', 'goals'],
@@ -68,7 +96,7 @@ export default function ProfileScreen() {
       navigation.navigate('Subscription');
     } else if (itemId === 'preferences') {
       setActiveModal('preferences');
-      setNewGoalMinutes(goalsData?.goal?.dailyGoalMinutes?.toString() || '30');
+      setNewGoalMinutes(goalsData?.dailyGoalMinutes?.toString() || '30');
     } else if (itemId === 'support') {
       setActiveModal('support');
     } else if (itemId === 'about') {
@@ -76,11 +104,26 @@ export default function ProfileScreen() {
     }
   };
 
-  const activeTier = user?.subscription?.active ? user.subscription.tier : (user?.subscriptionTier || 'FREE');
+  const activeTier = user?.subscription?.active ? user.subscription.tier : 'FREE';
+
+  const statsShareOptions: ShareSheetOption[] = [
+    {
+      key: 'stats',
+      label: 'Kartu Statistik',
+      data: {
+        variant: 'stats',
+        userName: user?.name || 'Pembaca BUKOO',
+        finishedBooks: stats.finishedBooks,
+        readingHours: Math.round(stats.totalMinutes / 60),
+        streakDays: stats.streakDays,
+      },
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ResponsiveContainer>
         {/* Top Header Bar with Logo & Subscription Status */}
         <View style={styles.topHeaderBar}>
           <View style={styles.brandContainer}>
@@ -101,19 +144,20 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Profile Avatar & Info Section */}
-        <View style={styles.profileSection}>
+        {/* Profile header + streak — side-by-side on tablets, stacked on phones */}
+        <View style={isTablet ? styles.profileTopRow : undefined}>
+        <View style={[styles.profileSection, isTablet && styles.profileSectionTablet]}>
           <TouchableOpacity
-            style={styles.avatarBorderFrame}
+            style={[styles.avatarBorderFrame, isTablet && styles.avatarBorderFrameTablet]}
             onPress={() => setActiveModal('account')}
             activeOpacity={0.8}
           >
             {user?.avatarUrl?.startsWith('http://') || user?.avatarUrl?.startsWith('https://') ? (
-              <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
+              <Image source={{ uri: user.avatarUrl }} style={[styles.avatarImage, isTablet && styles.avatarImageTablet]} />
             ) : (() => {
               const presetObj = AVATAR_PRESETS.find((p) => p.id === user?.avatarUrl) || AVATAR_PRESETS[0];
               return (
-                <View style={[styles.avatarImage, { backgroundColor: presetObj.bgColor, alignItems: 'center', justifyContent: 'center' }]}>
+                <View style={[styles.avatarImage, isTablet && styles.avatarImageTablet, { backgroundColor: presetObj.bgColor, alignItems: 'center', justifyContent: 'center' }]}>
                   <Text style={{ fontSize: 36 }}>{presetObj.emoji}</Text>
                 </View>
               );
@@ -142,51 +186,41 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Quick Stats Row */}
-          <View style={styles.quickStatsRow}>
+          {/* <View style={styles.quickStatsRow}>
             <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>47</Text>
+              <Text style={styles.quickStatNumber}>{stats.finishedBooks}</Text>
               <Text style={styles.quickStatLabel}>Selesai</Text>
             </View>
             <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>312</Text>
+              <Text style={styles.quickStatNumber}>{Math.round(stats.totalMinutes / 60)}</Text>
               <Text style={styles.quickStatLabel}>jam baca</Text>
             </View>
-            <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>128</Text>
-              <Text style={styles.quickStatLabel}>Follower</Text>
-            </View>
-          </View>
+          </View> */}
         </View>
 
         {/* Weekly Streak Calendar Bar */}
-        <View style={styles.streakSection}>
+        <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
           <View style={styles.streakHeaderRow}>
-            <TouchableOpacity activeOpacity={0.6}>
-              <Ionicons name="chevron-back" size={20} color={COLORS.gold} />
-            </TouchableOpacity>
-            <Text style={styles.streakTitle}>Agustus Week 1</Text>
-            <TouchableOpacity activeOpacity={0.6}>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
-            </TouchableOpacity>
+            <Text style={styles.streakTitle}>Minggu Ini</Text>
           </View>
 
           {/* Days Header */}
           <View style={styles.daysHeaderRow}>
-            {['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((day, idx) => (
-              <Text key={`day-label-${idx}`} style={styles.dayLabelText}>{day}</Text>
+            {weekLogs.map((day) => (
+              <Text key={`day-label-${day.dateStr}`} style={styles.dayLabelText}>{day.dayLabel[0]}</Text>
             ))}
           </View>
 
           {/* Days Pills */}
           <View style={styles.daysPillRow}>
-            {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => {
-              const isActive = dayNum <= 6;
+            {weekLogs.map((day) => {
+              const dayNum = new Date(day.dateStr).getDate();
               return (
                 <View
-                  key={`day-num-${dayNum}`}
-                  style={[styles.dayPill, isActive ? styles.dayPillActive : styles.dayPillInactive]}
+                  key={`day-num-${day.dateStr}`}
+                  style={[styles.dayPill, day.isCompleted ? styles.dayPillActive : styles.dayPillInactive]}
                 >
-                  <Text style={[styles.dayNumText, isActive ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                  <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
                     {dayNum}
                   </Text>
                 </View>
@@ -197,28 +231,39 @@ export default function ProfileScreen() {
           {/* Streak Indicator */}
           <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
             <Ionicons name="flame" size={22} color={COLORS.gold} />
-            <Text style={styles.streakCountNumber}>21</Text>
+            <Text style={styles.streakCountNumber}>{stats.streakDays}</Text>
             <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
           </TouchableOpacity>
+        </View>
         </View>
 
         {/* Pencapaian Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Pencapaian</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Pencapaian</Text>
+            <TouchableOpacity
+              style={styles.shareIconBtn}
+              onPress={() => setShareVisible(true)}
+              hitSlop={8}
+              accessibilityLabel="Bagikan pencapaian"
+            >
+              <Ionicons name="share-social-outline" size={18} color={COLORS.gold} />
+            </TouchableOpacity>
+          </View>
           <View style={styles.statsGrid}>
             <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
               <Ionicons name="book-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>47</Text>
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
               <Text style={styles.statTileLabel}>Buku selesai</Text>
             </View>
             <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
               <Ionicons name="time-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>312</Text>
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{Math.round(stats.totalMinutes / 60)}</Text>
               <Text style={styles.statTileLabel}>Jam Membaca</Text>
             </View>
             <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
               <Ionicons name="flame-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>21</Text>
+              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
               <Text style={styles.statTileLabel}>Hari Streak</Text>
             </View>
           </View>
@@ -245,6 +290,7 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Keluar</Text>
         </TouchableOpacity>
+        </ResponsiveContainer>
       </ScrollView>
 
 
@@ -254,7 +300,7 @@ export default function ProfileScreen() {
       {/* Preferences (Goals) Modal */}
       <Modal visible={activeModal === 'preferences'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, isTablet && styles.modalCardTablet]}>
             <Text style={styles.modalTitle}>Preferensi Target Bacaan</Text>
             <Text style={styles.modalSubtitle}>Sesuaikan target membaca harian Anda (menit):</Text>
 
@@ -303,7 +349,7 @@ export default function ProfileScreen() {
       {/* Help & Support Modal */}
       <Modal visible={activeModal === 'support'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, isTablet && styles.modalCardTablet]}>
             <Text style={styles.modalTitle}>Bantuan & Dukungan</Text>
             <ScrollView style={{ maxHeight: 300, marginVertical: 12 }} showsVerticalScrollIndicator={false}>
               <View style={styles.faqBlock}>
@@ -329,7 +375,7 @@ export default function ProfileScreen() {
       {/* About Modal */}
       <Modal visible={activeModal === 'about'} transparent animationType="fade" onRequestClose={() => setActiveModal(null)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, isTablet && styles.modalCardTablet]}>
             <Text style={styles.modalTitle}>Tentang BUKOO</Text>
             <View style={{ alignItems: 'center', marginVertical: 24 }}>
               <Text style={{ fontSize: 28, fontFamily: FONTS.serifBold, fontWeight: 'bold', color: COLORS.gold, marginBottom: 8 }}>BUKOO</Text>
@@ -353,7 +399,7 @@ export default function ProfileScreen() {
       {/* Custom Logout Modal */}
       <Modal visible={showLogoutModal} transparent animationType="fade" onRequestClose={() => setShowLogoutModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.logoutModalCard}>
+          <View style={[styles.logoutModalCard, isTablet && styles.logoutModalCardTablet]}>
             <View style={styles.logoutIconBadge}>
               <Ionicons name="log-out-outline" size={32} color="#EF4444" />
             </View>
@@ -386,6 +432,14 @@ export default function ProfileScreen() {
       <ReadingAnalyticsModal
         visible={showAnalyticsModal}
         onClose={() => setShowAnalyticsModal(false)}
+      />
+
+      {/* Share to social media */}
+      <ShareSheetModal
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        options={statsShareOptions}
+        link={appShareLink}
       />
     </SafeAreaView>
   );
@@ -454,6 +508,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 24,
   },
+  profileTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginHorizontal: 20,
+    marginBottom: 24,
+  },
+  profileSectionTablet: {
+    flex: 1,
+    paddingHorizontal: 0,
+    marginTop: 0,
+    marginBottom: 0,
+  },
   avatarBorderFrame: {
     width: 90,
     height: 90,
@@ -463,10 +530,18 @@ const styles = StyleSheet.create({
     padding: 3,
     marginBottom: 12,
   },
+  avatarBorderFrameTablet: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+  },
   avatarImage: {
     width: '100%',
     height: '100%',
     borderRadius: 42,
+  },
+  avatarImageTablet: {
+    borderRadius: 52,
   },
   profileNameText: {
     fontSize: 22,
@@ -510,6 +585,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: COLORS.forestBorder,
+  },
+  streakSectionTablet: {
+    flex: 1,
+    marginHorizontal: 0,
+    marginBottom: 0,
   },
   streakHeaderRow: {
     flexDirection: 'row',
@@ -591,6 +671,21 @@ const styles = StyleSheet.create({
   sectionContainer: {
     paddingHorizontal: 20,
     marginBottom: 6,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  shareIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.goldPill,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
   },
   sectionTitle: {
     fontSize: 20,
@@ -735,6 +830,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
+  },
+  modalCardTablet: {
+    maxWidth: 440,
   },
   modalTitle: {
     fontSize: 20,
@@ -924,6 +1022,9 @@ const styles = StyleSheet.create({
     borderColor: '#1D4437',
     padding: 24,
     alignItems: 'center',
+  },
+  logoutModalCardTablet: {
+    maxWidth: 440,
   },
   logoutIconBadge: {
     width: 64,

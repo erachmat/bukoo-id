@@ -3,28 +3,18 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import {
-  readingProgress, highlights, bookmarks, books, subscriptions,
+  readingProgress, highlights, bookmarks, books,
 } from '@bukoo/db';
 import { isBookAccessible } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { createId } from '../lib/cuid.js';
+import { getUserTier } from '../lib/tier.js';
+import { buildCoverUrl } from '../lib/cover-url.js';
 import type { Env } from '../types/env.js';
 
 const reading = new Hono<{ Bindings: Env }>();
 reading.use('*', authMiddleware);
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-async function getUserTier(userId: string, db: ReturnType<typeof createDb>): Promise<string> {
-  const sub = await db.query.subscriptions.findFirst({ where: eq(subscriptions.userId, userId) });
-  if (sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING')) {
-    return sub.planId.replace('plan_', '').toUpperCase();
-  }
-  return 'FREE';
-}
 
 // ---------------------------------------------------------------------------
 // POST / PUT /v1/reading/progress or /v1/reading/:bookId/progress — upsert CFI + progress
@@ -152,11 +142,6 @@ reading.get('/:bookId/progress', async (c) => {
 // ---------------------------------------------------------------------------
 // GET /v1/reading/recent & GET /v1/reading/progress — last 10 in-progress books
 // ---------------------------------------------------------------------------
-
-/** R2 cover keys are not public URLs — the web worker serves them at /covers/<key>. */
-function buildCoverUrl(coverKey: string | null): string | null {
-  return coverKey ? `https://bukoo.id/covers/${coverKey}` : null;
-}
 
 async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env }>) {
   const db = createDb(c.env.DB);

@@ -19,6 +19,8 @@ import { AiBookInsightCard } from './components/AiBookInsightCard';
 import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
 import { WriteReviewModal } from './components/WriteReviewModal';
 import { RelatedBooksCarousel } from './components/RelatedBooksCarousel';
+import { ShareSheetModal, ShareSheetOption } from '../../components/share/ShareSheetModal';
+import { bookShareLink } from '../../services/shareService';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -33,6 +35,7 @@ export default function BookDetailScreen() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSavedWishlist, setIsSavedWishlist] = useState(false);
   const [writeReviewVisible, setWriteReviewVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
   const [userReviews, setUserReviews] = useState<UserReview[]>([]);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -168,6 +171,32 @@ export default function BookDetailScreen() {
   const buttonText = hasProgress ? `Lanjut Baca · ${Math.round(progressPct)}%` : 'Mulai Membaca';
   const isAccessible = book?.is_accessible !== false;
 
+  const shareOptions: ShareSheetOption[] = [
+    {
+      key: 'book',
+      label: 'Kartu Buku',
+      data: {
+        variant: 'book',
+        title: displayBook.title,
+        author: displayBook.author,
+        coverUrl: displayBook.coverUrl,
+      },
+    },
+  ];
+  if (hasProgress) {
+    shareOptions.push({
+      key: 'progress',
+      label: 'Kartu Progres',
+      data: {
+        variant: 'progress',
+        title: displayBook.title,
+        author: displayBook.author,
+        coverUrl: displayBook.coverUrl,
+        progressPercent: progressPct,
+      },
+    });
+  }
+
   const handleOpenReader = (isSampleMode = false) => {
     navigation.navigate('ReadingStack', {
       screen: 'Reading',
@@ -178,7 +207,7 @@ export default function BookDetailScreen() {
         epubUrl: displayBook.epubUrl ?? undefined,
         isSample: isSampleMode,
       },
-    } as never);
+    });
   };
 
   return (
@@ -205,6 +234,13 @@ export default function BookDetailScreen() {
             size={22}
             color={isSavedWishlist ? '#EF4444' : COLORS.forest}
           />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.floatingHeaderBtn}
+          onPress={() => setShareVisible(true)}
+          accessibilityLabel="Bagikan buku"
+        >
+          <Ionicons name="share-social-outline" size={22} color={COLORS.forest} />
         </TouchableOpacity>
       </Animated.View>
 
@@ -278,7 +314,7 @@ export default function BookDetailScreen() {
             ) : (
               <TouchableOpacity
                 style={styles.lockedButton}
-                onPress={() => navigation.navigate('Subscription' as never)}
+                onPress={() => navigation.navigate('Subscription')}
                 accessibilityRole="button"
                 accessibilityLabel="Buku khusus premium"
               >
@@ -380,6 +416,14 @@ export default function BookDetailScreen() {
         onClose={() => setWriteReviewVisible(false)}
         bookTitle={displayBook.title}
         onSubmitReview={handleAddReview}
+      />
+
+      {/* Share to social media */}
+      <ShareSheetModal
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        options={shareOptions}
+        link={bookShareLink(displayBook.id)}
       />
     </SafeAreaView>
   );

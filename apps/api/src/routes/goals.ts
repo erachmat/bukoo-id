@@ -6,6 +6,7 @@ import { readingGoals, readingStreaks, readingProgress } from '@bukoo/db';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { createId } from '../lib/cuid.js';
+import { computeCurrentStreak } from '../lib/streak.js';
 import type { Env } from '../types/env.js';
 
 const goals = new Hono<{ Bindings: Env }>();
@@ -140,44 +141,7 @@ goals.get('/streak/current', async (c) => {
     .where(eq(readingStreaks.userId, userId))
     .orderBy(desc(readingStreaks.date));
 
-  let currentStreak = 0;
-  const today = new Date().toISOString().slice(0, 10);
-
-  const dates = allStreaks;
-  let expectedDate = today;
-
-  for (const row of dates) {
-    if (row.date === expectedDate && row.goalMet) {
-      currentStreak++;
-      // Move expected date back by one day
-      const d = new Date(expectedDate);
-      d.setUTCDate(d.getUTCDate() - 1);
-      expectedDate = d.toISOString().slice(0, 10);
-    } else if (row.date === expectedDate && !row.goalMet) {
-      // Gap — goal not met on this day
-      break;
-    } else if (row.date < expectedDate) {
-      // Skip today if no entry yet; allow yesterday as start
-      if (expectedDate === today) {
-        const d = new Date(expectedDate);
-        d.setUTCDate(d.getUTCDate() - 1);
-        expectedDate = d.toISOString().slice(0, 10);
-        // Re-check this row against yesterday
-        if (row.date === expectedDate && row.goalMet) {
-          currentStreak++;
-          const d2 = new Date(expectedDate);
-          d2.setUTCDate(d2.getUTCDate() - 1);
-          expectedDate = d2.toISOString().slice(0, 10);
-        } else {
-          break;
-        }
-      } else {
-        break;
-      }
-    }
-  }
-
-  return c.json({ currentStreak });
+  return c.json({ currentStreak: computeCurrentStreak(allStreaks) });
 });
 
 // ---------------------------------------------------------------------------

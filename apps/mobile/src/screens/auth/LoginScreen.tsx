@@ -25,7 +25,7 @@ import {
   BIOMETRIC_ENABLED_KEY,
   authApi,
 } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore, toUserDto } from '../../stores/authStore';
 import { COLORS } from '../../constants/COLORS';
 
 // NOTE: Google Sign-In requires configuration files to be added manually:
@@ -177,7 +177,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           if (data.refreshToken) {
             await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
           }
-          setUser(data.user);
+          setUser(toUserDto(data.user));
         } else {
           showAlert('Gagal', 'Kredensial biometrik tidak valid atau kadaluarsa.', 'error');
         }

@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore, toUserDto } from '../stores/authStore';
 import {
   authApi,
   LoginData,
@@ -34,7 +34,7 @@ export function useAuthHydration() {
             if (data.refreshToken) {
               await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
             }
-            setUser(data.user);
+            setUser(toUserDto(data.user));
           } catch (err: unknown) {
             const status = (err as { response?: { status?: number } })?.response?.status;
             if (status === 401 || status === 403) {
@@ -74,7 +74,7 @@ export function useLogin() {
     onSuccess: async (data) => {
       await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
-      setUser(data.user);
+      setUser(toUserDto(data.user));
     },
   });
 }
@@ -91,7 +91,7 @@ export function useRegister() {
       if (data.accessToken && data.refreshToken) {
         await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
         await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
-        setUser(data.user);
+        setUser(toUserDto(data.user));
       }
     },
   });
@@ -108,7 +108,7 @@ export function useSocialLogin() {
     onSuccess: async (data) => {
       await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
-      setUser(data.user);
+      setUser(toUserDto(data.user));
     },
   });
 }

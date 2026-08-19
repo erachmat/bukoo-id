@@ -47,8 +47,10 @@ export function CreatePostModal({ visible, onClose, onPostCreated }: CreatePostM
     setErrorText('');
     (async () => {
       try {
-        const res = await api.get<{ items: { id: string; title: string; author: string }[] }>('/books');
-        setBooks(res.data.items || []);
+        // GET /v1/books returns a bare array — guard against the old { items } assumption.
+        const res = await api.get<{ items: { id: string; title: string; author: string }[] } | { id: string; title: string; author: string }[]>('/books');
+        const data = res.data;
+        setBooks(Array.isArray(data) ? data : (data?.items ?? []));
       } catch {
         setBooks([]);
       }
