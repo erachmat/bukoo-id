@@ -25,4 +25,4 @@ Started: 2026-08-19 · Mode: executing-plans
 - Manual device E2E (real seeded book → Mulai Membaca) remains a QA step for a device build; all static + local-route verification passes here.
 
 ## Commits
-- (pending — work is on disk, uncommitted)
+- `0120ee8` — `feat(mobile): real EPUB reading via authenticated download` (9 files, +310/−9), committed 2026-08-19.
