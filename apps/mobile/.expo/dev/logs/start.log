@@ -7772,3 +7772,348 @@
 {"_e":"metro:client_log","_t":1787134995893,"level":"log","data":["[Perf] WebView shell ready duration: 490ms"]}
 {"_e":"metro:client_log","_t":1787134997864,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
 {"_e":"metro:client_log","_t":1787134998021,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787135282188,"level":"log","data":["[Perf] WebView shell ready duration: 480ms"]}
+{"_e":"metro:client_log","_t":1787135283465,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135283674,"level":"warn","data":["[ReadingScreen] WebView error:","EPUB load failed: Error: Network or CORS error loading EPUB URL"]}
+{"_e":"metro:client_log","_t":1787135290303,"level":"log","data":["[Perf] WebView shell ready duration: 8607ms"]}
+{"_e":"metro:client_log","_t":1787135351063,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135353985,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135353992,"level":"log","data":["[Perf] Total Time-to-First-Frame: 72293ms, In-WebView load: 2678ms, Location gen (generated): 2652ms"]}
+{"_e":"metro:client_log","_t":1787135366792,"level":"log","data":["[Perf] Page turn latency: 206ms"]}
+{"_e":"metro:client_log","_t":1787135366924,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135368408,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1787135368414,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135369911,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1787135369929,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135371017,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1787135371022,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135371403,"level":"log","data":["[Perf] Page turn latency: 123ms"]}
+{"_e":"metro:client_log","_t":1787135371504,"level":"warn","data":["[ReadingSync] updateLocalProgress called without an active session"]}
+{"_e":"metro:client_log","_t":1787135384795,"level":"error","data":["[TypeError: Cannot read property 'bg' of undefined]"]}
+{"_e":"root:init","_t":1787135467574,"format":"v0-jsonl","version":"56.1.23"}
+{"_e":"devserver:start","_t":1787135467593,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787135469125,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787135488747,"atlas":false,"workers":6,"host":"::","port":8083}
+{"_e":"metro:bundling:started","_t":1787135523365,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1787135523365,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787135523377,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787135523486,"id":"1","progress":0.010655567117585849,"total":155,"current":16}
+{"_e":"metro:bundling:progress","_t":1787135523587,"id":"1","progress":0.0355998576005696,"total":318,"current":60}
+{"_e":"metro:bundling:progress","_t":1787135523688,"id":"1","progress":0.06283025041596757,"total":379,"current":95}
+{"_e":"metro:bundling:progress","_t":1787135523788,"id":"1","progress":0.21813968511507723,"total":516,"current":241}
+{"_e":"metro:bundling:progress","_t":1787135523888,"id":"1","progress":0.35715335768085527,"total":589,"current":352}
+{"_e":"metro:bundling:progress","_t":1787135523988,"id":"1","progress":0.42886751799043304,"total":707,"current":463}
+{"_e":"metro:bundling:progress","_t":1787135524088,"id":"1","progress":0.4693195467948344,"total":797,"current":546}
+{"_e":"metro:bundling:progress","_t":1787135524189,"id":"1","progress":0.6535286924622238,"total":856,"current":692}
+{"_e":"metro:bundling:progress","_t":1787135524291,"id":"1","progress":0.6535286924622238,"total":958,"current":772}
+{"_e":"metro:bundling:progress","_t":1787135524393,"id":"1","progress":0.6582698207598016,"total":1076,"current":873}
+{"_e":"metro:bundling:progress","_t":1787135524493,"id":"1","progress":0.6664789791310364,"total":1111,"current":907}
+{"_e":"metro:bundling:progress","_t":1787135524593,"id":"1","progress":0.7015970769791516,"total":1207,"current":1011}
+{"_e":"metro:bundling:progress","_t":1787135524723,"id":"1","progress":0.7128849646204222,"total":1304,"current":1101}
+{"_e":"metro:bundling:progress","_t":1787135524826,"id":"1","progress":0.7923394799814998,"total":1338,"current":1191}
+{"_e":"metro:bundling:progress","_t":1787135524926,"id":"1","progress":0.9527118946215402,"total":1379,"current":1346}
+{"_e":"metro:bundling:done","_t":1787135525119,"id":"1","total":1379,"ms":1753.666628}
+{"_e":"metro:client_log","_t":1787135535955,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1787135536575,"level":"log","data":["[featureFlags] Remote Config no update"]}
+{"_e":"metro:client_log","_t":1787135555907,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135556891,"level":"log","data":["[Perf] WebView shell ready duration: 1578ms"]}
+{"_e":"metro:client_log","_t":1787135557217,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1895ms, In-WebView load: 92ms, Location gen (cached): 69ms"]}
+{"_e":"metro:client_log","_t":1787135559075,"level":"log","data":["[Perf] Page turn latency: 183ms"]}
+{"_e":"metro:client_log","_t":1787135560713,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1787135561686,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1787135564535,"level":"log","data":["[Perf] Page turn latency: 150ms"]}
+{"_e":"metro:client_log","_t":1787135565629,"level":"log","data":["[Perf] Page turn latency: 164ms"]}
+{"_e":"metro:client_log","_t":1787135566853,"level":"log","data":["[Perf] Page turn latency: 76ms"]}
+{"_e":"metro:client_log","_t":1787135567676,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1787135568255,"level":"log","data":["[Perf] Page turn latency: 78ms"]}
+{"_e":"metro:client_log","_t":1787135569008,"level":"log","data":["[Perf] Page turn latency: 75ms"]}
+{"_e":"metro:client_log","_t":1787135644067,"level":"log","data":["[Perf] WebView shell ready duration: 88679ms"]}
+{"_e":"metro:client_log","_t":1787135644386,"level":"log","data":["[Perf] Total Time-to-First-Frame: 89071ms, In-WebView load: 61ms, Location gen (cached): 47ms"]}
+{"_e":"metro:client_log","_t":1787135647274,"level":"log","data":["[Perf] Page turn latency: 144ms"]}
+{"_e":"metro:client_log","_t":1787135662090,"level":"log","data":["[Perf] Page turn latency: 74ms"]}
+{"_e":"metro:client_log","_t":1787135662807,"level":"log","data":["[Perf] Page turn latency: 112ms"]}
+{"_e":"metro:client_log","_t":1787135666084,"level":"error","data":["[TypeError: Cannot read property 'bg' of undefined]"]}
+{"_e":"metro:client_log","_t":1787135708273,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135708609,"level":"log","data":["[Perf] WebView shell ready duration: 643ms"]}
+{"_e":"metro:client_log","_t":1787135708888,"level":"log","data":["[Perf] WebView shell ready duration: 920ms"]}
+{"_e":"metro:client_log","_t":1787135709092,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1083ms, In-WebView load: 64ms, Location gen (cached): 47ms"]}
+{"_e":"metro:client_log","_t":1787135712061,"level":"log","data":["[Perf] Page turn latency: 79ms"]}
+{"_e":"metro:client_log","_t":1787135713350,"level":"log","data":["[Perf] Page turn latency: 60ms"]}
+{"_e":"metro:client_log","_t":1787135715673,"level":"log","data":["[Perf] Page turn latency: 73ms"]}
+{"_e":"metro:client_log","_t":1787135715957,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1787135716207,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1787135716874,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1787135717195,"level":"log","data":["[Perf] Page turn latency: 77ms"]}
+{"_e":"metro:client_log","_t":1787135719595,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135719971,"level":"log","data":["[Perf] WebView shell ready duration: 572ms"]}
+{"_e":"metro:client_log","_t":1787135720271,"level":"log","data":["[Perf] WebView shell ready duration: 868ms"]}
+{"_e":"metro:client_log","_t":1787135720418,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1016ms, In-WebView load: 38ms, Location gen (cached): 29ms"]}
+{"_e":"metro:client_log","_t":1787135787326,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135787816,"level":"log","data":["[Perf] WebView shell ready duration: 672ms"]}
+{"_e":"metro:client_log","_t":1787135788146,"level":"log","data":["[Perf] WebView shell ready duration: 1026ms"]}
+{"_e":"metro:client_log","_t":1787135788419,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1285ms, In-WebView load: 53ms, Location gen (cached): 38ms"]}
+{"_e":"metro:client_log","_t":1787135917792,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787135918169,"level":"log","data":["[Perf] WebView shell ready duration: 628ms"]}
+{"_e":"metro:client_log","_t":1787135918335,"level":"log","data":["[Perf] WebView shell ready duration: 880ms"]}
+{"_e":"metro:client_log","_t":1787135918570,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1117ms, In-WebView load: 57ms, Location gen (cached): 39ms"]}
+{"_e":"metro:client_log","_t":1787136130376,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787136130754,"level":"log","data":["[Perf] WebView shell ready duration: 605ms"]}
+{"_e":"metro:client_log","_t":1787136131194,"level":"log","data":["[Perf] WebView shell ready duration: 999ms"]}
+{"_e":"metro:client_log","_t":1787136131337,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1191ms, In-WebView load: 50ms, Location gen (cached): 37ms"]}
+{"_e":"metro:client_log","_t":1787136135393,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-1.epub"]}
+{"_e":"metro:client_log","_t":1787136135804,"level":"log","data":["[Perf] WebView shell ready duration: 614ms"]}
+{"_e":"metro:client_log","_t":1787136136059,"level":"log","data":["[Perf] WebView shell ready duration: 918ms"]}
+{"_e":"metro:client_log","_t":1787136136269,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1069ms, In-WebView load: 31ms, Location gen (cached): 25ms"]}
+{"_e":"metro:client_log","_t":1787136188602,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136189612,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136190609,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136191464,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136192475,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136193477,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136194554,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136195502,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136196492,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136197506,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136198527,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136199512,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136200516,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136201530,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136202530,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136203532,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136204539,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136205551,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136206551,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136207562,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136208567,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136209568,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136210582,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136211585,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136212592,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136213599,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136214605,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136215650,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136216616,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136217623,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136218625,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136219636,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136220632,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136221645,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136222651,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136223650,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136224660,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136225662,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136225832,"level":"log","data":["[Perf] Page turn latency: 88ms"]}
+{"_e":"metro:client_log","_t":1787136226670,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136227679,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136228680,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136229688,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136230789,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136231702,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136232707,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136233711,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136234730,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136235723,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136236723,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136237734,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136238741,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136239746,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136240754,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136241775,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136242780,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136243768,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136244772,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136245036,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136245805,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136246788,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136247793,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136248802,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136249807,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136250812,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136251817,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136252823,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136253828,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136254834,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136256140,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136256944,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136257866,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136258857,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136259866,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136260875,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136261874,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136262881,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136263885,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136264893,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136265899,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136266898,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136267906,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136268909,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136269913,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136270929,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136271934,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136272946,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136274045,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136274955,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136275966,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136276983,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136277973,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136278972,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136279992,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136280996,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136281996,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136283008,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136284021,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136285036,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136286050,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136287051,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136288060,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136289064,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136290077,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136291091,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136292094,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136293093,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136294096,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136295107,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136296464,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136297112,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136298119,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136299125,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136300133,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136301135,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136302145,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136303150,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136304155,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136305172,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136306173,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136307170,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136307771,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136308226,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136308454,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136309093,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136309329,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136309516,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136310201,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136311194,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136312249,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136313215,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136314218,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136315216,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136316223,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136317240,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136318242,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136319261,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136320256,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136321249,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136322258,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136323017,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136323343,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136323556,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136323837,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136324285,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136325278,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136326281,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136327287,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136328292,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136329298,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136330307,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136331309,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136332414,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136333336,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136334360,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136396519,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136396858,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136397443,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136397919,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136398707,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136398875,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136399134,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136399492,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136400512,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136401423,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136402435,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136403540,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136403670,"level":"log","data":["[Perf] WebView shell ready duration: 739ms"]}
+{"_e":"metro:client_log","_t":1787136404537,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136405543,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136405956,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-2.epub"]}
+{"_e":"metro:client_log","_t":1787136406551,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136407550,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136408557,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136409319,"level":"log","data":["[Perf] Total Time-to-First-Frame: 6340ms, In-WebView load: 3013ms, Location gen (generated): 2996ms"]}
+{"_e":"metro:client_log","_t":1787136409567,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136409859,"level":"log","data":["[Perf] Page turn latency: 92ms"]}
+{"_e":"metro:client_log","_t":1787136410579,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136411594,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136412683,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136413625,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136413846,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136414307,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136414632,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136414717,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136415127,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136415860,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136416606,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136417591,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136417636,"level":"error","data":["[Error: Uncaught (in promise, id: 0): \"Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException\"]"]}
+{"_e":"metro:client_log","_t":1787136418629,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136419541,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136419758,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136419832,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136420173,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136420646,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136421698,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136422017,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136422745,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136423664,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136423932,"level":"error","data":["[Error: Uncaught (in promise, id: 1): \"Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException\"]"]}
+{"_e":"metro:client_log","_t":1787136424674,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136425672,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136426637,"level":"log","data":["[Perf] WebView shell ready duration: 505ms"]}
+{"_e":"metro:client_log","_t":1787136426684,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136427687,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136428115,"level":"log","data":["[ReadingScreen] Opened authenticated download locally:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-3.epub"]}
+{"_e":"metro:client_log","_t":1787136428521,"level":"error","data":["[Error: Uncaught (in promise, id: 2): \"Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException\"]"]}
+{"_e":"metro:client_log","_t":1787136428691,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136429703,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136430713,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136431713,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136431845,"level":"log","data":["[Perf] Total Time-to-First-Frame: 5806ms, In-WebView load: 3508ms, Location gen (generated): 3487ms"]}
+{"_e":"metro:client_log","_t":1787136432055,"level":"warn","data":["[useReadingSession] updateLocalProgress failed:","[Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException]"]}
+{"_e":"metro:client_log","_t":1787136432711,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136432975,"level":"log","data":["[Perf] Page turn latency: 124ms"]}
+{"_e":"metro:client_log","_t":1787136433082,"level":"warn","data":["[useReadingSession] updateLocalProgress failed:","[Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException]"]}
+{"_e":"metro:client_log","_t":1787136433717,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136433927,"level":"log","data":["[Perf] Page turn latency: 72ms"]}
+{"_e":"metro:client_log","_t":1787136433964,"level":"warn","data":["[useReadingSession] updateLocalProgress failed:","[Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException]"]}
+{"_e":"metro:client_log","_t":1787136434725,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136435433,"level":"warn","data":["[useReadingSession] stopSession on unmount failed:","[Error: Call to function 'NativeDatabase.prepareAsync' has been rejected.\n→ Caused by: java.lang.NullPointerException: java.lang.NullPointerException]"]}
+{"_e":"metro:client_log","_t":1787136435730,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136436704,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136436926,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136437104,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136437480,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136437764,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136438811,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136439756,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136440771,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136441800,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136442792,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136443824,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136444859,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136445789,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136446810,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136447803,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136448807,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136449815,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136450825,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136451827,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136452840,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:client_log","_t":1787136453836,"level":"warn","data":["source.uri should not be an empty string"]}
+{"_e":"metro:bundling:started","_t":1787136456246,"id":"8","platform":"android","environment":null,"entry":"apps/mobile/index.js"}
+{"_e":"metro:bundling:progress","_t":1787136456246,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1787136456326,"id":"8","total":1,"ms":79.825332}
+{"_e":"metro:client_log","_t":1787136467154,"level":"warn","data":["The global process.env.EXPO_OS is not defined. This should be inlined by babel-preset-expo during transformation."]}
+{"_e":"metro:client_log","_t":1787136468484,"level":"log","data":["[featureFlags] Remote Config no update"]}
+{"_e":"metro:client_log","_t":1787136513052,"level":"log","data":["[ReadingScreen] Found local cached book path:","file:///data/user/0/com.erachmat.bukoo/files/books/dsc-3.epub"]}
+{"_e":"metro:client_log","_t":1787136513809,"level":"log","data":["[Perf] WebView shell ready duration: 1179ms"]}
+{"_e":"metro:client_log","_t":1787136514055,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1428ms, In-WebView load: 58ms, Location gen (cached): 37ms"]}
+{"_e":"metro:client_log","_t":1787136516534,"level":"log","data":["[Perf] Page turn latency: 143ms"]}

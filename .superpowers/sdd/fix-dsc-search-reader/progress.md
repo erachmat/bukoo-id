@@ -10,6 +10,7 @@ Started: 2026-08-19 · Mode: subagent-driven-development
 - **Task 2 (mobile search error state)**: complete — `useSearchBooks` already exposed `isError`/`refetch`; `SearchScreen` now renders "Terjadi kesalahan" + Coba Lagi on error instead of "Buku tidak ditemukan". ✅
 - **Task 3 (bookDownload error propagation)**: complete — `downloadBookForReading` no longer swallows errors to `null`. ✅
 - **Task 4 (ReadingScreen error surfacing)**: complete — `resolveAndLoadBook` catches download failures and sets `loadError` to the real message (render maps pdf/corrupt/network/timeout to friendly variants, others shown as-is). ✅
+- **Task 6 (local file:// CORS)**: complete — device logs showed download OK but `EPUB load failed: Network or CORS error loading EPUB URL` (WebView cannot `fetch(file://)` from `about:blank`). `injectBookData` now reads local files as base64 in 3-byte-aligned chunks and assembles via the existing `__bukooPushChunk`/`__bukooLoadBookFromChunks` bridge → `ePub(arrayBuffer)`. Remote URLs keep direct passthrough. Mobile typecheck ✅ / lint ✅.
 - **Task 5 (verification)**: complete —
   - API: typecheck ✅, lint 0 errors (4 pre-existing console warnings in unrelated files), vitest 8/8 ✅.
   - Mobile: typecheck ✅, lint ✅ (no test script — stated explicitly).

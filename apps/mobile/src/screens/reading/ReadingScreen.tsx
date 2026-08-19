@@ -1084,7 +1084,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [showHighlights, setShowHighlights] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [selectedHighlightData, setSelectedHighlightData] = useState<{ cfi: string; text: string } | null>(null);
-  const [brightness, setBrightness] = useState(1.0);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const hasShownCompletionRef = useRef(false);
 
@@ -1360,7 +1359,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (parsed.theme) setTheme(parsed.theme);
+          if (parsed.theme) {
+            const cap = (String(parsed.theme).charAt(0).toUpperCase() + String(parsed.theme).slice(1)) as 'Light' | 'Cream' | 'Dark' | 'Sepia';
+            setTheme(cap === 'Light' || cap === 'Cream' || cap === 'Dark' || cap === 'Sepia' ? cap : 'Cream');
+          }
           if (parsed.fontSize) setFontSize(parsed.fontSize);
           if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
           if (parsed.pageTurnStyle) setPageTurnStyle(parsed.pageTurnStyle);
@@ -1605,17 +1607,52 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     const locsArg = cachedLocations ? JSON.stringify(cachedLocations) : 'null';
     const targetCfiArg = initialCfiRef.current ? JSON.stringify(initialCfiRef.current) : 'null';
 
-    // Directly pass the file or remote URL to the WebView bridge (0 Base64 memory overhead)
-    webViewRef.current.injectJavaScript(
-      `(function(){
-        var bookUrl = ${JSON.stringify(localFileUri)};
-        var locs = ${locsArg};
-        var targetCfi = ${targetCfiArg};
-        if (window.__bukooLoadBook) {
-          window.__bukooLoadBook(bookUrl, locs, targetCfi);
-        }
-      })(); true;`
-    );
+    // Remote http(s) URL → stream directly through the bridge (0 Base64 overhead).
+    if (!localFileUri.startsWith('file://')) {
+      webViewRef.current.injectJavaScript(
+        `(function(){
+          var bookUrl = ${JSON.stringify(localFileUri)};
+          var locs = ${locsArg};
+          var targetCfi = ${targetCfiArg};
+          if (window.__bukooLoadBook) {
+            window.__bukooLoadBook(bookUrl, locs, targetCfi);
+          }
+        })(); true;`
+      );
+      return;
+    }
+
+    // Local file:// — the Android WebView cannot fetch file:// URLs from an
+    // about:blank origin (CORS → "Network or CORS error loading EPUB URL"), so
+    // read the EPUB as base64 on the native side and assemble it in the bridge
+    // as a data: URL → ePub(arrayBuffer). Chunks are read in byte lengths that
+    // are multiples of 3 so each chunk's base64 concatenates cleanly (no
+    // padding/alignment issues), and each pushed chunk stays well under the
+    // WebView evaluateJavaScript size limit for larger books.
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(localFileUri);
+      const fileSize = fileInfo.exists && 'size' in fileInfo && fileInfo.size ? fileInfo.size : 0;
+      if (!fileSize) throw new Error('Berkas buku lokal tidak ditemukan.');
+      const CHUNK_BYTES = 245760; // multiple of 3 → clean base64 alignment per chunk
+      webViewRef.current.injectJavaScript(`if (window.__bukooResetChunks) window.__bukooResetChunks(); true;`);
+      for (let pos = 0; pos < fileSize; pos += CHUNK_BYTES) {
+        if (!webViewRef.current) return; // user left the reader mid-load
+        const b64 = await FileSystem.readAsStringAsync(localFileUri, {
+          encoding: FileSystem.EncodingType.Base64,
+          position: pos,
+          length: Math.min(CHUNK_BYTES, fileSize - pos),
+        });
+        if (!webViewRef.current) return;
+        webViewRef.current.injectJavaScript(`window.__bukooPushChunk(${JSON.stringify(b64)}); true;`);
+      }
+      if (!webViewRef.current) return;
+      webViewRef.current.injectJavaScript(
+        `if (window.__bukooLoadBookFromChunks) window.__bukooLoadBookFromChunks('application/epub+zip', ${locsArg}, ${targetCfiArg}); true;`
+      );
+    } catch (e) {
+      console.error('[ReadingScreen] Failed to read local book file:', e);
+      setLoadError(e instanceof Error ? e.message : String(e));
+    }
   }, [localFileUri, cachedLocations]);
 
   // Called when the WebView's initial HTML has fully loaded and executed
@@ -1907,7 +1944,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         theme={(theme.toLowerCase() === 'cream' ? 'cream' : theme.toLowerCase() === 'light' ? 'light' : theme.toLowerCase() === 'sepia' ? 'sepia' : 'dark') as ReaderTheme}
         setTheme={(t) => {
           const cap = (t.charAt(0).toUpperCase() + t.slice(1)) as 'Light' | 'Cream' | 'Dark' | 'Sepia';
-          setTheme(cap);
+          setTheme(cap === 'Light' || cap === 'Cream' || cap === 'Dark' || cap === 'Sepia' ? cap : 'Cream');
         }}
         pageTurnStyle={pageTurnStyle}
         setPageTurnStyle={setPageTurnStyle}
@@ -1915,8 +1952,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         setLineHeight={setLineHeight}
         textAlign={textAlign}
         setTextAlign={setTextAlign}
-        brightness={brightness}
-        setBrightness={setBrightness}
       />
 
       <HighlightModal
@@ -2030,6 +2065,7 @@ const styles = StyleSheet.create({
   headerMeta: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
   },
   headerMetaDivider: {
     fontSize: 12,
@@ -2039,6 +2075,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 12,
     color: COLORS.muted,
+    flexShrink: 1,
   },
   headerAction: {
     paddingLeft: 12,

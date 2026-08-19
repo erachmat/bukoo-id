@@ -385,7 +385,7 @@ export default function LibraryScreen() {
               onPress={() => { setSortOption('progress'); setSortModalVisible(false); }}
             >
               <Ionicons name="stats-chart-outline" size={18} color={sortOption === 'progress' ? COLORS.gold : COLORS.creamLight} />
-              <Text style={[styles.sortOptionText, sortOption === 'progress' && styles.sortOptionTextActive]}>Progres Membaca (% Tinggi-Rendah)</Text>
+              <Text style={[styles.sortOptionText, sortOption === 'progress' && styles.sortOptionTextActive]}>Progres Membaca</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

@@ -30,6 +30,12 @@
 
 - [x] In `resolveAndLoadBook`, wrap `downloadBookForReading(bookId)` in its own `try/catch`; on failure set `loadError` to the actual error message (e.g. "Sesi berakhir, silakan masuk kembali." / "Download failed with status 401") instead of the generic fallback. Keep generic fallback for the outer catch.
 
+## Task 6 — `apps/mobile/src/screens/reading/ReadingScreen.tsx`: fix local file:// CORS (reader still failed)
+
+- [x] Root cause (device logs): download now succeeds (`[ReadingScreen] Found local cached book path: file:///.../books/dsc-1.epub`) but the WebView bridge `fetch`/XHR on `file://` is blocked from the `about:blank` origin → `EPUB load failed: Network or CORS error loading EPUB URL`.
+- [x] `injectBookData`: keep direct URL passthrough for remote `http(s)`; for local `file://` read the EPUB as base64 in 3-byte-aligned byte chunks (245760 B) via `FileSystem.readAsStringAsync(position/length, Base64)`, push each with `__bukooPushChunk`, assemble with `__bukooLoadBookFromChunks('application/epub+zip', locs, targetCfi)` → `data:` URL → `ePub(arrayBuffer)`; unmount guards between async reads.
+- [x] Mobile typecheck ✅ / lint ✅.
+
 ## Task 5 — Verification
 
 - [x] `npm run typecheck --workspace=@bukoo/api && npm run lint --workspace=@bukoo/api && npm run test --workspace=@bukoo/api`.

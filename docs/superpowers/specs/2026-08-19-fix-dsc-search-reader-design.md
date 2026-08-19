@@ -89,6 +89,13 @@ injection.
   "Sesi berakhir, silakan masuk kembali." or "Download failed with status 401") instead of
   the generic fallback. The existing render mapping already turns pdf/corrupt/network/
   timeout messages into the friendly Indonesian variants; other messages are shown as-is.
+- **`injectBookData` — local `file://` CORS (found via device logs)**: the download now
+  succeeds but the WebView bridge cannot `fetch(file://...)` from its `about:blank` origin
+  → `Network or CORS error loading EPUB URL`. For local files, read the EPUB as base64 in
+  3-byte-aligned byte chunks (position/length + `EncodingType.Base64`) and push them through
+  the existing `__bukooPushChunk`/`__bukooLoadBookFromChunks` bridge functions, which build a
+  `data:` URL → `ePub(arrayBuffer)`. Remote `http(s)` URLs keep the direct URL passthrough
+  (0 base64 overhead).
 
 ## Layout / styling tokens
 

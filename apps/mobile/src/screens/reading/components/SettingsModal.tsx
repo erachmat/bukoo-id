@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 
-export type ReaderTheme = 'light' | 'cream' | 'dark' | 'sepia' | 'oled';
+export type ReaderTheme = 'light' | 'cream' | 'dark' | 'sepia';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -23,8 +23,6 @@ interface SettingsModalProps {
   setTextAlign?: (align: 'left' | 'justify') => void;
   marginSize?: 'narrow' | 'medium' | 'wide';
   setMarginSize?: (m: 'narrow' | 'medium' | 'wide') => void;
-  brightness?: number;
-  setBrightness?: (val: number) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -44,8 +42,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setTextAlign,
   marginSize = 'medium',
   setMarginSize,
-  brightness = 1.0,
-  setBrightness,
 }) => {
   const fontFamilies = [
     { label: 'Serif (Playfair)', value: FONTS.serifRegular },
@@ -58,7 +54,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'light', label: 'Terang', bg: '#FFFFFF', text: '#111827' },
     { id: 'sepia', label: 'Warm Sepia', bg: '#F4ECD8', text: '#5F4B32' },
     { id: 'dark', label: 'Gelap', bg: '#121816', text: '#E5E7EB' },
-    { id: 'oled', label: 'OLED Black', bg: '#000000', text: '#E5E5E5' },
   ];
 
   return (
@@ -93,28 +88,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Brightness Adjuster */}
-            {setBrightness && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Kecerahan Layar ({Math.round(brightness * 100)}%)</Text>
-                <View style={styles.sizeControlRow}>
-                  <TouchableOpacity
-                    style={styles.sizeButton}
-                    onPress={() => setBrightness(Math.max(0.1, Math.round((brightness - 0.15) * 100) / 100))}
-                  >
-                    <Ionicons name="sunny-outline" size={16} color={COLORS.cream} />
-                  </TouchableOpacity>
-                  <Text style={styles.sizeDisplay}>{Math.round(brightness * 100)}%</Text>
-                  <TouchableOpacity
-                    style={styles.sizeButton}
-                    onPress={() => setBrightness(Math.min(1.0, Math.round((brightness + 0.15) * 100) / 100))}
-                  >
-                    <Ionicons name="sunny" size={20} color={COLORS.gold} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
 
             {/* Font Family Selector */}
             <View style={styles.section}>

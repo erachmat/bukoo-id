@@ -1,3 +1,14 @@
+# Reader UX & Search Filter Fixes — 2026-08-19
+
+- [x] 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-reader-ux-search-fixes*`, `.superpowers/sdd/reader-ux-search-fixes/`).
+- [x] 2. **OLED Black crash** — SettingsModal theme ids are lowercase (`'oled'`) but ReadingScreen capitalizes → `themeColors['Oled']` undefined → `Cannot read property 'bg' of undefined`. Removed OLED Black from the picker; `setTheme` wrapper + persisted-settings loader now sanitize to known themes (fallback `Cream`).
+- [x] 3. **Removed "Kecerahan Layar"** (brightness) — section, props, and unused state removed.
+- [x] 4. **Genre/Category filter** — backend `/books/search` ignores `genre` (client now filters via `item.genre?.includes`); genre-only browse (empty search box + chip) was 400ing on missing `q` → now routed to `GET /books?genre=…`.
+- [x] 5. **Header overlap** — reading-time text overlapped the Audio icon; added `flexShrink: 1` to `headerMeta`/`headerSubtitle`.
+- [x] 6. Verification: mobile typecheck ✅ / lint ✅ (no test script — stated). No backend change / no deploy.
+- [ ] 7. (manual/device QA) Reload app → OLED Black gone, no brightness section, genre chips + Filter modal filter correctly, header no longer overlaps.
+- [ ] 8. (question, answered) **"How to add books to My Library?"** — books auto-populate from `GET /books`; there is NO manual "add to library" button. Tabs derive from activity: start reading → "Sedang Dibaca", 100% → "Selesai", downloaded → "Diunduh", not started → "Ingin Dibaca". If a manual "Ingin Dibaca"/"Add to Library" shelf is wanted, that's a new feature task (not implemented).
+
 # Fix DSC Search 500 & Reader Load Error — 2026-08-19
 
 - [x] 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-fix-dsc-search-reader*`, `.superpowers/sdd/fix-dsc-search-reader/`).
@@ -7,7 +18,8 @@
 - [x] 5. Mobile `SearchScreen` — `isError` state ("Terjadi kesalahan" + Coba Lagi) instead of misleading empty state.
 - [x] 6. Verification: API typecheck ✅ / lint 0 errors / tests 8/8 ✅; mobile typecheck ✅ / lint ✅ (no test script — stated). **Deployed** `bukoo-api` (versions 739bf34d → c0cfc336). Live: `q=Dead`→3, `q=Dead Smoker`→3, `q=Dead Smokers`→3, `q=xyzzy`→0, injection probe safe; `?genre=Fiksi`→3 (was 500); `/health` 200; download dsc-1 200 + PK magic.
 - [x] 7. Cleanup: both QA users deleted from prod D1; temp files removed.
-- [ ] 8. (manual/device QA) Rebuild/reinstall mobile app → search "Dead" shows 3 results; "Mulai membaca" opens reader (or now shows the real error message for diagnosis).
+- [x] 8. **Reader root cause #2 (device logs)**: download succeeds (`Found local cached book path: file:///.../dsc-1.epub`) but WebView bridge `fetch(file://)` is CORS-blocked from `about:blank` → `Network or CORS error loading EPUB URL`. Fixed: `injectBookData` reads local files as base64 in 3-byte-aligned chunks and assembles via `__bukooPushChunk`/`__bukooLoadBookFromChunks` → `ePub(arrayBuffer)`; remote URLs keep direct passthrough. Mobile typecheck ✅ / lint ✅.
+- [ ] 9. (manual/device QA) Reload the app (Metro) → search "Dead" shows 3 results; "Mulai membaca" opens the reader (local EPUB now loads via base64).
 
 # Insert Dead Smokers Club Books (PDF → EPUB) — 2026-08-19
 

@@ -320,16 +320,27 @@ export const booksApi = {
 
     const query = params.query?.trim() || '';
 
-    const queryParts: string[] = [];
-    if (query) queryParts.push(`q=${encodeURIComponent(query)}`);
-    if (params.genre && params.genre !== 'Semua') queryParts.push(`genre=${encodeURIComponent(params.genre)}`);
-    if (params.tier && params.tier !== 'Semua') queryParts.push(`tier=${encodeURIComponent(params.tier)}`);
-    if (params.sortBy) queryParts.push(`sortBy=${encodeURIComponent(params.sortBy)}`);
-    if (params.minRating) queryParts.push(`minRating=${params.minRating}`);
-
-    const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
-    const res = await api.get<{ items: BookItemDto[] } | BookItemDto[]>(`/books/search${queryString}`);
-    let items: BookItemDto[] = Array.isArray(res.data) ? res.data : res.data.items || [];
+    let items: BookItemDto[];
+    if (query) {
+      // Full-text search via the FTS endpoint. The backend /books/search route
+      // requires `q` and only filters by FTS — genre/tier/sortBy/minRating are
+      // applied client-side below.
+      const queryParts: string[] = [`q=${encodeURIComponent(query)}`];
+      if (params.genre && params.genre !== 'Semua') queryParts.push(`genre=${encodeURIComponent(params.genre)}`);
+      if (params.tier && params.tier !== 'Semua') queryParts.push(`tier=${encodeURIComponent(params.tier)}`);
+      if (params.sortBy) queryParts.push(`sortBy=${encodeURIComponent(params.sortBy)}`);
+      if (params.minRating) queryParts.push(`minRating=${params.minRating}`);
+      const queryString = `?${queryParts.join('&')}`;
+      const res = await api.get<{ items: BookItemDto[] } | BookItemDto[]>(`/books/search${queryString}`);
+      items = Array.isArray(res.data) ? res.data : res.data.items || [];
+    } else if (params.genre && params.genre !== 'Semua') {
+      // Genre-only browse (no search text): /books/search would 400 without
+      // `q`, so use the catalog endpoint which filters by genre server-side.
+      const res = await api.get<BookItemDto[]>(`/books?genre=${encodeURIComponent(params.genre)}`);
+      items = res.data || [];
+    } else {
+      return [];
+    }
 
     // Client-side fallback sorting/filtering if backend returns un-filtered list
     if (params.minRating && params.minRating > 0) {
@@ -341,6 +352,11 @@ export const booksApi = {
         if (params.tier === 'Bukoo PLUS') return item.subscriptionRequired === 'PLUS' || item.subscriptionRequired === 'PREMIUM';
         return true;
       });
+    }
+    // The backend /books/search route only filters by FTS `q` — genre is
+    // applied client-side against the parsed `genre: string[]` on each item.
+    if (params.genre && params.genre !== 'Semua') {
+      items = items.filter((item) => (item.genre ?? []).includes(params.genre!));
     }
 
     if (params.sortBy) {
