@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore, UserPublicDto } from '../stores/authStore';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://api.bukoo.id/v1';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || 'https://api.bukoo.id/v1';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -25,6 +25,35 @@ export async function getOrCreateDeviceId(): Promise<string> {
     await SecureStore.setItemAsync(DEVICE_ID_KEY, deviceId);
   }
   return deviceId;
+}
+
+/**
+ * Reads the current access token from secure storage. Returns null when signed out.
+ */
+export async function getAccessToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+}
+
+/**
+ * Returns a FRESH access token for use OUTSIDE the axios instance (e.g. the
+ * FileSystem book downloader, which cannot go through the request interceptor).
+ *
+ * Pings a lightweight authenticated endpoint through the axios instance first
+ * so the existing 401→refresh interceptor transparently refreshes an expired
+ * token and rewrites SecureStore, then re-reads the token.
+ *
+ * Returns null when signed out (or refresh failed).
+ */
+export async function ensureFreshAccessToken(): Promise<string | null> {
+  let token = await getAccessToken();
+  if (!token) return null;
+  try {
+    await api.get('/users/me');
+  } catch {
+    // Ignore — if the refresh failed, the re-read below reflects reality.
+  }
+  token = await getAccessToken();
+  return token;
 }
 
 export interface AuthResponseDto {

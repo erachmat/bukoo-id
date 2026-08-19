@@ -26,4 +26,4 @@ Started: 2026-08-19 · Mode: executing-plans
 5. **Known follow-ups (not blockers)**: real EPUB reading in mobile needs an auth'd source — the API's `GET /v1/books/:id/download` requires auth and the reader/download pipeline (`FileSystem.downloadAsync`, epubjs WebView) sends none; real books today have `epubKey` only, so reading shows the honest "Gagal memuat buku" error until that pipeline is built. Covers now work via `coverKey` → `bukoo.id/covers/`.
 
 ## Commits
-- Work is uncommitted on disk (no commit range yet).
+- `a1e6483` — `refactor(mobile): remove all dummy ebooks, wire real API data` (21 files, +558/−1066), committed 2026-08-19. `ProfileScreen.tsx` (pre-existing company-name edit) + `dsc-publisher/` left uncommitted intentionally.

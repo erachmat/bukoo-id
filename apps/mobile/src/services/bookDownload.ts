@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import { API_URL, ensureFreshAccessToken } from './api';
 
 class BookDownloadService {
   private readonly DOWNLOAD_DIR = FileSystem.documentDirectory + 'books/';
@@ -59,12 +60,45 @@ class BookDownloadService {
     }
   }
 
+  /**
+   * Auth-protected download URL for a real book. The API streams the EPUB
+   * from R2 at GET /v1/books/:id/download (Bearer token required).
+   */
+  getDownloadUrl(bookId: string): string {
+    return `${API_URL}/books/${bookId}/download`;
+  }
+
+  /**
+   * Ensures the book file exists locally via an authenticated download from
+   * the API, returning the local path for the reader (or null on failure).
+   * Reuses the cache — the file is downloaded only once per book.
+   */
+  async downloadBookForReading(bookId: string, onProgress?: (percent: number) => void): Promise<string | null> {
+    const remoteUrl = this.getDownloadUrl(bookId);
+    const cached = await this.getLocalBookPath(bookId, remoteUrl);
+    if (cached) return cached;
+    try {
+      return await this.downloadBook(bookId, remoteUrl, onProgress);
+    } catch (e) {
+      console.error(`[BookDownloadService] Failed to download book ${bookId} for reading:`, e);
+      return null;
+    }
+  }
+
   async downloadBook(
     bookId: string, 
     remoteUrl: string, 
     onProgress?: (percent: number) => void
   ): Promise<string> {
     await this.ensureDirectoryExists();
+
+    // The API download endpoint requires a Bearer token. Fetch a fresh token
+    // outside the axios interceptors (FileSystem can't use them).
+    const token = await ensureFreshAccessToken();
+    if (!token) {
+      throw new Error('Sesi berakhir, silakan masuk kembali.');
+    }
+
     const ext = this.getExtension(remoteUrl);
     const localUri = this.DOWNLOAD_DIR + bookId + ext;
 
@@ -84,7 +118,7 @@ class BookDownloadService {
     const downloadResumable = FileSystem.createDownloadResumable(
       remoteUrl,
       localUri,
-      {},
+      { headers: { Authorization: `Bearer ${token}` } },
       (downloadProgress) => {
         if (downloadProgress.totalBytesExpectedToWrite > 0) {
           totalExpectedBytes = downloadProgress.totalBytesExpectedToWrite;

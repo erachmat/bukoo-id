@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 import { wishlistService } from '../../services/wishlistService';
 import { getCoverUrl } from '../../services/coverUrl';
+import { bookDownloadService } from '../../services/bookDownload';
 import { readingSync, ReadingProgress } from '../../services/readingSync';
 import { AiBookInsightCard } from './components/AiBookInsightCard';
 import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
@@ -105,9 +106,12 @@ export default function BookDetailScreen() {
     return `${domainBaseUrl}/${epubPath.replace(/^\//, '')}`;
   };
 
-  // Real data only: epubUrl/fileUrl come from the backend when provided;
-  // coverKey (R2 key) is mapped to a public cover URL via getCoverUrl().
-  const rawEpubUrl = book?.epubUrl || book?.fileUrl;
+  // Real data only: epubUrl/fileUrl come from the backend when provided.
+  // Real books carry an R2 epubKey — map it to the auth-protected download
+  // URL (the Bearer token is attached on download, not streamable publicly).
+  const rawEpubUrl = book?.epubKey
+    ? bookDownloadService.getDownloadUrl(book.id)
+    : (book?.epubUrl || book?.fileUrl);
   const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl);
 
   const displayBook = book

@@ -1,3 +1,14 @@
+# Real EPUB Reading (Mobile) — Authenticated Book Access — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-real-epub-reading*`, `.superpowers/sdd/real-epub-reading/`). User-approved.
+- `[x]` 2. `api.ts` — exported `API_URL`; added `getAccessToken()` + `ensureFreshAccessToken()` (`/users/me` ping triggers the 401→refresh interceptor, then re-reads SecureStore).
+- `[x]` 3. `bookDownload.ts` — `downloadBook` now sends `Authorization: Bearer <fresh token>` via `createDownloadResumable` headers; added `getDownloadUrl(bookId)` + `downloadBookForReading(bookId)` (cache-first).
+- `[x]` 4. `ReadingScreen.tsx` — real books (auth-protected) download natively then open locally via `downloadBookForReading`; public URLs still stream in WebView (`isPublicBookUrl`); honest loadError kept.
+- `[x]` 5. `BookDetailScreen.tsx` — `epubUrl` derived from `epubKey` via `getDownloadUrl(book.id)`; reader + offline download share the auth'd source.
+- `[x]` 6. Verification: mobile tsc ✅, lint ✅, test "no tests specified" (stated). **Local API route proof**: seeded test book in local D1 + R2, `wrangler dev` → no token 401, with token 200 `application/epub+zip` + `PK\x03\x04`, missing book 404. Test data cleaned up.
+- `[x]` 7. Docs: plan checkboxes ✅, ledger updated, this entry.
+- `[ ]` 8. (manual/QA) Device E2E: seed a real book + R2 EPUB, open detail → Mulai Membaca renders; offline download shows in "Diunduh".
+
 # Remove All Dummy Ebooks (Mobile) — 2026-08-19
 
 - `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-remove-dummy-ebooks*`, `.superpowers/sdd/remove-dummy-ebooks/`). User-approved.
@@ -13,7 +24,7 @@
 - `[x]` 11. `QuickResumeCard.tsx` — removed `DEFAULT_ACTIVE_BOOK` fallback.
 - `[x]` 12. New `services/coverUrl.ts` — maps R2 `coverKey` → `https://bukoo.id/covers/<key>` (real covers after dummy URLs removed).
 - `[x]` 13. Verification: mobile typecheck ✅, lint ✅, test "no tests specified" (stated). Greps for all dummy symbols + hardcoded cover URLs → 0 hits.
-- `[ ]` 14. (follow-up) Real EPUB reading in mobile: needs auth'd source (API `/v1/books/:id/download` requires auth; reader/download pipeline sends none). Covers work now; reading shows honest error until wired.
+- `[x]` 14. Real EPUB reading in mobile: DONE 2026-08-19 — auth'd native download (`createDownloadResumable` + Bearer token) → open local file. See "Real EPUB Reading" entry above. Device E2E is item 8 there.
 
 # CI/CD for Web & API (Cloudflare Workers) — 2026-08-19
 

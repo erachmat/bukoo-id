@@ -18,6 +18,7 @@ import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
 import { annotationSyncService } from '../../services/annotationSyncService';
 import { bookDownloadService } from '../../services/bookDownload';
+import { API_URL } from '../../services/api';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -990,6 +991,21 @@ async function getBookSourceFingerprint(uri: string): Promise<string> {
   return `remote:${uri}`;
 }
 
+/**
+ * True when epubjs can fetch the URL from inside the WebView WITHOUT auth.
+ * API download URLs (api.bukoo.id / local dev host) require a Bearer token,
+ * so they must be downloaded natively instead of streamed.
+ */
+function isPublicBookUrl(url: string): boolean {
+  if (!/^https?:\/\//i.test(url)) return false;
+  try {
+    const apiHost = new URL(API_URL).host;
+    return new URL(url).host !== apiHost;
+  } catch {
+    return true;
+  }
+}
+
 // ─── Theme Colors Map ─────────────────────────────────────────────────────────
 
 const themeColors = {
@@ -1248,11 +1264,23 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           return;
         }
 
-        // Directly open remote URL without downloading first
-        if (remoteUrl && isMounted) {
+        // Public remote URL → stream directly (epubjs fetches it inside the
+        // WebView, so it must NOT require auth).
+        if (remoteUrl && isPublicBookUrl(remoteUrl) && isMounted) {
           console.log('[ReadingScreen] Opening directly from remote URL:', remoteUrl);
           setLocalFileUri(remoteUrl);
           return;
+        }
+
+        // Real book (epubKey → auth-protected API download): fetch the file
+        // with the Bearer token on the native side, then open it locally.
+        if (bookId && isMounted) {
+          const localPath = await bookDownloadService.downloadBookForReading(bookId);
+          if (localPath && isMounted) {
+            console.log('[ReadingScreen] Opened authenticated download locally:', localPath);
+            setLocalFileUri(localPath);
+            return;
+          }
         }
 
         // No resolvable source — honest error, no demo fallback.
