@@ -109,13 +109,8 @@ export default function TentangPage() {
             </div>
             <div className="tm">
               <div className="tm-av">MM</div>
-              <h4>Muhammad Mustofa</h4>
-              <p>Head of Publisher Relations</p>
-            </div>
-            <div className="tm">
-              <div className="tm-av">AM</div>
               <h4>Ahmad Mustafa</h4>
-              <p>Komisaris</p>
+              <p>Head of Publisher Relations</p>
             </div>
           </div>
         </div>

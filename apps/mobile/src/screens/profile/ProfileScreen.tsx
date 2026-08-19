@@ -678,8 +678,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   shareIconBtn: {
-    width: 32,
-    height: 32,
+    width: 22,
+    height: 22,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
