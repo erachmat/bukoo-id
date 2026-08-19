@@ -340,7 +340,7 @@ export default function ProfileScreen() {
             </View>
             <View style={{ borderTopWidth: 1, borderTopColor: COLORS.forestBorder, paddingTop: 16, alignItems: 'center' }}>
               <Text style={{ fontSize: 12, fontFamily: FONTS.sansRegular, color: COLORS.muted, marginBottom: 4 }}>Dikembangkan oleh</Text>
-              <Text style={{ fontSize: 13, fontFamily: FONTS.sansBold, fontWeight: 'bold', color: COLORS.cream, marginBottom: 12 }}>PT Akkadia Sarana Intelektual</Text>
+              <Text style={{ fontSize: 13, fontFamily: FONTS.sansBold, fontWeight: 'bold', color: COLORS.cream, marginBottom: 12 }}>PT BUKOO Digital Indonesia</Text>
               <Text style={{ fontSize: 11, fontFamily: FONTS.sansRegular, color: COLORS.muted }}>Copyright © 2026. Hak Cipta Dilindungi.</Text>
             </View>
             <TouchableOpacity style={styles.closeModalButton} onPress={() => setActiveModal(null)}>
