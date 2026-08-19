@@ -106,12 +106,14 @@ export default function Navbar() {
 
           {/* 4. Untuk Penerbit */}
           <li className="nav-item">
-            <Link
-              href="/penerbit-daftar.html"
+            <a
+              href="https://publisher.bukoo.id/publisher/daftar"
+              target="_blank"
+              rel="noopener noreferrer"
               className="nav-link"
             >
               Untuk Penerbit
-            </Link>
+            </a>
           </li>
 
           {/* 5. Perusahaan (Dropdown) */}
@@ -202,12 +204,14 @@ export default function Navbar() {
             </li>
 
             <li>
-              <Link
-                href="/penerbit-daftar.html"
+              <a
+                href="https://publisher.bukoo.id/publisher/daftar"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={closeMobileMenu}
               >
                 Untuk Penerbit
-              </Link>
+              </a>
             </li>
 
             {/* Perusahaan Submenu Accordion */}

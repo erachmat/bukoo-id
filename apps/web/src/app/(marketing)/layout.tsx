@@ -55,11 +55,11 @@ export default function MarketingLayout({
           <div>
             <div className="footer-col-title">Untuk Penerbit</div>
             <ul className="footer-links">
-              <li><Link href="/penerbit-daftar.html">Daftar Penerbit</Link></li>
-              <li><Link href="/penerbit-dashboard.html">Publisher Dashboard</Link></li>
-              <li><Link href="/penerbit-royalti.html">Kebijakan Royalti</Link></li>
-              <li><Link href="/penerbit-submit.html">Submit Judul</Link></li>
-              <li><Link href="/penerbit-panduan.html">Panduan Penerbit</Link></li>
+              <li><a href="https://publisher.bukoo.id/publisher/daftar" target="_blank" rel="noopener noreferrer">Daftar Penerbit</a></li>
+              <li><a href="https://publisher.bukoo.id/publisher/dashboard" target="_blank" rel="noopener noreferrer">Publisher Dashboard</a></li>
+              <li><a href="https://publisher.bukoo.id/publisher/royalti" target="_blank" rel="noopener noreferrer">Kebijakan Royalti</a></li>
+              <li><a href="https://publisher.bukoo.id/publisher/submit" target="_blank" rel="noopener noreferrer">Submit Judul</a></li>
+              <li><a href="https://publisher.bukoo.id/publisher/panduan" target="_blank" rel="noopener noreferrer">Panduan Penerbit</a></li>
             </ul>
           </div>
 
