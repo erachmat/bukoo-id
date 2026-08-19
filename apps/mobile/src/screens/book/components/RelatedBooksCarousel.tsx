@@ -4,7 +4,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 import { RootStackParamList } from '../../../navigation/types';
-import { MASTER_SAMPLE_BOOKS } from '../BookDetailScreen';
+import { useRecommendedBooks } from '../../../hooks/api/useBooksApi';
+import { getCoverUrl } from '../../../services/coverUrl';
 
 interface RelatedBooksCarouselProps {
   currentBookId: string;
@@ -12,10 +13,20 @@ interface RelatedBooksCarouselProps {
 
 export function RelatedBooksCarousel({ currentBookId }: RelatedBooksCarouselProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { data: recommendations } = useRecommendedBooks();
 
-  const relatedList = Object.values(MASTER_SAMPLE_BOOKS)
+  // Real recommendations from GET /v1/books/recommendations — no dummy books.
+  const relatedList = (recommendations ?? [])
     .filter((b) => b.id !== currentBookId)
-    .slice(0, 5);
+    .slice(0, 5)
+    .map((b) => ({
+      ...b,
+      coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+    }));
+
+  if (relatedList.length === 0) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>

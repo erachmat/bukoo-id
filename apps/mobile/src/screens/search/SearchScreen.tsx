@@ -13,7 +13,8 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { searchHistoryService } from '../../services/searchHistoryService';
 import { FilterModal, FilterState, DEFAULT_FILTERS } from './components/FilterModal';
 import { FilterChips } from './components/FilterChips';
-import { SearchFilterParams } from '../../services/api';
+import { SearchFilterParams, BookItemDto } from '../../services/api';
+import { getCoverUrl } from '../../services/coverUrl';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -57,59 +58,15 @@ export default function SearchScreen() {
   const cleanCategory = selectedCategory.replace('🔥', '').trim();
   const { data: genreBooks } = useGenreBooks(cleanCategory);
 
-  const exploreBooks = [
-    {
-      id: 'laut-bercerita',
-      title: 'Laut Bercerita',
-      author: 'Laila S. Chudori',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    },
-    {
-      id: 'authority-search',
-      title: 'BOOK 2 OF AUTHORI...',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    },
-    {
-      id: 'moby-dick-orig',
-      title: 'Moby Dick',
-      author: 'Herman Melville',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    },
-    {
-      id: 'authority-orig',
-      title: 'BOOK 2 OF AUTHORITY',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    },
-  ];
-
-  const originalBooks = [
-    {
-      id: 'moby-dick-orig',
-      title: 'Moby Dick',
-      author: 'Herman Melville',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    },
-    {
-      id: 'authority-orig',
-      title: 'BOOK 2 OF AUTHORITY',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    },
-    {
-      id: 'laut-bercerita',
-      title: 'Laut Bercerita',
-      author: 'Laila S. Chudori',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    },
-    {
-      id: 'authority-search',
-      title: 'BOOK 2 OF AUTHORI...',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    },
-  ];
+  // Real data only — R2 coverKey is mapped to a public cover URL.
+  const genreBooksWithCover = (genreBooks ?? []).map((b: BookItemDto) => ({
+    ...b,
+    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+  }));
+  const searchResultsWithCover = (searchResults ?? []).map((b: BookItemDto) => ({
+    ...b,
+    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+  }));
 
   const handleSelectRecentSearch = (term: string) => {
     setSearchQuery(term);
@@ -247,8 +204,8 @@ export default function SearchScreen() {
               <View style={styles.loadingContainer}>
                 <Text style={styles.loadingText}>Mencari buku...</Text>
               </View>
-            ) : searchResults && searchResults.length > 0 ? (
-              searchResults.map((item: { id: string; title: string; author: string; coverUrl?: string; subscriptionRequired?: string }) => (
+            ) : searchResultsWithCover.length > 0 ? (
+              searchResultsWithCover.map((item: BookItemDto) => (
                 <TouchableOpacity
                   key={item.id}
                   style={styles.searchResultItem}
@@ -260,7 +217,7 @@ export default function SearchScreen() {
                   }
                 >
                   <Image
-                    source={{ uri: item.coverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
+                    source={{ uri: item.coverUrl || '' }}
                     style={styles.searchResultCover}
                   />
                   <View style={styles.searchResultInfo}>
@@ -291,72 +248,36 @@ export default function SearchScreen() {
           </View>
         ) : (
           <>
-            {/* Top Horizontal Book Cards */}
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.bookListContent}
-              data={genreBooks && genreBooks.length > 0 ? genreBooks : exploreBooks}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.exploreBookCard}
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    navigation.navigate('ReadingStack', {
-                      screen: 'BookDetail',
-                      params: { bookId: item.id },
-                    } as never)
-                  }
-                >
-                  <Image source={{ uri: item.coverUrl }} style={styles.exploreBookCover} />
-                  <Text style={styles.exploreBookTitle} numberOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text style={styles.exploreBookAuthor} numberOfLines={1}>
-                    {item.author}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-
-            {/* BUKOO ORIGINAL Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>BUKOO ORIGINAL</Text>
-              <TouchableOpacity style={styles.seeAllButton}>
-                <Text style={styles.seeAllText}>Lihat semua</Text>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.gold} />
-              </TouchableOpacity>
-            </View>
-
-            {/* BUKOO Original List */}
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.bookListContent}
-              data={originalBooks}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.exploreBookCard}
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    navigation.navigate('ReadingStack', {
-                      screen: 'BookDetail',
-                      params: { bookId: item.id },
-                    } as never)
-                  }
-                >
-                  <Image source={{ uri: item.coverUrl }} style={styles.exploreBookCover} />
-                  <Text style={styles.exploreBookTitle} numberOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text style={styles.exploreBookAuthor} numberOfLines={1}>
-                    {item.author}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+            {/* Top Horizontal Book Cards — real genre books, hidden when empty */}
+            {genreBooksWithCover.length > 0 && (
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.bookListContent}
+                data={genreBooksWithCover}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.exploreBookCard}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate('ReadingStack', {
+                        screen: 'BookDetail',
+                        params: { bookId: item.id },
+                      } as never)
+                    }
+                  >
+                    <Image source={{ uri: item.coverUrl }} style={styles.exploreBookCover} />
+                    <Text style={styles.exploreBookTitle} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text style={styles.exploreBookAuthor} numberOfLines={1}>
+                      {item.author}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
           </>
         )}
       </ScrollView>

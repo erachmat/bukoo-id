@@ -34,7 +34,7 @@ const QUICK_PROMPTS = [
   { id: 'prompt-time', label: '⏱️ Estimasi Selesai', query: 'Berapa estimasi waktu membaca hingga tamat?' },
 ];
 
-export function AiChatSection({ currentBookTitle = 'Laut Bercerita', onOpenSummaryModal }: AiChatSectionProps) {
+export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal }: AiChatSectionProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);

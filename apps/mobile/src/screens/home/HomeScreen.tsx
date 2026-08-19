@@ -6,6 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
 import { useFeaturedBooks, useGenreBooks } from '../../hooks/api/useBooksApi';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
+import { BookItemDto } from '../../services/api';
 import { bookDownloadService } from '../../services/bookDownload';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
@@ -25,6 +26,7 @@ import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
 import { NotificationModal } from './components/NotificationModal';
 import { notificationService } from '../../services/notificationService';
 import { MiniAudioPlayer } from '../../components/MiniAudioPlayer';
+import { getCoverUrl } from '../../services/coverUrl';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -73,41 +75,22 @@ export default function HomeScreen() {
     }
   };
 
-  const defaultTrending = [
-    {
-      id: 'moby-dick',
-      title: 'Moby Dick',
-      author: 'by herman melvile',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-      genre: [],
-    },
-    {
-      id: 'authority',
-      title: 'BOOK 2 OF AUTHORITY',
-      author: 'Jeff Vandermeer',
-      coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-      genre: [],
-    },
-    {
-      id: 'great-gatsby',
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-      genre: [],
-    },
-  ];
+  // Real data only — R2 coverKey is mapped to a public cover URL.
+  const toBookWithCover = (b: BookItemDto) => ({
+    ...b,
+    coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+  });
 
-  const displayTrending = (featuredData?.trending && featuredData.trending.length > 0)
-    ? featuredData.trending
-    : defaultTrending;
+  const trendingBooks = (featuredData?.trending ?? []).map(toBookWithCover);
+  const heroBook = trendingBooks[0] ?? null;
 
   const currentSectionTitle = selectedCategory === 'Semua'
     ? (favoriteGenres.length > 0 ? `Rekomendasi & Trending` : 'Trending Minggu ini')
     : `Buku ${selectedCategory}`;
 
   const currentBooksData = (selectedCategory !== 'Semua' && categoryBooks && categoryBooks.length > 0)
-    ? categoryBooks
-    : displayTrending;
+    ? categoryBooks.map(toBookWithCover)
+    : trendingBooks;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -182,29 +165,35 @@ export default function HomeScreen() {
           })}
         </ScrollView>
 
-        {/* Hero Featured Banner Card */}
-        <TouchableOpacity
-          style={styles.heroBanner}
-          activeOpacity={0.9}
-          onPress={() => navigation.navigate('Search')}
-        >
-          <View style={styles.heroContent}>
-            <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>★ KOLEKSI TERBAIK</Text>
+        {/* Hero Featured Banner Card — real featured book, hidden when none exists */}
+        {heroBook && (
+          <TouchableOpacity
+            style={styles.heroBanner}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('ReadingStack', {
+              screen: 'BookDetail',
+              params: { bookId: heroBook.id }
+            } as never)}
+          >
+            <View style={styles.heroContent}>
+              <View style={styles.heroBadge}>
+                <Text style={styles.heroBadgeText}>★ KOLEKSI TERBAIK</Text>
+              </View>
+              <Text style={styles.heroTitle} numberOfLines={2}>
+                {heroBook.title}
+              </Text>
+              <Text style={styles.heroSubtitle} numberOfLines={1}>{heroBook.author}</Text>
+              {heroBook.synopsis ? (
+                <Text style={styles.heroDescription} numberOfLines={3}>
+                  {heroBook.synopsis}
+                </Text>
+              ) : null}
             </View>
-            <Text style={styles.heroTitle}>
-              Buku <Text style={styles.heroTitleHighlight}>Atomic Habit</Text>
-            </Text>
-            <Text style={styles.heroSubtitle}>Perubahan Kecil, Hasil Luar Biasa.</Text>
-            <Text style={styles.heroDescription}>
-              Koleksi pilihan buku Atomic Habits untuk membangun kebiasaan baik, konsisten setiap hari, dan menjadi versi terbaik dirimu.
-            </Text>
-          </View>
-          <Image
-            source={{ uri: 'https://covers.openlibrary.org/b/id/12812239-L.jpg' }}
-            style={styles.heroCoverImage}
-          />
-        </TouchableOpacity>
+            {heroBook.coverUrl ? (
+              <Image source={{ uri: heroBook.coverUrl }} style={styles.heroCoverImage} />
+            ) : null}
+          </TouchableOpacity>
+        )}
 
         {/* Dynamic Category / Trending Section Header */}
         <View style={styles.sectionHeader}>
@@ -217,6 +206,14 @@ export default function HomeScreen() {
             <Ionicons name="arrow-forward" size={16} color={COLORS.gold} />
           </TouchableOpacity>
         </View>
+
+        {/* Empty state when no books from the API yet */}
+        {currentBooksData.length === 0 && (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="book-outline" size={40} color={COLORS.muted} />
+            <Text style={styles.emptyText}>Belum ada buku — nantikan koleksi BUKOO!</Text>
+          </View>
+        )}
 
         {/* Dynamic Category / Trending Books List — carousel vs grid (A/B) */}
         {isGrid ? (
@@ -452,6 +449,19 @@ const styles = StyleSheet.create({
     width: 100,
     height: 140,
     borderRadius: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    textAlign: 'center',
+    marginTop: 12,
+    lineHeight: 20,
   },
   sectionHeader: {
     flexDirection: 'row',

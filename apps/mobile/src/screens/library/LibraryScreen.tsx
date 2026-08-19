@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { api } from '../../services/api';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { bookDownloadService } from '../../services/bookDownload';
+import { getCoverUrl } from '../../services/coverUrl';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { RootStackParamList, MainTabParamList } from '../../navigation/types';
@@ -16,41 +17,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 
 type LibraryTab = 'semua' | 'sedang_dibaca' | 'selesai' | 'ingin_dibaca' | 'diunduh';
 type LibrarySortOption = 'recent' | 'title' | 'progress';
-
-const DEFAULT_BOOKS_LIST = [
-  {
-    id: 'laut-bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    progressPercent: 40,
-    status: 'sedang_dibaca',
-  },
-  {
-    id: 'cage-the-raven',
-    title: 'CAGE THE RAVEN',
-    author: 'Author Name',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    progressPercent: 0,
-    status: 'ingin_dibaca',
-  },
-  {
-    id: 'moby-dick-library',
-    title: 'Moby Dick',
-    author: 'Herman Melville',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    progressPercent: 100,
-    status: 'selesai',
-  },
-  {
-    id: 'authority-library',
-    title: 'AUTHORITY',
-    author: 'Jeff Vandermeer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    progressPercent: 0,
-    status: 'ingin_dibaca',
-  },
-];
 
 import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
@@ -124,7 +90,7 @@ export default function LibraryScreen() {
 
   const allLibraryItems = useMemo(() => {
     if (books && books.length > 0) {
-      return books.map((b: { id: string; title: string; author: string; coverUrl?: string }) => {
+      return books.map((b: { id: string; title: string; author: string; coverUrl?: string; coverKey?: string | null }) => {
         const prog = userLibraryProgress?.find((p) => p.bookId === b.id);
         const percent = prog?.progressPercent ?? 0;
         let status: LibraryTab = 'ingin_dibaca';
@@ -134,13 +100,13 @@ export default function LibraryScreen() {
           id: b.id,
           title: b.title,
           author: b.author,
-          coverUrl: b.coverUrl || 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
+          coverUrl: getCoverUrl(b.coverKey) || b.coverUrl || '',
           progressPercent: percent,
           status,
         };
       });
     }
-    return DEFAULT_BOOKS_LIST;
+    return [];
   }, [books, userLibraryProgress]);
 
   // Filter books according to active tab
@@ -164,11 +130,11 @@ export default function LibraryScreen() {
   }, [filteredBooks, sortOption]);
 
   const activeProgress = userLibraryProgress && userLibraryProgress.length > 0 ? userLibraryProgress[0] : null;
-  const activeTitle = activeProgress?.bookTitle || 'Laut Bercerita';
-  const activeCover = activeProgress?.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg';
-  const activePercent = activeProgress?.progressPercent ?? 40;
-  const activeAuthor = activeProgress?.bookAuthor || 'Leila S. Chudori';
-  const activeBookId = activeProgress?.bookId || 'laut-bercerita';
+  const activeTitle = activeProgress?.bookTitle ?? '';
+  const activeCover = activeProgress?.bookCoverUrl ?? '';
+  const activePercent = activeProgress?.progressPercent ?? 0;
+  const activeAuthor = activeProgress?.bookAuthor ?? '';
+  const activeBookId = activeProgress?.bookId ?? '';
 
   const tabLabels: { id: LibraryTab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { id: 'semua', label: 'Semua', icon: 'grid-outline' },
@@ -210,38 +176,40 @@ export default function LibraryScreen() {
         {/* Daily Reading Target & Streak Card */}
         <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
 
-        {/* Featured "Sedang dibaca" Card */}
-        <View style={styles.activeCard}>
-          <Image source={{ uri: activeCover }} style={styles.activeCover} />
-          <View style={styles.activeInfo}>
-            <View style={styles.readingStatusBadge}>
-              <Text style={styles.readingStatusText}>Sedang dibaca</Text>
-            </View>
-            <Text style={styles.activeTitle}>{activeTitle}</Text>
-            <Text style={styles.activeAuthor}>{activeAuthor}</Text>
-
-            <View style={styles.progressRow}>
-              <View style={styles.progressBarBackground}>
-                <View style={[styles.progressBarFill, { width: `${activePercent}%` }]} />
+        {/* Featured "Sedang dibaca" Card — only when real progress exists */}
+        {activeProgress && (
+          <View style={styles.activeCard}>
+            <Image source={{ uri: activeCover }} style={styles.activeCover} />
+            <View style={styles.activeInfo}>
+              <View style={styles.readingStatusBadge}>
+                <Text style={styles.readingStatusText}>Sedang dibaca</Text>
               </View>
-              <Text style={styles.progressText}>{activePercent}%</Text>
-            </View>
+              <Text style={styles.activeTitle}>{activeTitle}</Text>
+              <Text style={styles.activeAuthor}>{activeAuthor}</Text>
 
-            <TouchableOpacity
-              style={styles.continueButton}
-              activeOpacity={0.8}
-              onPress={() =>
-                navigation.navigate('ReadingStack', {
-                  screen: 'BookDetail',
-                  params: { bookId: activeBookId },
-                } as never)
-              }
-            >
-              <Text style={styles.continueButtonText}>Lanjut Baca</Text>
-              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
+              <View style={styles.progressRow}>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBarFill, { width: `${activePercent}%` }]} />
+                </View>
+                <Text style={styles.progressText}>{activePercent}%</Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.continueButton}
+                activeOpacity={0.8}
+                onPress={() =>
+                  navigation.navigate('ReadingStack', {
+                    screen: 'BookDetail',
+                    params: { bookId: activeBookId },
+                  } as never)
+                }
+              >
+                <Text style={styles.continueButtonText}>Lanjut Baca</Text>
+                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* AI Companion Insight Banner Card */}
         <TouchableOpacity

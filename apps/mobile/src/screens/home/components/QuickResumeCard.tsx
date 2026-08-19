@@ -22,19 +22,15 @@ interface QuickResumeCardProps {
   progressData?: ActiveBookProgress | null;
 }
 
-const DEFAULT_ACTIVE_BOOK: ActiveBookProgress = {
-  bookId: 'book_bumi_manusia',
-  bookTitle: 'Bumi Manusia',
-  bookAuthor: 'Pramoedya Ananta Toer',
-  bookCoverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-  progressPercent: 42,
-  currentPage: 225,
-  totalPages: 535,
-};
-
 export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
   const navigation = useNavigation<NavigationProp>();
-  const activeBook = progressData || DEFAULT_ACTIVE_BOOK;
+
+  // Real data only — hide the card when there is no active reading progress.
+  if (!progressData) {
+    return null;
+  }
+
+  const activeBook = progressData;
   const progressPercent = activeBook.progressPercent || 0;
 
   const handleResumeReading = () => {
@@ -63,7 +59,7 @@ export function QuickResumeCard({ progressData }: QuickResumeCardProps) {
       {/* Main Content Body */}
       <View style={styles.contentRow}>
         <Image
-          source={{ uri: activeBook.bookCoverUrl || 'https://covers.openlibrary.org/b/id/12528734-L.jpg' }}
+          source={{ uri: activeBook.bookCoverUrl || '' }}
           style={styles.coverImage}
         />
         <View style={styles.infoCol}>

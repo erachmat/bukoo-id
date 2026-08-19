@@ -11,6 +11,7 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
+import { getCoverUrl } from '../../services/coverUrl';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
 
@@ -22,201 +23,6 @@ interface Book {
   genre?: string[];
   category?: string;
 }
-
-const SAMPLE_STORE_BOOKS: (Book & { section: string })[] = [
-  {
-    id: 'book_filsafat_ajaran_islam',
-    title: 'Filsafat Ajaran Islam (Edisi 2025)',
-    author: 'Hadhrat Mirza Ghulam Ahmad',
-    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
-    category: 'Fiksi',
-    genre: ['Filsafat', 'Islam', 'Agama'],
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_perlunya_seorang_imam',
-    title: 'Perlunya Seorang Imam',
-    author: 'Hadhrat Mirza Ghulam Ahmad',
-    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
-    category: 'Fiksi',
-    genre: ['Agama', 'Islam', 'Kerohanian'],
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_riwayat_rasulullah',
-    title: 'Riwayat Rasulullah SAW',
-    author: 'Tim Penulis Kiram',
-    coverUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400',
-    category: 'Fiksi',
-    genre: ['Sejarah', 'Biografi', 'Islam'],
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_laskar_pelangi',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    category: 'Fiksi',
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_bumi_manusia',
-    title: 'Bumi Manusia',
-    author: 'Pramoedya Ananta Toer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    category: 'Fiksi',
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_cantik_itu_luka',
-    title: 'Cantik Itu Luka',
-    author: 'Eka Kurniawan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    category: 'Fiksi',
-    section: 'editors_choice'
-  },
-  {
-    id: 'book_laut_bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    category: 'Fiksi',
-    section: 'trending'
-  },
-  {
-    id: 'book_saman',
-    title: 'Saman',
-    author: 'Ayu Utami',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    category: 'Fiksi',
-    section: 'trending'
-  },
-  {
-    id: 'pride-prejudice',
-    title: 'Pride and Prejudice',
-    author: 'Jane Austen',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    category: 'Fiksi',
-    section: 'new_releases'
-  },
-  {
-    id: 'great-gatsby',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    category: 'Fiksi',
-    section: 'new_releases'
-  },
-  {
-    id: 'tale-two-cities',
-    title: 'A Tale of Two Cities',
-    author: 'Charles Dickens',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    category: 'Fiksi',
-    section: 'new_releases'
-  },
-  // Non-fiksi
-  {
-    id: 'sapiens',
-    title: 'Sapiens',
-    author: 'Yuval Noah Harari',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    category: 'Non-fiksi',
-    section: 'editors_choice'
-  },
-  {
-    id: 'atomic-habits',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    category: 'Non-fiksi',
-    section: 'trending'
-  },
-  {
-    id: 'art-of-war',
-    title: 'The Art of War',
-    author: 'Sun Tzu',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    category: 'Non-fiksi',
-    section: 'new_releases'
-  },
-  // Komik
-  {
-    id: 'one-piece',
-    title: 'One Piece, Vol. 1',
-    author: 'Eiichiro Oda',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    category: 'Komik',
-    section: 'editors_choice'
-  },
-  {
-    id: 'naruto',
-    title: 'Naruto, Vol. 1',
-    author: 'Masashi Kishimoto',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    category: 'Komik',
-    section: 'trending'
-  },
-  {
-    id: 'doraemon',
-    title: 'Doraemon, Vol. 1',
-    author: 'Fujiko F. Fujio',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    category: 'Komik',
-    section: 'new_releases'
-  },
-  // Audiobook
-  {
-    id: 'audio-hobbit',
-    title: 'The Hobbit (Audio)',
-    author: 'J.R.R. Tolkien',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    category: 'Audiobook',
-    section: 'editors_choice'
-  },
-  {
-    id: 'audio-sherlock',
-    title: 'Sherlock Holmes',
-    author: 'Arthur Conan Doyle',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    category: 'Audiobook',
-    section: 'trending'
-  },
-  // Anak-anak
-  {
-    id: 'kancil-buaya',
-    title: 'Kancil dan Buaya',
-    author: 'Dongeng Rakyat',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    category: 'Anak-anak',
-    section: 'editors_choice'
-  },
-  {
-    id: 'malin-kundang',
-    title: 'Malin Kundang',
-    author: 'Cerita Rakyat',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    category: 'Anak-anak',
-    section: 'trending'
-  },
-  // Sains
-  {
-    id: 'brief-history',
-    title: 'A Brief History of Time',
-    author: 'Stephen Hawking',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    category: 'Sains',
-    section: 'editors_choice'
-  },
-  {
-    id: 'cosmos',
-    title: 'Cosmos',
-    author: 'Carl Sagan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    category: 'Sains',
-    section: 'trending'
-  }
-];
 
 const isCategoryMatch = (book: Book, category: string) => {
   if (!book) return false;
@@ -285,17 +91,19 @@ export default function StoreScreen() {
     </TouchableOpacity>
   );
 
-  const allEditorsChoice = featuredBooks?.editors_choice?.length > 0 
-    ? featuredBooks.editors_choice 
-    : SAMPLE_STORE_BOOKS.filter(b => b.section === 'editors_choice');
+  const mapBook = (b: { id: string; title: string; author: string; coverKey?: string | null; coverUrl?: string; genre?: string[] }): Book => ({
+    id: b.id,
+    title: b.title,
+    author: b.author,
+    coverUrl: getCoverUrl(b.coverKey) || b.coverUrl || '',
+    genre: b.genre,
+  });
 
-  const allTrending = featuredBooks?.trending?.length > 0 
-    ? featuredBooks.trending 
-    : SAMPLE_STORE_BOOKS.filter(b => b.section === 'trending');
+  const allEditorsChoice = (featuredBooks?.editors_choice ?? []).map(mapBook);
 
-  const allNewReleases = featuredBooks?.new_releases?.length > 0 
-    ? featuredBooks.new_releases 
-    : SAMPLE_STORE_BOOKS.filter(b => b.section === 'new_releases');
+  const allTrending = (featuredBooks?.trending ?? []).map(mapBook);
+
+  const allNewReleases = (featuredBooks?.new_releases ?? []).map(mapBook);
 
   const displayEditorsChoice = allEditorsChoice.filter((b: Book) => isCategoryMatch(b, activeCategory));
   const displayTrending = allTrending.filter((b: Book) => isCategoryMatch(b, activeCategory));
@@ -428,6 +236,17 @@ export default function StoreScreen() {
                 />
               </View>
             )}
+
+            {/* Empty state — no books on the backend yet */}
+            {displayEditorsChoice?.length === 0 && displayTrending?.length === 0 && displayNewReleases?.length === 0 && (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="book-outline" size={48} color={COLORS.muted} />
+                <Text style={styles.emptyTitle}>Belum ada buku</Text>
+                <Text style={styles.emptySub}>
+                  Pustaka BUKOO akan segera hadir. Nantikan judul-judul terbaru!
+                </Text>
+              </View>
+            )}
           </>
         )}
       </ScrollView>
@@ -508,6 +327,26 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginVertical: 50,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginTop: 16,
+    marginBottom: 6,
+  },
+  emptySub: {
+    fontSize: 14,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   section: {
     marginTop: 25,

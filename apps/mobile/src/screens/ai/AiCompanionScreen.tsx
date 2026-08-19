@@ -13,35 +13,9 @@ import { AiSummaryModal } from './components/AiSummaryModal';
 import { userProfileService } from '../../services/userProfileService';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { useRecommendedBooks } from '../../hooks/api/useBooksApi';
+import { getCoverUrl } from '../../services/coverUrl';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabParamList>;
-
-const BASE_RECOMMENDATIONS = [
-  {
-    id: 'book_bumi_manusia',
-    title: 'Bumi Manusia',
-    author: 'Pramoedya Ananta Toer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    genre: 'Sejarah',
-    matchPercent: 95,
-  },
-  {
-    id: 'book_cantik_itu_luka',
-    title: 'Cantik Itu Luka',
-    author: 'Eka Kurniawan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    genre: 'Fiksi',
-    matchPercent: 92,
-  },
-  {
-    id: 'book_laskar_pelangi',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    genre: 'Fiksi',
-    matchPercent: 90,
-  },
-];
 
 export default function AiCompanionScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -55,16 +29,14 @@ export default function AiCompanionScreen() {
   const { data: apiRecommendations } = useRecommendedBooks();
 
   const displayRecommendations =
-    apiRecommendations && apiRecommendations.length > 0
-      ? apiRecommendations.map((b) => ({
-          id: b.id,
-          title: b.title,
-          author: b.author,
-          coverUrl: b.coverUrl || 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-          genre: Array.isArray(b.genre) && b.genre.length > 0 ? b.genre[0] : 'Fiksi',
-          matchPercent: b.matchPercent || 90,
-        }))
-      : BASE_RECOMMENDATIONS;
+    (apiRecommendations ?? []).map((b) => ({
+      id: b.id,
+      title: b.title,
+      author: b.author,
+      coverUrl: getCoverUrl((b as { coverKey?: string | null }).coverKey) || b.coverUrl || '',
+      genre: Array.isArray(b.genre) && b.genre.length > 0 ? b.genre[0] : 'Fiksi',
+      matchPercent: b.matchPercent || 90,
+    }));
 
   useEffect(() => {
     if (isFocused) {
@@ -181,42 +153,52 @@ export default function AiCompanionScreen() {
             <Text style={styles.sectionTitle}>Rekomendasi AI (Berdasarkan Minat)</Text>
           </View>
 
-          {displayRecommendations.map((item, idx) => {
-            const isMatchGenre = favoriteGenres.includes(item.genre);
-            const displayMatch = isMatchGenre ? Math.min(99, item.matchPercent + 5) : item.matchPercent;
-            return (
-              <TouchableOpacity
-                key={`${item.id}-${idx}`}
-                style={styles.recommendCard}
-                activeOpacity={0.8}
-                onPress={() =>
-                  navigation.navigate('ReadingStack', {
-                    screen: 'BookDetail',
-                    params: { bookId: item.id },
-                  } as never)
-                }
-              >
-                <Image source={{ uri: item.coverUrl }} style={styles.recommendCover} />
-                <View style={styles.recommendInfo}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={styles.recommendTitle}>{item.title}</Text>
-                    {isMatchGenre && (
-                      <View style={styles.genreMatchBadge}>
-                        <Text style={styles.genreMatchBadgeText}>★ {item.genre}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.recommendAuthor}>{item.author}</Text>
-                  <View style={styles.progressRow}>
-                    <View style={styles.progressBarBackground}>
-                      <View style={[styles.progressBarFill, { width: `${displayMatch}%` }]} />
+          {displayRecommendations.length > 0 ? (
+            displayRecommendations.map((item, idx) => {
+              const isMatchGenre = favoriteGenres.includes(item.genre);
+              const displayMatch = isMatchGenre ? Math.min(99, item.matchPercent + 5) : item.matchPercent;
+              return (
+                <TouchableOpacity
+                  key={`${item.id}-${idx}`}
+                  style={styles.recommendCard}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    navigation.navigate('ReadingStack', {
+                      screen: 'BookDetail',
+                      params: { bookId: item.id },
+                    } as never)
+                  }
+                >
+                  <Image source={{ uri: item.coverUrl }} style={styles.recommendCover} />
+                  <View style={styles.recommendInfo}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Text style={styles.recommendTitle}>{item.title}</Text>
+                      {isMatchGenre && (
+                        <View style={styles.genreMatchBadge}>
+                          <Text style={styles.genreMatchBadgeText}>★ {item.genre}</Text>
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.progressText}>{displayMatch}% Match</Text>
+                    <Text style={styles.recommendAuthor}>{item.author}</Text>
+                    <View style={styles.progressRow}>
+                      <View style={styles.progressBarBackground}>
+                        <View style={[styles.progressBarFill, { width: `${displayMatch}%` }]} />
+                      </View>
+                      <Text style={styles.progressText}>{displayMatch}% Match</Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <View style={styles.activeBookEmptyCard}>
+              <Ionicons name="sparkles-outline" size={28} color={COLORS.muted} />
+              <Text style={styles.emptyActiveText}>Belum ada rekomendasi.</Text>
+              <Text style={styles.emptyActiveSub}>
+                Mulai membaca dan AI akan menyusun rekomendasi sesuai minatmu.
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 

@@ -18,7 +18,6 @@ import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
 import { annotationSyncService } from '../../services/annotationSyncService';
 import { bookDownloadService } from '../../services/bookDownload';
-import { MASTER_SAMPLE_BOOKS } from '../book/BookDetailScreen';
 import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
@@ -1128,7 +1127,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [lineHeight, setLineHeight] = useState<number>(1.6);
   const [textAlign, setTextAlign] = useState<'left' | 'justify'>('left');
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [offlineCacheWarning, setOfflineCacheWarning] = useState<string | null>(null);
   const [showQuickJump, setShowQuickJump] = useState<boolean>(false);
   const [localFileUri, setLocalFileUri] = useState<string>('');
   const [epubJsContent, setEpubJsContent] = useState<string>(cachedEpubJsContent || '');
@@ -1145,10 +1143,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
     // Force re-resolution of book to stream remotely
     setLocalFileUri('');
-    const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
-    const remoteUrl = epubUrl || sampleBook?.epubUrl || '';
-    if (remoteUrl) {
-      setLocalFileUri(remoteUrl);
+    if (epubUrl) {
+      setLocalFileUri(epubUrl);
     }
   }, [bookId, epubUrl]);
 
@@ -1235,28 +1231,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     let isMounted = true;
     const resolveAndLoadBook = async () => {
       try {
-        // Bundled local assets for the 3 offline books (no download needed)
-        const OFFLINE_BOOK_ASSETS: Record<string, number> = {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          book_filsafat_ajaran_islam: require('../../../assets/filsafat-ajaran-islam.epub') as number,
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          book_perlunya_seorang_imam: require('../../../assets/perlunya-seorang-imam.epub') as number,
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          book_riwayat_rasulullah: require('../../../assets/riwayat-rasulullah.epub') as number,
-        };
-
-        if (OFFLINE_BOOK_ASSETS[bookId] !== undefined) {
-          console.log('[ReadingScreen] Loading offline bundled asset for:', bookId);
-          const asset = Asset.fromModule(OFFLINE_BOOK_ASSETS[bookId]);
-          await asset.downloadAsync();
-          if (asset.localUri && isMounted) {
-            setLocalFileUri(asset.localUri);
-          }
-          return;
-        }
-
-        const sampleBook = (MASTER_SAMPLE_BOOKS as Record<string, { epubUrl?: string; fileType?: string }>)[bookId];
-        let remoteUrl = epubUrl || sampleBook?.epubUrl || '';
+        let remoteUrl = epubUrl || '';
         if (remoteUrl) {
           remoteUrl = remoteUrl.replace(/\.pdf$/i, '.epub');
         }
@@ -1280,26 +1255,14 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           return;
         }
 
-        // Fallback: load bundled static sample EPUB asset for guaranteed demo reading
-        console.log('[ReadingScreen] Loading static bundled sample EPUB asset for demo...');
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const sampleAsset = Asset.fromModule(require('../../../assets/sample-book.epub'));
-        await sampleAsset.downloadAsync();
-        if (sampleAsset.localUri && isMounted) {
-          setOfflineCacheWarning('Mode Demo: Menggunakan sampel buku lokal.');
-          setLocalFileUri(sampleAsset.localUri);
+        // No resolvable source — honest error, no demo fallback.
+        if (isMounted) {
+          setLoadError('Gagal memuat buku. Periksa koneksi atau unduh kembali.');
         }
       } catch (e) {
-        console.error('[ReadingScreen] Failed to resolve book, attempting bundled asset fallback:', e);
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const sampleAsset = Asset.fromModule(require('../../../assets/sample-book.epub'));
-          await sampleAsset.downloadAsync();
-          if (sampleAsset.localUri && isMounted) {
-            setLocalFileUri(sampleAsset.localUri);
-          }
-        } catch (assetErr) {
-          setLoadError('Gagal memuat sampel buku.');
+        console.error('[ReadingScreen] Failed to resolve book:', e);
+        if (isMounted) {
+          setLoadError('Gagal memuat buku. Periksa koneksi atau unduh kembali.');
         }
       }
     };
@@ -1694,10 +1657,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 audioPlayerService.playTrack({
                   id: `audio-${bookId}`,
                   bookId: bookId,
-                  bookTitle: title || 'Buku Sastra BUKOO',
-                  bookAuthor: 'Penulis Sastra',
-                  coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-                  chapterTitle: chapterTitle || 'Bab 1: Pendahuluan Audio',
+                  bookTitle: title || 'Buku',
+                  bookAuthor: '',
+                  coverUrl: '',
+                  chapterTitle: chapterTitle || 'Bab 1',
                   durationSeconds: 1125,
                 });
               }}
@@ -1723,14 +1686,6 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             </TouchableOpacity>
           </View>
         </Animated.View>
-      )}
-
-      {/* ── Offline cache warning banner ── */}
-      {offlineCacheWarning && (
-        <View style={styles.offlineBanner}>
-          <Ionicons name="cloud-offline-outline" size={18} color="#FFFFFF" />
-          <Text style={styles.offlineBannerText}>{offlineCacheWarning}</Text>
-        </View>
       )}
 
       {/* ── WebView ── */}
@@ -2336,31 +2291,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.ember,
     fontWeight: '600',
-  },
-  offlineBanner: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 16,
-    zIndex: 99,
-    backgroundColor: '#DC2626',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  offlineBannerText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontFamily: FONTS.sansMedium,
-    flex: 1,
   },
   errorContainer: {
     flex: 1,

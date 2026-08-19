@@ -12,6 +12,7 @@ import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { ShimmerPlaceholder } from '../../components/ShimmerPlaceholder';
 import { wishlistService } from '../../services/wishlistService';
+import { getCoverUrl } from '../../services/coverUrl';
 import { readingSync, ReadingProgress } from '../../services/readingSync';
 import { AiBookInsightCard } from './components/AiBookInsightCard';
 import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
@@ -20,362 +21,6 @@ import { RelatedBooksCarousel } from './components/RelatedBooksCarousel';
 
 type DetailRouteProp = RouteProp<ReadingStackParamList, 'BookDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const MASTER_SAMPLE_BOOKS: Record<string, any> = {
-  book_laskar_pelangi: {
-    id: 'book_laskar_pelangi',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 1200,
-    genre: ['Fiksi', 'Drama', 'Edukasi'],
-    totalPages: 529,
-    language: 'id',
-    publishedYear: 2005,
-    synopsis: 'Kisah inspiratif tentang sepuluh anak dari keluarga miskin di Pulau Belitong yang berjuang mendapatkan pendidikan layak bersama dua guru hebat.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  book_bumi_manusia: {
-    id: 'book_bumi_manusia',
-    title: 'Bumi Manusia',
-    author: 'Pramoedya Ananta Toer',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    ratingAverage: 4.9,
-    ratingCount: 3500,
-    genre: ['Fiksi', 'Sejarah', 'Klasik'],
-    totalPages: 535,
-    language: 'id',
-    publishedYear: 1980,
-    synopsis: 'Kisah cinta Minke dan Annelies dengan latar belakang kolonial Belanda di Indonesia, menyuguhkan perjuangan melawan feodalisme dan ketidakadilan.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  book_cantik_itu_luka: {
-    id: 'book_cantik_itu_luka',
-    title: 'Cantik Itu Luka',
-    author: 'Eka Kurniawan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    ratingAverage: 4.7,
-    ratingCount: 1800,
-    genre: ['Fiksi', 'Realisme Magis', 'Klasik'],
-    totalPages: 508,
-    language: 'id',
-    publishedYear: 2002,
-    synopsis: 'Kisah epik yang memadukan realisme magis, sejarah, asmara, dan tragedi tentang kehidupan Dewi Ayu dan anak-anak perempuannya yang rupawan.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  book_laut_bercerita: {
-    id: 'book_laut_bercerita',
-    title: 'Laut Bercerita',
-    author: 'Leila S. Chudori',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 2200,
-    genre: ['Fiksi', 'Sejarah', 'Politik'],
-    totalPages: 379,
-    language: 'id',
-    publishedYear: 2017,
-    synopsis: 'Novel mengharukan yang menelusuri kisah hilangnya para aktivis tahun 1998 dari sudut pandang Biru Laut dan adiknya Asmara Jati.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  book_saman: {
-    id: 'book_saman',
-    title: 'Saman',
-    author: 'Ayu Utami',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    ratingAverage: 4.5,
-    ratingCount: 850,
-    genre: ['Fiksi', 'Modern', 'Sosial'],
-    totalPages: 150,
-    language: 'id',
-    publishedYear: 1998,
-    synopsis: 'Sebuah novel eksperimental yang mengangkat tema seksualitas, represi politik, dan pergulatan iman pada akhir masa Orde Baru.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  book_filsafat_ajaran_islam: {
-    id: 'book_filsafat_ajaran_islam',
-    title: 'Filsafat Ajaran Islam (Edisi 2025)',
-    author: 'Hadhrat Mirza Ghulam Ahmad',
-    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
-    ratingAverage: 4.9,
-    ratingCount: 150,
-    genre: ['Filsafat', 'Islam', 'Agama'],
-    totalPages: 280,
-    language: 'id',
-    publishedYear: 2025,
-    synopsis: 'Buku karya monumental yang menjelaskan secara mendalam tentang filsafat ajaran Islam, tujuan hidup manusia, keadaan fisik, moral, dan kerohanian manusia.',
-    fileUrl: '/public/books/filsafat-ajaran-islam.epub',
-    epubUrl: '/public/books/filsafat-ajaran-islam.epub',
-    fileType: 'EPUB',
-  },
-  book_perlunya_seorang_imam: {
-    id: 'book_perlunya_seorang_imam',
-    title: 'Perlunya Seorang Imam',
-    author: 'Hadhrat Mirza Ghulam Ahmad',
-    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
-    ratingAverage: 4.8,
-    ratingCount: 95,
-    genre: ['Agama', 'Islam', 'Kerohanian'],
-    totalPages: 120,
-    language: 'id',
-    publishedYear: 2024,
-    synopsis: 'Membahas pentingnya kepemimpinan rohani dan keberadaan seorang Imam pada setiap zaman untuk membimbing umat manusia menuju kebenaran.',
-    fileUrl: '/public/books/perlunya-seorang-imam.epub',
-    epubUrl: '/public/books/perlunya-seorang-imam.epub',
-    fileType: 'EPUB',
-  },
-  book_riwayat_rasulullah: {
-    id: 'book_riwayat_rasulullah',
-    title: 'Riwayat Rasulullah SAW',
-    author: 'Tim Penulis Kiram',
-    coverUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400',
-    ratingAverage: 5.0,
-    ratingCount: 420,
-    genre: ['Sejarah', 'Biografi', 'Islam'],
-    totalPages: 450,
-    language: 'id',
-    publishedYear: 2023,
-    synopsis: 'Riwayat lengkap dan agung perjalanan hidup Nabi Besar Muhammad SAW dari masa kelahiran, kerasulan, hingga akhir hayat beliau.',
-    fileUrl: '/public/books/riwayat-rasulullah.epub',
-    epubUrl: '/public/books/riwayat-rasulullah.epub',
-    fileType: 'EPUB',
-  },
-  'art-of-war': {
-    id: 'art-of-war',
-    title: 'The Art of War',
-    author: 'Sun Tzu',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    ratingAverage: 4.6,
-    ratingCount: 5000,
-    genre: ['Non-fiksi', 'Sejarah', 'Filsafat'],
-    totalPages: 273,
-    language: 'en',
-    publishedYear: 2000,
-    synopsis: 'Sebuah risalah militer kuno dari Tiongkok yang menawarkan wawasan mendalam tentang strategi, taktik, dan penyelesaian konflik.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'pride-prejudice': {
-    id: 'pride-prejudice',
-    title: 'Pride and Prejudice',
-    author: 'Jane Austen',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    ratingAverage: 4.7,
-    ratingCount: 9500,
-    genre: ['Fiksi', 'Romansa', 'Klasik'],
-    totalPages: 432,
-    language: 'en',
-    publishedYear: 1813,
-    synopsis: 'Sebuah kisah romansa klasik tentang hubungan antara Elizabeth Bennet yang cerdas dan Fitzwilliam Darcy yang sombong.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'great-gatsby': {
-    id: 'great-gatsby',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    ratingAverage: 4.4,
-    ratingCount: 8200,
-    genre: ['Fiksi', 'Klasik'],
-    totalPages: 180,
-    language: 'en',
-    publishedYear: 1925,
-    synopsis: 'Mengisahkan kegemerlapan dan kemerosotan moral era jazz Amerika melalui kisah cinta Jay Gatsby yang obsesif terhadap Daisy Buchanan.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'tale-two-cities': {
-    id: 'tale-two-cities',
-    title: 'A Tale of Two Cities',
-    author: 'Charles Dickens',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    ratingAverage: 4.5,
-    ratingCount: 4200,
-    genre: ['Fiksi', 'Sejarah', 'Klasik'],
-    totalPages: 489,
-    language: 'en',
-    publishedYear: 1859,
-    synopsis: 'Mengambil latar belakang di London dan Paris sebelum dan selama Revolusi Prancis, menggambarkan perjuangan dan pengorbanan rakyat kecil.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  sapiens: {
-    id: 'sapiens',
-    title: 'Sapiens',
-    author: 'Yuval Noah Harari',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 15000,
-    genre: ['Non-fiksi', 'Sains', 'Sejarah'],
-    totalPages: 512,
-    language: 'en',
-    publishedYear: 2011,
-    synopsis: 'Sebuah penelusuran sejarah umat manusia dari munculnya Homo sapiens di Afrika Timur hingga era teknologi modern.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'atomic-habits': {
-    id: 'atomic-habits',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12812239-L.jpg',
-    ratingAverage: 4.9,
-    ratingCount: 22000,
-    genre: ['Non-fiksi', 'Pengembangan Diri'],
-    totalPages: 320,
-    language: 'en',
-    publishedYear: 2018,
-    synopsis: 'Cara mudah dan terbukti untuk membangun kebiasaan baik dan menghilangkan kebiasaan buruk dengan memanfaatkan perubahan kecil.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'one-piece': {
-    id: 'one-piece',
-    title: 'One Piece, Vol. 1',
-    author: 'Eiichiro Oda',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    ratingAverage: 4.9,
-    ratingCount: 30000,
-    genre: ['Komik', 'Petualangan'],
-    totalPages: 208,
-    language: 'id',
-    publishedYear: 1997,
-    synopsis: 'Awal petualangan Monkey D. Luffy yang bermimpi menjadi Raja Bajak Laut setelah memakan buah iblis Gomu Gomu.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  naruto: {
-    id: 'naruto',
-    title: 'Naruto, Vol. 1',
-    author: 'Masashi Kishimoto',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8431872-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 25000,
-    genre: ['Komik', 'Aksi', 'Petualangan'],
-    totalPages: 192,
-    language: 'id',
-    publishedYear: 1999,
-    synopsis: 'Kisah ninja yatim piatu, Naruto Uzumaki, yang bermimpi diakui oleh penduduk desa dengan menjadi Hokage.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  doraemon: {
-    id: 'doraemon',
-    title: 'Doraemon, Vol. 1',
-    author: 'Fujiko F. Fujio',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    ratingAverage: 4.9,
-    ratingCount: 15000,
-    genre: ['Komik', 'Sains', 'Anak-anak'],
-    totalPages: 190,
-    language: 'id',
-    publishedYear: 1970,
-    synopsis: 'Petualangan robot kucing dari abad ke-22 bernama Doraemon yang dikirim untuk menolong bocah pemalas bernama Nobita.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'audio-hobbit': {
-    id: 'audio-hobbit',
-    title: 'The Hobbit (Audio)',
-    author: 'J.R.R. Tolkien',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 6500,
-    genre: ['Audiobook', 'Fiksi', 'Fantasi'],
-    totalPages: 310,
-    language: 'en',
-    publishedYear: 1937,
-    synopsis: 'Petualangan seru Bilbo Baggins yang direkrut oleh penyihir Gandalf untuk merebut kembali harta karun dari naga Smaug.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'audio-sherlock': {
-    id: 'audio-sherlock',
-    title: 'Sherlock Holmes',
-    author: 'Arthur Conan Doyle',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12781440-L.jpg',
-    ratingAverage: 4.7,
-    ratingCount: 4300,
-    genre: ['Audiobook', 'Misteri'],
-    totalPages: 350,
-    language: 'en',
-    publishedYear: 1892,
-    synopsis: 'Kumpulan kasus detektif jenius Sherlock Holmes dan asistennya Dr. Watson dalam memecahkan misteri di kota London.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'kancil-buaya': {
-    id: 'kancil-buaya',
-    title: 'Kancil dan Buaya',
-    author: 'Dongeng Rakyat',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12093551-L.jpg',
-    ratingAverage: 4.5,
-    ratingCount: 2000,
-    genre: ['Anak-anak', 'Dongeng'],
-    totalPages: 32,
-    language: 'id',
-    publishedYear: 2010,
-    synopsis: 'Kisah kecerdikan Kancil saat menyeberangi sungai dengan mengelabui kawanan buaya lapar.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'malin-kundang': {
-    id: 'malin-kundang',
-    title: 'Malin Kundang',
-    author: 'Cerita Rakyat',
-    coverUrl: 'https://covers.openlibrary.org/b/id/11100378-L.jpg',
-    ratingAverage: 4.6,
-    ratingCount: 1500,
-    genre: ['Anak-anak', 'Cerita Rakyat'],
-    totalPages: 40,
-    language: 'id',
-    publishedYear: 2012,
-    synopsis: 'Legenda Malin Kundang, seorang anak yang durhaka kepada ibunya setelah sukses merantau dan dikutuk menjadi batu.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  'brief-history': {
-    id: 'brief-history',
-    title: 'A Brief History of Time',
-    author: 'Stephen Hawking',
-    coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-    ratingAverage: 4.8,
-    ratingCount: 8900,
-    genre: ['Sains', 'Non-fiksi', 'Fisika'],
-    totalPages: 256,
-    language: 'en',
-    publishedYear: 1988,
-    synopsis: 'Buku ilmiah populer yang memaparkan kosmologi, ruang dan waktu, teori relativitas, serta lubang hitam secara sederhana.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-  cosmos: {
-    id: 'cosmos',
-    title: 'Cosmos',
-    author: 'Carl Sagan',
-    coverUrl: 'https://covers.openlibrary.org/b/id/12528734-L.jpg',
-    ratingAverage: 4.9,
-    ratingCount: 11000,
-    genre: ['Sains', 'Non-fiksi'],
-    totalPages: 384,
-    language: 'en',
-    publishedYear: 1980,
-    synopsis: 'Eksplorasi memukau tentang alam semesta, sejarah perkembangan ilmu pengetahuan, dan tempat manusia di kosmos.',
-    epubUrl: 'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub',
-  },
-};
-
-const DEFAULT_REVIEWS: UserReview[] = [
-  {
-    id: 'rev-1',
-    userName: 'Rian Pratama',
-    rating: 5,
-    date: '12 Agt 2026',
-    comment: 'Buku luar biasa yang mengubah cara pandang saya. Sangat direkomendasikan untuk dibaca ulang!',
-  },
-  {
-    id: 'rev-2',
-    userName: 'Siti Rahma',
-    rating: 5,
-    date: '04 Agt 2026',
-    comment: 'Gaya bahasanya sangat mengalir dan membuat penasaran di setiap bab. Karya mahakarya!',
-  },
-  {
-    id: 'rev-3',
-    userName: 'Budi Santoso',
-    rating: 4,
-    date: '28 Jul 2026',
-    comment: 'Alur cerita menarik dengan pesan moral mendalam. Sangat menginspirasi.',
-  },
-];
 
 export default function BookDetailScreen() {
   const route = useRoute<DetailRouteProp>();
@@ -387,7 +32,7 @@ export default function BookDetailScreen() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSavedWishlist, setIsSavedWishlist] = useState(false);
   const [writeReviewVisible, setWriteReviewVisible] = useState(false);
-  const [userReviews, setUserReviews] = useState<UserReview[]>(DEFAULT_REVIEWS);
+  const [userReviews, setUserReviews] = useState<UserReview[]>([]);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
@@ -449,8 +94,6 @@ export default function BookDetailScreen() {
     }
   }, [bookId]);
 
-  const sampleFallback = MASTER_SAMPLE_BOOKS[bookId] || MASTER_SAMPLE_BOOKS['book_bumi_manusia'];
-
   const resolveEpubUrl = (url?: string) => {
     if (!url) return undefined;
     const epubPath = url.replace(/\.pdf$/i, '.epub');
@@ -462,20 +105,18 @@ export default function BookDetailScreen() {
     return `${domainBaseUrl}/${epubPath.replace(/^\//, '')}`;
   };
 
-  const rawEpubUrl = book?.epubUrl || book?.fileUrl || sampleFallback.epubUrl || sampleFallback.fileUrl;
+  // Real data only: epubUrl/fileUrl come from the backend when provided;
+  // coverKey (R2 key) is mapped to a public cover URL via getCoverUrl().
+  const rawEpubUrl = book?.epubUrl || book?.fileUrl;
   const resolvedEpubUrl = resolveEpubUrl(rawEpubUrl);
 
   const displayBook = book
     ? {
-      ...sampleFallback,
       ...book,
-      synopsis: book.synopsis || sampleFallback.synopsis,
+      coverUrl: getCoverUrl(book.coverKey) || book.coverUrl,
       epubUrl: resolvedEpubUrl,
     }
-    : {
-      ...sampleFallback,
-      epubUrl: resolvedEpubUrl,
-    };
+    : null;
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [120, 220],
@@ -642,29 +283,30 @@ export default function BookDetailScreen() {
               </TouchableOpacity>
             )}
 
-            {/* Read Sample Secondary Button */}
-            <TouchableOpacity
-              style={styles.sampleButton}
-              onPress={() => handleOpenReader(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Baca Sampel"
-            >
-              <Text style={styles.sampleButtonText}>Baca Sampel</Text>
-            </TouchableOpacity>
+            {/* Read Sample Secondary Button — only shown when the backend provides a real sample source */}
+            {book?.sampleUrl && (
+              <TouchableOpacity
+                style={styles.sampleButton}
+                onPress={() => handleOpenReader(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Baca Sampel"
+              >
+                <Text style={styles.sampleButtonText}>Baca Sampel</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Offline Download Button */}
           <View style={styles.offlineActionRow}>
             {!isDownloaded ? (
               <TouchableOpacity
-                style={[styles.secondaryButton, isDownloading && styles.secondaryButtonDisabled]}
-                onPress={() =>
-                  download(
-                    displayBook.epubUrl ||
-                    'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub'
-                  )
-                }
-                disabled={isDownloading}
+                style={[styles.secondaryButton, (isDownloading || !displayBook.epubUrl) && styles.secondaryButtonDisabled]}
+                onPress={() => {
+                  if (displayBook.epubUrl) {
+                    download(displayBook.epubUrl);
+                  }
+                }}
+                disabled={isDownloading || !displayBook.epubUrl}
               >
                 {isDownloading ? (
                   <View style={styles.downloadingContainer}>

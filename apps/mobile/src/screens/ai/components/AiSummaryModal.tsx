@@ -11,7 +11,7 @@ interface AiSummaryModalProps {
   bookTitle?: string;
 }
 
-export function AiSummaryModal({ visible, onClose, bookId = 'book_laut_bercerita', bookTitle = 'Laut Bercerita' }: AiSummaryModalProps) {
+export function AiSummaryModal({ visible, onClose, bookId = '', bookTitle = '' }: AiSummaryModalProps) {
   const insight = aiCompanionService.getBookInsight(bookId);
 
   return (

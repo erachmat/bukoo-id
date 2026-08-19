@@ -1,3 +1,20 @@
+# Remove All Dummy Ebooks (Mobile) — 2026-08-19
+
+- `[x]` 1. Spec + plan + SDD ledger (`docs/superpowers/specs|plans/2026-08-19-remove-dummy-ebooks*`, `.superpowers/sdd/remove-dummy-ebooks/`). User-approved.
+- `[x]` 2. `BookDetailScreen.tsx` — removed `MASTER_SAMPLE_BOOKS`, `DEFAULT_REVIEWS`, `sampleFallback`, hardcoded GitHub EPUB URL; Baca Sampel gated on real `sampleUrl`; download disabled without `epubUrl`.
+- `[x]` 3. `StoreScreen.tsx` — removed `SAMPLE_STORE_BOOKS`; featured API only + empty state.
+- `[x]` 4. `HomeScreen.tsx` — removed `defaultTrending`; hero banner de-hardcoded ('Atomic Habit'); empty state.
+- `[x]` 5. `LibraryScreen.tsx` — removed `DEFAULT_BOOKS_LIST` + 'Laut Bercerita' active-book fallbacks.
+- `[x]` 6. `SearchScreen.tsx` — removed `exploreBooks`/`originalBooks` + BUKOO ORIGINAL section.
+- `[x]` 7. `AiCompanionScreen.tsx` — removed `BASE_RECOMMENDATIONS`; `aiCompanionService` `BOOK_KNOWLEDGE_BASE` (dummy AI insights) removed.
+- `[x]` 8. `RelatedBooksCarousel.tsx` — real `/v1/books/recommendations` via `useRecommendedBooks`.
+- `[x]` 9. `ReadingScreen.tsx` — removed sample/demo fallbacks (`OFFLINE_BOOK_ASSETS`, `sample-book.epub`, "Mode Demo" banner); audio companion fake metadata cleaned.
+- `[x]` 10. Deleted bundled assets: `assets/filsafat-ajaran-islam.epub`, `perlunya-seorang-imam.epub`, `riwayat-rasulullah.epub`, `sample-book.epub`.
+- `[x]` 11. `QuickResumeCard.tsx` — removed `DEFAULT_ACTIVE_BOOK` fallback.
+- `[x]` 12. New `services/coverUrl.ts` — maps R2 `coverKey` → `https://bukoo.id/covers/<key>` (real covers after dummy URLs removed).
+- `[x]` 13. Verification: mobile typecheck ✅, lint ✅, test "no tests specified" (stated). Greps for all dummy symbols + hardcoded cover URLs → 0 hits.
+- `[ ]` 14. (follow-up) Real EPUB reading in mobile: needs auth'd source (API `/v1/books/:id/download` requires auth; reader/download pipeline sends none). Covers work now; reading shows honest error until wired.
+
 # CI/CD for Web & API (Cloudflare Workers) — 2026-08-19
 
 - `[x]` 1. Design decisions: split workflows; auto-deploy on main; preview on PRs; drop mobile EAS; manual migrations.

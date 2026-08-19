@@ -21,73 +21,9 @@ export interface BookAiInsight {
   readingTimeHours: number;
 }
 
-const BOOK_KNOWLEDGE_BASE: Record<string, BookAiInsight> = {
-  'book_laskar_pelangi': {
-    bookId: 'book_laskar_pelangi',
-    summary: 'Kisah inspiratif tentang 10 anak desa Gantong di Pulau Belitong yang berjuang sekolah di SD Muhammadiyah yang terancam ditutup, dipandu oleh Bu Mus dan Pak Harfan.',
-    keyTakeaways: [
-      'Pendidikan adalah hak segala bangsa dan lentera harapan di tengah kemiskinan.',
-      'Persahabatan dan ketabahan mampu mengalahkan segala keterbatasan fisik & ekonomi.',
-      'Peran guru sejati yang mengabdi tanpa pamrih sanggup mengubah jalan hidup anak didik.',
-    ],
-    mainCharacters: [
-      { name: 'Ikal', description: 'Tokoh utama dan narator yang penuh rasa ingin tahu.' },
-      { name: 'Lintang', description: 'Genius matematika dari keluarga nelayan miskin.' },
-      { name: 'Mahar', description: 'Anak berbakat seni dan penuh imajinasi magis.' },
-      { name: 'Bu Mus', description: 'Guru perempuan tangguh yang berdedikasi tinggi.' },
-    ],
-    readingTimeHours: 6.5,
-  },
-  'book_bumi_manusia': {
-    bookId: 'book_bumi_manusia',
-    summary: 'Kisah Minke, seorang pemuda pribumi terpelajar di Surabaya era kolonial Hindia Belanda, yang jatuh cinta pada Annelies Mellema dan berjuang menuntut keadilan hak asasi.',
-    keyTakeaways: [
-      'Pendidikan dan literasi adalah senjata terbaik melawan ketidakadilan dan kolonialisme.',
-      'Martabat manusia tidak ditentukan oleh ras atau warna kulit, melainkan oleh perbuatan.',
-      'Perjuangan hukum dan kebebasan membutuhkan keberanian serta kesadaran nasionalis.',
-    ],
-    mainCharacters: [
-      { name: 'Minke', description: 'Pemuda pribumi terpelajar dan penulis kritis.' },
-      { name: 'Annelies', description: 'Gadis blasteran Belanda-Jawa berhati lembut.' },
-      { name: 'Nyai Ontosoroh', description: 'Wanita mandiri dan cerdas pengelola perkebunan Buitenzorg.' },
-    ],
-    readingTimeHours: 8.0,
-  },
-  'book_laut_bercerita': {
-    bookId: 'book_laut_bercerita',
-    summary: 'Novel sejarah dan kemanusiaan tentang penculikan aktivis mahasiswa tahun 1998, mengisahkan perjuangan Biru Laut dari kedalaman laut dan ketabahan keluarga yang ditinggalkan.',
-    keyTakeaways: [
-      'Kehilangan tanpa kepastian adalah duka terberat bagi sebuah keluarga.',
-      'Suara kebenaran dan keadilan tidak pernah bisa ditenggelamkan oleh kejahatan.',
-      'Pentingnya merawat ingatan sejarah bangsa agar tragedi kemanusiaan tidak berulang.',
-    ],
-    mainCharacters: [
-      { name: 'Biru Laut', description: 'Aktivis mahasiswa sastra Inggris yang diculik.' },
-      { name: 'Asmara Jati', description: 'Adik Biru Laut yang gigih mencari keberadaan sang kakak.' },
-      { name: 'Anjani', description: 'Kekasih Biru Laut yang selalu setia menunggu.' },
-    ],
-    readingTimeHours: 5.5,
-  },
-  'book_filsafat_ajaran_islam': {
-    bookId: 'book_filsafat_ajaran_islam',
-    summary: 'Buka karya monumental Hadhrat Mirza Ghulam Ahmad yang menguraikan 5 masalah utama kerohanian, hakikat moralitas manusia, dan tahapan perkembangan jiwa menuju Tuhan.',
-    keyTakeaways: [
-      'Tiga kondisi manusia: Kondisi Alamiah (Nafs Ammarah), Kondisi Moral (Nafs Lawwamah), dan Kondisi Kerohanian (Nafs Mutmainnah).',
-      'Pengaruh makanan dan kebiasaan fisik terhadap kondisi moral dan spiritual manusia.',
-      'Tujuan akhir kehidupan manusia adalah mengenal dan meraih kedekatan sejati dengan Sang Pencipta.',
-    ],
-    mainCharacters: [
-      { name: 'Penulis', description: 'Hadhrat Mirza Ghulam Ahmad (Pendiri Jemaat Ahmadiyah).' },
-    ],
-    readingTimeHours: 4.0,
-  },
-};
-
 export const aiCompanionService = {
   getBookInsight: (bookId: string): BookAiInsight => {
-    const known = BOOK_KNOWLEDGE_BASE[bookId];
-    if (known) return known;
-    // Honest fallback — never show another book's summary for an unknown book.
+    // No hardcoded book knowledge — always an honest "not available" insight.
     return {
       bookId,
       summary:
