@@ -107,7 +107,7 @@ export default function Navbar() {
           {/* 4. Untuk Penerbit (External redirect) */}
           <li className="nav-item">
             <a
-              href="https://publisher.bukoo.id"
+              href="penerbit-daftar.html"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-link"
@@ -205,7 +205,7 @@ export default function Navbar() {
 
             <li>
               <a
-                href="https://publisher.bukoo.id"
+                href="penerbit-daftar.html"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={closeMobileMenu}
