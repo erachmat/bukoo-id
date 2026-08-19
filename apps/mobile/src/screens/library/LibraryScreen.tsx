@@ -175,7 +175,7 @@ export default function LibraryScreen() {
     { id: 'sedang_dibaca', label: 'Sedang Dibaca', icon: 'book-outline' },
     { id: 'selesai', label: 'Selesai', icon: 'checkmark-circle-outline' },
     { id: 'ingin_dibaca', label: 'Ingin Dibaca', icon: 'bookmark-outline' },
-    { id: 'diunduh', label: 'Diunduh ⬇️', icon: 'download-outline' },
+    { id: 'diunduh', label: 'Diunduh', icon: 'download-outline' },
   ];
 
   return (
@@ -269,27 +269,34 @@ export default function LibraryScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
 
-        {/* 3-Card Quick Stats Grid — real local reading data */}
+        {/* 4-Card Quick Stats Grid (2 x 2) — real local reading data */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-            <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
-            <Text style={styles.statLabel}>Buku selesai</Text>
+          {/* Row 1: Buku selesai & Menit Membaca */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="book-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
+              <Text style={styles.statLabel}>Buku selesai</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.totalMinutes}</Text>
+              <Text style={styles.statLabel}>Menit Membaca</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-            <Ionicons name="time-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.totalMinutes}</Text>
-            <Text style={styles.statLabel}>Menit Membaca</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-            <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
-            <Text style={styles.statLabel}>Hari Streak</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-            <Ionicons name="download-outline" size={24} color="#4ADE80" style={styles.statIcon} />
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.storageMb}</Text>
-            <Text style={styles.statLabel}>MB Offline</Text>
+
+          {/* Row 2: Hari Streak & MB Offline */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="flame-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
+              <Text style={styles.statLabel}>Hari Streak</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+              <Ionicons name="download-outline" size={24} color="#4ADE80" style={styles.statIcon} />
+              <Text style={[styles.statNumber, { color: '#4ADE80' }]}>{stats.storageMb}</Text>
+              <Text style={styles.statLabel}>MB Offline</Text>
+            </View>
           </View>
         </View>
 
@@ -322,14 +329,14 @@ export default function LibraryScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
             {activeTab === 'diunduh'
-              ? '📥 Buku Offline (Diunduh)'
+              ? 'Buku Offline (Diunduh)'
               : activeTab === 'sedang_dibaca'
-              ? '📖 Sedang Dibaca'
-              : activeTab === 'selesai'
-              ? '✅ Selesai Dibaca'
-              : activeTab === 'ingin_dibaca'
-              ? '📌 Ingin Dibaca'
-              : '📚 Semua Koleksi'}
+                ? 'Sedang Dibaca'
+                : activeTab === 'selesai'
+                  ? 'Selesai Dibaca'
+                  : activeTab === 'ingin_dibaca'
+                    ? 'Ingin Dibaca'
+                    : 'Semua Koleksi'}
           </Text>
           <Text style={styles.sortIndicatorText}>
             {sortOption === 'recent' ? 'Urutkan: Terakhir Dibaca' : sortOption === 'title' ? 'Urutkan: Judul' : 'Urutkan: Progres'}
@@ -618,14 +625,18 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansMedium,
   },
   statsGrid: {
-    flexDirection: 'row',
     marginHorizontal: 20,
     gap: 10,
     marginBottom: 20,
   },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   statCard: {
     flex: 1,
-    padding: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
@@ -640,7 +651,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.muted,
     fontFamily: FONTS.sansRegular,
     textAlign: 'center',

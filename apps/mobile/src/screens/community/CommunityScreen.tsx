@@ -128,7 +128,7 @@ export default function CommunityScreen() {
 
   const handleShare = (post: CommunityPostDto) => {
     const bookLine = post.book ? `\n📖 ${post.book.title} — ${post.book.author}` : '';
-    Share.share({ message: `"${post.content}" — ${post.user.name} di BUKOO${bookLine}` }).catch(() => {});
+    Share.share({ message: `"${post.content}" — ${post.user.name} di BUKOO${bookLine}` }).catch(() => { });
   };
 
   const handleDeletePost = (post: CommunityPostDto) => {
@@ -199,7 +199,7 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Semua')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Semua' && styles.filterChipTextActive]}>
-                Semua ✨
+                Semua
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -207,7 +207,7 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Post')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Post' && styles.filterChipTextActive]}>
-                Post 📝
+                Post
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -215,7 +215,7 @@ export default function CommunityScreen() {
               onPress={() => setActiveFilter('Event')}
             >
               <Text style={[styles.filterChipText, activeFilter === 'Event' && styles.filterChipTextActive]}>
-                Event 📅
+                Event
               </Text>
             </TouchableOpacity>
           </View>

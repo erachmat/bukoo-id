@@ -38,14 +38,14 @@ export function ReadingGoalCard({ onOpenAnalytics }: ReadingGoalCardProps) {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Ionicons name="flag-outline" size={18} color={COLORS.gold} />
-          <Text style={styles.title}>Target Membaca Harian</Text>
+          <Text style={styles.title} numberOfLines={1}>Target Membaca Harian</Text>
         </View>
         <View style={styles.streakBadge}>
           <Ionicons name="flame" size={14} color="#EF4444" />
           <Text style={styles.streakText}>{streakDays} Hari Streak</Text>
         </View>
       </View>
-
+      
       {/* Progress Bar & Readout */}
       <View style={styles.progressSection}>
         <View style={styles.readoutRow}>
@@ -95,32 +95,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 14,
+    gap: 8,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    flex: 1,
+    flexShrink: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
+    flexShrink: 1,
   },
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.4)',
+    flexShrink: 0,
   },
   streakText: {
     color: '#EF4444',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     fontFamily: FONTS.sansBold,
   },

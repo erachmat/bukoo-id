@@ -25,7 +25,7 @@ export default function TentangPage() {
           </div>
           <div className="story">
             <p>
-              Semuanya bermula di <strong>Gramedia Matraman</strong>. Seseorang memegang novel Pramoedya, membacanya sebentar, lalu meletakkannya kembali. Harganya <strong>Rp 95.000</strong> — setara anggaran makan seminggu. Bukan karena tak ingin membaca, tapi karena harus memilih.
+              Semuanya bermula di <strong>Toko Buku</strong>. Seseorang memegang novel Pramoedya, membacanya sebentar, lalu meletakkannya kembali. Harganya <strong>Rp 95.000</strong> — setara anggaran makan seminggu. Bukan karena tak ingin membaca, tapi karena harus memilih.
             </p>
             <p className="pull">
               &quot;Membaca adalah perjalanan. Tapi hari ini, satu buku fisik bisa menjadi pembatas antara seseorang dan pengetahuan. Kami tidak menerima itu.&quot;

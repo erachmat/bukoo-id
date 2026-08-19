@@ -9,6 +9,7 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import BookDetailScreen from '../screens/book/BookDetailScreen';
 import SubscriptionScreen from '../screens/subscription/SubscriptionScreen';
 import SearchScreen from '../screens/search/SearchScreen';
+import AiCompanionScreen from '../screens/ai/AiCompanionScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const ReadingStack = createNativeStackNavigator<ReadingStackParamList>();
@@ -47,6 +48,11 @@ export default function AppNavigator() {
           <Stack.Screen 
             name="Subscription" 
             component={SubscriptionScreen}
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen 
+            name="Ai" 
+            component={AiCompanionScreen}
             options={{ presentation: 'modal' }}
           />
         </>

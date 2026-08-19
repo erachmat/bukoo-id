@@ -467,15 +467,15 @@ export default function BookDetailScreen() {
 
   const displayBook = book
     ? {
-        ...sampleFallback,
-        ...book,
-        synopsis: book.synopsis || sampleFallback.synopsis,
-        epubUrl: resolvedEpubUrl,
-      }
+      ...sampleFallback,
+      ...book,
+      synopsis: book.synopsis || sampleFallback.synopsis,
+      epubUrl: resolvedEpubUrl,
+    }
     : {
-        ...sampleFallback,
-        epubUrl: resolvedEpubUrl,
-      };
+      ...sampleFallback,
+      epubUrl: resolvedEpubUrl,
+    };
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [120, 220],
@@ -649,7 +649,6 @@ export default function BookDetailScreen() {
               accessibilityRole="button"
               accessibilityLabel="Baca Sampel"
             >
-              <Ionicons name="book-outline" size={16} color={COLORS.forest} />
               <Text style={styles.sampleButtonText}>Baca Sampel</Text>
             </TouchableOpacity>
           </View>
@@ -662,7 +661,7 @@ export default function BookDetailScreen() {
                 onPress={() =>
                   download(
                     displayBook.epubUrl ||
-                      'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub'
+                    'https://github.com/IDPF/epub3-samples/releases/download/20230704/georgia-cfi.epub'
                   )
                 }
                 disabled={isDownloading}

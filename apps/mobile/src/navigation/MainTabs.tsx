@@ -6,7 +6,6 @@ import { COLORS } from '../constants/COLORS';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
-import AiCompanionScreen from '../screens/ai/AiCompanionScreen';
 import CommunityScreen from '../screens/community/CommunityScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 
@@ -70,18 +69,6 @@ export default function MainTabs() {
           tabBarIcon: ({ focused, color }) => (
             <View style={focused ? styles.iconPillActive : styles.iconPill}>
               <Ionicons name={focused ? 'library' : 'library-outline'} size={20} color={color} />
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Ai"
-        component={AiCompanionScreen}
-        options={{
-          tabBarLabel: 'AI',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={focused ? styles.iconPillActive : styles.iconPill}>
-              <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={20} color={color} />
             </View>
           ),
         }}
