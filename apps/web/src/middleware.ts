@@ -16,6 +16,18 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
   const user = req.auth?.user as AuthUser | undefined
   const isPublisherHost = host.startsWith("publisher.") || host.includes("publisher.bukoo.id")
 
+  // Rewrite static .html path aliases for publisher landing pages
+  const htmlPublisherMap: Record<string, string> = {
+    "/penerbit-daftar.html": "/publisher/daftar",
+    "/penerbit-dashboard.html": "/publisher/dashboard",
+    "/penerbit-royalti.html": "/publisher/royalti",
+    "/penerbit-submit.html": "/publisher/submit",
+    "/penerbit-panduan.html": "/publisher/panduan",
+  }
+  if (htmlPublisherMap[pathname]) {
+    return NextResponse.rewrite(new URL(htmlPublisherMap[pathname], req.url))
+  }
+
   // Handle requests on publisher.bukoo.id domain
   if (isPublisherHost) {
     if (user && user.role === "PUBLISHER" && (pathname === "/" || pathname === "/daftar" || pathname === "/publisher/daftar")) {

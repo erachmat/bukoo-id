@@ -13,38 +13,38 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
 
   const getNavItemClass = (tabName: string) => {
     if (currentTab === tabName) return "on";
-    if (pathname.includes(`/publisher/${tabName}`)) return "on";
+    if (pathname.includes(`/publisher/${tabName}`) || pathname.includes(`penerbit-${tabName}.html`)) return "on";
     return "";
   };
 
   return (
     <header className="pub-nav">
-      <Link href="/publisher/daftar" className="pub-nav-logo">
+      <Link href="/penerbit-daftar.html" className="pub-nav-logo">
         BUKOO <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-dim)", marginLeft: "6px" }}>Publisher</span>
       </Link>
       <ul className="pub-nav-links">
         <li>
-          <Link href="/publisher/daftar" className={getNavItemClass("daftar")}>
+          <Link href="/penerbit-daftar.html" className={getNavItemClass("daftar")}>
             Daftar Penerbit
           </Link>
         </li>
         <li>
-          <Link href="/publisher/dashboard" className={getNavItemClass("dashboard")}>
+          <Link href="/penerbit-dashboard.html" className={getNavItemClass("dashboard")}>
             Dashboard
           </Link>
         </li>
         <li>
-          <Link href="/publisher/submit" className={getNavItemClass("submit")}>
+          <Link href="/penerbit-submit.html" className={getNavItemClass("submit")}>
             Submit Judul
           </Link>
         </li>
         <li>
-          <Link href="/publisher/royalti" className={getNavItemClass("royalti")}>
+          <Link href="/penerbit-royalti.html" className={getNavItemClass("royalti")}>
             Kebijakan Royalti
           </Link>
         </li>
         <li>
-          <Link href="/publisher/panduan" className={getNavItemClass("panduan")}>
+          <Link href="/penerbit-panduan.html" className={getNavItemClass("panduan")}>
             Panduan Penerbit
           </Link>
         </li>
@@ -53,7 +53,7 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
         <Link href="/login" className="btn-ghost">
           Masuk
         </Link>
-        <Link href="/publisher/daftar" className="btn-cta">
+        <Link href="/penerbit-daftar.html" className="btn-cta">
           Daftar Sekarang
         </Link>
       </div>

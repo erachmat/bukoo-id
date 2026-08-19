@@ -107,7 +107,7 @@ export default function Navbar() {
           {/* 4. Untuk Penerbit */}
           <li className="nav-item">
             <Link
-              href="/publisher/daftar"
+              href="/penerbit-daftar.html"
               className="nav-link"
             >
               Untuk Penerbit
@@ -203,7 +203,7 @@ export default function Navbar() {
 
             <li>
               <Link
-                href="/publisher/daftar"
+                href="/penerbit-daftar.html"
                 onClick={closeMobileMenu}
               >
                 Untuk Penerbit

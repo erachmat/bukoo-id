@@ -55,11 +55,11 @@ export default function MarketingLayout({
           <div>
             <div className="footer-col-title">Untuk Penerbit</div>
             <ul className="footer-links">
-              <li><Link href="/publisher/daftar">Daftar Penerbit</Link></li>
-              <li><Link href="/publisher/dashboard">Publisher Dashboard</Link></li>
-              <li><Link href="/publisher/royalti">Kebijakan Royalti</Link></li>
-              <li><Link href="/publisher/submit">Submit Judul</Link></li>
-              <li><Link href="/publisher/panduan">Panduan Penerbit</Link></li>
+              <li><Link href="/penerbit-daftar.html">Daftar Penerbit</Link></li>
+              <li><Link href="/penerbit-dashboard.html">Publisher Dashboard</Link></li>
+              <li><Link href="/penerbit-royalti.html">Kebijakan Royalti</Link></li>
+              <li><Link href="/penerbit-submit.html">Submit Judul</Link></li>
+              <li><Link href="/penerbit-panduan.html">Panduan Penerbit</Link></li>
             </ul>
           </div>
 
