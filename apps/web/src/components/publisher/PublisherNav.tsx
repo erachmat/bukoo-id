@@ -19,32 +19,32 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
 
   return (
     <header className="pub-nav">
-      <Link href="/penerbit-daftar.html" className="pub-nav-logo">
-        BUKOO <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-dim)", marginLeft: "6px" }}>Publisher</span>
+      <Link href="/publisher/daftar" className="pub-nav-logo">
+        BUKOO
       </Link>
       <ul className="pub-nav-links">
         <li>
-          <Link href="/penerbit-daftar.html" className={getNavItemClass("daftar")}>
+          <Link href="/publisher/daftar" className={getNavItemClass("daftar")}>
             Daftar Penerbit
           </Link>
         </li>
         <li>
-          <Link href="/penerbit-dashboard.html" className={getNavItemClass("dashboard")}>
+          <Link href="/publisher/dashboard" className={getNavItemClass("dashboard")}>
             Dashboard
           </Link>
         </li>
         <li>
-          <Link href="/penerbit-submit.html" className={getNavItemClass("submit")}>
+          <Link href="/publisher/submit" className={getNavItemClass("submit")}>
             Submit Judul
           </Link>
         </li>
         <li>
-          <Link href="/penerbit-royalti.html" className={getNavItemClass("royalti")}>
+          <Link href="/publisher/royalti" className={getNavItemClass("royalti")}>
             Kebijakan Royalti
           </Link>
         </li>
         <li>
-          <Link href="/penerbit-panduan.html" className={getNavItemClass("panduan")}>
+          <Link href="/publisher/panduan" className={getNavItemClass("panduan")}>
             Panduan Penerbit
           </Link>
         </li>
@@ -53,8 +53,8 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
         <Link href="/login" className="btn-ghost">
           Masuk
         </Link>
-        <Link href="/penerbit-daftar.html" className="btn-cta">
-          Daftar Sekarang
+        <Link href="/publisher/daftar#daftar" className="btn-cta">
+          Coba Gratis
         </Link>
       </div>
     </header>

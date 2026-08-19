@@ -12,60 +12,78 @@ export function DaftarForm() {
 
   if (submitted) {
     return (
-      <div className="pub-card" style={{ background: "rgba(10,26,21,0.9)", border: "1px solid var(--border-hi)", textAlign: "center", padding: "40px 32px" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-        <h3 style={{ color: "#fff", fontSize: 22, marginBottom: 8 }}>Pendaftaran Terkirim!</h3>
-        <p style={{ color: "var(--text-dim)", fontSize: 14 }}>
-          Tim partnership BUKOO akan meninjau profil penerbit Anda dan menghubungi dalam 1×24 jam kerja melalui email atau WhatsApp yang Anda daftarkan.
-        </p>
+      <div className="form-card">
+        <div className="form-ok" style={{ display: "block" }}>
+          <h4>Pengajuan terkirim ✓</h4>
+          <p>
+            Terima kasih. Tim kemitraan BUKOO akan menghubungi Anda dalam 3 hari kerja. Untuk pertanyaan cepat:{" "}
+            <a href="mailto:penerbit@bukoo.id" style={{ color: "var(--amber)" }}>
+              penerbit@bukoo.id
+            </a>
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="pub-card" style={{ background: "rgba(10,26,21,0.9)", border: "1px solid var(--border-hi)" }}>
+    <div className="form-card">
       <form onSubmit={handleSubmit}>
         <div className="pub-fg">
-          <label>Nama Penerbit / Perusahaan *</label>
-          <input type="text" placeholder="Contoh: PT Penerbit Utama" required />
+          <label>Nama penerbit / perusahaan</label>
+          <input type="text" required placeholder="mis. Penerbit Nusantara" />
         </div>
         <div className="pub-fg-row">
           <div className="pub-fg">
-            <label>Nama Penanggung Jawab *</label>
-            <input type="text" placeholder="Nama lengkap" required />
+            <label>Nama PIC</label>
+            <input type="text" required placeholder="Nama Anda" />
           </div>
           <div className="pub-fg">
-            <label>Jabatan *</label>
-            <input type="text" placeholder="Manager / Pemilik" required />
+            <label>Jabatan</label>
+            <input type="text" placeholder="mis. Direktur" />
           </div>
         </div>
         <div className="pub-fg-row">
           <div className="pub-fg">
-            <label>Email Perusahaan *</label>
-            <input type="email" placeholder="kemitraan@penerbit.id" required />
+            <label>Email</label>
+            <input type="email" required placeholder="nama@penerbit.id" />
           </div>
           <div className="pub-fg">
-            <label>Nomor WhatsApp *</label>
-            <input type="tel" placeholder="081234567890" required />
+            <label>No. WhatsApp</label>
+            <input type="tel" required placeholder="08xx" />
+          </div>
+        </div>
+        <div className="pub-fg-row">
+          <div className="pub-fg">
+            <label>Perkiraan jumlah judul</label>
+            <select defaultValue="1 – 25 judul">
+              <option value="1 – 25 judul">1 – 25 judul</option>
+              <option value="26 – 100 judul">26 – 100 judul</option>
+              <option value="101 – 500 judul">101 – 500 judul</option>
+              <option value="500+ judul">500+ judul</option>
+            </select>
+          </div>
+          <div className="pub-fg">
+            <label>Genre utama</label>
+            <select defaultValue="Sastra & Fiksi">
+              <option value="Sastra & Fiksi">Sastra & Fiksi</option>
+              <option value="Non-fiksi & Self-development">Non-fiksi & Self-development</option>
+              <option value="Bisnis & Keuangan">Bisnis & Keuangan</option>
+              <option value="Akademik & Sains">Akademik & Sains</option>
+              <option value="Anak & Remaja">Anak & Remaja</option>
+              <option value="Campuran">Campuran</option>
+            </select>
           </div>
         </div>
         <div className="pub-fg">
-          <label>Estimasi Jumlah Katalog Judul *</label>
-          <select defaultValue="10-50">
-            <option value="1-10">1 – 10 Judul</option>
-            <option value="10-50">10 – 50 Judul</option>
-            <option value="50-200">50 – 200 Judul</option>
-            <option value="200+">Lebih dari 200 Judul</option>
-          </select>
+          <label>Pesan (opsional)</label>
+          <textarea placeholder="Ceritakan sedikit tentang katalog & harapan Anda dari kerjasama ini." />
         </div>
-        <div className="pub-fg">
-          <label>Pesan / Catatan Tambahan (Opsional)</label>
-          <textarea placeholder="Ceritakan singkat tentang katalog atau fokus genre penerbit Anda..." />
-        </div>
-        <button type="submit" className="form-submit" style={{ marginTop: 10 }}>
-          Kirim Pendaftaran Penerbit →
+        <button type="submit" className="form-submit">
+          Kirim pengajuan
         </button>
       </form>
     </div>
   );
 }
+

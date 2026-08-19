@@ -3,111 +3,276 @@
 import React, { useState } from "react";
 
 export function SubmitForm() {
+  const [curStep, setCurStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitted(true);
+  // Form states
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [isbn, setIsbn] = useState("");
+  const [genre, setGenre] = useState("Sastra & Fiksi");
+  const [year, setYear] = useState("2024");
+  const [synopsis, setSynopsis] = useState("");
+
+  const [bookFileName, setBookFileName] = useState<string | null>(null);
+  const [coverFileName, setCoverFileName] = useState<string | null>(null);
+
+  const [releaseWindow, setReleaseWindow] = useState("Segera setelah disetujui");
+  const [positioning, setPositioning] = useState("Katalog reguler (semua tier)");
+  const [storeUrl, setStoreUrl] = useState("");
+
+  const handleNext = () => {
+    if (curStep < 4) {
+      setCurStep((prev) => prev + 1);
+    } else {
+      setSubmitted(true);
+    }
+  };
+
+  const handlePrev = () => {
+    if (curStep > 1) {
+      setCurStep((prev) => prev - 1);
+    }
   };
 
   if (submitted) {
     return (
-      <div className="pub-card" style={{ maxWidth: 860, margin: "0 auto", background: "rgba(18,42,34,0.6)", border: "1px solid var(--border-hi)", textAlign: "center", padding: "48px 32px" }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>🚀</div>
-        <h3 style={{ color: "#fff", fontSize: 24, marginBottom: 8 }}>Judul Berhasil Dikirim!</h3>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, maxWidth: 480, margin: "0 auto" }}>
-          Tim redaksi &amp; kurasi BUKOO akan memverifikasi naskah Anda dalam 1–2 hari kerja. Notifikasi status akan dikirimkan ke email yang terdaftar.
-        </p>
+      <div className="form-card" style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div className="form-ok show">
+          <div className="big">✓</div>
+          <h3>Judul terkirim ke tim kurasi</h3>
+          <p>
+            Tim kurasi BUKOO akan meninjau dalam 5&ndash;7 hari kerja dan menghubungi Anda via dashboard. Terima kasih telah memperkaya katalog Indonesia.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="pub-card" style={{ maxWidth: 860, margin: "0 auto", background: "rgba(18,42,34,0.6)", border: "1px solid var(--border-hi)" }}>
-      <form onSubmit={handleSubmit}>
-        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 22, color: "#fff", marginBottom: 20 }}>
-          1. Metadata Informasi Buku
-        </h3>
-
-        <div className="pub-fg">
-          <label>Judul Buku *</label>
-          <input type="text" placeholder="Contoh: Laut Bercerita" required />
+    <div className="form-card" style={{ maxWidth: 760, margin: "0 auto" }}>
+      {/* Stepper Header */}
+      <div className="stepper" id="stepper">
+        <div className={`step-dot ${curStep === 1 ? "active" : ""} ${curStep > 1 ? "done" : ""}`}>
+          <div className="sd-n">1</div>
+          <span className="sd-l">Detail buku</span>
         </div>
-
-        <div className="pub-fg-row">
-          <div className="pub-fg">
-            <label>Nama Penulis *</label>
-            <input type="text" placeholder="Contoh: Leila S. Chudori" required />
-          </div>
-          <div className="pub-fg">
-            <label>Nomor ISBN (E-book) *</label>
-            <input type="text" placeholder="978-602-xxx-xxx-x" required />
-          </div>
+        <div className="step-line" />
+        <div className={`step-dot ${curStep === 2 ? "active" : ""} ${curStep > 2 ? "done" : ""}`}>
+          <div className="sd-n">2</div>
+          <span className="sd-l">Berkas</span>
         </div>
-
-        <div className="pub-fg-row">
-          <div className="pub-fg">
-            <label>Kategori Genre Utama *</label>
-            <select defaultValue="Fiksi">
-              <option value="Fiksi">Fiksi &amp; Sastra</option>
-              <option value="Agama">Agama &amp; Spiritualitas</option>
-              <option value="Sejarah">Sejarah &amp; Budaya</option>
-              <option value="SelfDev">Pengembangan Diri</option>
-              <option value="Bisnis">Bisnis &amp; Ekonomi</option>
-              <option value="Sains">Sains &amp; Teknologi</option>
-            </select>
-          </div>
-          <div className="pub-fg">
-            <label>Tahun Terbit / Bahasa *</label>
-            <input type="text" placeholder="2026 / Bahasa Indonesia" required />
-          </div>
+        <div className="step-line" />
+        <div className={`step-dot ${curStep === 3 ? "active" : ""} ${curStep > 3 ? "done" : ""}`}>
+          <div className="sd-n">3</div>
+          <span className="sd-l">Rilis &amp; harga</span>
         </div>
-
-        <div className="pub-fg">
-          <label>Sinopsis Ringkas Buku *</label>
-          <textarea placeholder="Tuliskan gambaran cerita atau ringkasan isi buku (maks 500 kata)..." required />
+        <div className="step-line" />
+        <div className={`step-dot ${curStep === 4 ? "active" : ""}`}>
+          <div className="sd-n">4</div>
+          <span className="sd-l">Tinjau</span>
         </div>
+      </div>
 
-        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 22, color: "#fff", margin: "30px 0 20px" }}>
-          2. Berkas Naskah &amp; Cover
-        </h3>
-
-        <div className="pub-fg-row">
-          <div className="pub-fg">
-            <label>Berkas Naskah (EPUB / PDF) *</label>
-            <div style={{ border: "2px dashed var(--border-hi)", borderRadius: 12, padding: "24px 16px", textAlign: "center", background: "rgba(0,0,0,0.2)" }}>
-              <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
-                Tarik &amp; lepas berkas EPUB/PDF di sini, atau <b>Pilih Berkas</b>
-              </p>
-              <input type="file" accept=".epub,.pdf" style={{ display: "none" }} id="epub-file" />
-              <label htmlFor="epub-file" className="btn-ghost" style={{ cursor: "pointer", fontSize: 12 }}>
-                📁 Cari Berkas EPUB/PDF
-              </label>
+      {/* Step 1: Detail buku */}
+      {curStep === 1 && (
+        <div className="fstep on">
+          <h3>Detail buku</h3>
+          <p className="sub">Informasi dasar tentang judul yang Anda ajukan.</p>
+          <div className="fg">
+            <label htmlFor="f_title">Judul buku</label>
+            <input
+              type="text"
+              id="f_title"
+              placeholder="Judul lengkap"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="fg-row">
+            <div className="fg">
+              <label htmlFor="f_author">Penulis</label>
+              <input
+                type="text"
+                id="f_author"
+                placeholder="Nama penulis"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+              />
+            </div>
+            <div className="fg">
+              <label htmlFor="f_isbn">ISBN</label>
+              <input
+                type="text"
+                id="f_isbn"
+                placeholder="978-..."
+                value={isbn}
+                onChange={(e) => setIsbn(e.target.value)}
+              />
             </div>
           </div>
+          <div className="fg-row">
+            <div className="fg">
+              <label htmlFor="f_genre">Genre</label>
+              <select id="f_genre" value={genre} onChange={(e) => setGenre(e.target.value)}>
+                <option value="Sastra & Fiksi">Sastra &amp; Fiksi</option>
+                <option value="Non-fiksi">Non-fiksi</option>
+                <option value="Bisnis & Keuangan">Bisnis &amp; Keuangan</option>
+                <option value="Self-development">Self-development</option>
+                <option value="Akademik & Sains">Akademik &amp; Sains</option>
+                <option value="Anak & Remaja">Anak &amp; Remaja</option>
+              </select>
+            </div>
+            <div className="fg">
+              <label htmlFor="f_year">Tahun terbit</label>
+              <input
+                type="text"
+                id="f_year"
+                placeholder="2024"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="fg">
+            <label htmlFor="f_synopsis">Sinopsis singkat</label>
+            <textarea
+              id="f_synopsis"
+              placeholder="2–4 kalimat yang menggambarkan isi buku."
+              value={synopsis}
+              onChange={(e) => setSynopsis(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
 
-          <div className="pub-fg">
-            <label>Cover Depan (JPG / PNG min 1400x2100px) *</label>
-            <div style={{ border: "2px dashed var(--border-hi)", borderRadius: 12, padding: "24px 16px", textAlign: "center", background: "rgba(0,0,0,0.2)" }}>
-              <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
-                Tarik &amp; lepas gambar Sampul Depan di sini
-              </p>
-              <input type="file" accept="image/*" style={{ display: "none" }} id="cover-file" />
-              <label htmlFor="cover-file" className="btn-ghost" style={{ cursor: "pointer", fontSize: 12 }}>
-                🖼️ Pilih Sampul Depan
-              </label>
+      {/* Step 2: Unggah berkas */}
+      {curStep === 2 && (
+        <div className="fstep on">
+          <h3>Unggah berkas</h3>
+          <p className="sub">Berkas diunggah secara aman ke server BUKOO.</p>
+          <div className="fg">
+            <label>File buku (EPUB / PDF)</label>
+            <label htmlFor="book-file-input">
+              <div className="drop">
+                <div className="ic">📄</div>
+                <b>{bookFileName ? bookFileName : "Klik untuk memilih atau tarik berkas ke sini"}</b>
+                <p>EPUB atau PDF &middot; maks 100 MB</p>
+                <input
+                  type="file"
+                  id="book-file-input"
+                  accept=".epub,.pdf"
+                  style={{ display: "none" }}
+                  onChange={(e) => setBookFileName(e.target.files?.[0]?.name || null)}
+                />
+              </div>
+            </label>
+          </div>
+          <div className="fg">
+            <label>Cover (JPG / PNG)</label>
+            <label htmlFor="cover-file-input">
+              <div className="drop">
+                <div className="ic">🖼️</div>
+                <b>{coverFileName ? coverFileName : "Unggah gambar cover"}</b>
+                <p>Min 1400&times;2100 px</p>
+                <input
+                  type="file"
+                  id="cover-file-input"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => setCoverFileName(e.target.files?.[0]?.name || null)}
+                />
+              </div>
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Rilis & positioning */}
+      {curStep === 3 && (
+        <div className="fstep on">
+          <h3>Rilis &amp; positioning</h3>
+          <p className="sub">Anda yang menentukan bagaimana buku ini hadir di BUKOO.</p>
+          <div className="fg-row">
+            <div className="fg">
+              <label>Jendela rilis digital</label>
+              <select value={releaseWindow} onChange={(e) => setReleaseWindow(e.target.value)}>
+                <option value="Segera setelah disetujui">Segera setelah disetujui</option>
+                <option value="3 bulan setelah rilis fisik">3 bulan setelah rilis fisik</option>
+                <option value="6 bulan setelah rilis fisik">6 bulan setelah rilis fisik</option>
+                <option value="Tanggal khusus">Tanggal khusus</option>
+              </select>
+            </div>
+            <div className="fg">
+              <label>Positioning</label>
+              <select value={positioning} onChange={(e) => setPositioning(e.target.value)}>
+                <option value="Katalog reguler (semua tier)">Katalog reguler (semua tier)</option>
+                <option value="Premium (tier Plus ke atas)">Premium (tier Plus ke atas)</option>
+                <option value="Kredit buku (in-app)">Kredit buku (in-app)</option>
+              </select>
+            </div>
+          </div>
+          <div className="fg">
+            <label htmlFor="f_store">Tautan pembelian fisik (opsional)</label>
+            <input
+              type="url"
+              id="f_store"
+              placeholder="https://toko-anda.id/judul"
+              value={storeUrl}
+              onChange={(e) => setStoreUrl(e.target.value)}
+            />
+          </div>
+          <div className="disc" style={{ marginTop: 6 }}>
+            <b>Tetap kendali Anda.</b> Pengaturan ini bisa diubah kapan saja lewat dashboard penerbit.
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Tinjau pengajuan */}
+      {curStep === 4 && (
+        <div className="fstep on">
+          <h3>Tinjau pengajuan</h3>
+          <p className="sub">Periksa kembali sebelum mengirim.</p>
+          <div className="review-list" id="reviewList">
+            <div className="rv-row">
+              <span>Judul</span>
+              <span>{title || "(belum diisi)"}</span>
+            </div>
+            <div className="rv-row">
+              <span>Penulis</span>
+              <span>{author || "(belum diisi)"}</span>
+            </div>
+            <div className="rv-row">
+              <span>Genre</span>
+              <span>{genre}</span>
+            </div>
+            <div className="rv-row">
+              <span>Berkas</span>
+              <span>{bookFileName || coverFileName ? `${bookFileName || "EPUB"} + ${coverFileName || "cover"}` : "EPUB + cover (siap)"}</span>
+            </div>
+            <div className="rv-row">
+              <span>Status</span>
+              <span style={{ color: "var(--amber)" }}>Siap dikirim ke tim kurasi</span>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="pub-disc" style={{ marginTop: 24, marginBottom: 24 }}>
-          <b>Catatan Hak Cipta &amp; Kepemilikan.</b> Dengan mengunggah naskah ini, Anda mengonfirmasi bahwa penerbit Anda memegang lisensi penerbitan digital yang sah dan tidak melanggar hak cipta pihak mana pun.
-        </div>
-
-        <button type="submit" className="form-submit" style={{ fontSize: 16 }}>
-          🚀 Kirim Judul untuk Peninjauan Kurator →
+      {/* Stepper Buttons */}
+      <div className="step-btns" id="stepBtns">
+        <button
+          type="button"
+          className="btn-ghost"
+          id="btnPrev"
+          onClick={handlePrev}
+          style={{ visibility: curStep === 1 ? "hidden" : "visible" }}
+        >
+          &larr; Kembali
         </button>
-      </form>
+        <button type="button" className="btn-cta" id="btnNext" onClick={handleNext}>
+          {curStep === 4 ? "Kirim ke tim kurasi \u2713" : "Lanjut \u2192"}
+        </button>
+      </div>
     </div>
   );
 }
