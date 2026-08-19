@@ -23,6 +23,7 @@ import {
   primaryKey,
 } from 'drizzle-orm/sqlite-core';
 import { sql, relations } from 'drizzle-orm';
+import { createId } from '@paralleldrive/cuid2';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,7 +62,10 @@ export const users = sqliteTable('users', {
 export const accounts = sqliteTable(
   'accounts',
   {
-    id:                text('id').primaryKey(),
+    // $defaultFn (client-side) so the @auth/drizzle-adapter's linkAccount()
+    // insert (which omits `id`) succeeds on D1 — a bare TEXT PRIMARY KEY with
+    // no default fails with NOT NULL constraint (SQLITE_CONSTRAINT 7500).
+    id:                text('id').primaryKey().$defaultFn(() => createId()),
     userId:            text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     type:              text('type').notNull(),
     provider:          text('provider').notNull(),
@@ -80,7 +84,9 @@ export const accounts = sqliteTable(
 );
 
 export const sessions = sqliteTable('sessions', {
-  id:           text('id').primaryKey(),
+  // $defaultFn (client-side) so the adapter's createSession() insert (which
+  // omits `id`) succeeds on D1, mirroring the accounts.id fix above.
+  id:           text('id').primaryKey().$defaultFn(() => createId()),
   sessionToken: text('session_token').notNull().unique(),
   userId:       text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   expires:      integer('expires').notNull(), // Unix ms timestamp
