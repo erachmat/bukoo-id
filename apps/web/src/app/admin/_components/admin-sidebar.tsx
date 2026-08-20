@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, BookText, Users, Settings, LogOut } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { signOut } from '@/app/(auth)/actions'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -74,7 +74,7 @@ export function AdminSidebar() {
       
       <div style={{ padding: '16px', borderTop: '1px solid #E8ECF0' }}>
         <button 
-          onClick={() => signOut({ callbackUrl: '/' })}
+          onClick={() => signOut()}
           style={{
             display: 'flex',
             alignItems: 'center',

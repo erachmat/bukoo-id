@@ -1,3 +1,14 @@
+# Web Auth Overhaul (login/register/Google — bukoo.id + publisher.bukoo.id) — 2026-08-20
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-20-web-auth-improvements-design.md` + plan `docs/superpowers/plans/2026-08-20-web-auth-improvements.md` + ledger `.superpowers/sdd/web-auth-improvements/` (user-approved "Start implementation").
+- `[x]` 2. Phase 1 (fix-first) — logout bug: consolidate all `next-auth/react` client `signOut` → server action (`Navbar`, `account-sign-out`, `admin-sidebar`, `publisher/sidebar-client`); gate `/publisher/dashboard` + `/publisher/submit` in middleware (PUBLISHER only); fix stale `(protected)/layout.tsx` comment. Verify cookie cleared + routes require login.
+- `[x]` 3. Phase 2 — shared auth UX/security: shared `(auth)/errors.ts` catalog; `callbackUrl` support (sanitized) + role-aware default redirect; Google button pending state; server-side validation; anti-enumeration errors; passwordless-account copy ("Akun ini terdaftar dengan Google"); keep `allowDangerousEmailAccountLinking` (decision).
+- `[x]` 4. Phase 3 — publisher auth: shared `login-form`/`register-form` components; `/publisher/login` + `/publisher/register` (branded); `signUpPublisher` (immediate PUBLISHER); middleware host redirects `/login`→`/publisher/login`.
+- `[x]` 5. Phase 4 — verify (web typecheck ✅ / lint 0 errors ✅ / next build ✅ / opennext build ✅ / local worker smoke tests ✅; no test script — stated) + **DEPLOYED** `npm run deploy:prod` → worker `f188e0de` live; prod smoke ✅ bukoo.id (/login /register /api/auth/session 200) + publisher.bukoo.id (/login→/publisher/login 307, /publisher/login 200 branded, unauthed dashboard 307). ledger/task.md/AGENTS.md updated.
+- `[x]` 6. (manual/ops) Authorize `https://publisher.bukoo.id/api/auth/callback/google` in Google Cloud Console (publisher-domain Google login prerequisite). — ACTION REQUIRED (ops step, cannot be done in code).
+- `[ ]` 7. (deferred) Rate limiting + email-based password reset (user decision).
+- `[ ]` 8. (manual QA) Real-device click-through: Google login→logout on both domains (cookie cleared, dashboard gated), publisher self-register→dashboard→create book, reader deep-link return.
+
 # Web Google Login Fix (accounts.id NOT NULL bug) — 2026-08-20
 
 - `[x]` 1. Root cause confirmed live: NextAuth DrizzleAdapter `linkAccount()` inserts into `accounts` WITHOUT `id`; `accounts.id` is a bare `TEXT PRIMARY KEY` → remote D1 throws `NOT NULL constraint failed: accounts.id` (7500). Broke web Google login; orphaned user rows (4 found) then caused register "sudah terdaftar" + login "salah" errors.

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/app/(auth)/actions";
 
 interface SidebarProps {
   user: {
@@ -55,7 +55,7 @@ export function PublisherSidebar({ user }: SidebarProps) {
 
         <div className="sidebar-footer" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "20px 24px" }}>
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut()}
             className="nav-item"
             style={{
               background: "none",

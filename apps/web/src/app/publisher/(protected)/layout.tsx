@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { PublisherSidebar } from "../sidebar-client";
 
 // Protected publisher layout — requires PUBLISHER role.
-// Wraps: dashboard, submit, books (and their sub-routes).
+// Wraps: books (and sub-routes) inside this route group. NOTE: /publisher/dashboard
+// and /publisher/submit live OUTSIDE this group and are gated by middleware
+// (PUBLISHER role required) — keep both in sync if moving routes.
 export default async function PublisherProtectedLayout({
   children,
 }: {

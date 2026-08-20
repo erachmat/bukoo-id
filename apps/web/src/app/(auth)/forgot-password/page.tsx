@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { resetPassword } from '../actions'
+import { mapError } from '../errors'
 import { auth } from '@/lib/auth'
 
 import { PasswordInput } from '@/components/auth/password-input'
@@ -13,6 +14,7 @@ export default async function ForgotPasswordPage(props: { searchParams: Promise<
   }
 
   const params = await props.searchParams
+  const errorMessage = mapError(params.error)
 
   return (
     <div>
@@ -21,9 +23,9 @@ export default async function ForgotPasswordPage(props: { searchParams: Promise<
         Masukkan email akun BUKOO Anda dan masukkan password baru untuk disetel ulang.
       </p>
 
-      {params.error && (
+      {errorMessage && (
         <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
-          {params.error}
+          {errorMessage}
         </div>
       )}
 

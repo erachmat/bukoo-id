@@ -1,12 +1,12 @@
 'use client'
 
-import { signOut } from 'next-auth/react'
+import { signOut } from '@/app/(auth)/actions'
 
 export function AccountSignOut() {
   return (
     <button
       type="button"
-      onClick={() => signOut({ callbackUrl: '/' })}
+      onClick={() => signOut()}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

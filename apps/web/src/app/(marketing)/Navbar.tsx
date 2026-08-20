@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { signOut } from '@/app/(auth)/actions';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -24,7 +25,7 @@ export default function Navbar() {
   }, [update]);
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/' });
+    signOut();
   };
 
   const toggleMobileSub = (key: string) => {

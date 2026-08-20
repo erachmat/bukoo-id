@@ -2974,6 +2974,86 @@ td.td-pct {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Publisher auth pages (login / register) — pub-auth-*                */
+/* ------------------------------------------------------------------ */
+
+.pub-auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--forest-dd);
+  /* The portal's :root tokens are light-theme; the shared auth forms render
+     on a dark background, so scope light-on-dark values here. */
+  --text: #F0EDE6;
+  --text-muted: rgba(240, 237, 230, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+.pub-auth-card {
+  width: 100%;
+  max-width: 460px;
+}
+
+.pub-auth-card .form-card {
+  padding: 36px 36px 40px;
+}
+
+.pub-auth-brand {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.pub-auth-brand .logo-bukoo {
+  color: var(--amber);
+}
+
+.pub-auth-brand .logo-sub {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Standalone input (used by PasswordInput, which can't sit inside .pub-fg) */
+.pub-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13.5px;
+}
+
+.pub-input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+/* Google sign-in button on publisher auth pages */
+.pub-btn-social {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pub-btn-social:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--amber);
+}
+
 
 
 

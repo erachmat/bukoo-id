@@ -11,7 +11,7 @@ interface AuthUser {
 }
 
 export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
-  const { pathname } = req.nextUrl
+  const { pathname, search } = req.nextUrl
   const host = req.headers.get("host") || ""
   const user = req.auth?.user as AuthUser | undefined
   const isPublisherHost = host.startsWith("publisher.") || host.includes("publisher.bukoo.id")
@@ -30,6 +30,12 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
 
   // Handle requests on publisher.bukoo.id domain
   if (isPublisherHost) {
+    // Map shared auth pages to the publisher-branded equivalents
+    if (pathname === "/login" || pathname === "/register") {
+      const target = pathname === "/login" ? "/publisher/login" : "/publisher/register"
+      return NextResponse.redirect(new URL(`${target}${search}`, req.url))
+    }
+
     if (user && user.role === "PUBLISHER" && (pathname === "/" || pathname === "/daftar" || pathname === "/publisher/daftar")) {
       return NextResponse.redirect(new URL("/publisher/dashboard", req.url))
     }
@@ -48,7 +54,7 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
 
   // Redirect authenticated roles landing on public root or login page
   if (user) {
-    if (user.role === "PUBLISHER" && (pathname === "/" || pathname === "/login")) {
+    if (user.role === "PUBLISHER" && (pathname === "/" || pathname === "/login" || pathname === "/publisher/login" || pathname === "/publisher/register")) {
       return NextResponse.redirect(new URL("/publisher/dashboard", req.url))
     }
     if (user.role === "ADMIN" && (pathname === "/" || pathname === "/login")) {
@@ -59,7 +65,7 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
   // Protected customer/reader routes
   if (pathname.startsWith("/library") || pathname.startsWith("/book")) {
     if (!user) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
     }
     if (pathname === "/library" && user.role === "ADMIN") {
       return NextResponse.redirect(new URL("/admin", req.url))
@@ -72,7 +78,7 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
   // Admin routes: require ADMIN role
   if (pathname.startsWith("/admin")) {
     if (!user) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
     }
     if (user.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/library", req.url))
@@ -82,7 +88,16 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
   // Protected publisher operations (e.g. books/new)
   if (pathname.startsWith("/publisher/books/new")) {
     if (!user) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      const loginTarget = isPublisherHost ? "/publisher/login" : "/login"
+      return NextResponse.redirect(new URL(`${loginTarget}?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
+    }
+  }
+
+  // Protected publisher dashboard/submit — require PUBLISHER role
+  if (pathname.startsWith("/publisher/dashboard") || pathname.startsWith("/publisher/submit")) {
+    if (!user || user.role !== "PUBLISHER") {
+      const loginTarget = isPublisherHost ? "/publisher/login" : "/login"
+      return NextResponse.redirect(new URL(`${loginTarget}?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
     }
   }
 

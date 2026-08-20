@@ -7,6 +7,12 @@ import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createId } from '@paralleldrive/cuid2';
+import {
+  safeCallbackUrl,
+  defaultRedirectForRole,
+  DEFAULT_CUSTOMER_HOME,
+  DEFAULT_PUBLISHER_HOME,
+} from '@/lib/auth-helpers';
 
 // ---------------------------------------------------------------------------
 // Password hashing — SubtleCrypto PBKDF2
@@ -27,21 +33,46 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers (sync helpers live in @/lib/auth-helpers — NOT exportable from here)
+// ---------------------------------------------------------------------------
+
+/** Server-side mirror of the register form's client validation. */
+function validateSignUp(name: string, email: string, password: string): string | null {
+  if (!name) return 'NAME_REQUIRED';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'EMAIL_INVALID';
+  if (password.length < 6) return 'PASSWORD_TOO_SHORT';
+  return null;
+}
+
+function rethrowRedirect(error: unknown): never {
+  const err = error as { message?: string };
+  if (err.message === 'NEXT_REDIRECT') {
+    revalidatePath('/', 'layout');
+    throw error;
+  }
+  throw error;
+}
+
+// ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
 
 export async function signUp(formData: FormData) {
-  const email = (formData.get('email') as string).toLowerCase();
-  const password = formData.get('password') as string;
-  const name = formData.get('name') as string;
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const password = (formData.get('password') as string) ?? '';
+  const name = ((formData.get('name') as string) ?? '').trim();
+  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_CUSTOMER_HOME);
+
+  const validationError = validateSignUp(name, email, password);
+  if (validationError) {
+    return redirect(`/register?error=${validationError}&email=${encodeURIComponent(email)}`);
+  }
 
   const db = getDb();
   const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
 
   if (existing) {
-    return redirect(
-      `/register?error=${encodeURIComponent('Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.')}`,
-    );
+    return redirect(`/register?error=EMAIL_TAKEN&email=${encodeURIComponent(email)}`);
   }
 
   const hashedPassword = await hashPassword(password);
@@ -54,36 +85,59 @@ export async function signUp(formData: FormData) {
   });
 
   try {
-    await nextAuthSignIn('credentials', { email, password, redirectTo: '/library' });
+    await nextAuthSignIn('credentials', { email, password, redirectTo: callbackUrl });
   } catch (error: unknown) {
-    const err = error as { type?: string; message?: string };
+    const err = error as { type?: string };
     if (err.type === 'CredentialsSignin') {
-      return redirect(`/login?error=${encodeURIComponent('Pendaftaran berhasil, silakan masuk secara manual.')}`);
+      return redirect('/login?error=SIGNUP_SIGNIN_FAILED');
     }
-    if (err.message === 'NEXT_REDIRECT') {
-      revalidatePath('/', 'layout');
-      throw error;
-    }
-    throw error;
+    rethrowRedirect(error);
   }
 }
 
 export async function signIn(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const password = (formData.get('password') as string) ?? '';
+
+  // Role-aware default so PUBLISHER/ADMIN land on their dashboards without a
+  // middleware double-hop (credentials sign-in knows the email up front).
+  let defaultRedirect = DEFAULT_CUSTOMER_HOME;
+  try {
+    const db = getDb();
+    const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+    defaultRedirect = user ? defaultRedirectForRole(user.role) : DEFAULT_CUSTOMER_HOME;
+  } catch {
+    defaultRedirect = DEFAULT_CUSTOMER_HOME;
+  }
+  const redirectTo = safeCallbackUrl(formData.get('callbackUrl'), defaultRedirect);
 
   try {
-    await nextAuthSignIn('credentials', { email, password, redirectTo: '/library' });
+    await nextAuthSignIn('credentials', { email, password, redirectTo });
   } catch (error: unknown) {
-    const err = error as { type?: string; message?: string };
+    const err = error as { type?: string };
     if (err.type === 'CredentialsSignin') {
-      return redirect(`/login?error=${encodeURIComponent('Email atau password salah.')}`);
+      // Distinguish Google-only (passwordless) accounts for clearer UX copy.
+      try {
+        const db = getDb();
+        const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+        if (user && !user.password) {
+          return redirect('/login?error=PASSWORDLESS');
+        }
+      } catch {
+        // fall through to the generic credentials error
+      }
+      return redirect('/login?error=CredentialsSignin');
     }
-    if (err.message === 'NEXT_REDIRECT') {
-      revalidatePath('/', 'layout');
-      throw error;
-    }
-    return redirect(`/login?error=${encodeURIComponent('Terjadi kesalahan. Silakan coba lagi.')}`);
+    rethrowRedirect(error);
+  }
+}
+
+export async function signInWithGoogle(formData: FormData) {
+  const redirectTo = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_CUSTOMER_HOME);
+  try {
+    await nextAuthSignIn('google', { redirectTo });
+  } catch (error: unknown) {
+    rethrowRedirect(error);
   }
 }
 
@@ -92,30 +146,65 @@ export async function signOut() {
 }
 
 export async function resetPassword(formData: FormData) {
-  const email = (formData.get('email') as string).toLowerCase();
-  const newPassword = formData.get('password') as string;
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const newPassword = (formData.get('password') as string) ?? '';
+
+  if (newPassword.length < 6) {
+    return redirect('/forgot-password?error=PASSWORD_TOO_SHORT');
+  }
 
   const db = getDb();
   const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
   if (!existing) {
-    return redirect(`/forgot-password?error=${encodeURIComponent('Email tidak ditemukan.')}`);
+    // Generic (anti-enumeration): do not reveal whether the email is registered.
+    return redirect('/forgot-password?error=RESET_FAILED');
   }
 
   const hashedPassword = await hashPassword(newPassword);
   await db.update(users).set({ password: hashedPassword }).where(eq(users.email, email));
 
-  return redirect(`/login?message=${encodeURIComponent('Kata sandi berhasil diperbarui. Silakan masuk.')}`);
+  return redirect('/login?message=RESET_DONE');
 }
 
-export async function signInWithGoogle() {
+// ---------------------------------------------------------------------------
+// Publisher sign-up — creates the account with the PUBLISHER role immediately
+// (user decision 2026-08-20). Same validation as customer signUp.
+// ---------------------------------------------------------------------------
+
+export async function signUpPublisher(formData: FormData) {
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const password = (formData.get('password') as string) ?? '';
+  const name = ((formData.get('name') as string) ?? '').trim();
+  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_PUBLISHER_HOME);
+
+  const validationError = validateSignUp(name, email, password);
+  if (validationError) {
+    return redirect(`/publisher/register?error=${validationError}&email=${encodeURIComponent(email)}`);
+  }
+
+  const db = getDb();
+  const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
+  if (existing) {
+    return redirect(`/publisher/register?error=EMAIL_TAKEN&email=${encodeURIComponent(email)}`);
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  await db.insert(users).values({
+    id: createId(),
+    email,
+    password: hashedPassword,
+    name,
+    role: 'PUBLISHER',
+  });
+
   try {
-    await nextAuthSignIn('google', { redirectTo: '/library' });
+    await nextAuthSignIn('credentials', { email, password, redirectTo: callbackUrl });
   } catch (error: unknown) {
-    const err = error as { message?: string };
-    if (err.message === 'NEXT_REDIRECT') {
-      revalidatePath('/', 'layout');
-      throw error;
+    const err = error as { type?: string };
+    if (err.type === 'CredentialsSignin') {
+      return redirect('/publisher/login?error=SIGNUP_SIGNIN_FAILED');
     }
-    throw error;
+    rethrowRedirect(error);
   }
 }
