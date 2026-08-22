@@ -41,7 +41,7 @@ export function Pricing() {
             <li className="pf-item"><span className="pf-check">✓</span>Offline 10 judul</li>
             <li className="pf-item"><span className="pf-check">✓</span>Tanpa iklan</li>
             <li className="pf-item"><span className="pf-cross">✗</span>Audiobook</li>
-            <li className="pf-item"><span className="pf-cross">✗</span>AI Companion</li>
+            <li className="pf-item"><span className="pf-cross">✗</span>Bukoo Assistant</li>
           </ul>
           <button className="price-cta-btn price-cta-outline">Mulai Sekarang</button>
         </div>
@@ -75,8 +75,7 @@ export function Pricing() {
           <ul className="price-features">
             <li className="pf-item"><span className="pf-check">✓</span>Seluruh katalog global</li>
             <li className="pf-item"><span className="pf-check">✓</span>3 kredit buku terbaru</li>
-            <li className="pf-item"><span className="pf-check">✓</span>AI Companion penuh</li>
-            <li className="pf-item"><span className="pf-check">✓</span>BUKOO Originals</li>
+            <li className="pf-item"><span className="pf-check">✓</span>Bukoo Assistant penuh</li>
             <li className="pf-item"><span className="pf-check">✓</span>Majalah &amp; jurnal</li>
             <li className="pf-item"><span className="pf-check">✓</span>Priority support</li>
           </ul>

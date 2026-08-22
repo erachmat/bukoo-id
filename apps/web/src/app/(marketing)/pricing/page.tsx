@@ -51,7 +51,7 @@ export default function PricingPage() {
                 <li><span className="y">✓</span>Offline 10 judul</li>
                 <li><span className="y">✓</span>Tanpa iklan</li>
                 <li><span className="n">✗</span>Audiobook</li>
-                <li><span className="n">✗</span>AI Companion</li>
+                <li><span className="n">✗</span>Bukoo Assistant</li>
               </ul>
               <Link href="/register" className="pbtn">Mulai Sekarang</Link>
             </div>
@@ -85,8 +85,7 @@ export default function PricingPage() {
               <ul className="pfeat">
                 <li><span className="y">✓</span>Seluruh katalog global</li>
                 <li><span className="y">✓</span>3 kredit buku terbaru</li>
-                <li><span className="y">✓</span>AI Companion penuh</li>
-                <li><span className="y">✓</span>BUKOO Originals</li>
+                <li><span className="y">✓</span>Bukoo Assistant penuh</li>
                 <li><span className="y">✓</span>Majalah &amp; jurnal</li>
                 <li><span className="y">✓</span>Priority support</li>
               </ul>

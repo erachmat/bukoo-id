@@ -20,7 +20,8 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
   return (
     <header className="pub-nav">
       <Link href="/publisher/daftar" className="pub-nav-logo">
-        BUKOO
+        <img src="/bukoo-logo.svg" alt="BUKOO" className="pub-nav-logo-img" />
+        <span>BUKOO</span>
       </Link>
       <ul className="pub-nav-links">
         <li>

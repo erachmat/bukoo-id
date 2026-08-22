@@ -57,12 +57,12 @@ export function Features() {
           </div>
         </div>
 
-        {/* Feature 2: AI Companion */}
+        {/* Feature 2: Bukoo Assistant */}
         <div className="feature-row reverse">
           <div className="feature-text">
             <div className="feature-label">🤖 Kecerdasan Buatan</div>
             <h2 className="feature-h2">AI yang Mengenal<br />Selera Bacamu</h2>
-            <p className="feature-p">BUKOO AI Companion bukan sekadar merekomendasikan buku — ia membangun peta baca personal, merangkum bab, dan menjawab pertanyaan tentang buku yang kamu baca.</p>
+            <p className="feature-p">Bukoo Assistant bukan sekadar merekomendasikan buku — ia membangun peta baca personal, merangkum bab, dan menjawab pertanyaan tentang buku yang kamu baca.</p>
             <div className="feature-bullets">
               <div className="feature-bullet"><div className="bullet-icon">✓</div><span>Rekomendasi personal berdasarkan riwayat dan mood baca</span></div>
               <div className="feature-bullet"><div className="bullet-icon">✓</div><span>Rangkuman bab otomatis dan insight kunci dari setiap buku</span></div>

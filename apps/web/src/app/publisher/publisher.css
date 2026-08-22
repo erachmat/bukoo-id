@@ -897,11 +897,20 @@ td.td-pct {
 }
 
 .pub-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 900;
   color: var(--amber);
   text-decoration: none;
+}
+
+.pub-nav-logo-img {
+  height: 22px;
+  width: auto;
+  display: block;
 }
 
 .pub-nav-links {
@@ -3171,6 +3180,11 @@ td.td-pct {
   flex-shrink: 0;
   text-decoration: none;
 }
+.pub-dashboard-shell .pds-logo-img {
+  height: 20px;
+  width: auto;
+  display: block;
+}
 .pub-dashboard-shell .pds-logo-wm {
   font-family: var(--pds-serif);
   font-size: 19px;
@@ -4198,11 +4212,21 @@ td.td-pct {
   margin-bottom: 32px;
 }
 .pub-auth-dark-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   font-family: 'Playfair Display', serif;
   font-size: 32px;
   font-weight: 900;
   color: #C9952A;
   letter-spacing: -0.5px;
+}
+
+.pub-auth-dark-logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 .pub-auth-dark-sub {
   font-size: 11px;

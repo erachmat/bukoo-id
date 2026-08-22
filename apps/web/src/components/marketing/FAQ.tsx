@@ -48,15 +48,15 @@ export function FAQ() {
           Buku apa saja yang tersedia di BUKOO?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">BUKOO memiliki 2.000+ judul kurasi mencakup berbagai genre: self-development, fiksi dan sastra Indonesia, bisnis dan keuangan, sains, akademik, hingga buku anak. Kami bermitra dengan 50 penerbit pilihan termasuk Gramedia Pustaka Utama, Mizan, Bentang, Penguin Random House, dan banyak lagi. BUKOO Originals menambahkan konten eksklusif dari penulis-penulis terbaik Indonesia.</div>
+        <div className="faq-a">BUKOO memiliki 2.000+ judul kurasi mencakup berbagai genre: self-development, fiksi dan sastra Indonesia, bisnis dan keuangan, sains, akademik, hingga buku anak. Kami bermitra dengan 50 penerbit pilihan termasuk Gramedia Pustaka Utama, Mizan, Bentang, Penguin Random House, dan banyak lagi.</div>
       </div>
 
       <div className="faq-item">
         <button className="faq-q" onClick={toggleFaq}>
-          Apa itu BUKOO AI Companion?
+          Apa itu Bukoo Assistant?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">AI Companion adalah asisten membaca personal yang ada di tier Plus ke atas. Ia bisa merekomendasikan buku sesuai selera, membuat rangkuman bab, menjawab pertanyaan tentang isi buku, dan membangun &quot;Peta Baca&quot; — jalur membaca yang dikurasi AI berdasarkan tujuan dan minatmu.</div>
+        <div className="faq-a">Bukoo Assistant adalah asisten membaca personal yang ada di tier Plus ke atas. Ia bisa merekomendasikan buku sesuai selera, membuat rangkuman bab, menjawab pertanyaan tentang isi buku, dan membangun &quot;Peta Baca&quot; — jalur membaca yang dikurasi AI berdasarkan tujuan dan minatmu.</div>
       </div>
 
       <div className="faq-item">

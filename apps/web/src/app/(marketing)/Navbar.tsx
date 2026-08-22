@@ -60,7 +60,10 @@ export default function Navbar() {
   return (
     <>
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`} id="navbar">
-        <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>BUKOO</Link>
+        <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>
+          <img src="/bukoo-logo.svg" alt="BUKOO" className="nav-logo-img" />
+          <span>BUKOO</span>
+        </Link>
 
         <ul className="nav-links">
           {/* 1. Beranda */}
@@ -81,21 +84,18 @@ export default function Navbar() {
                 Koleksi Buku
                 <div className="nav-dropdown-desc">Ribuan e-book terlengkap</div>
               </Link>
-              <Link href="/audiobook" className="nav-dropdown-item">
-                Audiobook
-                <div className="nav-dropdown-desc">Dengar narasi berkualitas</div>
-              </Link>
-              <Link href="/originals" className="nav-dropdown-item">
-                BUKOO Originals
-                <div className="nav-dropdown-desc">Karya eksklusif BUKOO</div>
-              </Link>
               <Link href="/ai-companion" className="nav-dropdown-item">
-                AI Companion
+                Bukoo Assistant
                 <div className="nav-dropdown-desc">Asisten membaca pintar</div>
               </Link>
               <Link href="/komunitas" className="nav-dropdown-item">
                 Komunitas
                 <div className="nav-dropdown-desc">Klub baca &amp; ulasan</div>
+              </Link>
+              <Link href="/audiobook" className="nav-dropdown-item">
+                Audiobook
+                <div className="nav-dropdown-desc">Dengar narasi berkualitas</div>
+                <span className="nav-dropdown-badge">Coming soon</span>
               </Link>
             </div>
           </li>
@@ -192,10 +192,9 @@ export default function Navbar() {
               {activeMobileSub === 'produk' && (
                 <ul className="mobile-nav-sub">
                   <li><Link href="/koleksi" onClick={closeMobileMenu}>Koleksi Buku</Link></li>
-                  <li><Link href="/audiobook" onClick={closeMobileMenu}>Audiobook</Link></li>
-                  <li><Link href="/originals" onClick={closeMobileMenu}>BUKOO Originals</Link></li>
-                  <li><Link href="/ai-companion" onClick={closeMobileMenu}>AI Companion</Link></li>
+                  <li><Link href="/ai-companion" onClick={closeMobileMenu}>Bukoo Assistant</Link></li>
                   <li><Link href="/komunitas" onClick={closeMobileMenu}>Komunitas</Link></li>
+                  <li><Link href="/audiobook" onClick={closeMobileMenu}>Audiobook <span className="mobile-nav-badge">Coming soon</span></Link></li>
                 </ul>
               )}
             </li>

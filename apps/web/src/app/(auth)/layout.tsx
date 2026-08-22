@@ -11,7 +11,8 @@ export default function AuthLayout({
       {/* Left Form Side */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 24px' }}>
         <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-          <Link href="/" style={{ display: 'inline-block', marginBottom: '32px', textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '32px', textDecoration: 'none' }}>
+            <img src="/bukoo-logo.svg" alt="BUKOO" style={{ height: '26px', width: 'auto' }} />
             <span style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: '28px',

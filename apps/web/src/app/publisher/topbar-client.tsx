@@ -30,6 +30,7 @@ export function PublisherTopbar({
     <div className="pds-topbar">
       <div className="pds-tb-left">
         <Link href="/publisher/dashboard" className="pds-logo">
+          <img src="/bukoo-logo.svg" alt="BUKOO" className="pds-logo-img" />
           <span className="pds-logo-wm">BUKOO</span>
           <span className="pds-logo-sub">Publisher Portal</span>
         </Link>

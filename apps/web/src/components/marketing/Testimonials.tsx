@@ -11,7 +11,7 @@ export function Testimonials() {
       <div className="testi-grid">
         <div className="testi-card">
           <div className="testi-quote-icon">&quot;</div>
-          <p className="testi-text">BUKOO benar-benar mengubah cara saya membaca. Dulu beli buku mahal dan habis dibaca sekali. Sekarang saya bisa baca 3–4 buku per bulan dengan harga segelas kopi kekinian. AI Companion-nya bikin saya temukan buku yang tadinya tidak pernah terpikirkan!</p>
+          <p className="testi-text">BUKOO benar-benar mengubah cara saya membaca. Dulu beli buku mahal dan habis dibaca sekali. Sekarang saya bisa baca 3–4 buku per bulan dengan harga segelas kopi kekinian. Bukoo Assistant-nya bikin saya temukan buku yang tadinya tidak pernah terpikirkan!</p>
           <div className="testi-author">
             <div className="testi-avatar" style={{ background: 'linear-gradient(135deg,var(--amber),#8B6000)' }}>A</div>
             <div>
@@ -37,7 +37,7 @@ export function Testimonials() {
 
         <div className="testi-card">
           <div className="testi-quote-icon">&quot;</div>
-          <p className="testi-text">Koleksi buku Indonesia-nya luar biasa lengkap! Dari Pramoedya sampai penulis-penulis baru yang belum saya kenal. Fitur offline-nya sangat berguna saat saya traveling ke daerah yang sinyal susah. BUKOO Originals juga fresh banget kontennya!</p>
+          <p className="testi-text">Koleksi buku Indonesia-nya luar biasa lengkap! Dari Pramoedya sampai penulis-penulis baru yang belum saya kenal. Fitur offline-nya sangat berguna saat saya traveling ke daerah yang sinyal susah.</p>
           <div className="testi-author">
             <div className="testi-avatar" style={{ background: 'linear-gradient(135deg,#8B2FC9,#4A0D80)' }}>D</div>
             <div>

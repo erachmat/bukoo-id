@@ -25,7 +25,10 @@ export default async function PublisherRegisterPage(props: {
     <div className="pub-auth-dark">
       <div className="pub-auth-dark-card">
         <div className="pub-auth-dark-brand">
-          <div className="pub-auth-dark-logo">BUKOO</div>
+          <div className="pub-auth-dark-logo">
+            <img src="/bukoo-logo.svg" alt="BUKOO" className="pub-auth-dark-logo-img" />
+            <span>BUKOO</span>
+          </div>
           <div className="pub-auth-dark-sub">Publisher Portal</div>
         </div>
         <RegisterForm

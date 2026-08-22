@@ -8,7 +8,7 @@ import { Pricing } from '@/components/marketing/Pricing';
 import { Testimonials } from '@/components/marketing/Testimonials';
 import { FAQ } from '@/components/marketing/FAQ';
 import { CallToAction } from '@/components/marketing/CallToAction';
-import { trendingBooks, originalBooks } from '@/components/marketing/bookData';
+import { trendingBooks } from '@/components/marketing/bookData';
 
 export default function LandingPage() {
   return (
@@ -20,13 +20,6 @@ export default function LandingPage() {
         title="🔥 Trending di Indonesia" 
         badge="Minggu Ini" 
         books={trendingBooks} 
-      />
-      <BookRow 
-        title="✦ BUKOO Originals" 
-        badge="Eksklusif" 
-        badgeColor="var(--teal)"
-        badgeBorderColor="rgba(0,201,167,.3)"
-        books={originalBooks} 
       />
       <Stats />
       <Features />

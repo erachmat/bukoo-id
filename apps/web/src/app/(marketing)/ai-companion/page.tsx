@@ -8,10 +8,10 @@ export default function AiCompanionPage() {
         <div className="phero-bg"></div>
         <div className="phero-grid"></div>
         <div className="wrap">
-          <span className="eyebrow">Produk · AI Companion</span>
+          <span className="eyebrow">Produk · Bukoo Assistant</span>
           <h1 className="ph-h1">Asisten baca <em>personal</em> Anda</h1>
           <p className="ph-lead">
-            AI Companion menemani setiap halaman: merekomendasikan buku sesuai selera, merangkum bab, menjawab pertanyaan tentang isi buku, dan menyusun jalur baca yang dipersonalisasi. Tersedia di tier Plus ke atas.
+            Bukoo Assistant menemani setiap halaman: merekomendasikan buku sesuai selera, merangkum bab, menjawab pertanyaan tentang isi buku, dan menyusun jalur baca yang dipersonalisasi. Tersedia di tier Plus ke atas.
           </p>
           <div className="hero-ctas">
             <Link href="/pricing" className="btn-cta btn-lg">Ada di tier Plus →</Link>
@@ -23,7 +23,7 @@ export default function AiCompanionPage() {
       <section className="sec">
         <div className="wrap">
           <div className="sec-head">
-            <span className="eyebrow">Fitur AI Companion</span>
+            <span className="eyebrow">Fitur Bukoo Assistant</span>
             <h2 className="h2">Teknologi yang <em>memahami</em> cara Anda membaca</h2>
           </div>
           <div className="grid3">
@@ -80,7 +80,7 @@ export default function AiCompanionPage() {
       <section className="sec">
         <div className="wrap">
           <div className="cband">
-            <h3>Aktifkan AI Companion Anda</h3>
+            <h3>Aktifkan Bukoo Assistant Anda</h3>
             <p>Mulai dari tier Plus Rp 49.900/bulan untuk rekomendasi &amp; insight cerdas.</p>
             <Link href="/pricing" className="btn-cta btn-lg">Lihat paket →</Link>
           </div>

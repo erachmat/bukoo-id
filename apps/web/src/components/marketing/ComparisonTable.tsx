@@ -46,15 +46,7 @@ export function ComparisonTable() {
               <td><span className="compare-check">✓</span><span className="compare-text">Unlimited</span></td>
             </tr>
             <tr>
-              <td>BUKOO Originals</td>
-              <td><span className="compare-cross">✗</span></td>
-              <td><span className="compare-cross">✗</span></td>
-              <td>Sebagian</td>
-              <td><span className="compare-check">✓</span></td>
-              <td><span className="compare-check">✓</span></td>
-            </tr>
-            <tr>
-              <td>AI Companion</td>
+              <td>Bukoo Assistant</td>
               <td><span className="compare-cross">✗</span></td>
               <td><span className="compare-cross">✗</span></td>
               <td><span className="compare-check">✓</span><span className="compare-text">Rekomendasi</span></td>
