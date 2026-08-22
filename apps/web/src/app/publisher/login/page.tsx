@@ -3,6 +3,11 @@ import { auth } from '@/lib/auth'
 import { safeCallbackUrl, defaultRedirectForRole } from '@/lib/auth-helpers'
 import { LoginForm } from '@/components/auth/login-form'
 
+export const metadata = {
+  title: 'BUKOO Publisher — Masuk',
+  description: 'Masuk ke portal penerbit BUKOO untuk mengelola katalog, royalti, dan insight pembaca.',
+}
+
 export default async function PublisherLoginPage(props: {
   searchParams: Promise<{ error?: string; message?: string; callbackUrl?: string }>
 }) {
@@ -10,9 +15,6 @@ export default async function PublisherLoginPage(props: {
 
   const session = await auth()
   if (session) {
-    // Middleware already routes PUBLISHER here → dashboard. For any other role
-    // (e.g. a customer on the publisher domain), go to their role home to
-    // avoid bouncing off the PUBLISHER-gated dashboard.
     const role = (session.user as { role?: string } | undefined)?.role;
     redirect(safeCallbackUrl(params.callbackUrl, defaultRedirectForRole(role)));
   }
@@ -20,21 +22,25 @@ export default async function PublisherLoginPage(props: {
   const callbackUrl = safeCallbackUrl(params.callbackUrl, '/publisher/dashboard')
 
   return (
-    <div className="pub-auth-wrap">
-      <div className="pub-auth-card">
-        <div className="pub-auth-brand">
-          <div className="logo-bukoo" style={{ fontSize: '32px' }}>BUKOO</div>
-          <div className="logo-sub" style={{ fontSize: '12px' }}>Publisher Portal</div>
+    <div className="pub-auth-dark">
+      <div className="pub-auth-dark-card">
+        <div className="pub-auth-dark-brand">
+          <div className="pub-auth-dark-logo">BUKOO</div>
+          <div className="pub-auth-dark-sub">Publisher Portal</div>
         </div>
-        <div className="form-card">
-          <LoginForm
-            callbackUrl={callbackUrl}
-            error={params.error}
-            message={params.message}
-            registerHref="/publisher/register"
-            variant="publisher"
-          />
-        </div>
+        <LoginForm
+          callbackUrl={callbackUrl}
+          error={params.error}
+          message={params.message}
+          registerHref="/publisher/register"
+          variant="publisher"
+        />
+        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 10.5, color: 'rgba(255,255,255,0.3)' }}>
+          Belum punya akun penerbit?{' '}
+          <a href="/publisher/register" style={{ color: '#00C9A7', textDecoration: 'none', fontWeight: 700 }}>
+            Daftar di sini &rarr;
+          </a>
+        </p>
       </div>
     </div>
   )

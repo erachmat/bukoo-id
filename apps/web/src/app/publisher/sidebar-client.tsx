@@ -9,73 +9,93 @@ interface SidebarProps {
     name?: string | null;
     email?: string | null;
   };
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-export function PublisherSidebar({ user }: SidebarProps) {
+const analyticsNav = [
+  { id: "overview",  label: "Overview",      icon: "📊" },
+  { id: "performa",  label: "Performa Buku", icon: "📈" },
+  { id: "royalti",   label: "Royalti",       icon: "💰" },
+  { id: "pembaca",   label: "Pembaca",        icon: "👥" },
+  { id: "demografi", label: "Demografi",      icon: "🧬" },
+  { id: "geo",       label: "Sebaran Geo",    icon: "🗺️" },
+  { id: "waktu",     label: "Waktu Baca",     icon: "⏱️" },
+];
+
+const contentNav = [
+  { id: "katalog",   label: "Katalog",        icon: "📚", href: "/publisher/books" },
+  { id: "upload",    label: "Upload Buku",    icon: "➕", href: "/publisher/books/new" },
+  { id: "promosi",   label: "Promosi",         icon: "📣" },
+  { id: "metadata",  label: "Metadata",        icon: "📝" },
+];
+
+const accountNav = [
+  { id: "pengaturan",  label: "Pengaturan",    icon: "⚙️" },
+  { id: "notifikasi",  label: "Notifikasi",    icon: "🔔", badge: "4" },
+];
+
+export function PublisherSidebar({ user: _user, activeTab, onTabChange }: SidebarProps) {
   const pathname = usePathname();
 
-  const name = user.name || "Gramedia Pustaka Utama";
-  const initial = name.charAt(0).toUpperCase();
+  const renderItem = (item: { id: string; label: string; icon: string; href?: string; badge?: string }) => {
+    const isActive = item.href ? pathname === item.href : activeTab === item.id;
+    const cls = `pds-side-item${isActive ? " active" : ""}`;
 
-  const navItems = [
-    { name: "Ringkasan Royalti", href: "/publisher/dashboard", icon: "📊" },
-    { name: "Koleksi Buku", href: "/publisher/books", icon: "📖" },
-    { name: "Unggah Buku Baru", href: "/publisher/books/new", icon: "➕" },
-  ];
+    if (item.href) {
+      return (
+        <Link key={item.id} href={item.href} className={cls}>
+          <span className="pds-side-icon">{item.icon}</span>
+          {item.label}
+        </Link>
+      );
+    }
+    return (
+      <button key={item.id} className={cls} onClick={() => onTabChange(item.id)}>
+        <span className="pds-side-icon">{item.icon}</span>
+        {item.label}
+        {item.badge && <span className="pds-side-badge">{item.badge}</span>}
+      </button>
+    );
+  };
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <div className="logo-bukoo">BUKOO</div>
-        <div className="logo-sub">Publisher Portal</div>
-      </div>
+    <aside className="pds-sidebar">
+      <div className="pds-side-label">Menu</div>
+      {analyticsNav.map(renderItem)}
 
-      <div className="sidebar-pub">
-        <div className="pub-avatar">{initial}</div>
-        <div className="pub-name">{name}</div>
-        <div className="pub-tier">Mitra Penerbit · Tier 65%</div>
-      </div>
+      <div className="pds-side-label">Konten</div>
+      {contentNav.map(renderItem)}
 
-      <nav style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        <div className="nav-section" style={{ flex: 1 }}>
-          <div className="nav-label">Menu Utama</div>
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-item ${isActive ? "active" : ""}`}
-              >
-                <span className="nav-icon">{item.icon}</span> {item.name}
-              </Link>
-            );
-          })}
+      <div className="pds-side-label">Akun</div>
+      {accountNav.map(renderItem)}
+
+      <div className="pds-side-foot">
+        <div className="up">
+          Model royalti: <b style={{ color: "var(--pds-teal)" }}>65%</b> · tanpa cap<br />
+          Payout berikutnya: 5 Sep 2026
         </div>
-
-        <div className="sidebar-footer" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "20px 24px" }}>
-          <button
-            onClick={() => signOut()}
-            className="nav-item"
-            style={{
-              background: "none",
-              border: "none",
-              color: "#EF4444",
-              width: "100%",
-              textAlign: "left",
-              padding: "10px 0",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "11px",
-              fontSize: "13px",
-              fontWeight: "500",
-            }}
-          >
-            <span className="nav-icon" style={{ opacity: 1 }}>🚪</span> Keluar
-          </button>
-        </div>
-      </nav>
+        <button
+          onClick={() => signOut()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 10,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--pds-coral)",
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: "var(--pds-sans)",
+            padding: 0,
+          }}
+        >
+          🚪 Keluar
+        </button>
+      </div>
     </aside>
   );
 }
+

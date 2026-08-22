@@ -6,34 +6,24 @@ import { createPublisherBook } from "../actions";
 export default function NewPublisherBookPage() {
   return (
     <>
-      <header className="topbar">
-        <div className="topbar-left">
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+      <div className="pds-page-head">
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <Link
               href="/publisher/books"
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "13px",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
+              style={{ color: "var(--pds-dim)", fontSize: 11.5, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}
             >
-              ← Kembali
+              ← Koleksi Buku
             </Link>
-            <span style={{ color: "var(--border-dark)" }}>/</span>
-            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>Koleksi Buku</span>
           </div>
-          <div className="topbar-title">Unggah Buku Baru</div>
+          <div className="pds-page-title">Upload Buku Baru</div>
+          <div className="pds-page-sub">Unggah file EPUB, tentukan harga, dan publikasikan ke lebih dari 2 juta pembaca BUKOO</div>
         </div>
-      </header>
-
-      <main className="main">
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <PublisherBookForm action={createPublisherBook} submitLabel="Terbitkan Buku Baru →" />
+        <div className="pds-head-actions">
+          <Link href="/publisher/books" className="pds-btn pds-btn-line">Batal</Link>
         </div>
-      </main>
+      </div>
+      <PublisherBookForm action={createPublisherBook} submitLabel="Terbitkan Buku Baru →" />
     </>
   );
 }
