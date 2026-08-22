@@ -1,6 +1,7 @@
 import React from "react";
 import { auth } from "@/lib/auth";
 import { DashboardClient } from "./dashboard-client";
+import { PublisherDashboardShowcase } from "./showcase";
 
 export const metadata = {
   title: "BUKOO — Publisher Dashboard",
@@ -10,5 +11,11 @@ export const metadata = {
 export default async function PublisherDashboardPage() {
   const session = await auth();
   const user = session?.user;
-  return <DashboardClient user={user ?? null} />;
+  const userRole = (user as { role?: string } | undefined)?.role;
+
+  if (user && userRole === "PUBLISHER") {
+    return <DashboardClient user={user} />;
+  }
+
+  return <PublisherDashboardShowcase />;
 }

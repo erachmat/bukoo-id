@@ -93,8 +93,8 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
     }
   }
 
-  // Protected publisher dashboard/submit — require PUBLISHER role
-  if (pathname.startsWith("/publisher/dashboard") || pathname.startsWith("/publisher/submit")) {
+  // Protected publisher submit — require PUBLISHER role
+  if (pathname.startsWith("/publisher/submit")) {
     if (!user || user.role !== "PUBLISHER") {
       const loginTarget = isPublisherHost ? "/publisher/login" : "/login"
       return NextResponse.redirect(new URL(`${loginTarget}?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))

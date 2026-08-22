@@ -50,7 +50,7 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
         </li>
       </ul>
       <div className="pub-nav-right">
-        <Link href="/login" className="btn-ghost">
+        <Link href="/publisher/login?callbackUrl=/publisher/dashboard" className="btn-ghost">
           Masuk
         </Link>
         <Link href="/publisher/daftar#daftar" className="btn-cta">
