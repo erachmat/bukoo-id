@@ -68,15 +68,20 @@ export function PublisherTopbar({
           </button>
           {avatarOpen && (
             <div className="pds-avatar-menu">
-              <button
-                className="pds-avatar-item danger"
-                onClick={() => {
+              <form
+                action={async () => {
                   setAvatarOpen(false);
-                  signOut();
+                  await signOut({ redirectTo: "/publisher/login" });
                 }}
               >
-                🚪 Keluar
-              </button>
+                <button
+                  type="submit"
+                  className="pds-avatar-item danger"
+                  style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+                >
+                  🚪 Keluar
+                </button>
+              </form>
             </div>
           )}
         </div>

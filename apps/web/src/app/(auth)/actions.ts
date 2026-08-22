@@ -141,8 +141,8 @@ export async function signInWithGoogle(formData: FormData) {
   }
 }
 
-export async function signOut() {
-  await nextAuthSignOut({ redirectTo: '/' });
+export async function signOut(options?: { redirectTo?: string }) {
+  await nextAuthSignOut({ redirectTo: options?.redirectTo ?? '/' });
 }
 
 export async function resetPassword(formData: FormData) {

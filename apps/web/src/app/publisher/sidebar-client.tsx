@@ -75,25 +75,29 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
           Model royalti: <b style={{ color: "var(--pds-teal)" }}>65%</b> · tanpa cap<br />
           Payout berikutnya: 5 Sep 2026
         </div>
-        <button
-          onClick={() => signOut()}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 10,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--pds-coral)",
-            fontSize: 11,
-            fontWeight: 600,
-            fontFamily: "var(--pds-sans)",
-            padding: 0,
-          }}
-        >
-          🚪 Keluar
-        </button>
+        <form action={async () => { await signOut({ redirectTo: "/publisher/login" }); }}>
+          <button
+            type="submit"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 10,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--pds-coral)",
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: "var(--pds-sans)",
+              padding: 0,
+              width: "100%",
+              textAlign: "left",
+            }}
+          >
+            🚪 Keluar
+          </button>
+        </form>
       </div>
     </aside>
   );
