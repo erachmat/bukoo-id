@@ -90,27 +90,27 @@ export default function TentangPage() {
             <div className="tm">
               <div className="tm-av">RA</div>
               <h4>Rizqi Baihaqi Ahmadi</h4>
-              <p>Founder &amp; Chief Executive Officer</p>
+              <p>Chief Executive Officer</p>
             </div>
             <div className="tm">
               <div className="tm-av">ER</div>
               <h4>Eko Rahmat</h4>
-              <p>Chief Technology Officer &amp; Co-Founder</p>
+              <p>Chief Technology Officer</p>
             </div>
             <div className="tm">
               <div className="tm-av">AS</div>
               <h4>Ahmad Syarifudin</h4>
-              <p>Head of Marketing &amp; Communications</p>
+              <p>Chief Product Officer</p>
             </div>
             <div className="tm">
               <div className="tm-av">RP</div>
               <h4>M. Rizky Pontoh</h4>
-              <p>Head of Legal &amp; Compliance</p>
+              <p>Chief Legal &amp; Compliance</p>
             </div>
             <div className="tm">
               <div className="tm-av">MM</div>
               <h4>Ahmad Mustafa</h4>
-              <p>Head of Publisher Relations</p>
+              <p>Chief Publisher Relations</p>
             </div>
           </div>
         </div>
