@@ -8117,3 +8117,23 @@
 {"_e":"metro:client_log","_t":1787136513809,"level":"log","data":["[Perf] WebView shell ready duration: 1179ms"]}
 {"_e":"metro:client_log","_t":1787136514055,"level":"log","data":["[Perf] Total Time-to-First-Frame: 1428ms, In-WebView load: 58ms, Location gen (cached): 37ms"]}
 {"_e":"metro:client_log","_t":1787136516534,"level":"log","data":["[Perf] Page turn latency: 143ms"]}
+{"_e":"root:init","_t":1787521966479,"format":"v0-jsonl","version":"56.1.23"}
+{"_e":"env:mode","_t":1787521966480,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1787521966483,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"https://api.bukoo.id/v1","EXPO_PUBLIC_GOOGLE_CLIENT_ID":"576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"}}
+{"_e":"devserver:start","_t":1787521966947,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787521968441,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787521978987,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"root:init","_t":1787522585009,"format":"v0-jsonl","version":"56.1.24"}
+{"_e":"env:mode","_t":1787522585010,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1787522585012,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"https://api.bukoo.id/v1","EXPO_PUBLIC_GOOGLE_CLIENT_ID":"576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"}}
+{"_e":"devserver:start","_t":1787522585320,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787522586501,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787522596944,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"metro:client_log","_t":1787522619031,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThe project you requested requires a newer version of Expo Go.\n\nHow to fix this error:\n\nDownload the latest version of Expo Go from the App Store."]}
+{"_e":"metro:client_log","_t":1787522632369,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThe project you requested requires a newer version of Expo Go.\n\nHow to fix this error:\n\nDownload the latest version of Expo Go from the App Store."]}
+{"_e":"root:init","_t":1787522739344,"format":"v0-jsonl","version":"56.1.24"}
+{"_e":"env:mode","_t":1787522739345,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1787522739350,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"https://api.bukoo.id/v1","EXPO_PUBLIC_GOOGLE_CLIENT_ID":"576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"}}
+{"_e":"devserver:start","_t":1787522739714,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787522741218,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1787522756444,"atlas":false,"workers":6,"host":"::","port":8081}

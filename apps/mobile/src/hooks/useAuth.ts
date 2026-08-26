@@ -12,6 +12,7 @@ import {
   ACCESS_TOKEN_KEY,
   REFRESH_TOKEN_KEY,
 } from '../services/api';
+import { configureGoogleSignIn } from '../services/socialAuth';
 
 /**
  * Hook to hydrate authentication state on application startup.
@@ -128,6 +129,9 @@ export function useLogout() {
         // Purge the Zustand-persisted user from AsyncStorage so a stale user
         // object cannot restore isAuthenticated = true on the next app launch.
         await AsyncStorage.removeItem('bukoo-auth-storage');
+        // Re-configure (idempotent) so signOut has a configured client; no-ops
+        // in Expo Go where the native module is absent.
+        configureGoogleSignIn();
         await GoogleSignin.signOut();
       } catch (err) {
         console.log('Error during logout storage cleanup:', err);

@@ -25,25 +25,15 @@ import {
   BIOMETRIC_ENABLED_KEY,
   authApi,
 } from '../../services/api';
+import { configureGoogleSignIn } from '../../services/socialAuth';
 import { useAuthStore, toUserDto } from '../../stores/authStore';
 import { COLORS } from '../../constants/COLORS';
 
-// NOTE: Google Sign-In requires configuration files to be added manually:
+// NOTE: Google Sign-In is configured lazily via configureGoogleSignIn() in
+// src/services/socialAuth.ts (guarded so it can't crash in Expo Go). It still
+// requires the platform config files:
 // - iOS: iOS GoogleService-Info.plist
 // - Android: Android google-services.json
-// Make sure to add them to your native project build directories.
-GoogleSignin.configure({
-  // NOTE: `webClientId` must be the SERVER client ID (client_type 3) of the
-  // Android Firebase project that owns google-services.json — here project
-  // `bukoo-15ce3` (576187863248). That file's Android OAuth client carries the
-  // release keystore SHA-1 that Google Play App Signing will use. Do NOT swap
-  // this for the web project's client id (17547501035-...) — that breaks
-  // native Google Sign-In in release builds.
-  webClientId:
-    process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
-    '576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com',
-  offlineAccess: true,
-});
 
 interface LoginScreenProps {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -189,6 +179,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
   const handleGoogleSignIn = async () => {
     try {
+      configureGoogleSignIn();
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       if (userInfo.type === 'success') {

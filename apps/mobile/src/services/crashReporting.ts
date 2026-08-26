@@ -16,15 +16,21 @@ import {
 let devOverrideSet = false;
 
 export function initCrashReporting(): void {
-  if (__DEV__) {
-    if (!devOverrideSet) {
-      setCrashlyticsCollectionEnabled(getCrashlytics(), false);
-      devOverrideSet = true;
+  try {
+    if (__DEV__) {
+      if (!devOverrideSet) {
+        setCrashlyticsCollectionEnabled(getCrashlytics(), false);
+        devOverrideSet = true;
+      }
+      return;
     }
-    return;
+    // Production: collection is on by default via the config plugin.
+    // For internal test builds you can flip this to true via a build-time flag.
+  } catch {
+    // Firebase native module unavailable (e.g. Expo Go, or Firebase not yet
+    // configured for this platform) — crash reporting is silently disabled and
+    // must never block app boot.
   }
-  // Production: collection is on by default via the config plugin.
-  // For internal test builds you can flip this to true via a build-time flag.
 }
 
 /**

@@ -1,3 +1,34 @@
+# Publisher Logout Fix ("Keluar" does nothing) — 2026-08-26
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-26-publisher-logout-fix-design.md` + plan `docs/superpowers/plans/2026-08-26-publisher-logout-fix.md` + ledger `.superpowers/sdd/publisher-logout-fix/`. User-approved.
+- `[x]` 2. Root cause: both publisher logout buttons (topbar avatar menu + sidebar footer) wrapped the `signOut` server action in an inline async `<form action={...}>` closure — unique to these two files; every working sign-out (admin-sidebar, account, Navbar) calls the server action directly via `onClick`. The wrapper swallowed the `NEXT_REDIRECT`, so clicking "Keluar" was a no-op.
+- `[x]` 3. Fix: removed `<form>` wrappers; direct `onClick` → `signOut({ redirectTo: "/publisher/daftar" })` in `apps/web/src/app/publisher/topbar-client.tsx` + `sidebar-client.tsx`. Post-logout destination changed `/publisher/login` → `/publisher/daftar` (user decision).
+- `[x]` 4. Verification: web typecheck ✅ / lint **0 errors** (26 pre-existing warnings, none on changed lines) ✅ / tests: **no test script** for apps/web (stated). Greps: old patterns → 0 hits. (`node_modules` was missing at session start — ran full `npm install` first.)
+- `[ ]` 5. (manual QA) Login as publisher → dashboard → Keluar from avatar menu AND sidebar footer → lands on `/publisher/daftar`; `/api/auth/session` null; revisiting `/publisher/dashboard` redirects to login.
+
+# Mobile: Restore/Upgrade to Expo SDK 56 (was downgraded to 54) — 2026-08-24
+
+- `[x]` 1. Detected the project had been **downgraded to SDK 54** (`expo ~54.0.0`, RN 0.81.5, React 19.1.0) — `git diff` confirmed the committed state is SDK 56; the downgrade left `@react-native/babel-preset`/`metro-config` at 0.85 (inconsistent).
+- `[x]` 2. Restored `apps/mobile/package.json` + `package-lock.json` to the committed SDK 56 state; bumped `expo` to `~56.0.20` (latest 56.x patch).
+- `[x]` 3. Dependency reinstall saga: npm 10.8.2 hit the known arborist bug (`ERR_INVALID_ARG_TYPE: "from" undefined` in `reify.js rollbackMoveBackRetiredUnchanged`) on incremental installs. Fix: `rm -rf node_modules` + `npx --yes npm@11 install` (Node-20 compatible, no script blocking) → clean tree, expo **56.0.20** installed. npm 12 (EBADENGINE on Node 20) was tried first — don't use it here.
+- `[x]` 4. Verified binaries after reinstall: `esbuild 0.28.1`, `sharp 0.34.5`, `wrangler 4.86.0`, `tsc 5.9.3` all functional.
+- `[x]` 5. Full monorepo verification: typecheck **7/7** ✅, lint **5/5** (0 errors; pre-existing warnings only) ✅, test **4/4** (API **14/14**; mobile no test script — stated) ✅.
+- `[x]` 6. Note: `package-lock.json` got a large (but valid) rewrite — the committed lock was already stale (pre-existing `typescript` drift: package.json `~6.0.3` vs lock-pinned `5.9.3`, shared-version hoist conflict with web).
+- `[ ]` 7. (next) `npx expo install --check` will still flag `typescript 5.9.3 → ~6.0.3` — pre-existing hoisting conflict with `apps/web`'s typescript `~5.9`; benign (was the state before too). Optionally pin a single shared typescript version.
+- `[ ]` 8. (manual/QA) Test in the SDK 56 Expo Go build (sign.expo.dev) on iPhone: `npx expo start --tunnel` from `apps/mobile`.
+
+# Mobile Expo Go Compatibility (iOS testing without Apple Developer account) — 2026-08-24
+
+- `[x]` 1. Guard `initCrashReporting()` in `apps/mobile/src/services/crashReporting.ts` (try/catch) — Firebase native module is absent in Expo Go and previously crashed app boot.
+- `[x]` 2. New `apps/mobile/src/services/socialAuth.ts` — lazy, idempotent, guarded `configureGoogleSignIn()` (module-scope `GoogleSignin.configure` in `LoginScreen.tsx` previously crashed the login screen in Expo Go).
+- `[x]` 3. `LoginScreen.tsx` — removed module-scope `GoogleSignin.configure`; calls `configureGoogleSignIn()` inside `handleGoogleSignIn` (guarded).
+- `[x]` 4. `useAuth.ts` — calls `configureGoogleSignIn()` before `GoogleSignin.signOut()` in logout cleanup.
+- `[x]` 5. Docs: `apps/mobile/EXPO_GO_TESTING.md` (tunnel run steps + works/not matrix + gotchas).
+- `[x]` 6. Verification: mobile typecheck ✅ / lint ✅ (0 errors; only pre-existing @typescript-eslint TS-version warning) / test (no test script — stated).
+- `[x]` 6b. **Expo Go version gotcha (2026-08-24)**: App Store Expo Go stops at SDK 54; project is SDK 56 → "incompatible / requires a newer Expo Go". Fix: install the SDK 56 Expo Go build via **sign.expo.dev** (free Apple ID, no paid account; ~7-day cert, weekly re-sign). Documented in `EXPO_GO_TESTING.md`.
+- `[ ]` 7. (manual/QA) Remote tester: install SDK 56 Expo Go via sign.expo.dev → `npx expo start --tunnel` from `apps/mobile` → scan in Expo Go on iPhone → boots to login (no red screen), email/password + Apple Sign-In work, Google button shows graceful alert, reader opens, logout OK.
+- `[ ]` 8. (deferred) Firebase iOS `GoogleService-Info.plist` + EAS/TestFlight once the company Apple Developer account exists.
+
 # Web Auth Overhaul (login/register/Google — bukoo.id + publisher.bukoo.id) — 2026-08-20
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-20-web-auth-improvements-design.md` + plan `docs/superpowers/plans/2026-08-20-web-auth-improvements.md` + ledger `.superpowers/sdd/web-auth-improvements/` (user-approved "Start implementation").
