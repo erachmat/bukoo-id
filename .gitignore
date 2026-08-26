@@ -51,3 +51,6 @@ src/generated/prisma
 next-env.d.ts
 book-duplicate-report-*.json
 pg-client-17/
+
+# Expo local tooling
+.expo/
