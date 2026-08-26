@@ -50,6 +50,7 @@ export default async function PublisherBooksPage() {
               <tr>
                 <th>Judul & Penulis</th>
                 <th>Genre / Kategori</th>
+                <th>Status</th>
                 <th>Bahasa</th>
                 <th>Akses Konten</th>
                 <th>Format</th>
@@ -60,7 +61,7 @@ export default async function PublisherBooksPage() {
             <tbody>
               {books.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: "48px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: "12px" }}>
+                  <td colSpan={8} style={{ padding: "48px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: "12px" }}>
                     Belum ada buku terdaftar.{" "}
                     <Link href="/publisher/books/new" style={{ color: "var(--pds-teal)", fontWeight: 600, textDecoration: "none" }}>
                       Upload buku pertama Anda →
@@ -93,6 +94,12 @@ export default async function PublisherBooksPage() {
                         {(typeof book.genre === 'string' ? JSON.parse(book.genre || '[]') : book.genre)[0] ?? "Sastra"}
                       </span>
                     </td>
+                    <td>
+                      <span className={`pds-chip ${book.isPublished ? 'pds-chip-live' : 'pds-chip-review'}`}>
+                        <span className="pds-dotk" />
+                        {book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}
+                      </span>
+                    </td>
                     <td>{book.language}</td>
                     <td>
                       {book.subscriptionRequired !== "FREE" ? (
@@ -104,6 +111,12 @@ export default async function PublisherBooksPage() {
                     <td className="num">{book.epubKey ? 'EPUB' : '—'}</td>
                     <td className="r num">{book.readCount.toLocaleString('id-ID')} kali</td>
                     <td className="c">
+                      <Link
+                        href={`/publisher/books/${book.id}/edit`}
+                        style={{ fontSize: 12, fontWeight: 600, color: 'var(--pds-teal)', textDecoration: 'none', marginRight: 10 }}
+                      >
+                        Edit
+                      </Link>
                       <DeletePublisherBookButton bookId={book.id} bookTitle={book.title} />
                     </td>
                   </tr>

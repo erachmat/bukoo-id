@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
-import { readingProgress } from '@bukoo/db';
+import { readingProgress, recordPublisherReadingMetric } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
@@ -25,6 +25,11 @@ export async function updateReadingProgress(
     where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, bookId)),
   });
 
+  // No reading-time delta from the web reader (progress-only), so no seconds to add.
+  const isCompletion =
+    progressPercent >= 100 && (existing?.progressPercent ?? 0) < 100;
+  const isStart = !existing && progressPercent > 0;
+
   if (existing) {
     await db
       .update(readingProgress)
@@ -45,6 +50,15 @@ export async function updateReadingProgress(
       lastReadAt: now,
     });
   }
+
+  // Aggregate publisher analytics idempotently.
+  await recordPublisherReadingMetric(db, {
+    userId,
+    bookId,
+    progressPercent,
+    isStart,
+    isCompletion,
+  });
 
   return { success: true };
 }

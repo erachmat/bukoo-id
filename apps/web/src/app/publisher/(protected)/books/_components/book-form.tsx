@@ -7,9 +7,19 @@ const GENRES = ['Fiksi', 'Non-Fiksi', 'Pengembangan Diri', 'Roman', 'Sastra', 'B
 type BookFormProps = {
   action: (formData: FormData) => Promise<void>
   submitLabel?: string
+  initial?: {
+    title?: string
+    author?: string
+    description?: string
+    genre?: string
+    language?: string
+    year?: string
+    pageCount?: string
+    subscriptionRequired?: string
+  }
 }
 
-export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: BookFormProps) {
+export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku', initial }: BookFormProps) {
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
@@ -56,11 +66,11 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <label style={labelStyle}>Judul Buku *</label>
-              <input style={inputStyle} name="title" required placeholder="Masukkan judul..." />
+              <input style={inputStyle} name="title" required placeholder="Masukkan judul..." defaultValue={initial?.title} />
             </div>
             <div>
               <label style={labelStyle}>Penulis *</label>
-              <input style={inputStyle} name="author" required placeholder="Nama penulis..." />
+              <input style={inputStyle} name="author" required placeholder="Nama penulis..." defaultValue={initial?.author} />
             </div>
           </div>
 
@@ -69,6 +79,7 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
             <textarea
               name="description"
               placeholder="Sinopsis singkat..."
+              defaultValue={initial?.description}
               style={{ ...inputStyle, minHeight: 120, resize: 'vertical' }}
             />
           </div>
@@ -76,13 +87,13 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <label style={labelStyle}>Kategori *</label>
-              <select name="genre" required style={inputStyle}>
+              <select name="genre" required style={inputStyle} defaultValue={initial?.genre}>
                 {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <div>
               <label style={labelStyle}>Bahasa *</label>
-              <select name="language" required style={inputStyle} defaultValue="ID">
+              <select name="language" required style={inputStyle} defaultValue={initial?.language ?? 'ID'}>
                 <option value="ID">Indonesia 🇮🇩</option>
                 <option value="EN">English 🇺🇸</option>
               </select>
@@ -92,11 +103,11 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <label style={labelStyle}>Tahun Terbit</label>
-              <input style={inputStyle} name="year" type="number" placeholder="2026" min={1900} max={2100} />
+              <input style={inputStyle} name="year" type="number" placeholder="2026" min={1900} max={2100} defaultValue={initial?.year} />
             </div>
             <div>
               <label style={labelStyle}>Jumlah Halaman</label>
-              <input style={inputStyle} name="pageCount" type="number" placeholder="250" min={1} />
+              <input style={inputStyle} name="pageCount" type="number" placeholder="250" min={1} defaultValue={initial?.pageCount} />
             </div>
           </div>
 
@@ -106,7 +117,7 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku' }: Bo
               name="subscriptionRequired"
               required
               style={inputStyle}
-              defaultValue="FREE"
+              defaultValue={initial?.subscriptionRequired ?? 'FREE'}
             >
               <option value="FREE">Gratis (FREE)</option>
               <option value="PELAJAR">Pelajar (PELAJAR)</option>

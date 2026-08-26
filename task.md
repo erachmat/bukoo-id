@@ -1,10 +1,27 @@
+# Publisher Dashboard Features (Core MVP) — 2026-08-26
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-26-publisher-dashboard-features-design.md` + plan `docs/superpowers/plans/2026-08-26-publisher-dashboard-features.md` + ledger `.superpowers/sdd/publisher-dashboard-features/`. User-approved.
+- `[x]` 2. D1 schema: added `books.publicationStatus`, `publisherProfiles`, `publisherPayoutAccounts`, `publisherSubmissions`, `publisherBookReaderDays`, `publisherBookDailyMetrics`, `notifications`, `publisherRoyaltyPeriods/Lines`, `publisherPayouts`. Migration `0005_last_the_renegades.sql` (drizzle-kit check clean, no FTS5 ops). D1-safe.
+- `[x]` 3. Publisher auth helper `apps/web/src/lib/publisher-auth.ts` (`getPublisherUser`/`getAdminUser`) used by catalog + submission actions.
+- `[x]` 4. Catalog: server-side validation (≤50MB, EPUB/PDF, image types), new uploads → IN_REVIEW (not auto-publish), `updatePublisherBook`, safe R2 cleanup, edit page `books/[id]/edit`, status chips in list.
+- `[x]` 5. Submission workflow: `SubmitForm` posts real files via server action → `publisherSubmissions`; admin review UI at `/admin/submissions` (setujui/tolak/minta-revisi); approval publishes to catalog + notifies.
+- `[x]` 6. Reading metrics: `packages/db/src/publisher-metrics.ts` (`recordPublisherReadingMetric`) wired into web `updateReadingProgress` + API `handleUpsertProgress` — reader-days, daily metrics, completion-once, lifetime counters, idempotent.
+- `[x]` 7. Dashboard real data: `dashboard/queries.ts` server query; Overview + Royalti(estimates) + top-books + recent-notifications fed by D1. demografi/geo/promosi disabled (no data source, not fabricated).
+- `[x]` 8. Notifications: `/publisher/notifications` server page + mark-read/mark-all client; sidebar+shell routes wired; fake badge removed.
+- `[x]` 9. Settings: `/publisher/settings` profile + masked payout account (no raw bank numbers stored).
+- `[x]` 10. Navigation honesty: removed hardcoded royalties/payouts/counts, routed implemented tabs, footer shows real-data note.
+- `[x]` 11. Verification: full monorepo typecheck 7/7 ✅; web lint 0 errors (26 pre-existing warnings) ✅; web **no test script** (stated); api lint 0 errors ✅ + tests **14/14** ✅; db typecheck+build+`drizzle-kit check` ✅.
+- `[ ]` 12. (deploy) Apply migration `0005_last_the_renegades.sql` via `.github/workflows/migrate-d1.yml` (manual, `--remote --dry-run` first) → `npm run deploy:prod` from `apps/web` → redeploy `apps/api` (metrics aggregation on reading updates).
+- `[ ]` 13. (manual QA) Publisher login → upload book (goes to review) → admin approves → catalog active + notification; dashboard KPIs real; notifications mark-read persists; settings save; reading progress updates metrics.
+
 # Publisher Logout Fix ("Keluar" does nothing) — 2026-08-26
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-26-publisher-logout-fix-design.md` + plan `docs/superpowers/plans/2026-08-26-publisher-logout-fix.md` + ledger `.superpowers/sdd/publisher-logout-fix/`. User-approved.
 - `[x]` 2. Root cause: both publisher logout buttons (topbar avatar menu + sidebar footer) wrapped the `signOut` server action in an inline async `<form action={...}>` closure — unique to these two files; every working sign-out (admin-sidebar, account, Navbar) calls the server action directly via `onClick`. The wrapper swallowed the `NEXT_REDIRECT`, so clicking "Keluar" was a no-op.
 - `[x]` 3. Fix: removed `<form>` wrappers; direct `onClick` → `signOut({ redirectTo: "/publisher/daftar" })` in `apps/web/src/app/publisher/topbar-client.tsx` + `sidebar-client.tsx`. Post-logout destination changed `/publisher/login` → `/publisher/daftar` (user decision).
 - `[x]` 4. Verification: web typecheck ✅ / lint **0 errors** (26 pre-existing warnings, none on changed lines) ✅ / tests: **no test script** for apps/web (stated). Greps: old patterns → 0 hits. (`node_modules` was missing at session start — ran full `npm install` first.)
-- `[ ]` 5. (manual QA) Login as publisher → dashboard → Keluar from avatar menu AND sidebar footer → lands on `/publisher/daftar`; `/api/auth/session` null; revisiting `/publisher/dashboard` redirects to login.
+- `[x]` 5. **DEPLOYED** `npm run deploy:prod` from `apps/web` → worker version `21b5555c-dc84-4cac-bd4d-fb9cc00719e3` live on bukoo.id + publisher.bukoo.id; smoke ✅ (`/`, `/publisher/login`, `/publisher/daftar`, `/api/auth/session` → 200; unauthed dashboard renders public showcase as designed).
+- `[ ]` 6. (manual QA) Login as publisher → dashboard → Keluar from avatar menu AND sidebar footer → lands on `/publisher/daftar`; `/api/auth/session` null; revisiting `/publisher/dashboard` shows logged-out state.
 
 # Mobile: Restore/Upgrade to Expo SDK 56 (was downgraded to 54) — 2026-08-24
 

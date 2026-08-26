@@ -17,8 +17,10 @@ interface DashboardShellProps {
 
 // Tab → route mapping for navigation tabs that have real pages
 const TAB_ROUTES: Record<string, string> = {
-  katalog: "/publisher/books",
-  upload:  "/publisher/books/new",
+  katalog:      "/publisher/books",
+  upload:       "/publisher/books/new",
+  notifikasi:   "/publisher/notifications",
+  pengaturan:   "/publisher/settings",
 };
 
 export function DashboardShell({
@@ -64,8 +66,7 @@ export function DashboardShell({
           </div>
           <div className="pds-foot">
             <div className="pds-fnote">
-              <b>DATA CONTOH.</b> Seluruh angka bersifat ilustratif.{" "}
-              Data aktual tersedia setelah peluncuran platform.
+              Portal Penerbit BUKOO · Data real-time dari katalog dan aktivitas baca.
               <br />© 2026 PT BUKOO DIGITAL INDONESIA · Publisher Portal
             </div>
           </div>

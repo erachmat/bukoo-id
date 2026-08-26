@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
+import { submitPublisherSubmission } from "./actions";
 
 export function SubmitForm() {
   const [curStep, setCurStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   // Form states
   const [title, setTitle] = useState("");
@@ -16,16 +19,40 @@ export function SubmitForm() {
 
   const [bookFileName, setBookFileName] = useState<string | null>(null);
   const [coverFileName, setCoverFileName] = useState<string | null>(null);
+  const [bookFile, setBookFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [releaseWindow, setReleaseWindow] = useState("Segera setelah disetujui");
   const [positioning, setPositioning] = useState("Katalog reguler (semua tier)");
   const [storeUrl, setStoreUrl] = useState("");
 
   const handleNext = () => {
+    setErrorMsg(null);
     if (curStep < 4) {
       setCurStep((prev) => prev + 1);
     } else {
-      setSubmitted(true);
+      // Final step: submit to the server action via the hidden form.
+      startTransition(async () => {
+        try {
+          const fd = new FormData();
+          fd.append('title', title);
+          fd.append('author', author);
+          fd.append('isbn', isbn);
+          fd.append('genre', genre);
+          fd.append('year', year);
+          fd.append('synopsis', synopsis);
+          fd.append('releaseWindow', releaseWindow);
+          fd.append('positioning', positioning);
+          fd.append('storeUrl', storeUrl);
+          if (bookFile) fd.append('epub', bookFile);
+          if (coverFile) fd.append('cover', coverFile);
+          await submitPublisherSubmission(fd);
+          setSubmitted(true);
+        } catch (err: unknown) {
+          console.error(err);
+          setErrorMsg((err as Error).message || 'Terjadi kesalahan saat mengirim pengajuan.');
+        }
+      });
     }
   };
 
@@ -163,7 +190,7 @@ export function SubmitForm() {
                   id="book-file-input"
                   accept=".epub,.pdf"
                   style={{ display: "none" }}
-                  onChange={(e) => setBookFileName(e.target.files?.[0]?.name || null)}
+                  onChange={(e) => { const f = e.target.files?.[0] ?? null; setBookFile(f); setBookFileName(f?.name || null); }}
                 />
               </div>
             </label>
@@ -180,7 +207,7 @@ export function SubmitForm() {
                   id="cover-file-input"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => setCoverFileName(e.target.files?.[0]?.name || null)}
+                  onChange={(e) => { const f = e.target.files?.[0] ?? null; setCoverFile(f); setCoverFileName(f?.name || null); }}
                 />
               </div>
             </label>
@@ -269,10 +296,22 @@ export function SubmitForm() {
         >
           &larr; Kembali
         </button>
-        <button type="button" className="btn-cta" id="btnNext" onClick={handleNext}>
-          {curStep === 4 ? "Kirim ke tim kurasi \u2713" : "Lanjut \u2192"}
+        <button type="button" className="btn-cta" id="btnNext" onClick={handleNext} disabled={isPending}>
+          {isPending ? "Mengirim..." : curStep === 4 && !errorMsg ? "Kirim ke tim kurasi \u2713" : curStep === 4 ? "Coba lagi \u21ba" : "Lanjut \u2192"}
         </button>
       </div>
+
+      {/* Hidden file inputs capture the actual File objects into state */}
+      <form style={{ display: "none" }}>
+        <input type="file" name="epub" accept=".epub,.pdf" onChange={(e) => { const f = e.target.files?.[0] ?? null; setBookFile(f); setBookFileName(f?.name || null); }} />
+        <input type="file" name="cover" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] ?? null; setCoverFile(f); setCoverFileName(f?.name || null); }} />
+      </form>
+
+      {errorMsg && (
+        <div style={{ marginTop: 20, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 10, fontSize: 14, fontWeight: 600 }}>
+          {errorMsg}
+        </div>
+      )}
     </div>
   );
 }

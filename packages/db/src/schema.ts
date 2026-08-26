@@ -139,6 +139,13 @@ export const books = sqliteTable('books', {
   ratingCount:         integer('rating_count').notNull().default(0),
   readTimeMinutes:     integer('read_time_minutes').notNull().default(0),
   isPublished:         integer('is_published', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * Publication workflow status.
+   * 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'UNPUBLISHED' | 'REJECTED'
+   * `isPublished` remains the public-read compatibility flag; public queries
+   * continue to require `is_published = 1` until all callers migrate.
+   */
+  publicationStatus:   text('publication_status').notNull().default('DRAFT'),
   isAvailableOffline:  integer('is_available_offline', { mode: 'boolean' }).notNull().default(false),
   /**
    * Minimum subscription tier required to access this book.
@@ -443,6 +450,225 @@ export const communityEventJoins = sqliteTable(
 );
 
 // ---------------------------------------------------------------------------
+// Publisher portal
+// ---------------------------------------------------------------------------
+
+// One row per publisher user — display/legal/contact identity.
+export const publisherProfiles = sqliteTable(
+  'publisher_profiles',
+  {
+    id:           text('id').primaryKey(),
+    userId:       text('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+    displayName:  text('display_name'),
+    legalName:    text('legal_name'),
+    contactEmail: text('contact_email'),
+    contactPhone: text('contact_phone'),
+    website:      text('website'),
+    createdAt:    text('created_at').notNull().default(now()),
+    updatedAt:    text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_profiles_user_idx').on(t.userId),
+  ],
+);
+
+// Payout account — masked/reference-only. NEVER store raw bank numbers here.
+export const publisherPayoutAccounts = sqliteTable(
+  'publisher_payout_accounts',
+  {
+    id:               text('id').primaryKey(),
+    publisherUserId:  text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    /** 'BANK' | 'EWALLET' */
+    method:           text('method').notNull().default('BANK'),
+    bankCode:         text('bank_code'),
+    accountHolderName: text('account_holder_name'),
+    /** Masked account, e.g. "••••4821" */
+    maskedAccount:    text('masked_account'),
+    /** External provider reference (never the raw number). */
+    externalAccountRef: text('external_account_ref'),
+    /** 'PENDING' | 'ACTIVE' | 'FAILED' */
+    status:           text('status').notNull().default('PENDING'),
+    createdAt:        text('created_at').notNull().default(now()),
+    updatedAt:        text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_payout_accounts_user_idx').on(t.publisherUserId),
+  ],
+);
+
+// Publisher content submission — review-before-publish workflow.
+export const publisherSubmissions = sqliteTable(
+  'publisher_submissions',
+  {
+    id:               text('id').primaryKey(),
+    publisherUserId:  text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    /** Linked catalog book once approved/created. */
+    bookId:           text('book_id').references(() => books.id, { onDelete: 'set null' }),
+    title:            text('title').notNull(),
+    author:           text('author').notNull(),
+    isbn:             text('isbn'),
+    synopsis:         text('synopsis'),
+    genre:            text('genre').notNull().default('[]'),
+    language:         text('language').notNull().default('ID'),
+    publishedYear:    integer('published_year'),
+    totalPages:       integer('total_pages'),
+    subscriptionRequired: text('subscription_required').notNull().default('FREE'),
+    /** R2 keys for the submitted assets. */
+    epubKey:          text('epub_key'),
+    coverKey:         text('cover_key'),
+    /** Release window / positioning text. */
+    releaseWindow:    text('release_window'),
+    positioning:      text('positioning'),
+    storeUrl:         text('store_url'),
+    /**
+     * 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'CHANGES_REQUESTED' |
+     * 'APPROVED' | 'REJECTED' | 'PUBLISHED'
+     */
+    status:           text('status').notNull().default('DRAFT'),
+    reviewerUserId:   text('reviewer_user_id').references(() => users.id, { onDelete: 'set null' }),
+    reviewNote:       text('review_note'),
+    submittedAt:      text('submitted_at'),
+    reviewedAt:       text('reviewed_at'),
+    createdAt:        text('created_at').notNull().default(now()),
+    updatedAt:        text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_submissions_user_created_idx').on(t.publisherUserId, t.createdAt),
+    index('publisher_submissions_status_updated_idx').on(t.status, t.updatedAt),
+  ],
+);
+
+// Distinct authenticated reader-days per book. Composite PK (bookId, userId, readDate).
+export const publisherBookReaderDays = sqliteTable(
+  'publisher_book_reader_days',
+  {
+    bookId:       text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+    userId:       text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    /** ISO date 'YYYY-MM-DD' */
+    readDate:     text('read_date').notNull(),
+    firstReadAt:  text('first_read_at').notNull().default(now()),
+    lastReadAt:   text('last_read_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.userId, t.readDate] }),
+    index('publisher_book_reader_days_date_idx').on(t.readDate),
+  ],
+);
+
+// Daily aggregate metrics per book. Unique (bookId, metricDate).
+export const publisherBookDailyMetrics = sqliteTable(
+  'publisher_book_daily_metrics',
+  {
+    id:             text('id').primaryKey(),
+    bookId:         text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+    /** ISO date 'YYYY-MM-DD' */
+    metricDate:     text('metric_date').notNull(),
+    readStarts:     integer('read_starts').notNull().default(0),
+    completedReads: integer('completed_reads').notNull().default(0),
+    readingSeconds: integer('reading_seconds').notNull().default(0),
+    createdAt:      text('created_at').notNull().default(now()),
+    updatedAt:      text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    uniqueIndex('publisher_book_daily_metrics_book_date_idx').on(t.bookId, t.metricDate),
+  ],
+);
+
+// In-app notification inbox (web publisher). Separate from deviceTokens (push).
+export const notifications = sqliteTable(
+  'notifications',
+  {
+    id:         text('id').primaryKey(),
+    userId:     text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    kind:       text('kind').notNull(),
+    title:      text('title').notNull(),
+    body:       text('body'),
+    entityType: text('entity_type'),
+    entityId:   text('entity_id'),
+    /** JSON metadata */
+    data:       text('data'),
+    readAt:     text('read_at'),
+    createdAt:  text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    index('notifications_user_created_idx').on(t.userId, t.createdAt),
+    index('notifications_user_read_created_idx').on(t.userId, t.readAt, t.createdAt),
+  ],
+);
+
+// Estimated royalty period (read-model). Money in integer IDR minor units.
+export const publisherRoyaltyPeriods = sqliteTable(
+  'publisher_royalty_periods',
+  {
+    id:               text('id').primaryKey(),
+    publisherUserId:  text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    periodStart:      text('period_start').notNull(),
+    periodEnd:        text('period_end').notNull(),
+    /** 'OPEN' | 'CALCULATED' | 'APPROVED' | 'PAID' | 'VOID' */
+    status:           text('status').notNull().default('OPEN'),
+    currency:         text('currency').notNull().default('IDR'),
+    /** Gross revenue pool (minor units). */
+    revenuePool:      integer('revenue_pool').notNull().default(0),
+    /** Publisher share total (minor units). */
+    publisherShare:   integer('publisher_share').notNull().default(0),
+    /** Formula version used for the estimate. */
+    calcVersion:      text('calc_version'),
+    finalizedAt:      text('finalized_at'),
+    paidAt:           text('paid_at'),
+    createdAt:        text('created_at').notNull().default(now()),
+    updatedAt:        text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_royalty_periods_user_idx').on(t.publisherUserId),
+  ],
+);
+
+export const publisherRoyaltyLines = sqliteTable(
+  'publisher_royalty_lines',
+  {
+    id:               text('id').primaryKey(),
+    periodId:         text('period_id').notNull().references(() => publisherRoyaltyPeriods.id, { onDelete: 'cascade' }),
+    publisherUserId:  text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    bookId:           text('book_id').references(() => books.id, { onDelete: 'set null' }),
+    readSeconds:      integer('read_seconds').notNull().default(0),
+    /** Rate in basis points (e.g. 6500 = 65%). */
+    rateBps:          integer('rate_bps').notNull().default(0),
+    grossAmount:      integer('gross_amount').notNull().default(0),
+    netAmount:        integer('net_amount').notNull().default(0),
+    /** JSON calculation metadata. */
+    calcMeta:         text('calc_meta'),
+    createdAt:        text('created_at').notNull().default(now()),
+  },
+  (t) => [
+    uniqueIndex('publisher_royalty_lines_period_book_idx').on(t.periodId, t.bookId),
+    index('publisher_royalty_lines_user_idx').on(t.publisherUserId),
+  ],
+);
+
+export const publisherPayouts = sqliteTable(
+  'publisher_payouts',
+  {
+    id:               text('id').primaryKey(),
+    publisherUserId:  text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    royaltyPeriodId:  text('royalty_period_id').references(() => publisherRoyaltyPeriods.id, { onDelete: 'set null' }),
+    payoutAccountId:  text('payout_account_id').references(() => publisherPayoutAccounts.id, { onDelete: 'set null' }),
+    amount:           integer('amount').notNull().default(0),
+    currency:         text('currency').notNull().default('IDR'),
+    /** 'SCHEDULED' | 'PROCESSING' | 'PAID' | 'FAILED' | 'CANCELED' */
+    status:           text('status').notNull().default('SCHEDULED'),
+    scheduledAt:      text('scheduled_at'),
+    processedAt:      text('processed_at'),
+    externalRef:      text('external_ref'),
+    failureReason:    text('failure_reason'),
+    createdAt:        text('created_at').notNull().default(now()),
+    updatedAt:        text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_payouts_user_idx').on(t.publisherUserId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Relations (for Drizzle relational query API)
 // ---------------------------------------------------------------------------
 
@@ -465,6 +691,14 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   communityBookmarks:  many(communityBookmarks),
   communityEvents:     many(communityEvents),
   communityEventJoins: many(communityEventJoins),
+  publisherProfile:    one(publisherProfiles, { fields: [users.id], references: [publisherProfiles.userId] }),
+  payoutAccounts:      many(publisherPayoutAccounts),
+  submissions:         many(publisherSubmissions),
+  reviewedSubmissions: many(publisherSubmissions, { relationName: 'reviewer' }),
+  notifications:       many(notifications),
+  royaltyPeriods:      many(publisherRoyaltyPeriods),
+  royaltyLines:        many(publisherRoyaltyLines),
+  payouts:             many(publisherPayouts),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -483,6 +717,10 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   shelfBooks:      many(shelfBooks),
   communityPosts:  many(communityPosts),
   communityEvents: many(communityEvents),
+  submissions:     many(publisherSubmissions),
+  readerDays:      many(publisherBookReaderDays),
+  dailyMetrics:    many(publisherBookDailyMetrics),
+  royaltyLines:    many(publisherRoyaltyLines),
 }));
 
 export const readingProgressRelations = relations(readingProgress, ({ one }) => ({
@@ -567,4 +805,49 @@ export const communityEventsRelations = relations(communityEvents, ({ one, many 
 export const communityEventJoinsRelations = relations(communityEventJoins, ({ one }) => ({
   event: one(communityEvents, { fields: [communityEventJoins.eventId], references: [communityEvents.id] }),
   user:  one(users, { fields: [communityEventJoins.userId], references: [users.id] }),
+}));
+
+export const publisherProfilesRelations = relations(publisherProfiles, ({ one }) => ({
+  user: one(users, { fields: [publisherProfiles.userId], references: [users.id] }),
+}));
+
+export const publisherPayoutAccountsRelations = relations(publisherPayoutAccounts, ({ one }) => ({
+  publisher: one(users, { fields: [publisherPayoutAccounts.publisherUserId], references: [users.id] }),
+}));
+
+export const publisherSubmissionsRelations = relations(publisherSubmissions, ({ one }) => ({
+  publisher: one(users, { fields: [publisherSubmissions.publisherUserId], references: [users.id] }),
+  book:      one(books, { fields: [publisherSubmissions.bookId], references: [books.id] }),
+  reviewer:  one(users, { fields: [publisherSubmissions.reviewerUserId], references: [users.id] }),
+}));
+
+export const publisherBookReaderDaysRelations = relations(publisherBookReaderDays, ({ one }) => ({
+  book: one(books, { fields: [publisherBookReaderDays.bookId], references: [books.id] }),
+  user: one(users, { fields: [publisherBookReaderDays.userId], references: [users.id] }),
+}));
+
+export const publisherBookDailyMetricsRelations = relations(publisherBookDailyMetrics, ({ one }) => ({
+  book: one(books, { fields: [publisherBookDailyMetrics.bookId], references: [books.id] }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+export const publisherRoyaltyPeriodsRelations = relations(publisherRoyaltyPeriods, ({ one, many }) => ({
+  publisher: one(users, { fields: [publisherRoyaltyPeriods.publisherUserId], references: [users.id] }),
+  lines:     many(publisherRoyaltyLines),
+  payouts:   many(publisherPayouts),
+}));
+
+export const publisherRoyaltyLinesRelations = relations(publisherRoyaltyLines, ({ one }) => ({
+  period:    one(publisherRoyaltyPeriods, { fields: [publisherRoyaltyLines.periodId], references: [publisherRoyaltyPeriods.id] }),
+  publisher: one(users, { fields: [publisherRoyaltyLines.publisherUserId], references: [users.id] }),
+  book:      one(books, { fields: [publisherRoyaltyLines.bookId], references: [books.id] }),
+}));
+
+export const publisherPayoutsRelations = relations(publisherPayouts, ({ one }) => ({
+  publisher:     one(users, { fields: [publisherPayouts.publisherUserId], references: [users.id] }),
+  royaltyPeriod: one(publisherRoyaltyPeriods, { fields: [publisherPayouts.royaltyPeriodId], references: [publisherRoyaltyPeriods.id] }),
+  payoutAccount: one(publisherPayoutAccounts, { fields: [publisherPayouts.payoutAccountId], references: [publisherPayoutAccounts.id] }),
 }));

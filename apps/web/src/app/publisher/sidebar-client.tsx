@@ -18,21 +18,19 @@ const analyticsNav = [
   { id: "performa",  label: "Performa Buku", icon: "📈" },
   { id: "royalti",   label: "Royalti",       icon: "💰" },
   { id: "pembaca",   label: "Pembaca",        icon: "👥" },
-  { id: "demografi", label: "Demografi",      icon: "🧬" },
-  { id: "geo",       label: "Sebaran Geo",    icon: "🗺️" },
   { id: "waktu",     label: "Waktu Baca",     icon: "⏱️" },
+  { id: "metadata",  label: "Metadata",        icon: "📝" },
 ];
 
 const contentNav = [
   { id: "katalog",   label: "Katalog",        icon: "📚", href: "/publisher/books" },
   { id: "upload",    label: "Upload Buku",    icon: "➕", href: "/publisher/books/new" },
   { id: "promosi",   label: "Promosi",         icon: "📣" },
-  { id: "metadata",  label: "Metadata",        icon: "📝" },
 ];
 
 const accountNav = [
-  { id: "pengaturan",  label: "Pengaturan",    icon: "⚙️" },
-  { id: "notifikasi",  label: "Notifikasi",    icon: "🔔", badge: "4" },
+  { id: "pengaturan",  label: "Pengaturan",    icon: "⚙️", href: "/publisher/settings" },
+  { id: "notifikasi",  label: "Notifikasi",    icon: "🔔", href: "/publisher/notifications" },
 ];
 
 export function PublisherSidebar({ user: _user, activeTab, onTabChange }: SidebarProps) {
@@ -72,8 +70,8 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
 
       <div className="pds-side-foot">
         <div className="up">
-          Model royalti: <b style={{ color: "var(--pds-teal)" }}>65%</b> · tanpa cap<br />
-          Payout berikutnya: 5 Sep 2026
+          Royalti: estimasi berbasis data baca<br />
+          Payout final mengikuti settlement resmi
         </div>
         <button
           type="button"

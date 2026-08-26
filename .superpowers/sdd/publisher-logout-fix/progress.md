@@ -9,4 +9,7 @@
   warnings, none on changed lines) ✅; tests: `apps/web` has **no test script** (stated);
   greps: `<form action={async` / `redirectTo: "/publisher/login"` → 0 hits in publisher files ✅.
 - Task 4 (bookkeeping): complete — plan checkboxes + root `task.md` updated.
+- Deploy: complete — `npm run deploy:prod` → worker version `21b5555c-dc84-4cac-bd4d-fb9cc00719e3`
+  live on bukoo.id + publisher.bukoo.id (2026-08-26). Smoke: `/`, `/publisher/login`,
+  `/publisher/daftar`, `/api/auth/session` → 200; unauthed dashboard renders public showcase.
 - Remaining: manual smoke QA (login → Keluar → `/publisher/daftar`, session cleared).

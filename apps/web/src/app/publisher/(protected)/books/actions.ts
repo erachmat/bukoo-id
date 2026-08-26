@@ -4,10 +4,18 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
-import { books } from '@bukoo/db';
+import { books, publisherSubmissions, notifications } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
 import { createId } from '@paralleldrive/cuid2';
+import { getPublisherUser } from '@/lib/publisher-auth';
+
+// ---------------------------------------------------------------------------
+// Validation constants
+// ---------------------------------------------------------------------------
+
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB
+const ALLOWED_EXTENSIONS = ['epub', 'pdf'];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 // ---------------------------------------------------------------------------
 // R2 upload helpers (shared with admin/books/actions.ts)
@@ -31,13 +39,26 @@ async function deleteFromR2(key: string | null | undefined) {
   await env.BUKOO_STORAGE.delete(key).catch(() => {});
 }
 
-async function getPublisherUser() {
-  const session = await auth();
-  const user = session?.user;
-  if (!user || (user as { role?: string }).role !== 'PUBLISHER') {
-    throw new Error('Unauthorized');
+function validateBookFile(file: File | null, folder: 'covers' | 'epubs') {
+  if (!file || file.size === 0) return;
+  if (file.size > MAX_FILE_BYTES) {
+    throw new Error('Ukuran file melebihi batas 50MB.');
   }
-  return user as { id: string; name?: string | null; role: string };
+  if (folder === 'epubs') {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      throw new Error('Format file harus EPUB atau PDF.');
+    }
+  } else {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      throw new Error('Format cover harus JPG, PNG, atau WebP.');
+    }
+  }
+}
+
+function parseGenre(raw: string | null): string[] {
+  if (!raw) return [];
+  return raw.split(',').map((g) => g.trim()).filter(Boolean);
 }
 
 // ---------------------------------------------------------------------------
@@ -48,44 +69,162 @@ export async function createPublisherBook(formData: FormData) {
   const user = await getPublisherUser();
   const db = getDb();
 
-  const title = formData.get('title') as string;
-  const author = formData.get('author') as string;
-  const description = formData.get('description') as string;
-  const genre = formData.get('genre') as string;
+  const title = (formData.get('title') as string)?.trim();
+  const author = (formData.get('author') as string)?.trim();
+  const description = (formData.get('description') as string)?.trim();
+  const genre = (formData.get('genre') as string)?.trim();
   const language = (formData.get('language') as string) || 'ID';
   const subscriptionRequired = (formData.get('subscriptionRequired') as string) || 'FREE';
   const year = formData.get('year') ? Number(formData.get('year')) : null;
   const pageCount = formData.get('pageCount') ? Number(formData.get('pageCount')) : null;
 
+  if (!title || !author) {
+    throw new Error('Judul dan penulis wajib diisi.');
+  }
+
   const coverFile = formData.get('cover') as File | null;
   const epubFile = formData.get('epub') as File | null;
+
+  validateBookFile(coverFile, 'covers');
+  validateBookFile(epubFile, 'epubs');
 
   let coverKey: string | null = null;
   let epubKey: string | null = null;
 
-  if (coverFile && coverFile.size > 0) {
-    coverKey = await uploadToR2(coverFile, 'covers');
-  }
-  if (epubFile && epubFile.size > 0) {
-    epubKey = await uploadToR2(epubFile, 'epubs');
+  try {
+    if (coverFile && coverFile.size > 0) {
+      coverKey = await uploadToR2(coverFile, 'covers');
+    }
+    if (epubFile && epubFile.size > 0) {
+      epubKey = await uploadToR2(epubFile, 'epubs');
+    }
+
+    // Review-before-publish: new uploads enter IN_REVIEW, not published.
+    const bookId = createId();
+    await db.insert(books).values({
+      id: bookId,
+      title,
+      author,
+      description: description || null,
+      coverKey,
+      epubKey,
+      genre: JSON.stringify(parseGenre(genre)),
+      language,
+      subscriptionRequired,
+      isPublished: false,
+      publicationStatus: 'IN_REVIEW',
+      publishedYear: year ?? null,
+      publisher: user.name || 'Mitra Penerbit',
+      publisherUserId: user.id,
+      totalPages: pageCount ?? null,
+    });
+
+    // Create a submission record linked to the book for the review workflow.
+    await db.insert(publisherSubmissions).values({
+      id: createId(),
+      publisherUserId: user.id,
+      bookId,
+      title,
+      author,
+      synopsis: description || null,
+      genre: JSON.stringify(parseGenre(genre)),
+      language,
+      publishedYear: year ?? null,
+      totalPages: pageCount ?? null,
+      subscriptionRequired,
+      epubKey,
+      coverKey,
+      status: 'IN_REVIEW',
+      submittedAt: new Date().toISOString(),
+    });
+
+    await db.insert(notifications).values({
+      id: createId(),
+      userId: user.id,
+      kind: 'submission',
+      title: 'Judul masuk antrean review',
+      body: `"${title}" telah dikirim ke tim kurasi untuk ditinjau.`,
+      entityType: 'book',
+      entityId: bookId,
+    });
+  } catch (err) {
+    // Clean up any uploaded assets on failure.
+    await Promise.all([deleteFromR2(coverKey), deleteFromR2(epubKey)]);
+    throw err;
   }
 
-  await db.insert(books).values({
-    id: createId(),
-    title,
-    author,
-    description: description || null,
-    coverKey,
-    epubKey,
-    genre: JSON.stringify(genre ? [genre] : []),
-    language,
-    subscriptionRequired,
-    isPublished: true,
-    publishedYear: year ?? null,
-    publisher: user.name || 'Mitra Penerbit',
-    publisherUserId: user.id,
-    totalPages: pageCount ?? null,
+  revalidatePath('/publisher/books');
+  revalidatePath('/publisher/dashboard');
+  redirect('/publisher/books');
+}
+
+export async function updatePublisherBook(bookId: string, formData: FormData) {
+  const user = await getPublisherUser();
+  const db = getDb();
+
+  const book = await db.query.books.findFirst({
+    where: and(eq(books.id, bookId), eq(books.publisherUserId, user.id)),
   });
+  if (!book) {
+    throw new Error('Buku tidak ditemukan atau tidak berhak mengakses.');
+  }
+
+  const title = (formData.get('title') as string)?.trim();
+  const author = (formData.get('author') as string)?.trim();
+  const description = (formData.get('description') as string)?.trim();
+  const genre = (formData.get('genre') as string)?.trim();
+  const language = (formData.get('language') as string) || 'ID';
+  const subscriptionRequired = (formData.get('subscriptionRequired') as string) || 'FREE';
+  const year = formData.get('year') ? Number(formData.get('year')) : null;
+  const pageCount = formData.get('pageCount') ? Number(formData.get('pageCount')) : null;
+
+  if (!title || !author) {
+    throw new Error('Judul dan penulis wajib diisi.');
+  }
+
+  const coverFile = formData.get('cover') as File | null;
+  const epubFile = formData.get('epub') as File | null;
+
+  validateBookFile(coverFile, 'covers');
+  validateBookFile(epubFile, 'epubs');
+
+  let newCoverKey = book.coverKey;
+  let newEpubKey = book.epubKey;
+
+  try {
+    if (coverFile && coverFile.size > 0) {
+      newCoverKey = await uploadToR2(coverFile, 'covers');
+    }
+    if (epubFile && epubFile.size > 0) {
+      newEpubKey = await uploadToR2(epubFile, 'epubs');
+    }
+
+    await db
+      .update(books)
+      .set({
+        title,
+        author,
+        description: description || null,
+        coverKey: newCoverKey,
+        epubKey: newEpubKey,
+        genre: JSON.stringify(parseGenre(genre)),
+        language,
+        subscriptionRequired,
+        publishedYear: year ?? null,
+        totalPages: pageCount ?? null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(and(eq(books.id, bookId), eq(books.publisherUserId, user.id)));
+
+    // Clean up replaced assets.
+    if (newCoverKey !== book.coverKey) await deleteFromR2(book.coverKey);
+    if (newEpubKey !== book.epubKey) await deleteFromR2(book.epubKey);
+  } catch (err) {
+    // Clean up newly uploaded assets on failure.
+    if (newCoverKey !== book.coverKey) await deleteFromR2(newCoverKey);
+    if (newEpubKey !== book.epubKey) await deleteFromR2(newEpubKey);
+    throw err;
+  }
 
   revalidatePath('/publisher/books');
   revalidatePath('/publisher/dashboard');

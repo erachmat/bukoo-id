@@ -3,7 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import {
-  readingProgress, highlights, bookmarks, books,
+  readingProgress, highlights, bookmarks, books, recordPublisherReadingMetric,
 } from '@bukoo/db';
 import { isBookAccessible } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
@@ -80,6 +80,18 @@ async function handleUpsertProgress(
       updatedAt: now,
     });
   }
+
+  // Aggregate publisher analytics idempotently.
+  const isCompletion =
+    dto.progressPercent >= 100 && (existing?.progressPercent ?? 0) < 100;
+  await recordPublisherReadingMetric(db, {
+    userId,
+    bookId: targetBookId,
+    progressPercent: dto.progressPercent,
+    readingSecondsDelta: dto.reading_time_delta,
+    isStart: !existing,
+    isCompletion,
+  });
 
   return c.json({ success: true });
 }

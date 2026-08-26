@@ -6,3 +6,4 @@
  *   import * as schema from '@bukoo/db/schema'
  */
 export * from './schema.js';
+export * from './publisher-metrics.js';

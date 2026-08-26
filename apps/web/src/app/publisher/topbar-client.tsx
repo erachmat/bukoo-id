@@ -15,7 +15,6 @@ const topNavItems = [
   { id: "katalog", label: "Katalog", href: "/publisher/books" },
   { id: "royalti", label: "Royalti" },
   { id: "pembaca", label: "Pembaca" },
-  { id: "promosi", label: "Promosi" },
 ];
 
 export function PublisherTopbar({
