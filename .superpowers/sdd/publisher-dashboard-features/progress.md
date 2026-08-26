@@ -18,5 +18,5 @@ Plan: `docs/superpowers/plans/2026-08-26-publisher-dashboard-features.md`
 
 ## Verification notes
 - Web has **no test script** (stated explicitly, AGENTS.md rule).
-- Migration `0005_last_the_renegades.sql` must be applied to production D1 ONLY via the sanctioned `.github/workflows/migrate-d1.yml` workflow after `--remote --dry-run` review. NOT auto-applied in this task.
-- Deploy requires: migration apply + `npm run deploy:prod` from `apps/web`; `apps/api` needs redeploy for the metrics aggregation on reading updates.
+- **DEPLOYED 2026-08-26**: migration `0005_last_the_renegades.sql` applied to remote D1 via `migrate-d1.yml` (verified: 9 new tables + `books.publication_status`). API redeployed `e832e98c` (health 200). Web deployed `b3b6f9eb` live on bukoo.id + publisher.bukoo.id; smoke ✅ (all key + new routes 200/307 correctly).
+- Repo fixes discovered during deploy: `.gitignore` now tracks `packages/db/drizzle/**/*.sql` (were ignored → migrations never committed); `migrate-d1.yml` fixed (drop unsupported `--dry-run`, run drizzle from `packages/db`); server-action re-export shim removed; `.expo/` untracked.
