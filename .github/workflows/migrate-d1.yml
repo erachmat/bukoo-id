@@ -54,9 +54,16 @@ jobs:
         working-directory: packages/db
         run: npm run db:generate
 
-      - name: Review — dry-run migration SQL (nothing applied)
+      - name: Review — print pending migration SQL (nothing applied)
+        working-directory: packages/db
+        run: |
+          ls -1 drizzle/0*.sql
+          echo "---- latest migration SQL (for human review) ----"
+          cat "$(ls -1t drizzle/0*.sql | head -1)"
+
+      - name: Review — show remote applied/pending migrations (read-only)
         working-directory: apps/api
-        run: npx wrangler d1 migrations apply ${{ inputs.database }} --remote --dry-run
+        run: npx wrangler d1 migrations list ${{ inputs.database }} --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
