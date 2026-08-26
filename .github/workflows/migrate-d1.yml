@@ -55,11 +55,10 @@ jobs:
         run: npm run db:generate
 
       - name: Review — print pending migration SQL (nothing applied)
-        working-directory: packages/db
         run: |
-          ls -1 drizzle/0*.sql
+          ls -1 packages/db/drizzle/0*.sql
           echo "---- latest migration SQL (for human review) ----"
-          cat "$(ls -1t drizzle/0*.sql | head -1)"
+          cat "$(ls -1t packages/db/drizzle/0*.sql | head -1)"
 
       - name: Review — show remote applied/pending migrations (read-only)
         working-directory: apps/api
