@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { adminReviewSubmission } from './actions'
+import { adminReviewSubmission } from '../../publisher/submit/actions'
 
 export function AdminReviewActions({ submissionId }: { submissionId: string }) {
   const [isPending, startTransition] = useTransition()
