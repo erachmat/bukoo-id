@@ -51,11 +51,17 @@ To set up a proper release keystore (run in `apps/mobile/android/app/` so the
 keystore lands where Gradle expects it — `storeFile` is relative to the `app`
 module):
 
+> ⚠️ **Bash `!` gotcha**: if a password contains `!` (e.g. `Foo!bar`),
+> single-quote it on the command line, or run `keytool` without
+> `-storepass`/`-keypass` and type the password at the prompt. Otherwise bash
+> history-expands `!` and stores a mangled password that won't match
+> `keystore.properties` (build fails with `keystore password was incorrect`).
+
 ```bash
 cd apps/mobile/android/app
 keytool -genkeypair -v -keystore bukoo-release.keystore \
   -alias bukoo -keyalg RSA -keysize 2048 -validity 10000 \
-  -storepass YOUR_STORE_PASSWORD -keypass YOUR_KEY_PASSWORD \
+  -storepass 'YOUR_STORE_PASSWORD' -keypass 'YOUR_KEY_PASSWORD' \
   -dname "CN=BUKOO, OU=Mobile, O=BUKOO, L=Jakarta, S=Jakarta, C=ID"
 ```
 
