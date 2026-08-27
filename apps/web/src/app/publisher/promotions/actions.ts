@@ -6,8 +6,7 @@ import { publisherCampaignRequests, books, notifications } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { getPublisherUser } from '@/lib/publisher-auth';
-
-export const MAX_CAMPAIGN_BUDGET_IDR = 100_000_000;
+import { MAX_CAMPAIGN_BUDGET_IDR } from './constants';
 
 function isStrictIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;

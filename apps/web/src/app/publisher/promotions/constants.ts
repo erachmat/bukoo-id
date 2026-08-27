@@ -1,0 +1,1 @@
+export const MAX_CAMPAIGN_BUDGET_IDR = 100_000_000;
