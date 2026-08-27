@@ -21,6 +21,7 @@ const TAB_ROUTES: Record<string, string> = {
   upload:       "/publisher/books/new",
   notifikasi:   "/publisher/notifications",
   pengaturan:   "/publisher/settings",
+  promosi:      "/publisher/promotions",
 };
 
 export function DashboardShell({

@@ -57,14 +57,20 @@ export async function savePayoutAccount(formData: FormData) {
   const accountHolderName = (formData.get('accountHolderName') as string)?.trim() || null;
   const accountNumber = (formData.get('accountNumber') as string)?.trim() || null;
 
-  // Store only a masked reference — never the raw account number.
-  const maskedAccount = accountNumber
-    ? '••••' + accountNumber.slice(-4)
-    : null;
+  if (accountNumber && accountNumber.length < 4) {
+    throw new Error('Nomor rekening tidak valid.');
+  }
 
   const existing = await db.query.publisherPayoutAccounts.findFirst({
     where: eq(publisherPayoutAccounts.publisherUserId, user.id),
   });
+
+  // Store only a masked reference — never the raw account number.
+  // If the number is left blank, keep the previously saved masked reference
+  // instead of silently wiping it.
+  const maskedAccount = accountNumber
+    ? '••••' + accountNumber.slice(-4)
+    : (existing?.maskedAccount ?? null);
 
   if (existing) {
     await db

@@ -496,6 +496,41 @@ export const publisherPayoutAccounts = sqliteTable(
   ],
 );
 
+// Publisher campaign request — promo request workflow (reviewed by BUKOO team).
+export const publisherCampaignRequests = sqliteTable(
+  'publisher_campaign_requests',
+  {
+    id:              text('id').primaryKey(),
+    publisherUserId: text('publisher_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    /** The book to promote — must be publisher-owned and published (validated in the action). */
+    bookId:          text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+    campaignName:    text('campaign_name').notNull(),
+    /** ISO 'YYYY-MM-DD' */
+    startDate:       text('start_date').notNull(),
+    /** ISO 'YYYY-MM-DD' */
+    endDate:         text('end_date').notNull(),
+    goal:            text('goal'),
+    notes:           text('notes'),
+    /** Optional budget estimate in IDR (major units — display currency, not settlement money). */
+    budget:          integer('budget'),
+    /**
+     * 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'APPROVED' |
+     * 'REJECTED' | 'COMPLETED' | 'CANCELED'
+     */
+    status:          text('status').notNull().default('SUBMITTED'),
+    submittedAt:     text('submitted_at').notNull().default(now()),
+    reviewedAt:      text('reviewed_at'),
+    reviewerUserId:  text('reviewer_user_id').references(() => users.id, { onDelete: 'set null' }),
+    reviewNote:      text('review_note'),
+    createdAt:       text('created_at').notNull().default(now()),
+    updatedAt:       text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    index('publisher_campaign_requests_user_created_idx').on(t.publisherUserId, t.createdAt),
+    index('publisher_campaign_requests_status_updated_idx').on(t.status, t.updatedAt),
+  ],
+);
+
 // Publisher content submission — review-before-publish workflow.
 export const publisherSubmissions = sqliteTable(
   'publisher_submissions',

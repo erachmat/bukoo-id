@@ -196,22 +196,6 @@ function PageMetadata() {
   );
 }
 
-// ── page: settings (placeholder) ──────────────────────────────
-function PageSettings() {
-  return (
-    <>
-      <div className="pds-page-head">
-        <div><div className="pds-page-title">Pengaturan</div><div className="pds-page-sub">Profil penerbit, preferensi, dan rekening pencairan</div></div>
-      </div>
-      <div className="pds-panel" style={{ textAlign: "center", padding: "60px 24px" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>⚙️</div>
-        <div style={{ fontFamily: "var(--pds-serif)", fontSize: 20, color: "#fff", marginBottom: 8 }}>Pengaturan Penerbit</div>
-        <div style={{ fontSize: 12, color: "var(--pds-dim)" }}>Pengaturan profil dan rekening pencairan akan segera hadir.</div>
-      </div>
-    </>
-  );
-}
-
 // ── page: generic placeholder ─────────────────────────────────
 function PagePlaceholder({ title, sub, icon }: { title: string; sub: string; icon: string }) {
   return (
@@ -259,9 +243,7 @@ export function DashboardClient({ user, overview }: DashboardClientProps) {
       case "demografi":  return <PageUnavailable title="Demografi" sub="Data demografi pembaca belum tersedia" icon="🧬" />;
       case "geo":        return <PageUnavailable title="Sebaran Geografis" sub="Data geografis pembaca belum tersedia" icon="🗺️" />;
       case "waktu":      return <PageUnavailable title="Waktu Baca" sub="Data ritme baca belum tersedia" icon="⏱️" />;
-      case "promosi":    return <PageUnavailable title="Promosi & Kampanye" sub="Fitur promosi akan segera hadir" icon="📣" />;
       case "metadata":   return <PageMetadata />;
-      case "pengaturan": return <PageSettings />;
       default:           return <PageOverview onTabChange={setActiveTab} overview={overview} />;
     }
   };

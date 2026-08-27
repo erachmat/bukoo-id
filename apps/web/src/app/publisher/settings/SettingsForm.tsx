@@ -21,14 +21,10 @@ interface SettingsFormProps {
   }
 }
 
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)',
-  fontSize: 14, color: 'var(--text)', background: 'var(--bg-card)', outline: 'none', boxSizing: 'border-box',
-  fontFamily: 'inherit',
-}
-const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--text-mid)',
-  textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6, fontFamily: 'inherit',
+const cardStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
 }
 
 export function SettingsForm({ initialName, initialEmail, profile, payout }: SettingsFormProps) {
@@ -66,85 +62,89 @@ export function SettingsForm({ initialName, initialEmail, profile, payout }: Set
   return (
     <>
       {msg && (
-        <div style={{ background: '#E8F8F0', border: '1px solid #27AE60', color: '#1E7A43', padding: '12px 16px', borderRadius: 10, marginBottom: 20, fontSize: 14, fontWeight: 600 }}>
-          {msg}
+        <div className="pds-alert" style={{ background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.28)' }}>
+          <span className="ic">✓</span>
+          <span className="txt" style={{ color: 'var(--pds-pos)', fontWeight: 700 }}>{msg}</span>
         </div>
       )}
 
       <div className="pds-page-head">
-        <div><div className="pds-page-title">Pengaturan Penerbit</div><div className="pds-page-sub">Profil dan rekening pencairan Anda</div></div>
+        <div>
+          <div className="pds-page-title">Pengaturan Penerbit</div>
+          <div className="pds-page-sub">Profil dan rekening pencairan Anda</div>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'flex-start' }}>
+      <div className="pds-settings-grid">
         {/* Profile */}
-        <form onSubmit={submitProfile} style={{ background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={submitProfile} className="pds-panel" style={cardStyle}>
           <div style={{ fontFamily: 'var(--pds-serif)', fontSize: 18, color: '#fff' }}>👤 Profil Penerbit</div>
-          <div>
-            <label style={labelStyle}>Nama Akun</label>
-            <input style={inputStyle} defaultValue={initialName} disabled />
+          <div className="pds-field">
+            <label>Nama Akun</label>
+            <input className="pds-inp" defaultValue={initialName} disabled />
           </div>
-          <div>
-            <label style={labelStyle}>Email</label>
-            <input style={inputStyle} defaultValue={initialEmail} disabled />
+          <div className="pds-field">
+            <label>Email</label>
+            <input className="pds-inp" defaultValue={initialEmail} disabled />
           </div>
-          <div>
-            <label style={labelStyle}>Nama Penerbit (tampilan)</label>
-            <input style={inputStyle} name="displayName" defaultValue={profile.displayName} placeholder="Nama yang tampil di katalog" />
+          <div className="pds-field">
+            <label>Nama Penerbit (tampilan)</label>
+            <input className="pds-inp" name="displayName" defaultValue={profile.displayName} placeholder="Nama yang tampil di katalog" />
           </div>
-          <div>
-            <label style={labelStyle}>Nama Hukum</label>
-            <input style={inputStyle} name="legalName" defaultValue={profile.legalName} placeholder="Nama badan usaha / PT" />
+          <div className="pds-field">
+            <label>Nama Hukum</label>
+            <input className="pds-inp" name="legalName" defaultValue={profile.legalName} placeholder="Nama badan usaha / PT" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={labelStyle}>Kontak Email</label>
-              <input style={inputStyle} name="contactEmail" defaultValue={profile.contactEmail} type="email" />
+          <div className="pds-two-col">
+            <div className="pds-field">
+              <label>Kontak Email</label>
+              <input className="pds-inp" name="contactEmail" defaultValue={profile.contactEmail} type="email" />
             </div>
-            <div>
-              <label style={labelStyle}>Kontak Telepon</label>
-              <input style={inputStyle} name="contactPhone" defaultValue={profile.contactPhone} />
+            <div className="pds-field">
+              <label>Kontak Telepon</label>
+              <input className="pds-inp" name="contactPhone" defaultValue={profile.contactPhone} />
             </div>
           </div>
-          <div>
-            <label style={labelStyle}>Website</label>
-            <input style={inputStyle} name="website" defaultValue={profile.website} type="url" />
+          <div className="pds-field">
+            <label>Website</label>
+            <input className="pds-inp" name="website" defaultValue={profile.website} type="url" />
           </div>
-          <button type="submit" disabled={isPending} style={{ padding: '12px', borderRadius: 10, border: 'none', background: 'var(--amber)', color: 'var(--forest-dd)', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
+          <button type="submit" disabled={isPending} className="pds-btn pds-btn-primary" style={{ justifyContent: 'center', padding: '12px', fontSize: 12 }}>
             {isPending ? 'Menyimpan...' : 'Simpan Profil'}
           </button>
         </form>
 
         {/* Payout */}
-        <form onSubmit={submitPayout} style={{ background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={submitPayout} className="pds-panel" style={cardStyle}>
           <div style={{ fontFamily: 'var(--pds-serif)', fontSize: 18, color: '#fff' }}>💳 Rekening Pencairan</div>
           {payout.maskedAccount && (
-            <div style={{ background: 'rgba(0,201,167,0.1)', border: '1px solid rgba(0,201,167,0.3)', color: 'var(--pds-teal)', padding: '10px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>
+            <div style={{ background: 'rgba(0,201,167,0.08)', border: '1px solid rgba(0,201,167,0.2)', color: 'var(--pds-teal)', padding: '10px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>
               Terhubung: {payout.bankCode ? payout.bankCode + ' ' : ''}{payout.maskedAccount}
             </div>
           )}
-          <div>
-            <label style={labelStyle}>Metode</label>
-            <select name="method" style={inputStyle} defaultValue={payout.method}>
+          <div className="pds-field">
+            <label>Metode</label>
+            <select name="method" className="pds-sel" defaultValue={payout.method}>
               <option value="BANK">Transfer Bank</option>
               <option value="EWALLET">E-Wallet</option>
             </select>
           </div>
-          <div>
-            <label style={labelStyle}>Kode Bank</label>
-            <input style={inputStyle} name="bankCode" defaultValue={payout.bankCode} placeholder="cth: BCA" />
+          <div className="pds-field">
+            <label>Kode Bank</label>
+            <input className="pds-inp" name="bankCode" defaultValue={payout.bankCode} placeholder="cth: BCA" />
           </div>
-          <div>
-            <label style={labelStyle}>Nama Pemilik</label>
-            <input style={inputStyle} name="accountHolderName" defaultValue={payout.accountHolderName} />
+          <div className="pds-field">
+            <label>Nama Pemilik</label>
+            <input className="pds-inp" name="accountHolderName" defaultValue={payout.accountHolderName} />
           </div>
-          <div>
-            <label style={labelStyle}>Nomor Rekening</label>
-            <input style={inputStyle} name="accountNumber" placeholder="2568xxxxxxxx" />
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+          <div className="pds-field">
+            <label>Nomor Rekening</label>
+            <input className="pds-inp" name="accountNumber" placeholder="2568xxxxxxxx" />
+            <div className="hint">
               Nomor rekening hanya disimpan sebagai referensi terenkripsi (••••xxxx). Untuk keamanan, masukkan ulang setiap kali menyimpan.
             </div>
           </div>
-          <button type="submit" disabled={isPending} style={{ padding: '12px', borderRadius: 10, border: 'none', background: 'var(--amber)', color: 'var(--forest-dd)', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
+          <button type="submit" disabled={isPending} className="pds-btn pds-btn-primary" style={{ justifyContent: 'center', padding: '12px', fontSize: 12 }}>
             {isPending ? 'Menyimpan...' : 'Simpan Rekening'}
           </button>
         </form>

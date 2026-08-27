@@ -43,6 +43,13 @@
       "when": 1787748380006,
       "tag": "0005_last_the_renegades",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787797810237,
+      "tag": "0006_warm_sir_ram",
+      "breakpoints": true
     }
   ]
 }

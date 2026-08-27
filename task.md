@@ -1,3 +1,14 @@
+# Publisher Dashboard: Settings Shell, Promotions & Logout — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-dashboard-promotions-design.md` + plan `docs/superpowers/plans/2026-08-27-publisher-dashboard-promotions.md` + ledger `.superpowers/sdd/publisher-dashboard-promotions/`. User-approved ("Start implementation").
+- `[x]` 2. DB: add `publisherCampaignRequests` table to `packages/db/src/schema.ts` + migration `0006_warm_sir_ram.sql` (additive CREATE TABLE + 2 indexes; no FTS5 ops; db:check clean).
+- `[x]` 3. Settings: `/publisher/settings` rendered inside `DashboardShell`; payout blank-number preserves existing masked account (+ length validation); responsive `pds-settings-grid` restyle.
+- `[x]` 4. Promotions: new `/publisher/promotions` (shell + list + request form); `createCampaignRequest` server action (ownership/published validation, notification, revalidate).
+- `[x]` 5. Nav wiring: sidebar `promosi` → `/publisher/promotions`; `TAB_ROUTES` + dashboard-client placeholder cleanup (settings/promosi removed).
+- `[x]` 6. Logout: harden both controls (useTransition await server action, pending state, redirect `/publisher/daftar`).
+- `[x]` 7. Verification: db build/typecheck/`db:check` ✅; web typecheck ✅ / lint 0 errors (26 pre-existing warnings) ✅; no web test script (stated).
+- `[ ]` 8. (deploy, pending) Apply migration `0006_warm_sir_ram.sql` to remote `bukoo-db` via `migrate-d1.yml` (manual, dry-run review first). Then `npm run deploy:prod` from `apps/web`; smoke `/publisher/promotions`, `/publisher/settings`, both logout paths.
+
 # Publisher Dashboard Features (Core MVP) — 2026-08-26
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-26-publisher-dashboard-features-design.md` + plan `docs/superpowers/plans/2026-08-26-publisher-dashboard-features.md` + ledger `.superpowers/sdd/publisher-dashboard-features/`. User-approved.

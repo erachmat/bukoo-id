@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { publisherProfiles, publisherPayoutAccounts } from "@bukoo/db";
 import { eq } from "drizzle-orm";
 import { SettingsForm } from "./SettingsForm";
+import { DashboardShell } from "../(protected)/dashboard-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -24,22 +25,24 @@ export default async function PublisherSettingsPage() {
   });
 
   return (
-    <SettingsForm
-      initialName={user.name ?? ''}
-      initialEmail={user.email ?? ''}
-      profile={{
-        displayName: profile?.displayName ?? '',
-        legalName: profile?.legalName ?? '',
-        contactEmail: profile?.contactEmail ?? '',
-        contactPhone: profile?.contactPhone ?? '',
-        website: profile?.website ?? '',
-      }}
-      payout={{
-        method: payout?.method ?? 'BANK',
-        bankCode: payout?.bankCode ?? '',
-        accountHolderName: payout?.accountHolderName ?? '',
-        maskedAccount: payout?.maskedAccount ?? '',
-      }}
-    />
+    <DashboardShell user={user} activeTab="pengaturan">
+      <SettingsForm
+        initialName={user.name ?? ''}
+        initialEmail={user.email ?? ''}
+        profile={{
+          displayName: profile?.displayName ?? '',
+          legalName: profile?.legalName ?? '',
+          contactEmail: profile?.contactEmail ?? '',
+          contactPhone: profile?.contactPhone ?? '',
+          website: profile?.website ?? '',
+        }}
+        payout={{
+          method: payout?.method ?? 'BANK',
+          bankCode: payout?.bankCode ?? '',
+          accountHolderName: payout?.accountHolderName ?? '',
+          maskedAccount: payout?.maskedAccount ?? '',
+        }}
+      />
+    </DashboardShell>
   );
 }

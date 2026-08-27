@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface TopbarProps {
   publisherName: string;
@@ -23,6 +23,7 @@ export function PublisherTopbar({
   onTabChange,
 }: TopbarProps) {
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [isSigningOut, startSignOut] = useTransition();
   const initial = publisherName.charAt(0).toUpperCase();
 
   return (
@@ -71,13 +72,16 @@ export function PublisherTopbar({
               <button
                 type="button"
                 className="pds-avatar-item danger"
-                style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+                style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", opacity: isSigningOut ? 0.6 : 1 }}
+                disabled={isSigningOut}
                 onClick={() => {
                   setAvatarOpen(false);
-                  signOut({ redirectTo: "/publisher/daftar" });
+                  startSignOut(async () => {
+                    await signOut({ redirectTo: "/publisher/daftar" });
+                  });
                 }}
               >
-                🚪 Keluar
+                🚪 {isSigningOut ? "Keluar..." : "Keluar"}
               </button>
             </div>
           )}
