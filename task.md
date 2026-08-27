@@ -7,7 +7,11 @@
 - `[x]` 5. `FIREBASE_MVP_TESTING.md` updated: Release signing one-time setup, debug-fallback note, "Verified 2026-08-27" header note, file map.
 - `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly); `npm run apk:release` → BUILD SUCCESSFUL, `app-release.apk` produced; `git check-ignore` confirms keystore files ignored; Firebase CLI logged in as `erachmat.dev@gmail.com` (read-only).
 - `[x]` 7. Keystore issue fixed (2026-08-27): original keystore was generated with a bash-mangled `!#` password → regenerated `bukoo-release.keystore` reading passwords from gitignored `keystore.properties` (never printed); `keytool -list` unlock verified; release APK now signed with release cert `CN=BUKOO` (SHA-256 `6935bd8b…`). **Back up keystore + passwords.**
-- `[ ]` 8. Manual (user): run `npm run distribute:firebase` (or `npm run deploy:firebase`) from `apps/mobile` to push the release-signed APK to `mvp-testers`.
+- `[x]` 8. Distributed to `mvp-testers` 2026-08-27 — release `1.0.0 (1)` uploaded, then superseded by `1.0.1 (2)`.
+- `[x]` 9. Google Sign-In "Developer error" (status 10 `DEVELOPER_ERROR`) on the Firebase APK — root cause: release cert SHA-1 (`BF:E4:B6:3D:95:9D:8C:3D:9F:69:77:74:A3:97:04:09:F3:39:EC:83` = `bukoo-release.keystore`) was NOT registered in Firebase, only debug's (`5E:8F:16:...`). Fixed by adding the release SHA-1 in Firebase console + re-downloading `google-services.json` (now lists both cert hashes for `com.erachmat.bukoo`).
+- `[x]` 10. No-new-APK gotcha (two causes): (a) Gradle kept `assembleRelease UP-TO-DATE` — the `google-services.json` change is not a cache-invalidation input, so use `./gradlew clean assembleRelease` (codegen/CMake target may fail on the first clean pass — rerun once); (b) same `versionCode` → App Distribution "re-uploaded already existing release" with no visible new build. Fixed by bumping `versionCode 2` / `versionName "1.0.1"` in `android/app/build.gradle`.
+- `[x]` 11. Verified fresh release: Firebase reports `uploaded new release 1.0.1 (2)`; APK signed w/ release cert digest `bfe4b63d...`; `output-metadata.json` shows `versionCode 2` / `versionName 1.0.1`.
+- `[ ]` 12. Manual QA (user): tester reinstalls `1.0.1 (2)` → Google account picker appears, no Developer error.
 
 # Reader Settings Modal: Drag-to-Expand (fix) — 2026-08-27
 

@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "576187863248-ht4ql9pei63rvts861g6hqlfvfifcpd6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.erachmat.bukoo",
+            "certificate_hash": "bfe4b63d959d8c3d9f697774a3970409f339ec83"
+          }
+        },
+        {
           "client_id": "576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com",
           "client_type": 3
         }
