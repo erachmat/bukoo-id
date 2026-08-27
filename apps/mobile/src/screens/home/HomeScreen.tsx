@@ -14,10 +14,8 @@ import { RootStackParamList } from '../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 import { QuickResumeCard } from './components/QuickResumeCard';
-import { ReadingGoalCard } from './components/ReadingGoalCard';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
 import { useIsTablet } from '../../hooks/useResponsive';
-import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
 import { userProfileService } from '../../services/userProfileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -41,7 +39,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [notifModalVisible, setNotifModalVisible] = useState(false);
-  const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
 
   // A/B: home_layout — 'carousel' (current) vs 'grid' (2-column).
   const homeLayout = useFeatureFlag('home_layout');
@@ -143,9 +140,6 @@ export default function HomeScreen() {
 
         {/* Quick Resume Active Reading Widget */}
         <QuickResumeCard progressData={libraryProgress?.[0] ?? null} />
-
-        {/* Daily Reading Target & Streak Card */}
-        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
 
         {/* Category Pills Scroll */}
         <ScrollView
@@ -309,11 +303,6 @@ export default function HomeScreen() {
         visible={notifModalVisible}
         onClose={() => setNotifModalVisible(false)}
         onNotificationsChanged={refreshUnreadCount}
-      />
-
-      <ReadingAnalyticsModal
-        visible={analyticsModalVisible}
-        onClose={() => setAnalyticsModalVisible(false)}
       />
 
       <MiniAudioPlayer />

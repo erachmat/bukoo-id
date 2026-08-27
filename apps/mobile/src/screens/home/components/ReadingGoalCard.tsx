@@ -65,7 +65,7 @@ export function ReadingGoalCard({ onOpenAnalytics }: ReadingGoalCardProps) {
           <View key={idx} style={styles.dayCol}>
             <View style={[styles.dayCircle, item.isCompleted && styles.dayCircleCompleted]}>
               {item.isCompleted ? (
-                <Ionicons name="checkmark" size={12} color="#0A1A15" />
+                <Ionicons name="flame" size={12} color="#0A1A15" />
               ) : (
                 <Text style={styles.dayDotText}>·</Text>
               )}

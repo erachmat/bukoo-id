@@ -19,6 +19,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 
 import { ReadingAnalyticsModal } from './components/ReadingAnalyticsModal';
 import { EditProfileModal } from './components/EditProfileModal';
+import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
 import { useIsTablet } from '../../hooks/useResponsive';
 import { AVATAR_PRESETS } from '../../services/userProfileService';
@@ -120,6 +121,13 @@ export default function ProfileScreen() {
     },
   ];
 
+  // Week calendar: month/year label for the header, and today's dateStr for the highlight.
+  const todayStr = new Date().toISOString().split('T')[0];
+  const weekMonthLabel =
+    weekLogs.length > 0
+      ? new Date(weekLogs[0].dateStr + 'T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+      : '';
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -143,6 +151,9 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Daily Reading Target & Streak Card — full width above the row on tablets */}
+        {isTablet && <ReadingGoalCard onOpenAnalytics={() => setShowAnalyticsModal(true)} />}
 
         {/* Profile header + streak — side-by-side on tablets, stacked on phones */}
         <View style={isTablet ? styles.profileTopRow : undefined}>
@@ -198,31 +209,38 @@ export default function ProfileScreen() {
           </View> */}
         </View>
 
+        {/* Daily Reading Target & Streak Card — between profile header and week calendar on phones */}
+        {!isTablet && <ReadingGoalCard onOpenAnalytics={() => setShowAnalyticsModal(true)} />}
+
         {/* Weekly Streak Calendar Bar */}
         <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
           <View style={styles.streakHeaderRow}>
             <Text style={styles.streakTitle}>Minggu Ini</Text>
+            {weekMonthLabel !== '' && <Text style={styles.streakMonthLabel}>{weekMonthLabel}</Text>}
           </View>
 
-          {/* Days Header */}
-          <View style={styles.daysHeaderRow}>
-            {weekLogs.map((day) => (
-              <Text key={`day-label-${day.dateStr}`} style={styles.dayLabelText}>{day.dayLabel[0]}</Text>
-            ))}
-          </View>
-
-          {/* Days Pills */}
-          <View style={styles.daysPillRow}>
+          {/* Days — label + pill + minutes per day */}
+          <View style={styles.daysRow}>
             {weekLogs.map((day) => {
+              const isToday = day.dateStr === todayStr;
               const dayNum = new Date(day.dateStr).getDate();
               return (
-                <View
-                  key={`day-num-${day.dateStr}`}
-                  style={[styles.dayPill, day.isCompleted ? styles.dayPillActive : styles.dayPillInactive]}
-                >
-                  <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
-                    {dayNum}
+                <View key={`day-${day.dateStr}`} style={styles.dayCol}>
+                  <Text style={[styles.dayLabelText, isToday && styles.dayLabelTextToday]}>
+                    {day.dayLabel}
                   </Text>
+                  <View
+                    style={[
+                      styles.dayPill,
+                      day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
+                      isToday && styles.dayPillToday,
+                    ]}
+                  >
+                    <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                      {dayNum}
+                    </Text>
+                  </View>
+                  <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
                 </View>
               );
             })}
@@ -603,24 +621,31 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansBold,
     color: COLORS.cream,
   },
-  daysHeaderRow: {
+  streakMonthLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+  },
+  daysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 6,
-    marginBottom: 8,
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  dayCol: {
+    alignItems: 'center',
+    gap: 6,
   },
   dayLabelText: {
     fontSize: 12,
     fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
-    width: 32,
+    width: 36,
     textAlign: 'center',
   },
-  daysPillRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    marginBottom: 16,
+  dayLabelTextToday: {
+    color: COLORS.gold,
+    fontWeight: 'bold',
   },
   dayPill: {
     width: 34,
@@ -637,6 +662,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.forestBorder,
   },
+  dayPillToday: {
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+  },
   dayNumText: {
     fontSize: 13,
     fontWeight: 'bold',
@@ -646,6 +675,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   dayNumTextInactive: {
+    color: COLORS.muted,
+  },
+  dayMinutesText: {
+    fontSize: 10,
+    fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
   },
   streakCountRow: {

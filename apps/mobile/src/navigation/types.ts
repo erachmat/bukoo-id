@@ -29,6 +29,7 @@ export type RootStackParamList = {
   Subscription: undefined;
   Search: undefined;
   Ai: undefined;
+  AiChat: undefined;
 };
 
 // Global typing for React Navigation — use interface extension, not namespace

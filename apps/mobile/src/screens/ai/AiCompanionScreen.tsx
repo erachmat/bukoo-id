@@ -8,8 +8,6 @@ import { COLORS } from '../../constants/COLORS';
 import { FONTS } from '../../constants/FONTS';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/authStore';
-import { AiChatSection } from './components/AiChatSection';
-import { AiSummaryModal } from './components/AiSummaryModal';
 import { userProfileService } from '../../services/userProfileService';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { useRecommendedBooks } from '../../hooks/api/useBooksApi';
@@ -23,7 +21,6 @@ export default function AiCompanionScreen() {
   const user = useAuthStore((state) => state.user);
   const activeTier = user?.subscription?.active ? user.subscription.tier : 'FREE';
 
-  const [summaryModalVisible, setSummaryModalVisible] = useState(false);
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
   const { data: libraryProgress } = useUserLibrary();
   const { data: apiRecommendations } = useRecommendedBooks();
@@ -70,7 +67,7 @@ export default function AiCompanionScreen() {
             <Ionicons name="arrow-back" size={24} color={COLORS.gold} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>AI Companion & Assistant</Text>
+            <Text style={styles.headerTitle}>Bukoo Assistant</Text>
           </View>
         </View>
 
@@ -132,21 +129,29 @@ export default function AiCompanionScreen() {
           )}
         </View>
 
-        {/* Interactive AI Chat Section */}
-        <View style={styles.sectionHeaderRow}>
-          <Ionicons name="chatbubbles-outline" size={18} color={COLORS.gold} />
-          <Text style={styles.sectionTitle}>Tanya AI Companion</Text>
-        </View>
-        <AiChatSection
-          currentBookTitle={activeBook?.title ?? 'bukumu'}
-          onOpenSummaryModal={() => setSummaryModalVisible(true)}
-        />
+        {/* Bukoo Assistant — entry point to the Tanya Bukoo Assistant chat page */}
+        <TouchableOpacity
+          style={styles.assistantEntryCard}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('AiChat')}
+        >
+          <View style={styles.assistantEntryIcon}>
+            <Ionicons name="chatbubbles" size={22} color={COLORS.gold} />
+          </View>
+          <View style={styles.assistantEntryInfo}>
+            <Text style={styles.assistantEntryTitle}>Bukoo Assistant</Text>
+            <Text style={styles.assistantEntrySubtitle}>
+              Tanya apa saja tentang buku yang sedang kamu baca
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
+        </TouchableOpacity>
 
         {/* Personalized AI Recommendations */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="sparkles" size={18} color={COLORS.gold} />
-            <Text style={styles.sectionTitle}>Rekomendasi AI (Berdasarkan Minat)</Text>
+            <Text style={styles.sectionTitle}>Rekomendasi Bukoo</Text>
           </View>
 
           {displayRecommendations.length > 0 ? (
@@ -197,14 +202,6 @@ export default function AiCompanionScreen() {
           )}
         </View>
       </ScrollView>
-
-      {/* AI Summary Modal Sheet */}
-      <AiSummaryModal
-        visible={summaryModalVisible}
-        onClose={() => setSummaryModalVisible(false)}
-        bookId={activeBook?.id ?? ''}
-        bookTitle={activeBook?.title ?? ''}
-      />
     </SafeAreaView>
   );
 }
@@ -408,6 +405,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: FONTS.serifBold,
     color: COLORS.cream,
+  },
+  assistantEntryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0F2922',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#173E33',
+    marginBottom: 20,
+    gap: 12,
+  },
+  assistantEntryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(217, 119, 6, 0.15)',
+  },
+  assistantEntryInfo: {
+    flex: 1,
+  },
+  assistantEntryTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: FONTS.serifBold,
+    color: COLORS.cream,
+    marginBottom: 2,
+  },
+  assistantEntrySubtitle: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.sansRegular,
   },
   recommendCard: {
     flexDirection: 'row',

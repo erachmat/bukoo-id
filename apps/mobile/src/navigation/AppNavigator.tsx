@@ -10,6 +10,7 @@ import BookDetailScreen from '../screens/book/BookDetailScreen';
 import SubscriptionScreen from '../screens/subscription/SubscriptionScreen';
 import SearchScreen from '../screens/search/SearchScreen';
 import AiCompanionScreen from '../screens/ai/AiCompanionScreen';
+import TanyaBukooAssistantScreen from '../screens/ai/TanyaBukooAssistantScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const ReadingStack = createNativeStackNavigator<ReadingStackParamList>();
@@ -47,6 +48,11 @@ export default function AppNavigator() {
           <Stack.Screen 
             name="Ai" 
             component={AiCompanionScreen}
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen 
+            name="AiChat" 
+            component={TanyaBukooAssistantScreen}
             options={{ presentation: 'modal' }}
           />
         </>

@@ -16,6 +16,7 @@ import { aiCompanionService, ChatMessage, AiChatHistoryTurn } from '../../../ser
 interface AiChatSectionProps {
   currentBookTitle?: string;
   onOpenSummaryModal?: () => void;
+  isFullScreen?: boolean;
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -34,7 +35,7 @@ const QUICK_PROMPTS = [
   { id: 'prompt-time', label: '⏱️ Estimasi Selesai', query: 'Berapa estimasi waktu membaca hingga tamat?' },
 ];
 
-export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal }: AiChatSectionProps) {
+export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal, isFullScreen = false }: AiChatSectionProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +85,7 @@ export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal 
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isFullScreen && styles.containerFull]}>
       {/* Quick Prompt Chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.promptScroll}>
         {QUICK_PROMPTS.map((p) => (
@@ -107,7 +108,7 @@ export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal 
       {/* Message List */}
       <ScrollView
         ref={scrollViewRef}
-        style={styles.chatScroll}
+        style={[styles.chatScroll, isFullScreen ? styles.chatScrollFull : styles.chatScrollCard]}
         contentContainerStyle={styles.chatContent}
         showsVerticalScrollIndicator={false}
       >
@@ -170,6 +171,12 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 20,
   },
+  containerFull: {
+    flex: 1,
+    borderRadius: 0,
+    borderWidth: 0,
+    marginBottom: 0,
+  },
   promptScroll: {
     marginBottom: 12,
     flexDirection: 'row',
@@ -190,9 +197,15 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansMedium,
   },
   chatScroll: {
+    marginBottom: 12,
+  },
+  chatScrollCard: {
     maxHeight: 280,
     minHeight: 180,
-    marginBottom: 12,
+  },
+  chatScrollFull: {
+    flex: 1,
+    minHeight: 0,
   },
   chatContent: {
     paddingVertical: 4,

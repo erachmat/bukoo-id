@@ -184,18 +184,12 @@ export default function LibraryScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Rak Buku Saya</Text>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.sortIconButton} onPress={() => setSortModalVisible(true)}>
-              <Ionicons name="swap-vertical" size={18} color={COLORS.gold} />
-            </TouchableOpacity>
             <View style={styles.bookCountBadge}>
               <Ionicons name="book-outline" size={14} color="#6EE7B7" />
-              <Text style={styles.bookCountText}>{sortedBooks.length} Buku</Text>
+              <Text style={styles.bookCountText}>{allLibraryItems.length} Buku</Text>
             </View>
           </View>
         </View>
-
-        {/* Daily Reading Target & Streak Card */}
-        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
 
         {/* Featured "Sedang dibaca" Card — only when real progress exists */}
         {activeProgress && (
@@ -232,6 +226,9 @@ export default function LibraryScreen() {
           </View>
         )}
 
+        {/* Daily Reading Target & Streak Card */}
+        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
+
         {/* AI Companion Insight Banner Card */}
         <TouchableOpacity
           style={styles.aiCard}
@@ -243,7 +240,7 @@ export default function LibraryScreen() {
               <Text style={styles.aiBadgeText}>AI</Text>
             </View>
             <Ionicons name="sparkles" size={16} color={COLORS.gold} style={{ marginHorizontal: 4 }} />
-            <Text style={styles.aiTitle}>Ai Companion</Text>
+            <Text style={styles.aiTitle}>Bukoo Assistant</Text>
           </View>
           <Text style={styles.aiQuote}>
             "Kamu membaca paling fokus di antara jam 20.00 - 22.00. Lanjut malam ini?"
@@ -308,9 +305,14 @@ export default function LibraryScreen() {
                     ? 'Ingin Dibaca'
                     : 'Semua Koleksi'}
           </Text>
-          <Text style={styles.sortIndicatorText}>
-            {sortOption === 'recent' ? 'Urutkan: Terakhir Dibaca' : sortOption === 'title' ? 'Urutkan: Judul' : 'Urutkan: Progres'}
-          </Text>
+          <View style={styles.sectionHeaderActions}>
+            <Text style={styles.sortIndicatorText}>
+              {sortOption === 'recent' ? 'Urutkan: Terakhir Dibaca' : sortOption === 'title' ? 'Urutkan: Judul' : 'Urutkan: Progres'}
+            </Text>
+            <TouchableOpacity style={styles.sortIconButton} onPress={() => setSortModalVisible(true)}>
+              <Ionicons name="swap-vertical" size={18} color={COLORS.gold} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {sortedBooks.length > 0 ? (
@@ -672,6 +674,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.muted,
     fontFamily: FONTS.sansRegular,
+  },
+  sectionHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   wantListContent: {
     paddingHorizontal: 20,

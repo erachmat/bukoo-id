@@ -1,3 +1,13 @@
+# Mobile Library/AI/Profile UX — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-mobile-library-ai-profile-design.md`, plan `docs/superpowers/plans/2026-08-27-mobile-library-ai-profile.md`, ledger `.superpowers/sdd/mobile-library-ai-profile/progress.md`. User-approved.
+- `[x]` 2. Dashboard: removed 'Target Membaca' card + unused analytics-modal wiring.
+- `[x]` 3. Rak Buku Saya: reordered (Sedang dibaca → Target Membaca), AI card → 'Bukoo Assistant', count = total library books, sort button moved next to 'Semua Koleksi' list, fire icons on completed week days.
+- `[x]` 4. AI Companion: header → 'Bukoo Assistant', 'Rekomendasi Bukoo', chat moved to new 'Tanya Bukoo Assistant' screen (entry card on AI page).
+- `[x]` 5. Profile: added 'Target Membaca' card above the week calendar + enhanced calendar (month label, today ring, minutes/day, 3-letter days).
+- `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly).
+- `[ ]` 7. Manual QA in Expo Go: dashboard, Rak Buku Saya, AI Companion, new chat screen, Profile.
+
 # Publisher Logout → Landing Page — 2026-08-27
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-logout-fix-design.md` + plan `docs/superpowers/plans/2026-08-27-publisher-logout-fix.md` + ledger `.superpowers/sdd/publisher-logout-fix/progress.md` (appended). User-approved.
