@@ -14,4 +14,4 @@
 - Task 6 (logout hardening): complete (useTransition + await server action in both controls)
 - Task 7 (verification): complete (web typecheck ✅; web lint 0 errors [26 pre-existing warnings] ✅; db typecheck + `db:check` ✅; no web test script — stated)
 
-**Not deployed.** Migration `0006_warm_sir_ram.sql` requires the sanctioned `migrate-d1.yml` manual workflow (remote apply). Web changes require `npm run deploy:prod` from `apps/web` — pending user decision.
+**Deployed 2026-08-27** (commit `8856359` → main): migration `0006_warm_sir_ram.sql` applied to remote `bukoo-db` via `migrate-d1.yml` (`✅`); web prod live on bukoo.id via CI `deploy-web.yml`; CI green (lint / typecheck / tests / Drizzle Drift Check). Smoke: `/` 200, `/publisher/dashboard` 200, `/publisher/promotions` + `/publisher/settings` → 307 login. Manual publisher QA still open (settings save, promotions submit, logout both controls).

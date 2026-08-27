@@ -7,7 +7,8 @@
 - `[x]` 5. Nav wiring: sidebar `promosi` → `/publisher/promotions`; `TAB_ROUTES` + dashboard-client placeholder cleanup (settings/promosi removed).
 - `[x]` 6. Logout: harden both controls (useTransition await server action, pending state, redirect `/publisher/daftar`).
 - `[x]` 7. Verification: db build/typecheck/`db:check` ✅; web typecheck ✅ / lint 0 errors (26 pre-existing warnings) ✅; no web test script (stated).
-- `[ ]` 8. (deploy, pending) Apply migration `0006_warm_sir_ram.sql` to remote `bukoo-db` via `migrate-d1.yml` (manual, dry-run review first). Then `npm run deploy:prod` from `apps/web`; smoke `/publisher/promotions`, `/publisher/settings`, both logout paths.
+- `[x]` 8. **DEPLOYED 2026-08-27**: commit `8856359` pushed to main → CI green (lint/typecheck/test/db-check ✅). D1 migration `0006_warm_sir_ram.sql` applied to remote `bukoo-db` via `migrate-d1.yml` (`gh workflow run` apply_remote=true; log `│ 0006_warm_sir_ram.sql │ ✅`). Web `deploy:prod` via CI `deploy-web.yml` → live on bukoo.id (smoke: `/` 200, `/publisher/dashboard` 200, `/publisher/promotions` → 307 login, `/publisher/settings` → 307 login). Deploy API success (unchanged code).
+- `[ ]` 9. (manual QA) Publisher login → settings save (blank-number preserves masked account) → promotions submit (list refresh) → logout from both controls → `/publisher/daftar`.
 
 # Publisher Dashboard Features (Core MVP) — 2026-08-26
 

@@ -51,6 +51,7 @@ superpowers:subagent-driven-development
 - [x] `npm run typecheck --workspace=@bukoo/db` + `npm run db:check` (drift) from `packages/db`
 - [x] Review final diff; update SDD ledger + `task.md` with results
 
-## Deploy (pending user action)
-- [ ] Apply migration `0006_warm_sir_ram.sql` to remote `bukoo-db` via the manual `migrate-d1.yml` workflow (dry-run review first).
-- [ ] `npm run deploy:prod` from `apps/web`; smoke `/publisher/promotions`, `/publisher/settings`, both logout paths.
+## Deploy (done 2026-08-27)
+- [x] Applied migration `0006_warm_sir_ram.sql` to remote `bukoo-db` via `migrate-d1.yml` (workflow_dispatch `apply_remote=true`; log shows `│ 0006_warm_sir_ram.sql │ ✅`).
+- [x] Web prod deployed via CI `deploy-web.yml` on push to main (`8856359`); smoke: `/` 200, `/publisher/dashboard` 200, `/publisher/promotions` 307→login, `/publisher/settings` 307→login.
+- [x] CI green: lint / typecheck / tests / Drizzle Drift Check all success.
