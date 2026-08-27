@@ -10,6 +10,11 @@
 
 # Publisher Dashboard Features — 2026-08-27
 
+- `[ ]` Publisher catalog follow-ups: content-edit re-review integrity and bulk catalog actions.
+  - `[x]` Implementation complete; policy tests and web typecheck pass.
+  - `[x]` Full automated verification: 18 tests pass, typecheck/lint clean.
+  - `[ ]` Browser QA and deployment.
+
 - `[ ]` Publisher geo analytics: country aggregates, CF-IPCountry wiring, and reachable Sebaran Geografis tab.
   - `[x]` Implementation complete; DB/API/web verification passed.
   - `[ ]` Apply migration through `migrate-d1.yml`, deploy, and complete browser QA.

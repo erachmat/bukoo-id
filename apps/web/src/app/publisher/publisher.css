@@ -4105,6 +4105,30 @@ td.td-pct {
   cursor: default;
   opacity: .4;
 }
+.pub-dashboard-shell .pds-catalog-bulkbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(0,201,167,0.25);
+  border-radius: 8px;
+  background: rgba(0,201,167,0.06);
+  color: var(--pds-text);
+  font-size: 11px;
+}
+.pub-dashboard-shell .pds-catalog-bulkbar button {
+  border: 1px solid var(--pds-border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--pds-teal);
+  background: transparent;
+  font: 11px var(--pds-sans);
+  cursor: pointer;
+}
+.pub-dashboard-shell .pds-catalog-bulkbar button:disabled { cursor: wait; opacity: .5; }
+.pub-dashboard-shell .pds-catalog-bulkbar span { color: var(--pds-coral); }
 @media (max-width: 700px) {
   .pub-dashboard-shell .pds-catalog-toolbar .pds-search,
   .pub-dashboard-shell .pds-catalog-toolbar select {
