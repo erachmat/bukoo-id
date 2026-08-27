@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AiChatSection } from './components/AiChatSection';
 import { AiSummaryModal } from './components/AiSummaryModal';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
+import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -38,7 +39,9 @@ export default function TanyaBukooAssistantScreen() {
           <Ionicons name="arrow-back" size={24} color={COLORS.gold} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Tanya Bukoo Assistant</Text>
+          <LogoBukoo size={20} />
+          <Ionicons name="sparkles" size={16} color={COLORS.gold} />
+          <Text style={styles.headerTitle}>Bukoo Assistant</Text>
         </View>
       </View>
 
@@ -77,6 +80,9 @@ const styles = StyleSheet.create({
   },
   headerTitleContainer: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerTitle: {
     fontSize: 20,

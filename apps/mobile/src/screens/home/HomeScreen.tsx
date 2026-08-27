@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores/authStore';
@@ -16,9 +16,12 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlags';
 import { QuickResumeCard } from './components/QuickResumeCard';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
 import { useIsTablet } from '../../hooks/useResponsive';
+import { useThreeButtonNav } from '../../hooks/useSystemNav';
 import { userProfileService } from '../../services/userProfileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+type BookCardItem = BookItemDto & { coverUrl: string };
 
 const BASE_CATEGORIES = ['Semua', 'Fiksi', 'Agama', 'Sejarah', 'Self Dev', 'Teknologi', 'Bisnis'];
 
@@ -44,6 +47,8 @@ export default function HomeScreen() {
   const homeLayout = useFeatureFlag('home_layout');
   const isGrid = homeLayout === 'grid';
   const isTablet = useIsTablet();
+  const insets = useSafeAreaInsets();
+  const isThreeButton = useThreeButtonNav();
 
   const { data: featuredData, refetch: refetchFeatured } = useFeaturedBooks();
   const { data: categoryBooks } = useGenreBooks(selectedCategory !== 'Semua' ? selectedCategory : '');
@@ -82,22 +87,57 @@ export default function HomeScreen() {
   });
 
   const trendingBooks = (featuredData?.trending ?? []).map(toBookWithCover);
-  const heroBook = trendingBooks[0] ?? null;
+  const editorPicks = (featuredData?.editors_choice ?? []).map(toBookWithCover);
 
-  const currentSectionTitle = selectedCategory === 'Semua'
-    ? (favoriteGenres.length > 0 ? `Rekomendasi & Trending` : 'Trending Minggu ini')
-    : `Buku ${selectedCategory}`;
+  const currentSectionTitle = selectedCategory === 'Semua' ? 'Rekomendasi' : `Buku ${selectedCategory}`;
 
   const isCategorySelected = selectedCategory !== 'Semua';
   const currentBooksData = isCategorySelected
     ? (categoryBooks ?? []).map(toBookWithCover)
-    : trendingBooks;
+    : editorPicks;
+
+  const renderHorizontalBookCard = (item: BookCardItem) => {
+    const isMatchFav =
+      item.genre?.some((g: string) => favoriteGenres.includes(g)) ||
+      favoriteGenres.some((fg) => item.title?.toLowerCase().includes(fg.toLowerCase()));
+    return (
+      <TouchableOpacity
+        style={styles.bookCard}
+        activeOpacity={0.8}
+        onPress={() =>
+          navigation.navigate('ReadingStack', {
+            screen: 'BookDetail',
+            params: { bookId: item.id },
+          })
+        }
+      >
+        <View style={styles.coverWrapper}>
+          <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
+          {downloadedBookIds.includes(item.id) && (
+            <View style={styles.downloadBadge}>
+              <Text style={styles.downloadBadgeText}>⬇️</Text>
+            </View>
+          )}
+          {isMatchFav && (
+            <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: COLORS.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+              <Text style={{ color: '#0A1A15', fontSize: 9, fontWeight: 'bold' }}>★ Favorit</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <OfflineSyncBanner />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isThreeButton && { paddingBottom: 110 + insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -139,7 +179,24 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         {/* Quick Resume Active Reading Widget */}
-        <QuickResumeCard progressData={libraryProgress?.[0] ?? null} />
+        <QuickResumeCard progressData={libraryProgress?.length ? libraryProgress[0] : null} />
+
+        {/* Trending Minggu ini🔥 — dedicated trending row below "Sedang dibaca" */}
+        {trendingBooks.length > 0 && (
+          <View style={styles.trendingSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Trending Minggu ini🔥</Text>
+            </View>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.trendingListContent}
+              data={trendingBooks}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => renderHorizontalBookCard(item)}
+            />
+          </View>
+        )}
 
         {/* Category Pills Scroll */}
         <ScrollView
@@ -164,37 +221,7 @@ export default function HomeScreen() {
           })}
         </ScrollView>
 
-        {/* Hero Featured Banner Card — real featured book, hidden when none exists */}
-        {heroBook && (
-          <TouchableOpacity
-            style={styles.heroBanner}
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('ReadingStack', {
-              screen: 'BookDetail',
-              params: { bookId: heroBook.id }
-            })}
-          >
-            <View style={styles.heroContent}>
-              <View style={styles.heroBadge}>
-                <Text style={styles.heroBadgeText}>★ KOLEKSI TERBAIK</Text>
-              </View>
-              <Text style={styles.heroTitle} numberOfLines={2}>
-                {heroBook.title}
-              </Text>
-              <Text style={styles.heroSubtitle} numberOfLines={1}>{heroBook.author}</Text>
-              {heroBook.synopsis ? (
-                <Text style={styles.heroDescription} numberOfLines={3}>
-                  {heroBook.synopsis}
-                </Text>
-              ) : null}
-            </View>
-            {heroBook.coverUrl ? (
-              <Image source={{ uri: heroBook.coverUrl }} style={styles.heroCoverImage} />
-            ) : null}
-          </TouchableOpacity>
-        )}
-
-        {/* Dynamic Category / Trending Section Header */}
+        {/* Dynamic Category / Rekomendasi Section Header */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{currentSectionTitle}</Text>
           <TouchableOpacity
@@ -265,35 +292,7 @@ export default function HomeScreen() {
             contentContainerStyle={styles.trendingListContent}
             data={currentBooksData}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              const isMatchFav = item.genre?.some((g: string) => favoriteGenres.includes(g)) || favoriteGenres.some(fg => item.title?.toLowerCase().includes(fg.toLowerCase()));
-              return (
-                <TouchableOpacity
-                  style={styles.bookCard}
-                  activeOpacity={0.8}
-                  onPress={() => navigation.navigate('ReadingStack', {
-                    screen: 'BookDetail',
-                    params: { bookId: item.id }
-                  })}
-                >
-                  <View style={styles.coverWrapper}>
-                    <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
-                    {downloadedBookIds.includes(item.id) && (
-                      <View style={styles.downloadBadge}>
-                        <Text style={styles.downloadBadgeText}>⬇️</Text>
-                      </View>
-                    )}
-                    {isMatchFav && (
-                      <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: COLORS.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                        <Text style={{ color: '#0A1A15', fontSize: 9, fontWeight: 'bold' }}>★ Favorit</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.bookTitle} numberOfLines={1}>{item.title}</Text>
-                  <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-                </TouchableOpacity>
-              );
-            }}
+            renderItem={({ item }) => renderHorizontalBookCard(item)}
           />
         )}
         </ResponsiveContainer>
@@ -393,61 +392,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold',
   },
-  heroBanner: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF7F0',
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 30,
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  heroContent: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  heroBadge: {
-    backgroundColor: 'rgba(201, 149, 42, 0.15)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  heroBadgeText: {
-    color: COLORS.gold,
-    fontSize: 10,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-  },
-  heroTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: FONTS.serifBold,
-    color: '#1A1A1A',
-    marginBottom: 4,
-  },
-  heroTitleHighlight: {
-    color: COLORS.gold,
-  },
-  heroSubtitle: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-    color: '#4A4A4A',
-    marginBottom: 6,
-  },
-  heroDescription: {
-    fontSize: 11,
-    fontFamily: FONTS.sansRegular,
-    color: '#7A7A7A',
-    lineHeight: 15,
-  },
-  heroCoverImage: {
-    width: 100,
-    height: 140,
-    borderRadius: 8,
+  trendingSection: {
+    marginBottom: 20,
   },
   emptyContainer: {
     alignItems: 'center',

@@ -9,8 +9,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
+import { useThreeButtonNav } from '../../../hooks/useSystemNav';
 import { aiCompanionService, ChatMessage, AiChatHistoryTurn } from '../../../services/aiCompanionService';
 
 interface AiChatSectionProps {
@@ -36,6 +38,8 @@ const QUICK_PROMPTS = [
 ];
 
 export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal, isFullScreen = false }: AiChatSectionProps) {
+  const insets = useSafeAreaInsets();
+  const isThreeButton = useThreeButtonNav();
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -85,9 +89,20 @@ export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal,
   };
 
   return (
-    <View style={[styles.container, isFullScreen && styles.containerFull]}>
+    <View
+      style={[
+        styles.container,
+        isFullScreen && styles.containerFull,
+        isFullScreen && isThreeButton && { paddingBottom: insets.bottom },
+      ]}
+    >
       {/* Quick Prompt Chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.promptScroll}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.promptScroll}
+        contentContainerStyle={styles.promptContent}
+      >
         {QUICK_PROMPTS.map((p) => (
           <TouchableOpacity
             key={p.id}
@@ -164,7 +179,6 @@ export function AiChatSection({ currentBookTitle = 'bukumu', onOpenSummaryModal,
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#0F2922',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#173E33',
@@ -180,15 +194,21 @@ const styles = StyleSheet.create({
   promptScroll: {
     marginBottom: 12,
     flexDirection: 'row',
+    flexGrow: 0,
+  },
+  promptContent: {
+    alignItems: 'center',
   },
   promptChip: {
     backgroundColor: '#0A1A15',
     borderWidth: 1,
     borderColor: COLORS.gold + '40',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 16,
     marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   promptChipText: {
     fontSize: 12,

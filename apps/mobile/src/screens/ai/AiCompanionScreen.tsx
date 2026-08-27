@@ -12,6 +12,7 @@ import { userProfileService } from '../../services/userProfileService';
 import { useUserLibrary } from '../../hooks/api/useLibraryApi';
 import { useRecommendedBooks } from '../../hooks/api/useBooksApi';
 import { getCoverUrl } from '../../services/coverUrl';
+import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -67,6 +68,8 @@ export default function AiCompanionScreen() {
             <Ionicons name="arrow-back" size={24} color={COLORS.gold} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
+            <LogoBukoo size={20} />
+            <Ionicons name="sparkles" size={16} color={COLORS.gold} />
             <Text style={styles.headerTitle}>Bukoo Assistant</Text>
           </View>
         </View>
@@ -77,7 +80,7 @@ export default function AiCompanionScreen() {
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <Ionicons name="sparkles" size={16} color={COLORS.gold} />
-                <Text style={styles.insightMainTitle}>AI Reading Assistant</Text>
+                <Text style={styles.insightMainTitle}>AI Companion</Text>
               </View>
               <Text style={styles.insightSubtitle}>Panduan personal bacaan untukmu</Text>
             </View>
@@ -130,28 +133,27 @@ export default function AiCompanionScreen() {
         </View>
 
         {/* Bukoo Assistant — entry point to the Tanya Bukoo Assistant chat page */}
-        <TouchableOpacity
-          style={styles.assistantEntryCard}
-          activeOpacity={0.9}
-          onPress={() => navigation.navigate('AiChat')}
-        >
-          <View style={styles.assistantEntryIcon}>
-            <Ionicons name="chatbubbles" size={22} color={COLORS.gold} />
-          </View>
+        <View style={styles.assistantEntryCard}>
           <View style={styles.assistantEntryInfo}>
-            <Text style={styles.assistantEntryTitle}>Bukoo Assistant</Text>
+            <Text style={styles.assistantEntryTitle}>Tanya Bukoo Assistant</Text>
             <Text style={styles.assistantEntrySubtitle}>
-              Tanya apa saja tentang buku yang sedang kamu baca
+              Hai Saya Bukoo Assistant, Asisten personal baca untukmu. Ada yang bisa saya bantu?
             </Text>
+            <TouchableOpacity
+              style={styles.assistantChatButton}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('AiChat')}
+            >
+              <Text style={styles.assistantChatButtonText}>Chat Bukoo Assistant</Text>
+            </TouchableOpacity>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
-        </TouchableOpacity>
+        </View>
 
         {/* Personalized AI Recommendations */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="sparkles" size={18} color={COLORS.gold} />
-            <Text style={styles.sectionTitle}>Rekomendasi Bukoo</Text>
+            <Text style={styles.sectionTitle}>Rekomendasi Untukmu</Text>
           </View>
 
           {displayRecommendations.length > 0 ? (
@@ -437,8 +439,27 @@ const styles = StyleSheet.create({
   },
   assistantEntrySubtitle: {
     fontSize: 12,
+    fontStyle: 'italic',
+    lineHeight: 17,
     color: COLORS.muted,
     fontFamily: FONTS.sansRegular,
+  },
+  assistantChatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 20,
+    gap: 6,
+    marginTop: 12,
+  },
+  assistantChatButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
   },
   recommendCard: {
     flexDirection: 'row',

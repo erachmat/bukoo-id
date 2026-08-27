@@ -18,11 +18,9 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type LibraryTab = 'semua' | 'sedang_dibaca' | 'selesai' | 'ingin_dibaca' | 'diunduh';
 type LibrarySortOption = 'recent' | 'title' | 'progress';
 
-import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
-import { ReadingAnalyticsModal } from '../profile/components/ReadingAnalyticsModal';
+import { LogoBukoo } from '../../assets/logo/LogoBukoo';
 import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
-import { useIsTablet } from '../../hooks/useResponsive';
 import { readingSync } from '../../services/readingSync';
 import { readingGoalService } from '../../services/readingGoalService';
 
@@ -30,14 +28,12 @@ export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp<MainTabParamList, 'Library'>>();
   const isFocused = useIsFocused();
-  const isTablet = useIsTablet();
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<LibraryTab>('semua');
   const [sortOption, setSortOption] = useState<LibrarySortOption>('recent');
   const [sortModalVisible, setSortModalVisible] = useState(false);
-  const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
-  const [stats, setStats] = useState({ finishedBooks: 0, totalMinutes: 0, streakDays: 0, storageMb: 0 });
+  const [stats, setStats] = useState({ finishedBooks: 0, totalMinutes: 0, streakDays: 0 });
 
   const { data: userLibraryProgress, refetch: refetchLibraryProgress } = useUserLibrary();
 
@@ -60,9 +56,6 @@ export default function LibraryScreen() {
       readingSync.getFinishedBooksCount().then((c) => setStats((s) => ({ ...s, finishedBooks: c })));
       readingSync.getTotalReadingMinutes().then((m) => setStats((s) => ({ ...s, totalMinutes: m })));
       readingGoalService.getGoalsState().then((g) => setStats((s) => ({ ...s, streakDays: g.streakDays ?? 0 })));
-      bookDownloadService.getStorageUsed().then((bytes) =>
-        setStats((s) => ({ ...s, storageMb: Math.round(bytes / (1024 * 1024)) })),
-      );
     }
   }, [isFocused]);
 
@@ -153,7 +146,6 @@ export default function LibraryScreen() {
     { icon: 'book-outline', color: '#4ADE80', value: stats.finishedBooks, label: 'Buku selesai' },
     { icon: 'time-outline', color: '#4ADE80', value: stats.totalMinutes, label: 'Menit Membaca' },
     { icon: 'flame-outline', color: '#4ADE80', value: stats.streakDays, label: 'Hari Streak' },
-    { icon: 'download-outline', color: '#4ADE80', value: stats.storageMb, label: 'MB Offline' },
   ];
 
   const renderStatCard = (s: (typeof statCards)[number]) => (
@@ -185,7 +177,7 @@ export default function LibraryScreen() {
           <Text style={styles.title}>Rak Buku Saya</Text>
           <View style={styles.headerRight}>
             <View style={styles.bookCountBadge}>
-              <Ionicons name="book-outline" size={14} color="#6EE7B7" />
+              <Image source={require('../../../assets/book-02.png')} style={styles.bookCountIcon} />
               <Text style={styles.bookCountText}>{allLibraryItems.length} Buku</Text>
             </View>
           </View>
@@ -226,9 +218,6 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Daily Reading Target & Streak Card */}
-        <ReadingGoalCard onOpenAnalytics={() => setAnalyticsModalVisible(true)} />
-
         {/* AI Companion Insight Banner Card */}
         <TouchableOpacity
           style={styles.aiCard}
@@ -236,35 +225,25 @@ export default function LibraryScreen() {
           onPress={() => navigation.navigate('Ai')}
         >
           <View style={styles.aiHeader}>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>AI</Text>
-            </View>
-            <Ionicons name="sparkles" size={16} color={COLORS.gold} style={{ marginHorizontal: 4 }} />
+            <LogoBukoo size={20} />
+            <Ionicons name="sparkles" size={16} color={COLORS.gold} />
             <Text style={styles.aiTitle}>Bukoo Assistant</Text>
           </View>
           <Text style={styles.aiQuote}>
             "Kamu membaca paling fokus di antara jam 20.00 - 22.00. Lanjut malam ini?"
           </Text>
           <TouchableOpacity
-            style={styles.aiButton}
+            style={styles.continueButton}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Ai')}
           >
-            <Text style={styles.aiButtonText}>Lanjut Baca</Text>
-            <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+            <Text style={styles.continueButtonText}>Lihat Detail</Text>
           </TouchableOpacity>
         </TouchableOpacity>
 
-        {/* 4-Card Quick Stats Grid — 2x2 on phones, single 4-card row on tablets */}
+        {/* 3-Card Quick Stats Row — single equal-width row */}
         <View style={styles.statsGrid}>
-          {isTablet ? (
-            <View style={styles.statsRow}>{statCards.map(renderStatCard)}</View>
-          ) : (
-            <>
-              <View style={styles.statsRow}>{statCards.slice(0, 2).map(renderStatCard)}</View>
-              <View style={styles.statsRow}>{statCards.slice(2).map(renderStatCard)}</View>
-            </>
-          )}
+          <View style={styles.statsRow}>{statCards.map(renderStatCard)}</View>
         </View>
 
         {/* Filter Tabs Scroll View */}
@@ -305,14 +284,16 @@ export default function LibraryScreen() {
                     ? 'Ingin Dibaca'
                     : 'Semua Koleksi'}
           </Text>
-          <View style={styles.sectionHeaderActions}>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={() => setSortModalVisible(true)}
+            activeOpacity={0.8}
+          >
             <Text style={styles.sortIndicatorText}>
               {sortOption === 'recent' ? 'Urutkan: Terakhir Dibaca' : sortOption === 'title' ? 'Urutkan: Judul' : 'Urutkan: Progres'}
             </Text>
-            <TouchableOpacity style={styles.sortIconButton} onPress={() => setSortModalVisible(true)}>
-              <Ionicons name="swap-vertical" size={18} color={COLORS.gold} />
-            </TouchableOpacity>
-          </View>
+            <Ionicons name="swap-vertical" size={14} color={COLORS.gold} />
+          </TouchableOpacity>
         </View>
 
         {sortedBooks.length > 0 ? (
@@ -395,12 +376,6 @@ export default function LibraryScreen() {
           </View>
         </Pressable>
       </Modal>
-
-      {/* Reading Analytics Modal Sheet */}
-      <ReadingAnalyticsModal
-        visible={analyticsModalVisible}
-        onClose={() => setAnalyticsModalVisible(false)}
-      />
     </SafeAreaView>
   );
 }
@@ -426,8 +401,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  sortIconButton: {
-    padding: 6,
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 10,
     backgroundColor: '#0F2922',
     borderWidth: 1,
@@ -447,6 +426,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 12,
     gap: 6,
+  },
+  bookCountIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
   },
   bookCountText: {
     color: '#6EE7B7',
@@ -553,21 +537,8 @@ const styles = StyleSheet.create({
   aiHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 10,
-  },
-  aiBadge: {
-    backgroundColor: COLORS.goldPill,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  aiBadgeText: {
-    color: COLORS.gold,
-    fontSize: 10,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
   },
   aiTitle: {
     fontSize: 18,
@@ -581,21 +552,6 @@ const styles = StyleSheet.create({
     color: COLORS.cream,
     lineHeight: 20,
     marginBottom: 14,
-  },
-  aiButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    gap: 6,
-  },
-  aiButtonText: {
-    color: COLORS.cream,
-    fontSize: 13,
-    fontFamily: FONTS.sansMedium,
   },
   statsGrid: {
     marginHorizontal: 20,
@@ -671,14 +627,9 @@ const styles = StyleSheet.create({
     color: COLORS.cream,
   },
   sortIndicatorText: {
-    fontSize: 11,
-    color: COLORS.muted,
-    fontFamily: FONTS.sansRegular,
-  },
-  sectionHeaderActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    fontSize: 10,
+    color: COLORS.gold,
+    fontFamily: FONTS.sansMedium,
   },
   wantListContent: {
     paddingHorizontal: 20,

@@ -1,3 +1,36 @@
+# Reader Settings Modal: Drag-to-Expand (fix) — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-settings-modal-drag-expand-design.md`, plan `docs/superpowers/plans/2026-08-27-settings-modal-drag-expand.md`, ledger `.superpowers/sdd/settings-modal-drag-expand/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Height model: single `Animated.Value` `sheetHeight` (px) replaces `sheetProgress` + interpolation; `COLLAPSED=0.52*H`, `EXPANDED=0.9*H` (fixed).
+- `[x]` 3. PanResponder drag + grabber bar at top of sheet (full-width hit area + header grab zone); `setValue` on move, `stopAnimation` on grant, snap on release (midpoint + `vy`).
+- `[x]` 4. Scroll-up to expand restored (one-shot trigger past 24px; NO collapse-on-scroll branch → no viewport-clamp feedback loop; collapse via drag handle). Auto-fit dropped — fixed 90% target per user.
+- `[x]` 5. Verification: mobile typecheck ✅, lint ✅; no mobile tests (placeholder — stated explicitly).
+- `[ ]` 6. Manual QA (`npm run android`): drag up/down smooth, snap on release, expanded holds & shows all sections, reopen resets, settings persist.
+- `[x]` 7. Update ledger `settings-modal-drag-expand` + this file; commit.
+
+# Reader Settings Modal: Expand & Reorder — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-settings-modal-expand-reorder-design.md`, plan `docs/superpowers/plans/2026-08-27-settings-modal-expand-reorder.md`, ledger `.superpowers/sdd/settings-modal-expand-reorder/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Scroll-up to expand (Option A, snap): sheet animates between ~52% and ~90% via one-shot `Animated.timing` on scroll intent (up past 24px → open, back to top → close); no 1:1 feedback loop (original live-growth felt janky — replaced); resets collapsed + scroll-to-top on open. **SUPERSEDED 2026-08-27** by drag-to-expand (see "Reader Settings Modal: Drag-to-Expand (fix)") — scroll-offset trigger had a clamp feedback loop (sheet growth → viewport > content → offset clamped to 0 → collapse) causing lag + never holding 90%.
+- `[x]` 2. Scroll-up to expand (Option A, snap): sheet animates between ~52% and ~90% via one-shot `Animated.timing` on scroll intent (up past 24px → open, back to top → close); no 1:1 feedback loop (original live-growth felt janky — replaced); resets collapsed + scroll-to-top on open.
+- `[x]` 3. Reordered sections: Ukuran Teks → Tema Warna → Jenis Huruf → Jarak Baris → Mode Perpindahan Halaman → Rataan Teks (Margin kept last).
+- `[x]` 4. Theme picker → round swatches (no text), reader's real theme bg colors, gold ring + checkmark on active, a11y labels.
+- `[x]` 5. Font picker → horizontal chips 'Sans' / 'Serif' / 'Spacemono' (system monospace relabel); active detection normalized by family (fixes default 'DM Sans' not matching).
+- `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly).
+- `[ ]` 7. Manual QA in Expo Go: reader settings — order, swatches, chips, expand-on-scroll, persistence.
+
+# Mobile Dashboard/Library/AI/Profile/Reader Polish (20 items) — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-mobile-dashboard-library-polish-design.md`, plan `docs/superpowers/plans/2026-08-27-mobile-dashboard-library-polish.md`, ledger `.superpowers/sdd/mobile-dashboard-library-polish/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Dashboard: remove 'Koleksi terbaik' hero; verify 'Sedang dibaca' hide; add 'Trending Minggu ini🔥' row below it; 'Rekomendasi & Trending' → 'Rekomendasi' (editors' picks on 'Semua').
+- `[x]` 3. 3-button nav (items 5&6): new `useThreeButtonNav()` hook; raise tab bar (MainTabs) + reader bottom bar above the Android system nav bar.
+- `[x]` 4. Rak Buku Saya: remove 'Target membaca' card; `book-02.png` count icon; merge 'Urutkan:…' + sort button; remove 'MB Offline' + 3 equal stat cards in one row; 'B' logo on AI card; AI button 'Lihat Detail' (gold/white).
+- `[x]` 5. AI page: entry-card title 'Tanya Bukoo Assistant'; italic greeting subtitle; gold 'Chat Bukoo Assistant' button; compact prompt chips.
+- `[x]` 6. Profile: remove 'Target membaca' card; calendar Week/Month toggle + month grid.
+- `[x]` 7. Reader settings: default 4 settings, scroll-up reveals 2; no dark overlay, capped height (live preview).
+- `[x]` 8. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly).
+- `[ ]` 9. Manual QA in Expo Go: dashboard, Rak Buku Saya, AI page + chat, Profile, Reader (3-button raise on real device).
+
 # Mobile Library/AI/Profile UX — 2026-08-27
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-mobile-library-ai-profile-design.md`, plan `docs/superpowers/plans/2026-08-27-mobile-library-ai-profile.md`, ledger `.superpowers/sdd/mobile-library-ai-profile/progress.md`. User-approved.

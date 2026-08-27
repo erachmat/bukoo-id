@@ -116,4 +116,31 @@ export const readingGoalService = {
 
     return result;
   },
+
+  getMonthLogs: async (
+    year: number,
+    month: number,
+  ): Promise<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]> => {
+    const state = await readingGoalService.getGoalsState();
+    const result = [];
+    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayLabel = days[date.getDay()];
+      const seconds = state.dailyLogs[dateStr] || 0;
+      const minutes = Math.round(seconds / 60);
+
+      result.push({
+        dayLabel,
+        dateStr,
+        minutes,
+        isCompleted: minutes >= state.targetMinutes,
+      });
+    }
+
+    return result;
+  },
 };

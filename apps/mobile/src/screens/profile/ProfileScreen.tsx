@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useLogout } from '../../hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,9 +19,9 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList & MainTabPara
 
 import { ReadingAnalyticsModal } from './components/ReadingAnalyticsModal';
 import { EditProfileModal } from './components/EditProfileModal';
-import { ReadingGoalCard } from '../home/components/ReadingGoalCard';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
 import { useIsTablet } from '../../hooks/useResponsive';
+import { useThreeButtonNav } from '../../hooks/useSystemNav';
 import { AVATAR_PRESETS } from '../../services/userProfileService';
 import { ShareSheetModal, ShareSheetOption } from '../../components/share/ShareSheetModal';
 import { appShareLink } from '../../services/shareService';
@@ -32,6 +32,8 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
   const queryClient = useQueryClient();
   const isTablet = useIsTablet();
+  const insets = useSafeAreaInsets();
+  const isThreeButton = useThreeButtonNav();
 
   const [activeModal, setActiveModal] = useState<'account' | 'subscription' | 'preferences' | 'support' | 'about' | null>(null);
   const [newGoalMinutes, setNewGoalMinutes] = useState('');
@@ -40,6 +42,10 @@ export default function ProfileScreen() {
   const [shareVisible, setShareVisible] = useState(false);
   const [stats, setStats] = useState({ finishedBooks: 0, totalMinutes: 0, streakDays: 0 });
   const [weekLogs, setWeekLogs] = useState<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]>([]);
+  const [calendarView, setCalendarView] = useState<'week' | 'month'>('week');
+  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
+  const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
+  const [monthLogs, setMonthLogs] = useState<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +64,16 @@ export default function ProfileScreen() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    readingGoalService.getMonthLogs(viewYear, viewMonth).then((logs) => {
+      if (mounted) setMonthLogs(logs);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [viewYear, viewMonth]);
 
   const { data: goalsData } = useQuery({
     queryKey: ['reading', 'goals'],
@@ -128,9 +144,30 @@ export default function ProfileScreen() {
       ? new Date(weekLogs[0].dateStr + 'T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
       : '';
 
+  // Month calendar view.
+  const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  const firstWeekdayOfMonth = new Date(viewYear, viewMonth, 1).getDay();
+
+  const goPrevMonth = () => {
+    const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+    setViewMonth(prevMonth);
+    if (viewMonth === 0) setViewYear(viewYear - 1);
+  };
+  const goNextMonth = () => {
+    const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+    setViewMonth(nextMonth);
+    if (viewMonth === 11) setViewYear(viewYear + 1);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          isThreeButton && { paddingBottom: 40 + insets.bottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <ResponsiveContainer>
         {/* Top Header Bar with Logo & Subscription Status */}
         <View style={styles.topHeaderBar}>
@@ -151,9 +188,6 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Daily Reading Target & Streak Card — full width above the row on tablets */}
-        {isTablet && <ReadingGoalCard onOpenAnalytics={() => setShowAnalyticsModal(true)} />}
 
         {/* Profile header + streak — side-by-side on tablets, stacked on phones */}
         <View style={isTablet ? styles.profileTopRow : undefined}>
@@ -209,52 +243,6 @@ export default function ProfileScreen() {
           </View> */}
         </View>
 
-        {/* Daily Reading Target & Streak Card — between profile header and week calendar on phones */}
-        {!isTablet && <ReadingGoalCard onOpenAnalytics={() => setShowAnalyticsModal(true)} />}
-
-        {/* Weekly Streak Calendar Bar */}
-        <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
-          <View style={styles.streakHeaderRow}>
-            <Text style={styles.streakTitle}>Minggu Ini</Text>
-            {weekMonthLabel !== '' && <Text style={styles.streakMonthLabel}>{weekMonthLabel}</Text>}
-          </View>
-
-          {/* Days — label + pill + minutes per day */}
-          <View style={styles.daysRow}>
-            {weekLogs.map((day) => {
-              const isToday = day.dateStr === todayStr;
-              const dayNum = new Date(day.dateStr).getDate();
-              return (
-                <View key={`day-${day.dateStr}`} style={styles.dayCol}>
-                  <Text style={[styles.dayLabelText, isToday && styles.dayLabelTextToday]}>
-                    {day.dayLabel}
-                  </Text>
-                  <View
-                    style={[
-                      styles.dayPill,
-                      day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
-                      isToday && styles.dayPillToday,
-                    ]}
-                  >
-                    <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
-                      {dayNum}
-                    </Text>
-                  </View>
-                  <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
-                </View>
-              );
-            })}
-          </View>
-
-          {/* Streak Indicator */}
-          <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
-            <Ionicons name="flame" size={22} color={COLORS.gold} />
-            <Text style={styles.streakCountNumber}>{stats.streakDays}</Text>
-            <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
-          </TouchableOpacity>
-        </View>
-        </View>
-
         {/* Pencapaian Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeaderRow}>
@@ -265,7 +253,7 @@ export default function ProfileScreen() {
               hitSlop={8}
               accessibilityLabel="Bagikan pencapaian"
             >
-              <Ionicons name="share-social-outline" size={18} color={COLORS.gold} />
+              <Ionicons name="share-outline" size={20} color={COLORS.gold} />
             </TouchableOpacity>
           </View>
           <View style={styles.statsGrid}>
@@ -285,6 +273,116 @@ export default function ProfileScreen() {
               <Text style={styles.statTileLabel}>Hari Streak</Text>
             </View>
           </View>
+        </View>
+
+        {/* Streak Calendar Bar — Week / Month view */}
+        <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
+          <View style={styles.streakHeaderRow}>
+            <View style={styles.streakTitleRow}>
+              <Text style={styles.streakTitle}>{calendarView === 'month' ? 'Bulan Ini' : ''}</Text>
+              {calendarView === 'week' && weekMonthLabel !== '' && (
+                <Text style={styles.streakMonthLabel}>{weekMonthLabel}</Text>
+              )}
+            </View>
+            <View style={styles.calendarToggle}>
+              <TouchableOpacity
+                style={[styles.calendarToggleChip, calendarView === 'week' && styles.calendarToggleChipActive]}
+                onPress={() => setCalendarView('week')}
+              >
+                <Text style={[styles.calendarToggleText, calendarView === 'week' && styles.calendarToggleTextActive]}>
+                  Minggu
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.calendarToggleChip, calendarView === 'month' && styles.calendarToggleChipActive]}
+                onPress={() => setCalendarView('month')}
+              >
+                <Text style={[styles.calendarToggleText, calendarView === 'month' && styles.calendarToggleTextActive]}>
+                  Bulan
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {calendarView === 'week' ? (
+            /* Days — label + pill + minutes per day */
+            <View style={styles.daysRow}>
+              {weekLogs.map((day) => {
+                const isToday = day.dateStr === todayStr;
+                const dayNum = new Date(day.dateStr).getDate();
+                return (
+                  <View key={`day-${day.dateStr}`} style={styles.dayCol}>
+                    <Text style={[styles.dayLabelText, isToday && styles.dayLabelTextToday]}>
+                      {day.dayLabel}
+                    </Text>
+                    <View
+                      style={[
+                        styles.dayPill,
+                        day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
+                        isToday && styles.dayPillToday,
+                      ]}
+                    >
+                      <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                        {dayNum}
+                      </Text>
+                    </View>
+                    <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            /* Month — prev/next nav + 7-column grid with leading blanks */
+            <>
+              <View style={styles.monthNavRow}>
+                <TouchableOpacity style={styles.monthNavButton} onPress={goPrevMonth} hitSlop={8}>
+                  <Ionicons name="chevron-back" size={20} color={COLORS.gold} />
+                </TouchableOpacity>
+                <Text style={styles.monthLabel}>{monthLabel}</Text>
+                <TouchableOpacity style={styles.monthNavButton} onPress={goNextMonth} hitSlop={8}>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.daysRow}>
+                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((d) => (
+                  <Text key={d} style={styles.monthWeekdayLabel}>{d}</Text>
+                ))}
+              </View>
+              <View style={styles.monthGrid}>
+                {Array.from({ length: firstWeekdayOfMonth }).map((_, i) => (
+                  <View key={`blank-${i}`} style={styles.monthCell} />
+                ))}
+                {monthLogs.map((day) => {
+                  const isToday = day.dateStr === todayStr;
+                  const dayNum = new Date(day.dateStr).getDate();
+                  return (
+                    <View key={day.dateStr} style={styles.monthCell}>
+                      <View
+                        style={[
+                          styles.dayPill,
+                          day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
+                          isToday && styles.dayPillToday,
+                        ]}
+                      >
+                        <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                          {dayNum}
+                        </Text>
+                      </View>
+                      <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
+
+          {/* Streak Indicator */}
+          <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
+            <Ionicons name="flame" size={22} color={COLORS.gold} />
+            <Text style={styles.streakCountNumber}>{stats.streakDays}</Text>
+            <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
+          </TouchableOpacity>
+        </View>
         </View>
 
         {/* Aktifitas Section */}
@@ -626,6 +724,71 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansRegular,
     color: COLORS.muted,
   },
+  streakTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calendarToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#0A1A15',
+    borderRadius: 12,
+    padding: 3,
+    gap: 2,
+  },
+  calendarToggleChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9,
+  },
+  calendarToggleChipActive: {
+    backgroundColor: COLORS.gold,
+  },
+  calendarToggleText: {
+    fontSize: 11,
+    fontFamily: FONTS.sansMedium,
+    color: COLORS.muted,
+  },
+  calendarToggleTextActive: {
+    color: '#0A1A15',
+    fontWeight: 'bold',
+  },
+  monthNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    marginBottom: 12,
+  },
+  monthNavButton: {
+    padding: 6,
+  },
+  monthLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: FONTS.sansBold,
+    color: COLORS.cream,
+    minWidth: 140,
+    textAlign: 'center',
+  },
+  monthWeekdayLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.sansRegular,
+    color: COLORS.muted,
+    width: 36,
+    textAlign: 'center',
+  },
+  monthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  monthCell: {
+    width: '14.28%',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 10,
+  },
   daysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -704,7 +867,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     paddingHorizontal: 20,
-    marginBottom: 6,
+    marginBottom: 14,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -717,8 +880,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.goldPill,
-    borderWidth: 1,
     borderColor: COLORS.gold,
   },
   sectionTitle: {

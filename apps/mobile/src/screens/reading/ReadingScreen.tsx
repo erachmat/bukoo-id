@@ -8,12 +8,13 @@ import {
   Animated,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useReadingSession } from '../../hooks/useReadingSession';
+import { useThreeButtonNav } from '../../hooks/useSystemNav';
 import { bookmarkService, Bookmark } from '../../services/bookmarkService';
 import { highlightService, Highlight } from '../../services/highlightService';
 import { annotationSyncService } from '../../services/annotationSyncService';
@@ -1074,6 +1075,9 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   const [controlsVisible, setControlsVisible] = useState(true);
 
+  const insets = useSafeAreaInsets();
+  const isThreeButton = useThreeButtonNav();
+
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -1859,7 +1863,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
       {/* ── Bottom bar (animated show/hide) ── */}
       {controlsVisible && (
-        <Animated.View style={[styles.bottomBar, { opacity: controlsOpacity, backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border }]}>
+        <Animated.View style={[styles.bottomBar, { opacity: controlsOpacity, backgroundColor: themeColors[theme].bgHeader, borderTopColor: themeColors[theme].border, paddingBottom: isThreeButton ? insets.bottom + 4 : 12 }]}>
           <TouchableOpacity
             style={styles.navTextButton}
             onPress={handleLeftTap}

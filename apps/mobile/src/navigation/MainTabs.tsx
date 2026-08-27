@@ -1,10 +1,12 @@
 import { View, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './types';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/COLORS';
 import { MAX_CONTENT_WIDTH } from '../constants/LAYOUT';
 import { useIsTablet } from '../hooks/useResponsive';
+import { useThreeButtonNav } from '../hooks/useSystemNav';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
@@ -15,11 +17,13 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabs() {
   const isTablet = useIsTablet();
+  const insets = useSafeAreaInsets();
+  const isThreeButton = useThreeButtonNav();
 
   const tabBarStyle = isTablet
     ? {
         position: 'absolute' as const,
-        bottom: Platform.OS === 'ios' ? 24 : 14,
+        bottom: Platform.OS === 'ios' ? 24 : (isThreeButton ? insets.bottom + 14 : 14),
         left: 0,
         right: 0,
         marginHorizontal: 'auto' as const,
@@ -37,7 +41,7 @@ export default function MainTabs() {
       }
     : {
         position: 'absolute' as const,
-        bottom: Platform.OS === 'ios' ? 24 : 14,
+        bottom: Platform.OS === 'ios' ? 24 : (isThreeButton ? insets.bottom + 14 : 14),
         left: 16,
         right: 16,
         height: Platform.OS === 'ios' ? 68 : 64,
