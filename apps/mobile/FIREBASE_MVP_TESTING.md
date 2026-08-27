@@ -47,9 +47,12 @@ Must be the Google account that owns project `bukoo-15ce3`.
 falls back to the debug keystore — the build and App Distribution still work for
 internal testing, but the APK is debug-signed.
 
-To set up a proper release keystore (run in `apps/mobile/android/`):
+To set up a proper release keystore (run in `apps/mobile/android/app/` so the
+keystore lands where Gradle expects it — `storeFile` is relative to the `app`
+module):
 
 ```bash
+cd apps/mobile/android/app
 keytool -genkeypair -v -keystore bukoo-release.keystore \
   -alias bukoo -keyalg RSA -keysize 2048 -validity 10000 \
   -storepass YOUR_STORE_PASSWORD -keypass YOUR_KEY_PASSWORD \
