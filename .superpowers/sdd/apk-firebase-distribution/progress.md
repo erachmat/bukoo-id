@@ -16,7 +16,7 @@ Spec: `docs/superpowers/specs/2026-08-27-apk-firebase-distribution-design.md`
   `keystore.properties` exists); git-ignore verified; Firebase CLI logged in as
   `erachmat.dev@gmail.com` (read-only check).
 - Task 7: complete — ledger + `task.md` updated; committed + pushed 2026-08-27
-  (review clean; see `git log` for commit of this change).
+  (commit `8361968`; review clean).
 
 ## Notes / follow-ups (user-side, one-time)
 
