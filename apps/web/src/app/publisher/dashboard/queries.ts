@@ -4,6 +4,7 @@ import {
   books as booksTable,
   publisherBookDailyMetrics,
   publisherBookReaderDays,
+  publisherBookCountryMetrics,
   publisherProfiles,
   notifications as notificationsTable,
   publisherPayouts,
@@ -82,6 +83,7 @@ export interface PublisherDashboardOverview {
   totalLifetimeReads: number;
   monthlyRoyaltyEstimate: number;
   readerLoyalty: ReturnType<typeof bucketReaderLoyalty>;
+  geo: { countryCode: string; readerDays: number }[];
   topBooks: {
     id: string;
     title: string;
@@ -136,6 +138,7 @@ export async function getPublisherDashboardOverview(
   let totalReadingSeconds = 0;
   let totalCompletions = 0;
   let readerLoyalty = bucketReaderLoyalty([]);
+  let geo: { countryCode: string; readerDays: number }[] = [];
   const lifetimeMetrics = new Map<string, { readSeconds: number; completedReads: number }>();
 
   if (bookIds.length > 0) {
@@ -156,6 +159,15 @@ export async function getPublisherDashboardOverview(
     const loyaltyRows = await db.select({ userId: publisherBookReaderDays.userId, days: sql<number>`count(*)` })
       .from(publisherBookReaderDays).where(and(...loyaltyConditions)).groupBy(publisherBookReaderDays.userId);
     readerLoyalty = bucketReaderLoyalty(loyaltyRows.map((row) => Number(row.days)));
+
+    const countryConditions = [inArray(publisherBookCountryMetrics.bookId, bookIds)];
+    if (period.start) countryConditions.push(gte(publisherBookCountryMetrics.metricDate, period.start));
+    if (period.endExclusive) countryConditions.push(sql`${publisherBookCountryMetrics.metricDate} < ${period.endExclusive}`);
+    const countryRows = await db.select({
+      countryCode: publisherBookCountryMetrics.countryCode,
+      readerDays: sql<number>`coalesce(sum(${publisherBookCountryMetrics.readerDays}), 0)`,
+    }).from(publisherBookCountryMetrics).where(and(...countryConditions)).groupBy(publisherBookCountryMetrics.countryCode).orderBy(desc(sql`sum(${publisherBookCountryMetrics.readerDays})`));
+    geo = countryRows.map((row) => ({ countryCode: row.countryCode, readerDays: Number(row.readerDays) }));
 
     const metricConditions = [inArray(publisherBookDailyMetrics.bookId, bookIds)];
     if (period.start) metricConditions.push(gte(publisherBookDailyMetrics.metricDate, period.start));
@@ -252,6 +264,7 @@ export async function getPublisherDashboardOverview(
     totalLifetimeReads,
     monthlyRoyaltyEstimate,
     readerLoyalty,
+    geo,
     topBooks,
     recentNotifications: recentNotifications.map((n) => ({
       id: n.id,

@@ -10,6 +10,10 @@
 
 # Publisher Dashboard Features — 2026-08-27
 
+- `[ ]` Publisher geo analytics: country aggregates, CF-IPCountry wiring, and reachable Sebaran Geografis tab.
+  - `[x]` Implementation complete; DB/API/web verification passed.
+  - `[ ]` Apply migration through `migrate-d1.yml`, deploy, and complete browser QA.
+
 - `[ ]` Publisher catalog self-service: search, filters, sorting, pagination, safe publication toggle, storefront links.
   - `[x]` Implementation complete; web tests/typecheck/lint pass.
   - `[ ]` Browser QA and production deployment.

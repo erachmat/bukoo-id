@@ -177,3 +177,13 @@ export function normalizeCountryCode(value: string | null | undefined): string {
   if (/^[A-Z]{2}$/.test(code) && code !== 'T1') return code;
   return 'XX';
 }
+
+const COUNTRY_LABELS: Record<string, string> = {
+  ID: 'Indonesia', MY: 'Malaysia', SG: 'Singapura', TH: 'Thailand',
+  US: 'Amerika Serikat', GB: 'Britania Raya', AU: 'Australia',
+  SA: 'Arab Saudi', AE: 'Uni Emirat Arab', NL: 'Belanda',
+};
+
+export function countryLabel(code: string): string {
+  return COUNTRY_LABELS[code] ?? (code === 'XX' ? 'Tidak diketahui' : code);
+}

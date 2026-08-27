@@ -20,6 +20,7 @@ const analyticsNav = [
   { id: "royalti",   label: "Royalti",       icon: "💰" },
   { id: "pembaca",   label: "Pembaca",        icon: "👥" },
   { id: "waktu",     label: "Waktu Baca",     icon: "⏱️" },
+  { id: "geo",      label: "Sebaran Geografis", icon: "🌏" },
   { id: "metadata",  label: "Metadata",        icon: "📝" },
 ];
 

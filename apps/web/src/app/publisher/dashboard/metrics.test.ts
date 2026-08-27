@@ -7,6 +7,7 @@ import {
   getCurrentMonthStart,
   getPeriodRange,
   normalizeCountryCode,
+  countryLabel,
   rankBooksByPeriodActivity,
   rankTopBooks,
   resolveDashboardPeriod,
@@ -115,5 +116,11 @@ describe('publisher dashboard metrics', () => {
     expect(normalizeCountryCode('T1')).toBe('XX');
     expect(normalizeCountryCode('Indonesia')).toBe('XX');
     expect(normalizeCountryCode(null)).toBe('XX');
+  });
+
+  it('uses privacy-safe country labels with an unknown fallback', () => {
+    expect(countryLabel('ID')).toBe('Indonesia');
+    expect(countryLabel('XX')).toBe('Tidak diketahui');
+    expect(countryLabel('JP')).toBe('JP');
   });
 });

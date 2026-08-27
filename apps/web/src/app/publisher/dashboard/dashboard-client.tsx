@@ -7,6 +7,7 @@ import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview } from "./queries";
 import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
 import { getCoverUrl } from "@/lib/cover-url";
+import { countryLabel } from "./metrics";
 
 interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
@@ -205,6 +206,16 @@ function PagePembaca({ overview }: { overview?: PublisherDashboardOverview }) {
   </>;
 }
 
+function PageGeo({ overview }: { overview?: PublisherDashboardOverview }) {
+  const geo = overview?.geo ?? [];
+  return <>
+    <div className="pds-page-head"><div><div className="pds-page-title">Sebaran Geografis</div><div className="pds-page-sub">Reader-days berdasarkan negara · {overview?.period.label ?? 'periode terpilih'}</div></div></div>
+    <div className="pds-panel"><div className="pds-panel-title">Negara pembaca <span className="tag">agregat negara · tanpa alamat/IP</span></div>
+      {geo.length === 0 ? <div style={{ padding: 48, textAlign: 'center', color: 'var(--pds-muted)', fontSize: 12 }}>Belum ada data geografis. Data dikumpulkan dari pembacaan baru.</div> : <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Negara</th><th>Kode</th><th className="r">Hari baca</th></tr></thead><tbody>{geo.map((row) => <tr key={row.countryCode}><td className="t-main">{countryLabel(row.countryCode)}</td><td>{row.countryCode}</td><td className="r num">{row.readerDays.toLocaleString('id-ID')}</td></tr>)}</tbody></table></div>}
+    </div>
+  </>;
+}
+
 // ── page: metadata ────────────────────────────────────────────
 function PageMetadata({ catalog }: { catalog: PublisherCatalogBook[] }) {
   return (
@@ -269,7 +280,7 @@ export function DashboardClient({ user, overview, catalog = [], tab }: Dashboard
       case "performa":   return <PagePerforma catalog={catalog} />;
       case "pembaca":    return <PagePembaca overview={overview} />;
       case "demografi":  return <PageUnavailable title="Demografi" sub="Data demografi pembaca belum tersedia" icon="🧬" />;
-      case "geo":        return <PageUnavailable title="Sebaran Geografis" sub="Data geografis pembaca belum tersedia" icon="🗺️" />;
+      case "geo":        return <PageGeo overview={overview} />;
       case "waktu":      return <PageUnavailable title="Waktu Baca" sub="Data ritme baca belum tersedia" icon="⏱️" />;
       case "metadata":   return <PageMetadata catalog={catalog} />;
       default:           return <PageOverview onTabChange={onTabChange} overview={overview} />;

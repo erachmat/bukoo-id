@@ -84,6 +84,7 @@ async function handleUpsertProgress(
   // Aggregate publisher analytics idempotently.
   const isCompletion =
     dto.progressPercent >= 100 && (existing?.progressPercent ?? 0) < 100;
+    const countryCode = c.req.header('cf-ipcountry') ?? null;
   await recordPublisherReadingMetric(db, {
     userId,
     bookId: targetBookId,
@@ -91,6 +92,7 @@ async function handleUpsertProgress(
     readingSecondsDelta: dto.reading_time_delta,
     isStart: !existing,
     isCompletion,
+      countryCode,
   });
 
   return c.json({ success: true });

@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { readingProgress, recordPublisherReadingMetric } from '@bukoo/db';
 import { eq, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import { headers } from 'next/headers';
 
 export async function updateReadingProgress(
   bookId: string,
@@ -52,12 +53,14 @@ export async function updateReadingProgress(
   }
 
   // Aggregate publisher analytics idempotently.
+  const countryCode = (await headers()).get('cf-ipcountry') ?? null;
   await recordPublisherReadingMetric(db, {
     userId,
     bookId,
     progressPercent,
     isStart,
     isCompletion,
+    countryCode,
   });
 
   return { success: true };
