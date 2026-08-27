@@ -20,7 +20,9 @@ Spec: `docs/superpowers/specs/2026-08-27-apk-firebase-distribution-design.md`
 
 ## Notes / follow-ups (user-side, one-time)
 
-- Create release keystore + `keystore.properties` with own passwords (per
-  `FIREBASE_MVP_TESTING.md` § Release signing). Back up keystore + passwords.
-- Then `firebase login` (already logged in as `erachmat.dev@gmail.com`) and
-  `cd apps/mobile && npm run deploy:firebase` to push to `mvp-testers`.
+- Release keystore regenerated 2026-08-27 reading passwords from gitignored
+  `keystore.properties` (original was created with a bash history-expanded `!#`
+  password). `keytool -list` unlock verified; release APK signed with release
+  cert `CN=BUKOO` (SHA-256 `6935bd8b…`). **Back up keystore + passwords.**
+- Remaining manual step: `cd apps/mobile && npm run distribute:firebase`
+  (or `npm run deploy:firebase`) to push to `mvp-testers`.

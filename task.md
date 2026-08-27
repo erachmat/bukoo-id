@@ -5,8 +5,9 @@
 - `[x]` 3. `apps/mobile/android/keystore.properties.example` template committed; `android/.gitignore` ignores `keystore.properties`, `*.jks`, `*.keystore` (`!debug.keystore`).
 - `[x]` 4. `deploy:firebase` convenience script (build + distribute in one step) added to `apps/mobile/package.json`.
 - `[x]` 5. `FIREBASE_MVP_TESTING.md` updated: Release signing one-time setup, debug-fallback note, "Verified 2026-08-27" header note, file map.
-- `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly); `npm run apk:release` → BUILD SUCCESSFUL (12m54s), `app-release.apk` produced (122 MB, debug-signed via fallback — expected until `keystore.properties` exists); `git check-ignore` confirms keystore files ignored; Firebase CLI logged in as `erachmat.dev@gmail.com` (read-only).
-- `[ ]` 7. Manual (user): create release keystore + `keystore.properties` with own passwords → `firebase login` (already logged in) → `npm run deploy:firebase` to distribute to `mvp-testers`.
+- `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly); `npm run apk:release` → BUILD SUCCESSFUL, `app-release.apk` produced; `git check-ignore` confirms keystore files ignored; Firebase CLI logged in as `erachmat.dev@gmail.com` (read-only).
+- `[x]` 7. Keystore issue fixed (2026-08-27): original keystore was generated with a bash-mangled `!#` password → regenerated `bukoo-release.keystore` reading passwords from gitignored `keystore.properties` (never printed); `keytool -list` unlock verified; release APK now signed with release cert `CN=BUKOO` (SHA-256 `6935bd8b…`). **Back up keystore + passwords.**
+- `[ ]` 8. Manual (user): run `npm run distribute:firebase` (or `npm run deploy:firebase`) from `apps/mobile` to push the release-signed APK to `mvp-testers`.
 
 # Reader Settings Modal: Drag-to-Expand (fix) — 2026-08-27
 
