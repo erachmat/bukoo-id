@@ -17,3 +17,9 @@ app/src/main/java/inline/
 
 # Bundle artifacts
 *.jsbundle
+
+# Signing / keystores — release keystore + properties are secrets
+keystore.properties
+*.jks
+*.keystore
+!debug.keystore

@@ -2,6 +2,11 @@
 
 Applies to `apps/mobile` (Android-first for now; iOS later via TestFlight).
 
+> ✅ **Verified 2026-08-27**: release APK builds via `npm run apk:release`;
+> signing wiring (keystore.properties + debug fallback) in place; the
+> `deploy:firebase` convenience script added. Distribution to `mvp-testers`
+> still requires `firebase login` + the group existing (see below).
+
 ## One-time setup (you, ~10 min)
 
 The app is already registered to Firebase project **`bukoo-15ce3`** (package
@@ -35,17 +40,45 @@ npx firebase-tools login
 
 Must be the Google account that owns project `bukoo-15ce3`.
 
+## Release signing (one-time, ~5 min)
+
+`assembleRelease` signs with a real **release keystore** when
+`apps/mobile/android/keystore.properties` exists (gitignored). Until then it
+falls back to the debug keystore — the build and App Distribution still work for
+internal testing, but the APK is debug-signed.
+
+To set up a proper release keystore (run in `apps/mobile/android/`):
+
+```bash
+keytool -genkeypair -v -keystore bukoo-release.keystore \
+  -alias bukoo -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass YOUR_STORE_PASSWORD -keypass YOUR_KEY_PASSWORD \
+  -dname "CN=BUKOO, OU=Mobile, O=BUKOO, L=Jakarta, S=Jakarta, C=ID"
+```
+
+Then copy `keystore.properties.example` → `keystore.properties` and fill in the
+same `storeFile`/`storePassword`/`keyAlias`/`keyPassword`.
+
+> ⚠️ **Back up `bukoo-release.keystore` + the passwords** somewhere safe (e.g.
+> a password manager / secure storage). If lost, you can no longer update any
+> app already installed with that key. `keystore.properties` and the keystore
+> are gitignored — never commit them.
+
 ## Build + distribute (me or you)
 
 ```bash
 cd apps/mobile
 npm run apk:release             # ./gradlew assembleRelease
 npm run distribute:firebase     # uploads app-release.apk to the mvp-testers group
+# ...or in one step:
+npm run deploy:firebase
 ```
 
 Testers get an email link → allow "install unknown apps" → install.
 
-> Requires a **release-signed** APK. If you use EAS builds instead:
+> Signing: uses the real release keystore when `keystore.properties` is set up
+> (see above); otherwise falls back to the debug keystore (still installable,
+> but debug-signed). If you use EAS builds instead:
 > `eas build -p android --profile preview` produces an installable APK you can
 > upload to App Distribution manually (`firebase appdistribution:distribute <file>`).
 
@@ -90,7 +123,9 @@ Console → Remote Config → **A/B Testing** → Create experiment:
 - `src/services/crashReporting.ts` — Crashlytics wrapper
 - `App.tsx` — boots both on startup
 - `app.json` — Firebase config plugins (app, crashlytics only — remote-config needs NO plugin)
-- `package.json` — `apk:release` + `distribute:firebase` scripts
+- `package.json` — `apk:release` + `deploy:firebase` + `distribute:firebase` scripts
+- `android/app/build.gradle` — release signing (reads `keystore.properties`, debug fallback)
+- `android/keystore.properties.example` — release signing template (gitignored copy = `keystore.properties`)
 
 > ⚠️ Gotcha (2026-08-18): do NOT add `@react-native-firebase/remote-config`
 > to `app.json` plugins — it ships NO config plugin and breaks the gradle

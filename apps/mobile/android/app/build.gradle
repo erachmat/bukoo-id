@@ -81,6 +81,27 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+/**
+ * Loads release signing config from keystore.properties (gitignored) if present.
+ * The file lives next to gradle.properties in apps/mobile/android/ and is created
+ * during one-time setup (see FIREBASE_MVP_TESTING.md). When absent, release
+ * builds fall back to the debug keystore so internal App Distribution builds work.
+ */
+def loadKeystoreProperties() {
+    def props = new Properties()
+    def keystoreFile = rootProject.file('keystore.properties')
+    if (keystoreFile.exists()) {
+        keystoreFile.withInputStream { props.load(it) }
+    }
+    return props
+}
+
+def keystoreProperties = loadKeystoreProperties()
+def hasReleaseSigning = keystoreProperties.storeFile &&
+        keystoreProperties.storePassword &&
+        keystoreProperties.keyAlias &&
+        keystoreProperties.keyPassword
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -104,6 +125,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(keystoreProperties.storeFile)
+                storePassword keystoreProperties.storePassword
+                keyAlias keystoreProperties.keyAlias
+                keyPassword keystoreProperties.keyPassword
+            }
+        }
     }
     buildTypes {
         debug {
@@ -112,7 +141,9 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Uses the real release keystore when keystore.properties is present,
+            // otherwise falls back to the debug keystore (internal testing).
+            signingConfig hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
