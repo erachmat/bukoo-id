@@ -9,12 +9,16 @@ import { Testimonials } from '@/components/marketing/Testimonials';
 import { FAQ } from '@/components/marketing/FAQ';
 import { CallToAction } from '@/components/marketing/CallToAction';
 import { trendingBooks } from '@/components/marketing/bookData';
+import { FeaturedBooks } from '@/components/marketing/FeaturedBooks';
+
+export const dynamic = 'force-dynamic';
 
 export default function LandingPage() {
   return (
     <>
       <Hero />
       <Marquee />
+      <FeaturedBooks />
       <BookRow 
         id="trending-row"
         title="🔥 Trending di Indonesia" 

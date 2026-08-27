@@ -10,6 +10,10 @@
 
 # Publisher Dashboard Features — 2026-08-27
 
+- `[ ]` Featured Book program: admin curation, publisher badge, and real storefront featured row.
+  - `[x]` Implementation complete; migration `0009_slim_dazzler.sql` validated; web tests/typecheck/lint pass.
+  - `[ ]` Browser QA and deployment.
+
 - `[ ]` Publisher catalog follow-ups: content-edit re-review integrity and bulk catalog actions.
   - `[x]` Implementation complete; policy tests and web typecheck pass.
   - `[x]` Full automated verification: 18 tests pass, typecheck/lint clean.

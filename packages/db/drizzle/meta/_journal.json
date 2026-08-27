@@ -64,6 +64,13 @@
       "when": 1787802449417,
       "tag": "0008_publisher_book_country_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1787805845726,
+      "tag": "0009_slim_dazzler",
+      "breakpoints": true
     }
   ]
 }

@@ -154,6 +154,8 @@ export const books = sqliteTable('books', {
    */
   subscriptionRequired: text('subscription_required').notNull().default('FREE'),
   publisherUserId:     text('publisher_user_id').references(() => users.id, { onDelete: 'set null' }),
+  featured:            integer('featured', { mode: 'boolean' }).notNull().default(false),
+  featuredAt:          text('featured_at'),
   createdAt:           text('created_at').notNull().default(now()),
   updatedAt:           text('updated_at').notNull().default(now()),
 });

@@ -4,6 +4,7 @@ import { books as booksTable } from '@bukoo/db'
 import { desc } from 'drizzle-orm'
 import { getCoverUrl } from '@/lib/cover-url'
 import { DeleteBookButton } from './_components/delete-book-button'
+import { FeaturedToggleButton } from './_components/featured-toggle-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export default async function AdminBooksPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#F8FAFB', borderBottom: '1px solid #E8ECF0' }}>
-              {['Judul & Penulis', 'Kategori', 'Bahasa', 'Tipe', 'Status', 'Aksi'].map(h => (
+              {['Judul & Penulis', 'Kategori', 'Bahasa', 'Tipe', 'Status', 'Unggulan', 'Aksi'].map(h => (
                 <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#AAB4C0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{h}</th>
               ))}
             </tr>
@@ -46,7 +47,7 @@ export default async function AdminBooksPage() {
           <tbody>
             {books.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: '48px 16px', textAlign: 'center', color: '#AAB4C0', fontSize: 14 }}>
+                <td colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: '#AAB4C0', fontSize: 14 }}>
                   Belum ada buku. <Link href="/admin/books/new" style={{ color: '#00C9A7', fontWeight: 600, textDecoration: 'none' }}>Tambah buku pertama →</Link>
                 </td>
               </tr>
@@ -66,6 +67,7 @@ export default async function AdminBooksPage() {
                     </div>
                   </div>
                 </td>
+                <td style={{ padding: '14px 16px' }}><FeaturedToggleButton bookId={book.id} featured={book.featured} disabled={!book.isPublished} /></td>
                 <td style={{ padding: '14px 16px' }}>
                   <span style={{ background: '#F0F2F5', color: '#3D4A5C', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>
                     {book.genre[0] ?? '—'}

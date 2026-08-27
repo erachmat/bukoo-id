@@ -21,6 +21,7 @@ export interface PublisherCatalogBook {
   coverKey: string | null;
   readCount: number;
   updatedAt: string | null;
+  featured: boolean;
   isPublished: boolean;
   publicationStatus: string;
 }
@@ -116,7 +117,7 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
                   {book.coverKey ? <img src={getCoverUrl(book.coverKey)} alt={book.title} className="pds-thumb" style={{ objectFit: 'cover' }} /> : <div className="pds-thumb">📕</div>}
                   <div><div className="t-main">{book.title}</div><div className="t-sub">{book.author}</div></div>
                 </div></td>
-                <td><span className="pds-chip pds-chip-draft">{firstGenre(book.genre)}</span></td>
+                <td><span className="pds-chip pds-chip-draft">{firstGenre(book.genre)}</span>{book.featured && <span className="pds-chip pds-chip-live" style={{ marginLeft: 5 }}>★ Unggulan</span>}</td>
                 <td><span className={`pds-chip ${book.isPublished ? 'pds-chip-live' : 'pds-chip-review'}`}><span className="pds-dotk" />{book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></td>
                 <td>{book.language}</td>
                 <td>{book.subscriptionRequired !== 'FREE' ? <span className="pds-chip pds-chip-review">{book.subscriptionRequired}</span> : <span className="pds-chip pds-chip-live">GRATIS</span>}</td>

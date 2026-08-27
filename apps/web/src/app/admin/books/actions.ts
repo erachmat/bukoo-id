@@ -7,6 +7,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { books } from '@bukoo/db';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import { getAdminUser } from '@/lib/publisher-auth';
 
 // ---------------------------------------------------------------------------
 // R2 file upload helpers
@@ -144,4 +145,16 @@ export async function deleteBook(id: string) {
     await db.delete(books).where(eq(books.id, id));
   }
   revalidatePath('/admin/books');
+}
+
+export async function setBookFeatured(id: string, featured: boolean) {
+  await getAdminUser();
+  const db = getDb();
+  const book = await db.query.books.findFirst({ where: eq(books.id, id) });
+  if (!book) throw new Error('Buku tidak ditemukan.');
+  if (featured && !book.isPublished) throw new Error('Hanya buku yang sudah terbit yang dapat diunggulkan.');
+  await db.update(books).set({ featured, featuredAt: featured ? new Date().toISOString() : null, updatedAt: new Date().toISOString() }).where(eq(books.id, id));
+  revalidatePath('/admin/books');
+  revalidatePath('/');
+  revalidatePath('/publisher/books');
 }
