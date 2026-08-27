@@ -253,3 +253,24 @@ export async function deletePublisherBook(id: string) {
   revalidatePath('/publisher/books');
   revalidatePath('/publisher/dashboard');
 }
+
+export async function setBookPublication(bookId: string, action: 'publish' | 'unpublish') {
+  const user = await getPublisherUser();
+  const db = getDb();
+  const book = await db.query.books.findFirst({
+    where: and(eq(books.id, bookId), eq(books.publisherUserId, user.id)),
+  });
+  if (!book) throw new Error('Buku tidak ditemukan atau tidak berhak mengakses.');
+
+  if (action === 'unpublish') {
+    if (!book.isPublished) throw new Error('Buku ini sudah tidak aktif.');
+    await db.update(books).set({ isPublished: false, publicationStatus: 'UNPUBLISHED', updatedAt: new Date().toISOString() }).where(and(eq(books.id, bookId), eq(books.publisherUserId, user.id)));
+  } else {
+    if (book.isPublished) throw new Error('Buku ini sudah aktif.');
+    if (book.publicationStatus !== 'UNPUBLISHED') throw new Error('Judul baru harus disetujui tim kurasi sebelum terbit.');
+    await db.update(books).set({ isPublished: true, publicationStatus: 'PUBLISHED', updatedAt: new Date().toISOString() }).where(and(eq(books.id, bookId), eq(books.publisherUserId, user.id)));
+  }
+
+  revalidatePath('/publisher/books');
+  revalidatePath('/publisher/dashboard');
+}

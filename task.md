@@ -10,6 +10,10 @@
 
 # Publisher Dashboard Features — 2026-08-27
 
+- `[ ]` Publisher catalog self-service: search, filters, sorting, pagination, safe publication toggle, storefront links.
+  - `[x]` Implementation complete; web tests/typecheck/lint pass.
+  - `[ ]` Browser QA and production deployment.
+
 - `[ ]` 1. Publisher credibility & polish: admin-configurable royalty, URL tabs, real covers/metadata, lead capture, admin navigation, and QA.
   - `[x]` Implementation complete: settings, dashboard polish, admin submissions link, and lead capture.
   - `[ ]` Apply migration through `migrate-d1.yml`, deploy web, and complete browser/two-publisher QA.

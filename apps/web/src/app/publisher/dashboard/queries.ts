@@ -18,7 +18,7 @@ export async function getPublisherCatalog(publisherUserId: string): Promise<Publ
     id: booksTable.id, title: booksTable.title, author: booksTable.author, synopsis: booksTable.synopsis, totalPages: booksTable.totalPages, genre: booksTable.genre,
     language: booksTable.language, subscriptionRequired: booksTable.subscriptionRequired,
     epubKey: booksTable.epubKey, coverKey: booksTable.coverKey, readCount: booksTable.readCount,
-    isPublished: booksTable.isPublished, publicationStatus: booksTable.publicationStatus,
+    isPublished: booksTable.isPublished, publicationStatus: booksTable.publicationStatus, updatedAt: booksTable.updatedAt,
   }).from(booksTable).where(eq(booksTable.publisherUserId, publisherUserId)).orderBy(desc(booksTable.createdAt));
 }
 
