@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Animated, Easing, PanResponder, useWindowDimensions, type NativeSyntheticEvent, type NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
@@ -25,6 +25,23 @@ interface SettingsModalProps {
   setMarginSize?: (m: 'narrow' | 'medium' | 'wide') => void;
 }
 
+/**
+ * Active-chip check for the font picker. Mirrors `getCssFontFamily()` in
+ * ReadingScreen: matches by family rather than exact string so the default /
+ * persisted values ('DM Sans', 'PlayfairDisplay-Regular', …) highlight the
+ * right chip.
+ */
+function isFontFamilyActive(selected: string, value: string): boolean {
+  if (value === 'monospace') return selected === 'monospace';
+  if (value === FONTS.serifRegular) {
+    return selected.includes('Playfair') || selected.includes('serif') || selected === FONTS.serifRegular;
+  }
+  if (value === FONTS.sansRegular) {
+    return selected.includes('DM') || selected.includes('sans') || selected === FONTS.sansRegular;
+  }
+  return selected === value;
+}
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   visible,
   onClose,
@@ -43,32 +60,152 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   marginSize = 'medium',
   setMarginSize,
 }) => {
+  // Horizontal font choices: 'Sans', 'Serif', 'Spacemono'. Spacemono keeps the
+  // system monospace font — relabel only, no new font dependency.
   const fontFamilies = [
-    { label: 'Serif (Playfair)', value: FONTS.serifRegular },
-    { label: 'Sans (DM Sans)', value: FONTS.sansRegular },
-    { label: 'Monospace', value: 'monospace' },
+    { label: 'Sans', value: FONTS.sansRegular },
+    { label: 'Serif', value: FONTS.serifRegular },
+    { label: 'Spacemono', value: 'monospace' },
   ];
 
-  const themes: { id: ReaderTheme; label: string; bg: string; text: string }[] = [
-    { id: 'cream', label: 'Cream', bg: '#FBF0D9', text: '#2C221E' },
-    { id: 'light', label: 'Terang', bg: '#FFFFFF', text: '#111827' },
-    { id: 'sepia', label: 'Warm Sepia', bg: '#F4ECD8', text: '#5F4B32' },
-    { id: 'dark', label: 'Gelap', bg: '#121816', text: '#E5E7EB' },
+  // Round swatches only (no text). bg mirrors the reader's ACTUAL theme body
+  // background (see the themes map injected into the WebView in ReadingScreen)
+  // so the picker previews the real page color; check = icon color on the dot.
+  const themes: { id: ReaderTheme; label: string; bg: string; check: string }[] = [
+    { id: 'cream', label: 'Cream', bg: '#F4F1E8', check: '#0A1A15' },
+    { id: 'light', label: 'Terang', bg: '#FFFFFF', check: '#0A1A15' },
+    { id: 'sepia', label: 'Warm Sepia', bg: '#F5E6C8', check: '#5F4B32' },
+    { id: 'dark', label: 'Gelap', bg: '#1A1A1A', check: '#E5E7EB' },
   ];
+
+  const scrollRef = useRef<ScrollView>(null);
+  const { height: windowHeight } = useWindowDimensions();
+
+  // Expand/collapse. A PanResponder on the grabber resizes the sheet directly
+  // (`sheetHeight` in px: setValue while dragging, snap on release), and
+  // scrolling up inside the content ALSO expands it to EXPANDED (one-shot —
+  // there is deliberately NO collapse-on-scroll branch: growing the sheet grows
+  // the ScrollView viewport, and once the viewport exceeds the content height RN
+  // clamps the offset back to 0; a collapse branch would fire on that clamp and
+  // snap the sheet closed mid-animation — the old lag / "never 90%" bug).
+  // Collapsing is done with the drag handle instead.
+  const COLLAPSED = windowHeight * 0.52;
+  const EXPANDED = windowHeight * 0.8;
+  const EXPAND_THRESHOLD = 24;
+  const sheetHeight = useRef(new Animated.Value(COLLAPSED)).current; // px
+  const currentHeightRef = useRef(COLLAPSED); // tracks sheetHeight (setValue / animated)
+  const startHeightRef = useRef(COLLAPSED); // height at drag start
+  const isExpandedRef = useRef(false); // expansion state (drag or scroll)
+  const isAnimatingRef = useRef(false); // guards against re-triggering a running snap
+
+  const snapSheet = (toValue: number) => {
+    isAnimatingRef.current = true;
+    isExpandedRef.current = toValue > (COLLAPSED + EXPANDED) / 2;
+    currentHeightRef.current = toValue;
+    Animated.timing(sheetHeight, {
+      toValue,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start(() => {
+      isAnimatingRef.current = false;
+    });
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      // Claim only once the user actually drags (≥4px) so taps on the close
+      // button / settings controls are never swallowed.
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_evt, g) => Math.abs(g.dy) > 4,
+      onPanResponderGrant: () => {
+        // Stop any running snap animation and sync the refs to the real height.
+        sheetHeight.stopAnimation((value) => {
+          currentHeightRef.current = value;
+          startHeightRef.current = value;
+        });
+      },
+      onPanResponderMove: (_evt, g) => {
+        const h = Math.min(
+          Math.max(startHeightRef.current - g.dy, COLLAPSED),
+          EXPANDED,
+        );
+        isExpandedRef.current = h > (COLLAPSED + EXPANDED) / 2;
+        currentHeightRef.current = h;
+        sheetHeight.setValue(h);
+      },
+      onPanResponderRelease: (_evt, g) => {
+        const target =
+          g.vy < -0.3
+            ? EXPANDED
+            : g.vy > 0.3
+              ? COLLAPSED
+              : currentHeightRef.current > (COLLAPSED + EXPANDED) / 2
+                ? EXPANDED
+                : COLLAPSED;
+        snapSheet(target);
+      },
+      onPanResponderTerminate: () => {
+        snapSheet(
+          currentHeightRef.current > (COLLAPSED + EXPANDED) / 2 ? EXPANDED : COLLAPSED,
+        );
+      },
+    }),
+  ).current;
+
+  // Scroll up to expand — one-shot trigger only (no collapse branch, see above).
+  const handleSheetScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = e.nativeEvent.contentOffset.y;
+    if (y > EXPAND_THRESHOLD && !isExpandedRef.current && !isAnimatingRef.current) {
+      snapSheet(EXPANDED);
+    }
+  };
+
+  useEffect(() => {
+    if (!visible) return;
+    // Fresh open → collapsed sheet, scrolled back to the top.
+    isExpandedRef.current = false;
+    isAnimatingRef.current = false;
+    currentHeightRef.current = COLLAPSED;
+    sheetHeight.setValue(COLLAPSED);
+    const t = setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: false }), 50);
+    return () => clearTimeout(t);
+  }, [visible, sheetHeight, COLLAPSED]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
-        <View style={styles.modalCard}>
-          {/* Header */}
-          <View style={styles.header}>
+        <Animated.View
+          style={[
+            styles.modalCard,
+            {
+              height: sheetHeight,
+            },
+          ]}
+        >
+          {/* Grabber — drag up/down to resize the sheet */}
+          <View
+            style={styles.grabberWrap}
+            {...panResponder.panHandlers}
+            accessibilityLabel="Seret untuk membuka penuh"
+          >
+            <View style={styles.grabberBar} />
+          </View>
+
+          {/* Header (also a grab zone — tapping the close button still works) */}
+          <View style={styles.header} {...panResponder.panHandlers}>
             <Text style={styles.headerTitle}>Pengaturan Tampilan</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={22} color={COLORS.cream} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView
+            ref={scrollRef}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={handleSheetScroll}
+          >
             {/* Font Size Adjuster */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Ukuran Teks ({fontSize} pt)</Text>
@@ -89,7 +226,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </View>
             </View>
 
-            {/* Font Family Selector */}
+            {/* Theme Selector — round swatches, no text */}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>Tema Warna</Text>
+              <View style={styles.themeRow}>
+                {themes.map((t) => (
+                  <TouchableOpacity
+                    key={t.id}
+                    accessibilityLabel={`Tema ${t.label}`}
+                    style={[
+                      styles.themeDot,
+                      { backgroundColor: t.bg },
+                      theme === t.id && styles.themeDotActive,
+                    ]}
+                    onPress={() => setTheme(t.id)}
+                  >
+                    {theme === t.id && <Ionicons name="checkmark" size={16} color={t.check} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Font Family Selector — horizontal chips */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Jenis Huruf</Text>
               <View style={styles.fontOptionsRow}>
@@ -98,7 +256,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     key={item.value}
                     style={[
                       styles.fontChip,
-                      fontFamily === item.value && styles.fontChipActive,
+                      isFontFamilyActive(fontFamily, item.value) && styles.fontChipActive,
                     ]}
                     onPress={() => setFontFamily(item.value)}
                   >
@@ -106,7 +264,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       style={[
                         styles.fontChipText,
                         { fontFamily: item.value },
-                        fontFamily === item.value && styles.fontChipTextActive,
+                        isFontFamilyActive(fontFamily, item.value) && styles.fontChipTextActive,
                       ]}
                     >
                       {item.label}
@@ -116,28 +274,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </View>
             </View>
 
-            {/* Theme Selector */}
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Tema Warna</Text>
-              <View style={styles.themeRow}>
-                {themes.map((t) => (
-                  <TouchableOpacity
-                    key={t.id}
-                    style={[
-                      styles.themeTile,
-                      { backgroundColor: t.bg },
-                      theme === t.id && styles.themeTileActive,
-                    ]}
-                    onPress={() => setTheme(t.id)}
-                  >
-                    <Text style={[styles.themeTileText, { color: t.text }]}>{t.label}</Text>
-                    {theme === t.id && (
-                      <Ionicons name="checkmark-circle" size={16} color={COLORS.gold} style={styles.checkIcon} />
-                    )}
-                  </TouchableOpacity>
-                ))}
+            {/* Line Height Selector */}
+            {setLineHeight && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>Jarak Baris ({lineHeight}x)</Text>
+                <View style={styles.lineHeightRow}>
+                  {[1.3, 1.6, 1.9, 2.2].map((lh) => (
+                    <TouchableOpacity
+                      key={lh}
+                      style={[
+                        styles.lhChip,
+                        lineHeight === lh && styles.lhChipActive,
+                      ]}
+                      onPress={() => setLineHeight(lh)}
+                    >
+                      <Text style={[styles.lhText, lineHeight === lh && styles.lhTextActive]}>
+                        {lh}x
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Page Turn Mode Selector */}
             {setPageTurnStyle && (
@@ -166,22 +324,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </View>
             )}
 
-            {/* Line Height Selector */}
-            {setLineHeight && (
+            {/* Text Alignment Selector */}
+            {setTextAlign && (
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Jarak Baris ({lineHeight}x)</Text>
+                <Text style={styles.sectionLabel}>Rataan Teks</Text>
                 <View style={styles.lineHeightRow}>
-                  {[1.3, 1.6, 1.9, 2.2].map((lh) => (
+                  {[
+                    { label: 'Rata Kiri', value: 'left' as const },
+                    { label: 'Rata Kiri-Kanan', value: 'justify' as const },
+                  ].map((a) => (
                     <TouchableOpacity
-                      key={lh}
+                      key={a.value}
                       style={[
                         styles.lhChip,
-                        lineHeight === lh && styles.lhChipActive,
+                        textAlign === a.value && styles.lhChipActive,
                       ]}
-                      onPress={() => setLineHeight(lh)}
+                      onPress={() => setTextAlign(a.value)}
                     >
-                      <Text style={[styles.lhText, lineHeight === lh && styles.lhTextActive]}>
-                        {lh}x
+                      <Text style={[styles.lhText, textAlign === a.value && styles.lhTextActive]}>
+                        {a.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -215,34 +376,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </View>
               </View>
             )}
-
-            {/* Text Alignment Selector */}
-            {setTextAlign && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Rataan Teks</Text>
-                <View style={styles.lineHeightRow}>
-                  {[
-                    { label: 'Rata Kiri', value: 'left' as const },
-                    { label: 'Rata Kiri-Kanan', value: 'justify' as const },
-                  ].map((a) => (
-                    <TouchableOpacity
-                      key={a.value}
-                      style={[
-                        styles.lhChip,
-                        textAlign === a.value && styles.lhChipActive,
-                      ]}
-                      onPress={() => setTextAlign(a.value)}
-                    >
-                      <Text style={[styles.lhText, textAlign === a.value && styles.lhTextActive]}>
-                        {a.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
           </ScrollView>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -251,17 +386,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
   modalCard: {
     backgroundColor: COLORS.forestDark,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '85%',
     padding: 20,
     borderWidth: 1,
     borderColor: '#173E33',
+    overflow: 'hidden',
+  },
+  grabberWrap: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  grabberBar: {
+    width: 64,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#2C6A58',
   },
   header: {
     flexDirection: 'row',
@@ -321,16 +467,18 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansBold,
   },
   fontOptionsRow: {
+    flexDirection: 'row',
     gap: 8,
   },
   fontChip: {
+    flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: 6,
     borderRadius: 12,
     backgroundColor: '#0F2922',
     borderWidth: 1,
     borderColor: '#173E33',
-    marginBottom: 6,
+    alignItems: 'center',
   },
   fontChipActive: {
     borderColor: COLORS.gold,
@@ -346,34 +494,19 @@ const styles = StyleSheet.create({
   },
   themeRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    gap: 16,
   },
-  themeTile: {
-    width: '48%',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+  themeDot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    marginBottom: 6,
-  },
-  themeTileActive: {
-    borderColor: COLORS.gold,
     borderWidth: 2,
+    borderColor: 'transparent',
   },
-  themeTileText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    fontFamily: FONTS.sansBold,
-  },
-  checkIcon: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
+  themeDotActive: {
+    borderColor: COLORS.gold,
   },
   lineHeightRow: {
     flexDirection: 'row',
