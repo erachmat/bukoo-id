@@ -54,3 +54,8 @@ pg-client-17/
 
 # Expo local tooling
 .expo/
+
+# Signing / keystores — never commit these (release keystore + properties are secrets)
+*.keystore
+*.jks
+keystore.properties
