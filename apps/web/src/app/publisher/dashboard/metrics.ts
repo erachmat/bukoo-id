@@ -1,3 +1,5 @@
+import { isBookAccessible } from '@bukoo/shared-types';
+
 export interface DashboardMetricRow {
   bookId: string;
   userId?: string;
@@ -186,4 +188,29 @@ const COUNTRY_LABELS: Record<string, string> = {
 
 export function countryLabel(code: string): string {
   return COUNTRY_LABELS[code] ?? (code === 'XX' ? 'Tidak diketahui' : code);
+}
+
+export interface PremiumReaderBook {
+  id: string;
+  subscriptionRequired: string;
+}
+
+export function bucketPremiumReaders(
+  readerRows: { bookId: string; userId: string }[],
+  tierByUser: Map<string, string>,
+  books: PremiumReaderBook[],
+): Record<string, { distinctReaders: number; belowTierReaders: number; eligibleReaders: number }> {
+  const result: Record<string, { distinctReaders: number; belowTierReaders: number; eligibleReaders: number }> = {};
+  for (const book of books) {
+    const rows = readerRows.filter((row) => row.bookId === book.id);
+    let below = 0;
+    let eligible = 0;
+    for (const row of rows) {
+      const tier = tierByUser.get(row.userId) ?? 'FREE';
+      if (isBookAccessible(tier, book.subscriptionRequired)) eligible += 1;
+      else below += 1;
+    }
+    result[book.id] = { distinctReaders: rows.length, belowTierReaders: below, eligibleReaders: eligible };
+  }
+  return result;
 }

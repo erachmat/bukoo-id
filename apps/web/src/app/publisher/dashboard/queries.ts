@@ -8,9 +8,11 @@ import {
   publisherProfiles,
   notifications as notificationsTable,
   publisherPayouts,
+  subscriptions,
 } from '@bukoo/db';
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
-import { bucketReaderLoyalty, getPeriodRange, rankTopBooks, resolveDashboardPeriod, type DateRange } from './metrics';
+import { bucketPremiumReaders, bucketReaderLoyalty, getPeriodRange, rankTopBooks, resolveDashboardPeriod, type DateRange } from './metrics';
+import { tierFromSubscription } from '@/lib/subscription';
 import type { PublisherCatalogBook } from '../catalog-table';
 
 export async function getPublisherCatalog(publisherUserId: string): Promise<PublisherCatalogBook[]> {
@@ -101,6 +103,10 @@ export interface PublisherDashboardOverview {
     read: boolean;
   }[];
   payouts: { id: string; amount: number; currency: string; status: string; externalRef: string | null; createdAt: string }[];
+  premiumInsights: {
+    premiumBookCount: number;
+    books: { id: string; title: string; requiredTier: string; distinctReaders: number; belowTierReaders: number; eligibleReaders: number }[];
+  };
 }
 
 export async function getPublisherDashboardOverview(
@@ -119,6 +125,7 @@ export async function getPublisherDashboardOverview(
       readCount: booksTable.readCount,
       isPublished: booksTable.isPublished,
       publicationStatus: booksTable.publicationStatus,
+      subscriptionRequired: booksTable.subscriptionRequired,
     })
     .from(booksTable)
     .where(eq(booksTable.publisherUserId, publisherUserId))
@@ -232,6 +239,31 @@ export async function getPublisherDashboardOverview(
       };
     });
 
+  const premiumBooks = publisherBooks.filter((book) => book.subscriptionRequired !== 'FREE');
+  const premiumInsights: PublisherDashboardOverview['premiumInsights'] = { premiumBookCount: premiumBooks.length, books: [] };
+  if (premiumBooks.length > 0) {
+    const premiumBookIds = premiumBooks.map((book) => book.id);
+    const readerRows = await db
+      .select({ bookId: publisherBookReaderDays.bookId, userId: publisherBookReaderDays.userId })
+      .from(publisherBookReaderDays)
+      .where(inArray(publisherBookReaderDays.bookId, premiumBookIds))
+      .groupBy(publisherBookReaderDays.bookId, publisherBookReaderDays.userId);
+    const readerIds = [...new Set(readerRows.map((row) => row.userId))];
+    const tierByUser = new Map<string, string>();
+    if (readerIds.length > 0) {
+      const subscriptionRows = await db
+        .select({ userId: subscriptions.userId, planId: subscriptions.planId, status: subscriptions.status })
+        .from(subscriptions)
+        .where(inArray(subscriptions.userId, readerIds));
+      for (const row of subscriptionRows) tierByUser.set(row.userId, tierFromSubscription({ status: row.status, planId: row.planId }));
+    }
+    const buckets = bucketPremiumReaders(readerRows, tierByUser, premiumBooks.map((book) => ({ id: book.id, subscriptionRequired: book.subscriptionRequired })));
+    premiumInsights.books = premiumBooks.map((book) => {
+      const bucket = buckets[book.id] ?? { distinctReaders: 0, belowTierReaders: 0, eligibleReaders: 0 };
+      return { id: book.id, title: book.title, requiredTier: book.subscriptionRequired, ...bucket };
+    });
+  }
+
   const profile = await db.query.publisherProfiles.findFirst({
     where: eq(publisherProfiles.userId, publisherUserId),
     columns: { displayName: true },
@@ -274,5 +306,6 @@ export async function getPublisherDashboardOverview(
       read: !!n.readAt,
     })),
     payouts,
+    premiumInsights,
   };
 }

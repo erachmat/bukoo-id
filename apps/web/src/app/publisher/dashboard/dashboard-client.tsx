@@ -71,6 +71,8 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
         </div>
       </div>
 
+      <PremiumInsightsPanel insights={overview?.premiumInsights} />
+
       {/* Notifications */}
       <div className="pds-panel">
         <div className="pds-panel-title">🔔 Notifikasi Terbaru<button className="more" onClick={() => onTabChange("notifikasi")}>Semua →</button></div>
@@ -99,6 +101,37 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
         <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Tanggal</th><th>Status</th><th className="r">Jumlah</th><th>Referensi</th></tr></thead><tbody>{(overview?.payouts ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada settlement.</td></tr> : overview!.payouts.map((payout) => <tr key={payout.id}><td>{new Date(payout.createdAt).toLocaleDateString('id-ID')}</td><td>{payout.status}</td><td className="r num">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</td><td>{payout.externalRef || '—'}</td></tr>)}</tbody></table></div>
       </div>
     </>
+  );
+}
+
+function PremiumInsightsPanel({ insights }: { insights?: PublisherDashboardOverview['premiumInsights'] }) {
+  const data = insights ?? { premiumBookCount: 0, books: [] };
+  return (
+    <div className="pds-panel">
+      <div className="pds-panel-title">💎 Potensi Premium <span className="tag">agregat · tanpa identitas pembaca</span></div>
+      {data.premiumBookCount === 0 ? (
+        <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--pds-muted)', fontSize: 12 }}>
+          Belum ada buku premium. Tetapkan tier akses premium pada judul untuk melihat potensi konversi.
+        </div>
+      ) : (
+        <div className="pds-tbl-scroll">
+          <table className="pds-tbl">
+            <thead><tr><th>Judul</th><th>Tier wajib</th><th className="r">Pembaca</th><th className="r">Berpotensi upgrade</th><th className="r">Sudah memenuhi</th></tr></thead>
+            <tbody>
+              {data.books.map((book) => (
+                <tr key={book.id}>
+                  <td className="t-main">{book.title}</td>
+                  <td>{book.requiredTier}</td>
+                  <td className="r num">{book.distinctReaders.toLocaleString('id-ID')}</td>
+                  <td className="r num" style={{ color: 'var(--pds-coral)' }}>{book.belowTierReaders.toLocaleString('id-ID')}</td>
+                  <td className="r num" style={{ color: 'var(--pds-teal)' }}>{book.eligibleReaders.toLocaleString('id-ID')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }
 

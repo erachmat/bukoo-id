@@ -8,6 +8,7 @@ import {
   getPeriodRange,
   normalizeCountryCode,
   countryLabel,
+  bucketPremiumReaders,
   rankBooksByPeriodActivity,
   rankTopBooks,
   resolveDashboardPeriod,
@@ -122,5 +123,34 @@ describe('publisher dashboard metrics', () => {
     expect(countryLabel('ID')).toBe('Indonesia');
     expect(countryLabel('XX')).toBe('Tidak diketahui');
     expect(countryLabel('JP')).toBe('JP');
+  });
+
+  it('buckets premium readers by conversion potential without identities', () => {
+    const tiers = new Map<string, string>([
+      ['reader-a', 'FREE'],
+      ['reader-b', 'PLUS'],
+      ['reader-c', 'PREMIUM'],
+    ]);
+    const buckets = bucketPremiumReaders(
+      [
+        { bookId: 'premium', userId: 'reader-a' },
+        { bookId: 'premium', userId: 'reader-b' },
+        { bookId: 'premium', userId: 'reader-c' },
+        { bookId: 'premium', userId: 'reader-unknown' },
+      ],
+      tiers,
+      [{ id: 'premium', subscriptionRequired: 'PREMIUM' }],
+    );
+    expect(buckets['premium']).toEqual({ distinctReaders: 4, belowTierReaders: 3, eligibleReaders: 1 });
+  });
+
+  it('treats missing subscriptions as free and excludes other books', () => {
+    const buckets = bucketPremiumReaders(
+      [{ bookId: 'a', userId: 'reader-a' }, { bookId: 'b', userId: 'reader-b' }],
+      new Map(),
+      [{ id: 'a', subscriptionRequired: 'PLUS' }],
+    );
+    expect(buckets['a']).toEqual({ distinctReaders: 1, belowTierReaders: 1, eligibleReaders: 0 });
+    expect(buckets['b']).toBeUndefined();
   });
 });

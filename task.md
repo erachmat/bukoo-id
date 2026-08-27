@@ -10,6 +10,10 @@
 
 # Publisher Dashboard Features — 2026-08-27
 
+- `[ ]` Premium tier insights: aggregate reader-tier conversion potential per premium book.
+  - `[x]` Implementation complete; web tests/typecheck/lint pass (20 tests).
+  - `[ ]` Browser QA and deployment.
+
 - `[ ]` Featured Book program: admin curation, publisher badge, and real storefront featured row.
   - `[x]` Implementation complete; migration `0009_slim_dazzler.sql` validated; web tests/typecheck/lint pass.
   - `[ ]` Browser QA and deployment.
