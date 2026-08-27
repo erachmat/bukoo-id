@@ -41,7 +41,7 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
 
   const handleSignOut = () => {
     startSignOut(async () => {
-      await signOut({ redirectTo: "/publisher/daftar" });
+      await signOut({ redirectTo: "/publisher/daftar?logout=1" });
     });
   };
 

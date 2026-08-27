@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import { authConfig } from "./auth.config"
 import { NextResponse, type NextRequest } from "next/server"
+import { shouldBouncePublisherFromLanding } from "@/lib/publisher-landing-guard"
 
 const { auth } = NextAuth(authConfig)
 
@@ -36,7 +37,10 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
       return NextResponse.redirect(new URL(`${target}${search}`, req.url))
     }
 
-    if (user && user.role === "PUBLISHER" && (pathname === "/" || pathname === "/daftar" || pathname === "/publisher/daftar")) {
+    // Bounce signed-in publishers away from the public landing pages, unless
+    // this is a sign-out redirect (see shouldBouncePublisherFromLanding).
+    const isLogoutLanding = pathname === "/publisher/daftar" && req.nextUrl.searchParams.get("logout") === "1";
+    if (shouldBouncePublisherFromLanding({ isPublisherHost, userRole: user?.role, pathname, isLogoutLanding })) {
       return NextResponse.redirect(new URL("/publisher/dashboard", req.url))
     }
 

@@ -6,6 +6,7 @@ import { users } from '@bukoo/db';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { createId } from '@paralleldrive/cuid2';
 import {
   safeCallbackUrl,
@@ -142,6 +143,31 @@ export async function signInWithGoogle(formData: FormData) {
 }
 
 export async function signOut(options?: { redirectTo?: string }) {
+  // Hardening: NextAuth's own cookie clearing can be unreliable on Cloudflare
+  // Workers, leaving the JWT session cookie behind (see AGENTS.md). Explicitly
+  // expire the session/CSRF cookies here. This must run BEFORE nextAuthSignOut,
+  // which throws the redirect; the mutations are flushed onto its 303 response.
+  const cookieStore = await cookies();
+  const clearCookies: Array<[name: string, secure: boolean]> = [
+    // Secure variant (HTTPS hosts like publisher.bukoo.id). A bare delete()
+    // would omit the `Secure` attribute, so browsers reject clearing a
+    // `__Secure-`-prefixed cookie.
+    ['__Secure-authjs.session-token', true],
+    ['__Secure-authjs.csrf-token', true],
+    // Non-secure fallback.
+    ['authjs.session-token', false],
+    ['authjs.csrf-token', false],
+  ];
+  for (const [name, secure] of clearCookies) {
+    cookieStore.set(name, '', {
+      path: '/',
+      maxAge: 0,
+      httpOnly: true,
+      secure,
+      sameSite: 'lax',
+    });
+  }
+
   await nextAuthSignOut({ redirectTo: options?.redirectTo ?? '/' });
 }
 

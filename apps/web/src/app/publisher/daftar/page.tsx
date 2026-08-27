@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
 import { DaftarForm } from "./DaftarForm";
+import { LogoutMarkerCleanup } from "./LogoutMarkerCleanup";
 
 export const metadata = {
   title: "BUKOO — Daftar Penerbit",
@@ -11,6 +12,7 @@ export const metadata = {
 export default function PublisherDaftarPage() {
   return (
     <div className="pub-page-wrap">
+      <LogoutMarkerCleanup />
       <PublisherNav currentTab="daftar" />
 
       {/* Hero Section */}

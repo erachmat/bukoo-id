@@ -1,3 +1,11 @@
+# Publisher Logout → Landing Page — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-logout-fix-design.md` + plan `docs/superpowers/plans/2026-08-27-publisher-logout-fix.md` + ledger `.superpowers/sdd/publisher-logout-fix/progress.md` (appended). User-approved.
+- `[x]` 2. Middleware marker exception: sign-out redirects to `/publisher/daftar?logout=1`; new `shouldBouncePublisherFromLanding()` helper (`apps/web/src/lib/publisher-landing-guard.ts`) wired into `middleware.ts` so the marker bypasses the logged-in-publisher bounce; `LogoutMarkerCleanup` strips the marker from the address bar.
+- `[x]` 3. Cookie hardening: `(auth)/actions.ts` `signOut` expires `__Secure-authjs.session-token` / `authjs.session-token` (+ CSRF variants) before the NextAuth redirect (JWT cookie clearing flaky on Workers).
+- `[x]` 4. Tests: `publisher-landing-guard.test.ts` (7 cases); web tests 27/27 pass, typecheck ✅, lint 0 errors (3 pre-existing warnings).
+- `[ ]` 5. Manual QA on `publisher.bukoo.id`: publisher login → Keluar → lands on `/publisher/daftar` with session cleared; customer/admin logout regression.
+
 # Publisher Dashboard Hardening And UX — 2026-08-27
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-dashboard-hardening-design.md`, plan `docs/superpowers/plans/2026-08-27-publisher-dashboard-hardening.md`, and ledger `.superpowers/sdd/publisher-dashboard-hardening/` created; approved to implement.

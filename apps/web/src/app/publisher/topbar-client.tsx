@@ -141,7 +141,7 @@ export function PublisherTopbar({
                 onClick={() => {
                   setAvatarOpen(false);
                   startSignOut(async () => {
-                    await signOut({ redirectTo: "/publisher/daftar" });
+                    await signOut({ redirectTo: "/publisher/daftar?logout=1" });
                   });
                 }}
               >
