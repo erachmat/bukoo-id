@@ -82,7 +82,7 @@ export function CampaignsClient({ books, campaigns }: { books: EligibleBook[]; c
         </div>
       )}
       {error && (
-        <div className="pds-alert" style={{ background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.24)' }}>
+        <div role="alert" aria-live="assertive" className="pds-alert" style={{ background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.24)' }}>
           <span className="ic">⚠</span>
           <span className="txt" style={{ color: 'var(--pds-coral)', fontWeight: 700 }}>{error}</span>
         </div>

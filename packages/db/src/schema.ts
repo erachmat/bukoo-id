@@ -609,6 +609,31 @@ export const publisherBookDailyMetrics = sqliteTable(
   ],
 );
 
+// Country-level reader-day aggregates. ISO 3166-1 alpha-2 from CF-IPCountry
+// (or 'XX' when unknown). Never stores IP addresses.
+export const publisherBookCountryMetrics = sqliteTable(
+  'publisher_book_country_metrics',
+  {
+    id:          text('id').primaryKey(),
+    bookId:      text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+    /** ISO date 'YYYY-MM-DD' */
+    metricDate:  text('metric_date').notNull(),
+    /** ISO 3166-1 alpha-2, or 'XX' when unknown. */
+    countryCode: text('country_code').notNull(),
+    readerDays:  integer('reader_days').notNull().default(0),
+    createdAt:   text('created_at').notNull().default(now()),
+    updatedAt:   text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    uniqueIndex('publisher_book_country_metrics_book_date_country_idx').on(
+      t.bookId,
+      t.metricDate,
+      t.countryCode,
+    ),
+    index('publisher_book_country_metrics_book_date_idx').on(t.bookId, t.metricDate),
+  ],
+);
+
 // In-app notification inbox (web publisher). Separate from deviceTokens (push).
 export const notifications = sqliteTable(
   'notifications',
@@ -629,6 +654,16 @@ export const notifications = sqliteTable(
     index('notifications_user_created_idx').on(t.userId, t.createdAt),
     index('notifications_user_read_created_idx').on(t.userId, t.readAt, t.createdAt),
   ],
+);
+
+// Admin-controlled platform configuration.
+export const platformSettings = sqliteTable(
+  'platform_settings',
+  {
+    key:       text('key').primaryKey(),
+    value:     text('value').notNull(),
+    updatedAt: text('updated_at').notNull().default(now()),
+  },
 );
 
 // Estimated royalty period (read-model). Money in integer IDR minor units.
@@ -755,6 +790,7 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   submissions:     many(publisherSubmissions),
   readerDays:      many(publisherBookReaderDays),
   dailyMetrics:    many(publisherBookDailyMetrics),
+  countryMetrics:  many(publisherBookCountryMetrics),
   royaltyLines:    many(publisherRoyaltyLines),
 }));
 
@@ -863,6 +899,10 @@ export const publisherBookReaderDaysRelations = relations(publisherBookReaderDay
 
 export const publisherBookDailyMetricsRelations = relations(publisherBookDailyMetrics, ({ one }) => ({
   book: one(books, { fields: [publisherBookDailyMetrics.bookId], references: [books.id] }),
+}));
+
+export const publisherBookCountryMetricsRelations = relations(publisherBookCountryMetrics, ({ one }) => ({
+  book: one(books, { fields: [publisherBookCountryMetrics.bookId], references: [books.id] }),
 }));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({

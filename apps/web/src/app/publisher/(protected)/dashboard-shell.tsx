@@ -17,7 +17,6 @@ interface DashboardShellProps {
 
 // Tab → route mapping for navigation tabs that have real pages
 const TAB_ROUTES: Record<string, string> = {
-  katalog:      "/publisher/books",
   upload:       "/publisher/books/new",
   notifikasi:   "/publisher/notifications",
   pengaturan:   "/publisher/settings",
@@ -32,7 +31,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const router = useRouter();
   const [internalTab, setInternalTab] = useState("overview");
-  const name = user.name || "Gramedia Pustaka Utama";
+  const name = user.name || "Mitra Penerbit";
 
   const activeTab = controlledTab ?? internalTab;
 

@@ -13,6 +13,7 @@
 
 import {
   books,
+  publisherBookCountryMetrics,
   publisherBookDailyMetrics,
   publisherBookReaderDays,
 } from './schema.js';
@@ -26,6 +27,13 @@ export type Database = DrizzleD1Database<typeof schema>;
 function todayDate(): string {
   // 'YYYY-MM-DD' in UTC — matches the reader-day/daily-metric key.
   return new Date().toISOString().slice(0, 10);
+}
+
+/** ISO 3166-1 alpha-2, or XX when missing/invalid. Never stores an IP. */
+export function normalizeCountryCode(value: string | null | undefined): string {
+  const code = value?.trim().toUpperCase() ?? '';
+  if (/^[A-Z]{2}$/.test(code) && code !== 'T1') return code;
+  return 'XX';
 }
 
 /**
@@ -46,6 +54,8 @@ export async function recordPublisherReadingMetric(
     readingSecondsDelta?: number;
     isStart?: boolean;
     isCompletion?: boolean;
+    /** Cloudflare CF-IPCountry (ISO alpha-2). Never pass an IP. */
+    countryCode?: string | null;
   },
 ): Promise<void> {
   const {
@@ -55,6 +65,7 @@ export async function recordPublisherReadingMetric(
     readingSecondsDelta = 0,
     isStart = false,
     isCompletion = false,
+    countryCode,
   } = input;
   const today = todayDate();
   const now = new Date().toISOString();
@@ -138,5 +149,31 @@ export async function recordPublisherReadingMetric(
         updatedAt: now,
       })
       .where(eq(books.id, bookId));
+
+    const country = normalizeCountryCode(countryCode);
+    const existingCountry = await db.query.publisherBookCountryMetrics.findFirst({
+      where: and(
+        eq(publisherBookCountryMetrics.bookId, bookId),
+        eq(publisherBookCountryMetrics.metricDate, today),
+        eq(publisherBookCountryMetrics.countryCode, country),
+      ),
+    });
+    if (existingCountry) {
+      await db
+        .update(publisherBookCountryMetrics)
+        .set({
+          readerDays: existingCountry.readerDays + 1,
+          updatedAt: now,
+        })
+        .where(eq(publisherBookCountryMetrics.id, existingCountry.id));
+    } else {
+      await db.insert(publisherBookCountryMetrics).values({
+        id: createId(),
+        bookId,
+        metricDate: today,
+        countryCode: country,
+        readerDays: 1,
+      });
+    }
   }
 }

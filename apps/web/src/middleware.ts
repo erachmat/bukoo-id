@@ -85,9 +85,9 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
     }
   }
 
-  // Protected publisher operations (e.g. books/new)
-  if (pathname.startsWith("/publisher/books/new")) {
-    if (!user) {
+  // Protected publisher catalog operations
+  if (pathname.startsWith("/publisher/books")) {
+    if (!user || user.role !== "PUBLISHER") {
       const loginTarget = isPublisherHost ? "/publisher/login" : "/login"
       return NextResponse.redirect(new URL(`${loginTarget}?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
     }

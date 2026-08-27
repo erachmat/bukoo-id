@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview } from "./queries";
+import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
+import { getCoverUrl } from "@/lib/cover-url";
 
 interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
   overview?: PublisherDashboardOverview;
+  catalog?: PublisherCatalogBook[];
+  tab: string;
 }
 
 // ── page: overview ────────────────────────────────────────────
@@ -27,10 +33,11 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
           <button className="pds-btn pds-btn-primary" onClick={() => window.location.href = "/publisher/books/new"}>+ Upload Buku Baru</button>
         </div>
       </div>
+      <PeriodChips period={overview?.period.key ?? 'this_month'} />
 
       <div className="pds-kpi-row">
         <div className="pds-kpi teal"><div className="pds-kpi-label">Pembaca Bulan Ini</div><div className="pds-kpi-num">{totalReaders.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">pembaca aktif unik</div></div>
-        <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti (Bulan Ini)</div><div className="pds-kpi-num">{royalty > 0 ? fmtRp.format(royalty) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi dari data baca</div></div>
+        <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti (Bulan Ini)</div><div className="pds-kpi-num">{royalty > 0 ? fmtRp.format(royalty) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · pool diatur admin</div></div>
         <div className="pds-kpi coral"><div className="pds-kpi-label">Total Waktu Baca</div><div className="pds-kpi-num">{totalMinutes.toLocaleString('id-ID')} mnt</div><div className="pds-kpi-chg pds-flat">menit bulan ini</div></div>
         <div className="pds-kpi sky"><div className="pds-kpi-label">Judul Aktif</div><div className="pds-kpi-num">{overview?.publishedBooks ?? 0}</div><div className="pds-kpi-chg pds-flat">{(overview?.inReviewBooks ?? 0) + ' dalam review'}</div></div>
       </div>
@@ -50,7 +57,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
                   overview!.topBooks.map((b, i) => (
                     <tr key={b.id}>
                       <td style={{ width: 24 }}><div className="pds-rank bronze">{i + 1}</div></td>
-                      <td style={{ width: 34 }}><div className="pds-thumb">{b.coverKey ? '📖' : '📕'}</div></td>
+                      <td style={{ width: 34 }}><div className="pds-thumb">{b.coverKey ? <img src={getCoverUrl(b.coverKey)} alt="" /> : '📕'}</div></td>
                       <td><div className="t-main">{b.title}</div><div className="t-sub">{b.author}</div></td>
                       <td className="r"><div className="t-main num" style={{ color: "var(--pds-teal)" }}>{b.readCount.toLocaleString('id-ID')}</div><div className="t-sub">pembacaan</div></td>
                       <td className="r"><div className="t-main num">{Math.round(b.readSeconds / 60).toLocaleString('id-ID')} mnt</div><div className="t-sub">waktu baca</div></td>
@@ -86,12 +93,38 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
           )}
         </div>
       </div>
+      <div className="pds-panel" style={{ marginTop: 14 }}>
+        <div className="pds-panel-title">Riwayat settlement <span className="tag">ledger manual · bukan transfer langsung</span></div>
+        <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Tanggal</th><th>Status</th><th className="r">Jumlah</th><th>Referensi</th></tr></thead><tbody>{(overview?.payouts ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada settlement.</td></tr> : overview!.payouts.map((payout) => <tr key={payout.id}><td>{new Date(payout.createdAt).toLocaleDateString('id-ID')}</td><td>{payout.status}</td><td className="r num">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</td><td>{payout.externalRef || '—'}</td></tr>)}</tbody></table></div>
+      </div>
     </>
   );
 }
 
+function PeriodChips({ period }: { period: PublisherDashboardOverview['period']['key'] }) {
+  const options = [
+    { key: 'this_month' as const, label: 'Bulan ini' },
+    { key: 'last_month' as const, label: 'Bulan lalu' },
+    { key: 'all_time' as const, label: 'Semua waktu' },
+  ];
+  return (
+    <div className="pds-period-chips" aria-label="Periode data">
+      {options.map((option) => (
+        <Link
+          href={`/publisher/dashboard?period=${option.key}`}
+          key={option.key}
+          className={`pds-period-chip${period === option.key ? ' active' : ''}`}
+          aria-current={period === option.key ? 'page' : undefined}
+        >
+          {option.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 // ── page: katalog (tab view) ──────────────────────────────────
-function PageKatalog() {
+function PageKatalog({ catalog }: { catalog: PublisherCatalogBook[] }) {
   return (
     <>
       <div className="pds-page-head">
@@ -100,37 +133,10 @@ function PageKatalog() {
           <div className="pds-page-sub">Kelola judul, status, dan berkas dari halaman katalog.</div>
         </div>
         <div className="pds-head-actions">
-          <a href="/publisher/books" className="pds-btn pds-btn-primary">Buka Katalog →</a>
+          <a href="/publisher/books/new" className="pds-btn pds-btn-primary">+ Upload Buku Baru</a>
         </div>
       </div>
-      <div className="pds-panel" style={{ textAlign: "center", padding: "60px 24px" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>📚</div>
-        <div style={{ fontFamily: "var(--pds-serif)", fontSize: 20, color: "#fff", marginBottom: 8 }}>Katalog Buku</div>
-        <div style={{ fontSize: 12, color: "var(--pds-dim)" }}>
-          Kelola buku Anda di <a href="/publisher/books" style={{ color: "var(--pds-teal)" }}>halaman katalog</a> — unggah, edit, dan pantau status review.
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── page: notifikasi ──────────────────────────────────────────
-function PageNotifikasi() {
-  return (
-    <>
-      <div className="pds-page-head">
-        <div>
-          <div className="pds-page-title">Notifikasi</div>
-          <div className="pds-page-sub">Aktivitas akun penerbit Anda.</div>
-        </div>
-      </div>
-      <div className="pds-panel" style={{ textAlign: "center", padding: "60px 24px" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔔</div>
-        <div style={{ fontFamily: "var(--pds-serif)", fontSize: 20, color: "#fff", marginBottom: 8 }}>Notifikasi</div>
-        <div style={{ fontSize: 12, color: "var(--pds-dim)" }}>
-          Buka <a href="/publisher/notifications" style={{ color: "var(--pds-teal)" }}>halaman notifikasi</a> untuk melihat semua aktivitas.
-        </div>
-      </div>
+      <CatalogTable books={catalog} />
     </>
   );
 }
@@ -144,11 +150,11 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
   return (
     <>
       <div className="pds-page-head">
-        <div><div className="pds-page-title">Royalti</div><div className="pds-page-sub">Estimasi berbasis data baca · nilai final dihitung dari settlement resmi</div></div>
+        <div><div className="pds-page-title">Royalti</div><div className="pds-page-sub">Estimasi berbasis data baca · {overview?.period.label ?? 'Bulan ini'} · nilai final dihitung dari settlement resmi</div></div>
       </div>
       <div className="pds-kpi-row">
-        <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti Bulan Ini</div><div className="pds-kpi-num">{estimate > 0 ? fmtRp.format(estimate) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · formula 65%</div></div>
-        <div className="pds-kpi teal"><div className="pds-kpi-label">Total Pembacaan</div><div className="pds-kpi-num">{entries.reduce((s, b) => s + b.readCount, 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">pembacaan kumulatif</div></div>
+        <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti Bulan Ini</div><div className="pds-kpi-num">{estimate > 0 ? fmtRp.format(estimate) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · pool diatur admin</div></div>
+        <div className="pds-kpi teal"><div className="pds-kpi-label">Total Pembacaan</div><div className="pds-kpi-num">{(overview?.totalLifetimeReads ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">pembacaan kumulatif</div></div>
         <div className="pds-kpi sky"><div className="pds-kpi-label">Total Waktu Baca</div><div className="pds-kpi-num">{Math.round((overview?.totalReadingSeconds ?? 0) / 3600).toLocaleString('id-ID')} jam</div><div className="pds-kpi-chg pds-flat">bulan ini</div></div>
       </div>
       <div className="pds-panel">
@@ -176,37 +182,55 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
           Royalti ditampilkan sebagai <b>estimasi</b> berbasis aktivitas baca. Nilai final mengikuti settlement dan kebijakan kontrak penerbit.
         </div>
       </div>
+      <div className="pds-panel" style={{ marginTop: 14 }}>
+        <div className="pds-panel-title">Riwayat settlement <span className="tag">ledger manual · bukan transfer langsung</span></div>
+        <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Tanggal</th><th>Status</th><th className="r">Jumlah</th><th>Referensi</th></tr></thead><tbody>{(overview?.payouts ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada settlement.</td></tr> : overview!.payouts.map((payout) => <tr key={payout.id}><td>{new Date(payout.createdAt).toLocaleDateString('id-ID')}</td><td>{payout.status}</td><td className="r num">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</td><td>{payout.externalRef || '—'}</td></tr>)}</tbody></table></div>
+      </div>
     </>
   );
 }
 
+function PagePerforma({ catalog }: { catalog: PublisherCatalogBook[] }) {
+  return <>
+    <div className="pds-page-head"><div><div className="pds-page-title">Performa Buku</div><div className="pds-page-sub">Pilih judul untuk melihat pembacaan dan tren berdasarkan periode.</div></div></div>
+    <div className="pds-panel"><div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Judul</th><th>Penulis</th><th className="r">Pembacaan kumulatif</th><th className="c">Aksi</th></tr></thead><tbody>{catalog.length === 0 ? <tr><td colSpan={4} style={{ padding: 40, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada buku untuk dianalisis.</td></tr> : catalog.map((book) => <tr key={book.id}><td className="t-main">{book.title}</td><td>{book.author}</td><td className="r num">{book.readCount.toLocaleString('id-ID')}</td><td className="c"><Link href={`/publisher/books/${book.id}/analytics`} style={{ color: 'var(--pds-teal)', textDecoration: 'none', fontWeight: 600 }}>Lihat analitik →</Link></td></tr>)}</tbody></table></div></div>
+  </>;
+}
+
+function PagePembaca({ overview }: { overview?: PublisherDashboardOverview }) {
+  const loyalty = overview?.readerLoyalty ?? { oneDay: 0, twoToFourDays: 0, fivePlusDays: 0 };
+  return <>
+    <div className="pds-page-head"><div><div className="pds-page-title">Pembaca</div><div className="pds-page-sub">Retensi berdasarkan jumlah hari baca dalam {overview?.period.label ?? 'periode terpilih'}.</div></div></div>
+    <div className="pds-panel"><div className="pds-panel-title">Retensi pembaca <span className="tag">tanpa usia, gender, atau lokasi</span></div><div className="pds-kpi-row"><div className="pds-kpi teal"><div className="pds-kpi-label">1 hari baca</div><div className="pds-kpi-num">{loyalty.oneDay.toLocaleString('id-ID')}</div></div><div className="pds-kpi sky"><div className="pds-kpi-label">2–4 hari baca</div><div className="pds-kpi-num">{loyalty.twoToFourDays.toLocaleString('id-ID')}</div></div><div className="pds-kpi amber"><div className="pds-kpi-label">5+ hari baca</div><div className="pds-kpi-num">{loyalty.fivePlusDays.toLocaleString('id-ID')}</div></div></div></div>
+  </>;
+}
+
 // ── page: metadata ────────────────────────────────────────────
-function PageMetadata() {
+function PageMetadata({ catalog }: { catalog: PublisherCatalogBook[] }) {
   return (
     <>
       <div className="pds-page-head">
         <div><div className="pds-page-title">Metadata</div><div className="pds-page-sub">Kelengkapan metadata buku Anda</div></div>
       </div>
       <div className="pds-panel">
-        <div style={{ textAlign: "center", padding: "24px 16px", fontSize: 12, color: "var(--pds-dim)" }}>
-          Metadata dapat dikelola dari halaman <a href="/publisher/books" style={{ color: "var(--pds-teal)" }}>Katalog</a> &gt; pilih buku &gt; Edit. Pastikan judul, penulis, ISBN, sinopsis, genre, dan sampul terisi lengkap untuk daya temu yang baik.
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── page: generic placeholder ─────────────────────────────────
-function PagePlaceholder({ title, sub, icon }: { title: string; sub: string; icon: string }) {
-  return (
-    <>
-      <div className="pds-page-head">
-        <div><div className="pds-page-title">{title}</div><div className="pds-page-sub">{sub}</div></div>
-      </div>
-      <div className="pds-panel" style={{ textAlign: "center", padding: "60px 24px" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-        <div style={{ fontFamily: "var(--pds-serif)", fontSize: 20, color: "#fff", marginBottom: 8 }}>{title}</div>
-        <div style={{ fontSize: 12, color: "var(--pds-dim)" }}>Fitur ini belum tersedia. Data aktual akan ditampilkan setelah fitur rilis.</div>
+        <div className="pds-panel-title">Kelengkapan metadata <span className="tag">6 bidang dasar</span></div>
+        <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Judul</th><th>Bahasa</th><th>Genre</th><th>Sampul</th><th>Sinopsis</th><th>Halaman</th><th className="r">Skor</th></tr></thead><tbody>
+          {catalog.length === 0 ? <tr><td colSpan={7} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada buku.</td></tr> : catalog.map((book) => {
+            let genres: string[] = [];
+            if (Array.isArray(book.genre)) genres = book.genre;
+            else {
+              try {
+                const parsed = JSON.parse(book.genre || '[]');
+                if (Array.isArray(parsed)) genres = parsed;
+              } catch {
+                genres = [];
+              }
+            }
+            const checks = [Boolean(book.title), Boolean(book.language), genres.length > 0, Boolean(book.coverKey), Boolean(book.synopsis?.trim()), Boolean(book.totalPages && book.totalPages > 0)];
+            const score = checks.filter(Boolean).length;
+            return <tr key={book.id}><td className="t-main">{book.title}</td>{checks.slice(1, 6).map((complete, index) => <td key={index} style={{ color: complete ? 'var(--pds-teal)' : 'var(--pds-muted)' }}>{complete ? 'Lengkap' : 'Belum diisi'}</td>)}<td className="r num">{score}/6</td></tr>;
+          })}
+        </tbody></table></div>
       </div>
     </>
   );
@@ -229,27 +253,31 @@ function PageUnavailable({ title, sub, icon }: { title: string; sub: string; ico
 }
 
 // ── main dashboard client ─────────────────────────────────────
-export function DashboardClient({ user, overview }: DashboardClientProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+export function DashboardClient({ user, overview, catalog = [], tab }: DashboardClientProps) {
+  const router = useRouter();
+  const activeTab = tab;
+  const onTabChange = (nextTab: string) => {
+    const period = overview?.period.key ?? 'this_month';
+    router.replace(`/publisher/dashboard?tab=${nextTab}&period=${period}`);
+  };
 
   const renderPage = () => {
     switch (activeTab) {
-      case "overview":   return <PageOverview onTabChange={setActiveTab} overview={overview} />;
-      case "katalog":    return <PageKatalog />;
+      case "overview":   return <PageOverview onTabChange={onTabChange} overview={overview} />;
+      case "katalog":    return <PageKatalog catalog={catalog} />;
       case "royalti":    return <PageRoyalti overview={overview} />;
-      case "notifikasi": return <PageNotifikasi />;
-      case "performa":   return <PagePlaceholder title="Performa Buku" sub="Analisis per judul — pembacaan, tingkat selesai, rating, dan tren" icon="📈" />;
-      case "pembaca":    return <PagePlaceholder title="Pembaca" sub="Metrik retensi, frekuensi baca, dan loyalitas pembaca" icon="👥" />;
+      case "performa":   return <PagePerforma catalog={catalog} />;
+      case "pembaca":    return <PagePembaca overview={overview} />;
       case "demografi":  return <PageUnavailable title="Demografi" sub="Data demografi pembaca belum tersedia" icon="🧬" />;
       case "geo":        return <PageUnavailable title="Sebaran Geografis" sub="Data geografis pembaca belum tersedia" icon="🗺️" />;
       case "waktu":      return <PageUnavailable title="Waktu Baca" sub="Data ritme baca belum tersedia" icon="⏱️" />;
-      case "metadata":   return <PageMetadata />;
-      default:           return <PageOverview onTabChange={setActiveTab} overview={overview} />;
+      case "metadata":   return <PageMetadata catalog={catalog} />;
+      default:           return <PageOverview onTabChange={onTabChange} overview={overview} />;
     }
   };
 
   return (
-    <DashboardShell user={user ?? {}} activeTab={activeTab} onTabChange={setActiveTab}>
+    <DashboardShell user={user ?? {}} activeTab={activeTab} onTabChange={onTabChange}>
       {renderPage()}
     </DashboardShell>
   );

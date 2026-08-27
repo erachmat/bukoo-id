@@ -15,6 +15,8 @@ Plan: `docs/superpowers/plans/2026-08-26-publisher-dashboard-features.md`
 - Task 8 (settings/profile/payout): complete — `publisher/settings` profile + masked payout account.
 - Task 9 (navigation honesty): complete — removed fake counts, routed katalog/notifikasi/pengaturan, disabled uncollected-data tabs, footer updated.
 - Task 10 (verification): complete — web typecheck ✅ / lint 0 errors (26 pre-existing warnings) ✅ / web no test script (stated); api typecheck ✅ / lint 0 errors (4 pre-existing warnings) ✅ / tests 14/14 ✅; db typecheck+build+`drizzle-kit check` ✅.
+- Task 11 (period filters and SQL distinct readers): complete — dashboard KPIs accept shareable period parameters and use SQL aggregates.
+- Task 12 (catalog, analytics, retention, campaigns, payouts): complete — shared owned catalog, book analytics, privacy-safe reader buckets, admin campaign review notifications, and manual payout ledger state.
 
 ## Verification notes
 - Web has **no test script** (stated explicitly, AGENTS.md rule).

@@ -7,6 +7,15 @@ import { eq, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { getPublisherUser } from '@/lib/publisher-auth';
 
+export const MAX_CAMPAIGN_BUDGET_IDR = 100_000_000;
+
+function isStrictIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 // ---------------------------------------------------------------------------
 // Publisher: request a promotional campaign for a published, owned book.
 // Requests are persisted with status SUBMITTED and reviewed by the BUKOO team
@@ -28,14 +37,17 @@ export async function createCampaignRequest(formData: FormData) {
   if (!campaignName) throw new Error('Nama kampanye wajib diisi.');
   if (!bookId) throw new Error('Pilih buku yang akan dikampanyekan.');
   if (!startDate || !endDate) throw new Error('Tanggal mulai dan selesai wajib diisi.');
+  if (!isStrictIsoDate(startDate) || !isStrictIsoDate(endDate)) {
+    throw new Error('Format tanggal tidak valid. Gunakan tanggal kalender yang benar.');
+  }
   if (startDate > endDate) throw new Error('Tanggal selesai harus sama atau setelah tanggal mulai.');
 
   let budget: number | null = null;
   if (budgetRaw) {
     const digits = budgetRaw.replace(/\D/g, '');
     budget = digits ? Number(digits) : NaN;
-    if (!Number.isFinite(budget) || budget <= 0) {
-      throw new Error('Anggaran tidak valid — masukkan nominal dalam Rupiah.');
+    if (!Number.isSafeInteger(budget) || budget <= 0 || budget > MAX_CAMPAIGN_BUDGET_IDR) {
+      throw new Error(`Anggaran harus berupa angka Rupiah antara 1 dan ${MAX_CAMPAIGN_BUDGET_IDR.toLocaleString('id-ID')}.`);
     }
   }
 

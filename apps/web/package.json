@@ -10,7 +10,8 @@
     "deploy:preview": "opennextjs-cloudflare build && wrangler deploy --name bukoo-web-preview",
     "deploy:prod": "NEXT_PUBLIC_SITE_URL=https://bukoo.id opennextjs-cloudflare build && wrangler deploy -c wrangler.prod.jsonc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@bukoo/db": "*",
@@ -47,6 +48,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
+    "vitest": "^3.2.4",
     "wrangler": "^4.24.3"
   }
 }

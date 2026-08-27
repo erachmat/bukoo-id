@@ -1,15 +1,26 @@
-import { Construction } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { getPlatformSetting } from '@/lib/platform-settings'
+import { RoyaltySettingsForm } from './RoyaltySettingsForm'
 
-export default function AdminSettingsPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function AdminSettingsPage() {
+  const session = await auth()
+  if (!session?.user || (session.user as { role?: string }).role !== 'ADMIN') {
+    redirect('/admin')
+  }
+
+  const [monthlyPool, rateBps] = await Promise.all([
+    getPlatformSetting('royalty_monthly_pool'),
+    getPlatformSetting('royalty_rate_bps'),
+  ])
+
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-      <div style={{ width: 80, height: 80, background: '#F0F2F5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-        <Construction className="w-10 h-10 text-muted-foreground" />
-      </div>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A2332', marginBottom: 12 }}>Pengaturan</h1>
-      <p style={{ color: '#6B7A8D', maxWidth: 400, lineHeight: 1.6 }}>
-        Halaman pengaturan platform sedang dalam tahap pengembangan. Fitur ini akan tersedia pada pembaruan mendatang.
-      </p>
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A2332', marginBottom: 6 }}>Pengaturan platform</h1>
+      <p style={{ color: '#6B7A8D', marginBottom: 24 }}>Kelola parameter yang digunakan untuk perhitungan estimasi publisher.</p>
+      <RoyaltySettingsForm monthlyPool={monthlyPool ?? '0'} rateBps={rateBps ?? '6500'} />
     </div>
   )
 }

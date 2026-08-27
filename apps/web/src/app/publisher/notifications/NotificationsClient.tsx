@@ -15,22 +15,29 @@ export interface ClientNotification {
 export function NotificationsClient({ initial }: { initial: ClientNotification[] }) {
   const [items, setItems] = useState(initial)
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   const markRead = (id: string) => {
     startTransition(async () => {
       try {
+        setError(null)
         await markNotificationRead(id)
         setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-      } catch {}
+      } catch {
+        setError('Notifikasi gagal diperbarui. Coba lagi.')
+      }
     })
   }
 
   const markAll = () => {
     startTransition(async () => {
       try {
+        setError(null)
         await markAllNotificationsRead()
         setItems((prev) => prev.map((n) => ({ ...n, read: true })))
-      } catch {}
+      } catch {
+        setError('Notifikasi gagal diperbarui. Coba lagi.')
+      }
     })
   }
 
@@ -49,6 +56,7 @@ export function NotificationsClient({ initial }: { initial: ClientNotification[]
           </button>
         </div>
       </div>
+      {error && <div role="alert" className="pds-action-error">{error}</div>}
       <div className="pds-panel">
         {items.length === 0 ? (
           <div style={{ padding: "40px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: 12 }}>
@@ -56,11 +64,13 @@ export function NotificationsClient({ initial }: { initial: ClientNotification[]
           </div>
         ) : (
           items.map((n) => (
-            <div
+            <button
+              type="button"
               className={`pds-notif-item${n.read ? '' : ' unread'}`}
               key={n.id}
               onClick={() => !n.read && markRead(n.id)}
-              style={n.read ? { cursor: 'default' } : {}}
+              disabled={n.read || isPending}
+              style={n.read ? { cursor: 'default', width: '100%', textAlign: 'left' } : { width: '100%', textAlign: 'left' }}
             >
               <div className="pds-notif-ic" style={{ background: 'rgba(0,201,167,0.14)' }}>🔔</div>
               <div className="pds-notif-body">
@@ -69,7 +79,7 @@ export function NotificationsClient({ initial }: { initial: ClientNotification[]
                 <div className="pds-notif-time">{new Date(n.createdAt).toLocaleString('id-ID')}</div>
               </div>
               {!n.read && <div className="pds-notif-dot" />}
-            </div>
+            </button>
           ))
         )}
       </div>

@@ -1,3 +1,25 @@
+# Publisher Dashboard Hardening And UX — 2026-08-27
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-dashboard-hardening-design.md`, plan `docs/superpowers/plans/2026-08-27-publisher-dashboard-hardening.md`, and ledger `.superpowers/sdd/publisher-dashboard-hardening/` created; approved to implement.
+- `[x]` 2. Dashboard analytics correctness and grouped-query performance.
+- `[x]` 3. Focused web regression tests for isolation, dates, ranking, identity, and validation.
+- `[x]` 4. Publisher route guards and notification shell consistency.
+- `[x]` 5. Responsive navigation and accessible dashboard interactions.
+- `[x]` 6. Campaign validation and duplicate-submit feedback.
+- `[ ]` 7. Workspace verification and responsive/two-publisher QA.
+
+# Publisher Dashboard Features — 2026-08-27
+
+- `[ ]` 1. Publisher credibility & polish: admin-configurable royalty, URL tabs, real covers/metadata, lead capture, admin navigation, and QA.
+  - `[x]` Implementation complete: settings, dashboard polish, admin submissions link, and lead capture.
+  - `[ ]` Apply migration through `migrate-d1.yml`, deploy web, and complete browser/two-publisher QA.
+
+- `[x]` 1. Period-aware dashboard aggregates with SQL distinct readers and shareable period chips.
+- `[x]` 2. Shared owned catalog, per-book analytics, and privacy-safe reader retention buckets.
+- `[x]` 3. Admin campaign review with publisher notifications.
+- `[x]` 4. Honest manual payout ledger and settlement empty state.
+- `[x]` 5. Web typecheck/lint/tests pass; authenticated browser and two-publisher QA remain.
+
 # Publisher Dashboard: Settings Shell, Promotions & Logout — 2026-08-27
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-publisher-dashboard-promotions-design.md` + plan `docs/superpowers/plans/2026-08-27-publisher-dashboard-promotions.md` + ledger `.superpowers/sdd/publisher-dashboard-promotions/`. User-approved ("Start implementation").

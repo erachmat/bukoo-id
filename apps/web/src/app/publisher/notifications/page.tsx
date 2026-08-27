@@ -1,17 +1,19 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { notifications as notificationsTable } from "@bukoo/db";
 import { eq, desc } from "drizzle-orm";
+import { getPublisherUser } from "@/lib/publisher-auth";
+import { DashboardShell } from "../(protected)/dashboard-shell";
 import { NotificationsClient, type ClientNotification } from "./NotificationsClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublisherNotificationsPage() {
-  const session = await auth();
-  const user = session?.user;
-  if (!user || (user as { role?: string }).role !== "PUBLISHER") {
+  let user;
+  try {
+    user = await getPublisherUser();
+  } catch {
     redirect("/login");
   }
 
@@ -19,7 +21,7 @@ export default async function PublisherNotificationsPage() {
   const rows = await db
     .select()
     .from(notificationsTable)
-    .where(eq(notificationsTable.userId, user.id ?? ''))
+    .where(eq(notificationsTable.userId, user.id))
     .orderBy(desc(notificationsTable.createdAt))
     .limit(50);
 
@@ -32,5 +34,9 @@ export default async function PublisherNotificationsPage() {
     read: !!n.readAt,
   }));
 
-  return <NotificationsClient initial={initial} />;
+  return (
+    <DashboardShell user={user} activeTab="notifikasi">
+      <NotificationsClient initial={initial} />
+    </DashboardShell>
+  );
 }
