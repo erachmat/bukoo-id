@@ -159,6 +159,207 @@ export default function ProfileScreen() {
     if (viewMonth === 11) setViewYear(viewYear + 1);
   };
 
+  // Profile header (avatar / name / Edit Profil) — reused by both phone and tablet layouts.
+  const profileSection = (
+    <View style={[styles.profileSection, isTablet && styles.profileSectionTablet]}>
+      <TouchableOpacity
+        style={[styles.avatarBorderFrame, isTablet && styles.avatarBorderFrameTablet]}
+        onPress={() => setActiveModal('account')}
+        activeOpacity={0.8}
+      >
+        {user?.avatarUrl?.startsWith('http://') || user?.avatarUrl?.startsWith('https://') ? (
+          <Image source={{ uri: user.avatarUrl }} style={[styles.avatarImage, isTablet && styles.avatarImageTablet]} />
+        ) : (() => {
+          const presetObj = AVATAR_PRESETS.find((p) => p.id === user?.avatarUrl) || AVATAR_PRESETS[0];
+          return (
+            <View style={[styles.avatarImage, isTablet && styles.avatarImageTablet, { backgroundColor: presetObj.bgColor, alignItems: 'center', justifyContent: 'center' }]}>
+              <Text style={{ fontSize: 36 }}>{presetObj.emoji}</Text>
+            </View>
+          );
+        })()}
+      </TouchableOpacity>
+
+      <Text style={styles.profileNameText}>{user?.name || 'Pengguna BUKOO'}</Text>
+
+      <TouchableOpacity
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 4,
+          backgroundColor: 'rgba(217, 119, 6, 0.15)',
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 14,
+          marginBottom: 14,
+          borderWidth: 1,
+          borderColor: 'rgba(217, 119, 6, 0.3)',
+        }}
+        onPress={() => setActiveModal('account')}
+      >
+        <Ionicons name="create-outline" size={14} color={COLORS.gold} />
+        <Text style={{ color: COLORS.gold, fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.sansBold }}>Edit Profil</Text>
+      </TouchableOpacity>
+
+      {/* Quick Stats Row */}
+      {/* <View style={styles.quickStatsRow}>
+        <View style={styles.quickStatItem}>
+          <Text style={styles.quickStatNumber}>{stats.finishedBooks}</Text>
+          <Text style={styles.quickStatLabel}>Selesai</Text>
+        </View>
+        <View style={styles.quickStatItem}>
+          <Text style={styles.quickStatNumber}>{Math.round(stats.totalMinutes / 60)}</Text>
+          <Text style={styles.quickStatLabel}>jam baca</Text>
+        </View>
+      </View> */}
+    </View>
+  );
+
+  // "Pencapaian" achievements stats — always a full-width section.
+  const pencapaianSection = (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Pencapaian</Text>
+        <TouchableOpacity
+          style={styles.shareIconBtn}
+          onPress={() => setShareVisible(true)}
+          hitSlop={8}
+          accessibilityLabel="Bagikan pencapaian"
+        >
+          <Ionicons name="share-outline" size={20} color={COLORS.gold} />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.statsGrid}>
+        <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+          <Ionicons name="book-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+          <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
+          <Text style={styles.statTileLabel}>Buku selesai</Text>
+        </View>
+        <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+          <Ionicons name="time-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+          <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{Math.round(stats.totalMinutes / 60)}</Text>
+          <Text style={styles.statTileLabel}>Jam Membaca</Text>
+        </View>
+        <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
+          <Ionicons name="flame-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
+          <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
+          <Text style={styles.statTileLabel}>Hari Streak</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  // Reading-streak calendar (Week / Month) — side-by-side with the profile on tablet,
+  // below Pencapaian on phone.
+  const streakSection = (
+    <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
+      <View style={styles.streakHeaderRow}>
+        <View style={styles.streakTitleRow}>
+          <Text style={styles.streakTitle}>{calendarView === 'month' ? 'Bulan Ini' : ''}</Text>
+          {calendarView === 'week' && weekMonthLabel !== '' && (
+            <Text style={styles.streakMonthLabel}>{weekMonthLabel}</Text>
+          )}
+        </View>
+        <View style={styles.calendarToggle}>
+          <TouchableOpacity
+            style={[styles.calendarToggleChip, calendarView === 'week' && styles.calendarToggleChipActive]}
+            onPress={() => setCalendarView('week')}
+          >
+            <Text style={[styles.calendarToggleText, calendarView === 'week' && styles.calendarToggleTextActive]}>
+              Minggu
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.calendarToggleChip, calendarView === 'month' && styles.calendarToggleChipActive]}
+            onPress={() => setCalendarView('month')}
+          >
+            <Text style={[styles.calendarToggleText, calendarView === 'month' && styles.calendarToggleTextActive]}>
+              Bulan
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {calendarView === 'week' ? (
+        /* Days — label + pill + minutes per day */
+        <View style={styles.daysRow}>
+          {weekLogs.map((day) => {
+            const isToday = day.dateStr === todayStr;
+            const dayNum = new Date(day.dateStr).getDate();
+            return (
+              <View key={`day-${day.dateStr}`} style={styles.dayCol}>
+                <Text style={[styles.dayLabelText, isToday && styles.dayLabelTextToday]}>
+                  {day.dayLabel}
+                </Text>
+                <View
+                  style={[
+                    styles.dayPill,
+                    day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
+                    isToday && styles.dayPillToday,
+                  ]}
+                >
+                  <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                    {dayNum}
+                  </Text>
+                </View>
+                <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        /* Month — prev/next nav + 7-column grid with leading blanks */
+        <>
+          <View style={styles.monthNavRow}>
+            <TouchableOpacity style={styles.monthNavButton} onPress={goPrevMonth} hitSlop={8}>
+              <Ionicons name="chevron-back" size={20} color={COLORS.gold} />
+            </TouchableOpacity>
+            <Text style={styles.monthLabel}>{monthLabel}</Text>
+            <TouchableOpacity style={styles.monthNavButton} onPress={goNextMonth} hitSlop={8}>
+              <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.daysRow}>
+            {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((d) => (
+              <Text key={d} style={styles.monthWeekdayLabel}>{d}</Text>
+            ))}
+          </View>
+          <View style={styles.monthGrid}>
+            {Array.from({ length: firstWeekdayOfMonth }).map((_, i) => (
+              <View key={`blank-${i}`} style={styles.monthCell} />
+            ))}
+            {monthLogs.map((day) => {
+              const isToday = day.dateStr === todayStr;
+              const dayNum = new Date(day.dateStr).getDate();
+              return (
+                <View key={day.dateStr} style={styles.monthCell}>
+                  <View
+                    style={[
+                      styles.dayPill,
+                      day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
+                      isToday && styles.dayPillToday,
+                    ]}
+                  >
+                    <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
+                      {dayNum}
+                    </Text>
+                  </View>
+                  <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </>
+      )}
+
+      {/* Streak Indicator */}
+      <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
+        <Ionicons name="flame" size={22} color={COLORS.gold} />
+        <Text style={styles.streakCountNumber}>{stats.streakDays}</Text>
+        <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
@@ -189,201 +390,23 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Profile header + streak — side-by-side on tablets, stacked on phones */}
-        <View style={isTablet ? styles.profileTopRow : undefined}>
-        <View style={[styles.profileSection, isTablet && styles.profileSectionTablet]}>
-          <TouchableOpacity
-            style={[styles.avatarBorderFrame, isTablet && styles.avatarBorderFrameTablet]}
-            onPress={() => setActiveModal('account')}
-            activeOpacity={0.8}
-          >
-            {user?.avatarUrl?.startsWith('http://') || user?.avatarUrl?.startsWith('https://') ? (
-              <Image source={{ uri: user.avatarUrl }} style={[styles.avatarImage, isTablet && styles.avatarImageTablet]} />
-            ) : (() => {
-              const presetObj = AVATAR_PRESETS.find((p) => p.id === user?.avatarUrl) || AVATAR_PRESETS[0];
-              return (
-                <View style={[styles.avatarImage, isTablet && styles.avatarImageTablet, { backgroundColor: presetObj.bgColor, alignItems: 'center', justifyContent: 'center' }]}>
-                  <Text style={{ fontSize: 36 }}>{presetObj.emoji}</Text>
-                </View>
-              );
-            })()}
-          </TouchableOpacity>
-
-          <Text style={styles.profileNameText}>{user?.name || 'Pengguna BUKOO'}</Text>
-
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 4,
-              backgroundColor: 'rgba(217, 119, 6, 0.15)',
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 14,
-              marginBottom: 14,
-              borderWidth: 1,
-              borderColor: 'rgba(217, 119, 6, 0.3)',
-            }}
-            onPress={() => setActiveModal('account')}
-          >
-            <Ionicons name="create-outline" size={14} color={COLORS.gold} />
-            <Text style={{ color: COLORS.gold, fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.sansBold }}>Edit Profil</Text>
-          </TouchableOpacity>
-
-          {/* Quick Stats Row */}
-          {/* <View style={styles.quickStatsRow}>
-            <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>{stats.finishedBooks}</Text>
-              <Text style={styles.quickStatLabel}>Selesai</Text>
+        {/* Profile header + streak — side-by-side on tablets, stacked on phones.
+            Tablet: row = profile + streak only; Pencapaian renders full-width below. */}
+        {isTablet ? (
+          <>
+            <View style={styles.profileTopRow}>
+              {profileSection}
+              {streakSection}
             </View>
-            <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>{Math.round(stats.totalMinutes / 60)}</Text>
-              <Text style={styles.quickStatLabel}>jam baca</Text>
-            </View>
-          </View> */}
-        </View>
-
-        {/* Pencapaian Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Pencapaian</Text>
-            <TouchableOpacity
-              style={styles.shareIconBtn}
-              onPress={() => setShareVisible(true)}
-              hitSlop={8}
-              accessibilityLabel="Bagikan pencapaian"
-            >
-              <Ionicons name="share-outline" size={20} color={COLORS.gold} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.statsGrid}>
-            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="book-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.finishedBooks}</Text>
-              <Text style={styles.statTileLabel}>Buku selesai</Text>
-            </View>
-            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="time-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{Math.round(stats.totalMinutes / 60)}</Text>
-              <Text style={styles.statTileLabel}>Jam Membaca</Text>
-            </View>
-            <View style={[styles.statTile, { backgroundColor: '#0D2721', borderColor: '#18382F' }]}>
-              <Ionicons name="flame-outline" size={22} color="#4ADE80" style={{ marginBottom: 6 }} />
-              <Text style={[styles.statTileNumber, { color: '#4ADE80' }]}>{stats.streakDays}</Text>
-              <Text style={styles.statTileLabel}>Hari Streak</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Streak Calendar Bar — Week / Month view */}
-        <View style={[styles.streakSection, isTablet && styles.streakSectionTablet]}>
-          <View style={styles.streakHeaderRow}>
-            <View style={styles.streakTitleRow}>
-              <Text style={styles.streakTitle}>{calendarView === 'month' ? 'Bulan Ini' : ''}</Text>
-              {calendarView === 'week' && weekMonthLabel !== '' && (
-                <Text style={styles.streakMonthLabel}>{weekMonthLabel}</Text>
-              )}
-            </View>
-            <View style={styles.calendarToggle}>
-              <TouchableOpacity
-                style={[styles.calendarToggleChip, calendarView === 'week' && styles.calendarToggleChipActive]}
-                onPress={() => setCalendarView('week')}
-              >
-                <Text style={[styles.calendarToggleText, calendarView === 'week' && styles.calendarToggleTextActive]}>
-                  Minggu
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.calendarToggleChip, calendarView === 'month' && styles.calendarToggleChipActive]}
-                onPress={() => setCalendarView('month')}
-              >
-                <Text style={[styles.calendarToggleText, calendarView === 'month' && styles.calendarToggleTextActive]}>
-                  Bulan
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {calendarView === 'week' ? (
-            /* Days — label + pill + minutes per day */
-            <View style={styles.daysRow}>
-              {weekLogs.map((day) => {
-                const isToday = day.dateStr === todayStr;
-                const dayNum = new Date(day.dateStr).getDate();
-                return (
-                  <View key={`day-${day.dateStr}`} style={styles.dayCol}>
-                    <Text style={[styles.dayLabelText, isToday && styles.dayLabelTextToday]}>
-                      {day.dayLabel}
-                    </Text>
-                    <View
-                      style={[
-                        styles.dayPill,
-                        day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
-                        isToday && styles.dayPillToday,
-                      ]}
-                    >
-                      <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
-                        {dayNum}
-                      </Text>
-                    </View>
-                    <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          ) : (
-            /* Month — prev/next nav + 7-column grid with leading blanks */
-            <>
-              <View style={styles.monthNavRow}>
-                <TouchableOpacity style={styles.monthNavButton} onPress={goPrevMonth} hitSlop={8}>
-                  <Ionicons name="chevron-back" size={20} color={COLORS.gold} />
-                </TouchableOpacity>
-                <Text style={styles.monthLabel}>{monthLabel}</Text>
-                <TouchableOpacity style={styles.monthNavButton} onPress={goNextMonth} hitSlop={8}>
-                  <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.daysRow}>
-                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((d) => (
-                  <Text key={d} style={styles.monthWeekdayLabel}>{d}</Text>
-                ))}
-              </View>
-              <View style={styles.monthGrid}>
-                {Array.from({ length: firstWeekdayOfMonth }).map((_, i) => (
-                  <View key={`blank-${i}`} style={styles.monthCell} />
-                ))}
-                {monthLogs.map((day) => {
-                  const isToday = day.dateStr === todayStr;
-                  const dayNum = new Date(day.dateStr).getDate();
-                  return (
-                    <View key={day.dateStr} style={styles.monthCell}>
-                      <View
-                        style={[
-                          styles.dayPill,
-                          day.isCompleted ? styles.dayPillActive : styles.dayPillInactive,
-                          isToday && styles.dayPillToday,
-                        ]}
-                      >
-                        <Text style={[styles.dayNumText, day.isCompleted ? styles.dayNumTextActive : styles.dayNumTextInactive]}>
-                          {dayNum}
-                        </Text>
-                      </View>
-                      <Text style={styles.dayMinutesText}>{day.minutes > 0 ? `${day.minutes}m` : '·'}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </>
-          )}
-
-          {/* Streak Indicator */}
-          <TouchableOpacity style={styles.streakCountRow} onPress={() => setShowAnalyticsModal(true)}>
-            <Ionicons name="flame" size={22} color={COLORS.gold} />
-            <Text style={styles.streakCountNumber}>{stats.streakDays}</Text>
-            <Text style={styles.streakCountText}>Hari Berturut-turut (Lihat Analitik)</Text>
-          </TouchableOpacity>
-        </View>
-        </View>
+            {pencapaianSection}
+          </>
+        ) : (
+          <>
+            {profileSection}
+            {pencapaianSection}
+            {streakSection}
+          </>
+        )}
 
         {/* Aktifitas Section */}
         <View style={styles.sectionContainer}>
@@ -703,7 +726,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.forestBorder,
   },
   streakSectionTablet: {
-    flex: 1,
+    // Calendar needs >=294px for the 7 day-cols; profile stays flex:1 (~238px).
+    flex: 1.3,
     marginHorizontal: 0,
     marginBottom: 0,
   },

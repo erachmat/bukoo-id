@@ -1,3 +1,15 @@
+# Profile Tablet Layout Fix — 2026-08-28
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-28-profile-tablet-layout-fix-design.md`, plan `docs/superpowers/plans/2026-08-28-profile-tablet-layout-fix.md`, ledger `.superpowers/sdd/profile-tablet-layout-fix/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Root cause: "Pencapaian" achievements section was nested inside the tablet `profileTopRow` flex row → 3-column squeeze (profile · Pencapaian · streak) crushing the 7-day calendar + profile header on tablets; phones unaffected.
+- `[x]` 3. `ProfileScreen.tsx`: extracted `profileSection` / `pencapaianSection` / `streakSection` into local JSX consts; tablet renders profile + streak side-by-side in `profileTopRow` with Pencapaian full-width below; phone order (Profile → Pencapaian → Streak) unchanged.
+- `[x]` 4. `streakSectionTablet.flex` `1` → `1.3` so the calendar keeps ≥294px at 600dp.
+- `[x]` 5. Version bump `versionCode 2→3` / `versionName 1.0.1→1.0.2` in `apps/mobile/android/app/build.gradle`.
+- `[x]` 6. Verification: mobile typecheck ✅, lint ✅ (0 errors); no mobile tests exist (placeholder — stated explicitly).
+- `[x]` 7. `assembleRelease` BUILD SUCCESSFUL → `app-release.apk` (1.0.2, versionCode 3).
+- `[x]` 8. Distributed to `mvp-testers` 2026-08-28 — Firebase reports `uploaded new release 1.0.2 (3)`, release notes added, distributed to testers/groups successfully.
+- `[ ]` 9. Manual QA (user): tablet (600–800dp) — Profile shows profile + calendar side-by-side, calendar fully visible (no clipped days), Pencapaian full-width below; phone <600dp unchanged.
+
 # APK → Firebase Distribution (release signing + verified flow) — 2026-08-27
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-27-apk-firebase-distribution-design.md`, plan `docs/superpowers/plans/2026-08-27-apk-firebase-distribution.md`, ledger `.superpowers/sdd/apk-firebase-distribution/progress.md`. User-approved ("Start implementation").
@@ -846,3 +858,12 @@ Verification: mobile `tsc --noEmit` ✅, mobile lint ✅ (no errors; fixed one `
 - [ ] 4. (user) Rotate `AUTH_SECRET` (worker secret via `wrangler secret put`).
 - [ ] 5. (user) Restore real D1 `database_id` in `apps/web/wrangler.jsonc` + `wrangler.prod.jsonc` (or inject via CI/secret).
 - [ ] 6. (user, optional) Delete Vercel project + confirm Neon no longer needed (from migration section).
+
+## Publisher Dashboard Demo Data (2026-08-28)
+- [x] Seed generator `packages/db/src/seed-demo-publisher.ts` (`db:seed:demo`, deterministic + idempotent)
+- [x] SQL staged: `packages/db/sql/seed-demo-publisher.sql` + unseed (FTS-safe, 1428 upserts)
+- [x] R2 assets: `epubs/demo-{1..6}.epub` + `covers/demo-{1..6}-cover.jpg` in `bukoo-assets`
+- [x] Register `demo-publisher@bukoo.id` via bukoo.id/publisher/register (user action)
+- [x] Apply seed remote + verify DB/FTS/assets (idempotent re-run clean)
+- [ ] Visual dashboard pass logged in as demo publisher (user manual check)
+Runbook: `.superpowers/sdd/publisher-demo-data/progress.md`
