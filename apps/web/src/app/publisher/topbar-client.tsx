@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "@/app/(auth)/actions";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 interface TopbarProps {
@@ -140,8 +139,12 @@ export function PublisherTopbar({
                 disabled={isSigningOut}
                 onClick={() => {
                   setAvatarOpen(false);
-                  startSignOut(async () => {
-                    await signOut({ redirectTo: "/publisher/daftar?logout=1" });
+                  // Deterministic logout: /api/logout clears the session
+                  // cookies on its own 303 response (the NextAuth
+                  // server-action path can drop Set-Cookie on Cloudflare
+                  // Workers, leaving the session alive after "Keluar").
+                  startSignOut(() => {
+                    window.location.assign("/api/logout");
                   });
                 }}
               >
