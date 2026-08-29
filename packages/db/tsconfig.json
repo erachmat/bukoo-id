@@ -10,7 +10,7 @@
     "declaration": true,
     "declarationMap": true,
     "skipLibCheck": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

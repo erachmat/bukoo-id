@@ -21,6 +21,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
+    "db:seed:demo": "tsx src/seed-demo-publisher.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -29,7 +30,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250801.0",
+    "@types/node": "^22.20.1",
     "drizzle-kit": "^0.31.1",
+    "tsx": "^4.23.12",
     "typescript": "^5.4.5"
   }
 }
