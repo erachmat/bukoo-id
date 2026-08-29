@@ -22,10 +22,16 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PASSWORD_TOO_SHORT: 'Password minimal 6 karakter.',
   EMAIL_TAKEN: 'Akun dengan email ini sudah terdaftar. Silakan masuk.',
   PASSWORDLESS: 'Akun ini terdaftar dengan Google. Silakan masuk menggunakan Google.',
-  RESET_FAILED: 'Terjadi kesalahan. Silakan coba lagi.',
   RESET_DONE: 'Kata sandi berhasil diperbarui. Silakan masuk.',
   SIGNUP_SIGNIN_FAILED: 'Pendaftaran berhasil. Silakan masuk.',
   GENERIC_ERROR: 'Terjadi kesalahan. Silakan coba lagi.',
+
+  // Password-reset OTP flow (2026-08-29)
+  OTP_SENT: 'Jika email terdaftar, kode verifikasi telah dikirim.', // generic info, anti-enumeration
+  OTP_INVALID: 'Kode verifikasi salah. Silakan periksa kembali.',
+  OTP_EXPIRED: 'Kode verifikasi telah kadaluarsa. Silakan minta kode baru.',
+  RATE_LIMITED: 'Terlalu banyak percobaan. Silakan coba lagi nanti.',
+  // RETIRED 2026-08-29: RESET_FAILED — replaced by the OTP flow (no more direct reset).
 };
 
 /** Map an error/message key to Indonesian copy; unknown keys pass through raw. */

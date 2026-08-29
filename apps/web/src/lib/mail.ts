@@ -1,14 +1,15 @@
 /**
- * Email sender using the MailChannels HTTP API.
+ * Email sender using the MailChannels HTTP API — web copy.
  *
- * MailChannels is the recommended transactional email solution for Cloudflare Workers.
- * It does NOT require Nodemailer (which cannot run in Workers).
+ * Mirrors `apps/api/src/lib/mail.ts` (byte-compatible payload/endpoint) but
+ * reads secrets via `process.env` (NextAuth does the same for the Google
+ * provider; `wrangler secret put` exposes them to the deployed worker and
+ * `apps/web/.dev.vars` to `wrangler dev`).
  *
- * Two modes:
- *  1. If MAILCHANNELS_API_KEY is set → uses the authenticated MailChannels API (recommended)
- *  2. Fallback: domain must have MailChannels SPF/DKIM configured on Cloudflare DNS
+ * Sends BOTH auth headers (`X-Api-Key` current + legacy `X-Auth-Api-Key`) so
+ * newly-created MailChannels keys and older 2023-era keys both work.
  *
- * Docs: https://developers.cloudflare.com/workers/tutorials/send-emails-with-mailchannels/
+ * Docs: https://docs.mailchannels.com/email-api/
  */
 
 interface SendEmailOptions {
@@ -18,14 +19,22 @@ interface SendEmailOptions {
   text?: string;
 }
 
+function mailEnv(): { MAILCHANNELS_API_KEY?: string; MAIL_FROM?: string } {
+  return {
+    MAILCHANNELS_API_KEY: process.env.MAILCHANNELS_API_KEY,
+    MAIL_FROM: process.env.MAIL_FROM,
+  };
+}
+
 /**
  * Sends a transactional email via the MailChannels HTTP API.
- * Throws on non-2xx response.
+ * Throws on non-2xx response. Without MAILCHANNELS_API_KEY the request is
+ * still attempted (MailChannels accepts unauthenticated sends when the domain
+ * has DKIM/SPF via the legacy flow); callers should catch and not fail the
+ * user-facing flow on mail errors.
  */
-export async function sendEmail(
-  opts: SendEmailOptions,
-  env: { MAILCHANNELS_API_KEY?: string; MAIL_FROM?: string },
-): Promise<void> {
+export async function sendEmail(opts: SendEmailOptions): Promise<void> {
+  const env = mailEnv();
   const from = env.MAIL_FROM ?? 'noreply@bukoo.id';
   const payload = {
     personalizations: [{ to: [{ email: opts.to }] }],
@@ -41,9 +50,7 @@ export async function sendEmail(
     'Content-Type': 'application/json',
   };
   if (env.MAILCHANNELS_API_KEY) {
-    // Send BOTH auth headers: `X-Api-Key` is the current MailChannels Email API
-    // convention (2026), while `X-Auth-Api-Key` is the legacy (2023 CF tutorial)
-    // header — keeps older keys working while supporting newly-created keys.
+    // Current MailChannels Email API header + legacy header for older keys.
     headers['X-Api-Key'] = env.MAILCHANNELS_API_KEY;
     headers['X-Auth-Api-Key'] = env.MAILCHANNELS_API_KEY;
   }
@@ -63,16 +70,11 @@ export async function sendEmail(
 /**
  * Sends a 6-digit OTP email for password reset.
  */
-export async function sendOtpEmail(
-  email: string,
-  code: string,
-  env: { MAILCHANNELS_API_KEY?: string; MAIL_FROM?: string },
-): Promise<void> {
-  return sendEmail(
-    {
-      to: email,
-      subject: `${code} — Kode Reset Password Bukoo`,
-      html: `
+export async function sendOtpEmail(email: string, code: string): Promise<void> {
+  return sendEmail({
+    to: email,
+    subject: `${code} — Kode Reset Password Bukoo`,
+    html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
           <h2>Reset Password Bukoo</h2>
           <p>Gunakan kode verifikasi berikut untuk mereset password Anda:</p>
@@ -84,8 +86,6 @@ export async function sendOtpEmail(
           </p>
         </div>
       `,
-      text: `Kode reset password Bukoo Anda: ${code}\nBerlaku 15 menit.`,
-    },
-    env,
-  );
+    text: `Kode reset password Bukoo Anda: ${code}\nBerlaku 15 menit.`,
+  });
 }

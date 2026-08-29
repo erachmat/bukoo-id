@@ -357,6 +357,27 @@ export const otpTokens = sqliteTable('otp_tokens', {
 });
 
 // ---------------------------------------------------------------------------
+// authAttempts (rate limiting + lockout for web auth actions — 2026-08-29)
+// D1-backed attempt counters so limits survive Workers isolate restarts and
+// work in local dev (no Cloudflare Rate Limiting binding dependency).
+// Key format: '<policy>:<scope>:<identifier>'
+//   e.g. 'login-email:user@x.com' | 'login-ip:1.2.3.4' | 'otp-request-email:user@x.com'
+// ---------------------------------------------------------------------------
+
+export const authAttempts = sqliteTable(
+  'auth_attempts',
+  {
+    id:          text('id').primaryKey(), // cuid2 (createId) from application layer
+    key:         text('key').notNull().unique(),
+    attempts:    integer('attempts').notNull().default(0),
+    windowStart: integer('window_start').notNull(), // Unix ms — start of current attempt window
+    lockedUntil: integer('locked_until'),            // Unix ms — non-null while locked
+    updatedAt:   text('updated_at').notNull().default(now()),
+  },
+  (t) => [index('auth_attempts_key_idx').on(t.key)],
+);
+
+// ---------------------------------------------------------------------------
 // Community (posts, comments, likes, bookmarks, reading clubs)
 // ---------------------------------------------------------------------------
 

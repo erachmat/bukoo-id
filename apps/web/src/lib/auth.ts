@@ -6,6 +6,7 @@ import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { getDb, type Database } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { users, accounts, sessions, verificationTokens } from '@bukoo/db';
+import { d1LimiterStorage, checkRateLimit, RATE_LIMIT_POLICIES, rateLimitKey } from '@/lib/rate-limit';
 
 /**
  * Password verification using SubtleCrypto PBKDF2.
@@ -112,6 +113,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const db = getDb();
+
+        // Defense-in-depth: db-backed lockout check (5 fails/15min per email).
+        // Read-only — increments happen in the `signIn` server action so a
+        // single bad attempt isn't double-counted. Protects direct POSTs to
+        // /api/auth/callback/credentials that bypass the action.
+        try {
+          const locked = await checkRateLimit(
+            d1LimiterStorage(),
+            Date.now(),
+            rateLimitKey('loginEmail', 'email', (credentials.email as string).toLowerCase()),
+          );
+          if (!locked.allowed) return null;
+        } catch {
+          // Fail-open on limiter errors — never lock out every user because
+          // the counter table is temporarily unavailable.
+        }
+
         const user = await db.query.users.findFirst({
           where: eq(users.email, (credentials.email as string).toLowerCase()),
         });
