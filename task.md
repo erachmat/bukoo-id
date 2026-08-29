@@ -5,7 +5,7 @@
 - `[x]` 3. Phase 2: DELETE web reader (routes/components/download.epub/updateReadingProgress/ResumeReading); middleware `/book/:id/read` → detail; `app-links.ts` + `AppDownloadCta` (placeholder store URLs); book detail CTA "Baca di Aplikasi" + "Lanjutkan di aplikasi" card (mobile-written progress + `bukoo://` deep link); catalog card "Lihat Detail"; removed `react-reader` + `react-pdf` deps.
 - `[x]` 4. Phase 3: marketing copy sweep (Features/perangkat/FAQ/login/Hero/CTA → app-only), download strips on library+account, loading.tsx skeletons (library/publisher books/admin), refetchOnWindowFocus off, covers prefix guard, landing FeaturedBooks Suspense, dark mode toggle (hand-rolled ThemeProvider + ThemeToggle in (app) header).
 - `[x]` 5. Phase 4: vitest for app-links/subscription/rate-limit/otp (23 new → 60/60); full AGENTS.md verification (typecheck ✅ lint 0 errors ✅ tests ✅ build ✅).
-- `[ ]` 6. User QA: replace placeholder store URLs in `apps/web/src/lib/app-links.ts`; preview deploy (`npm run deploy:preview`) → verify `/book/:id/read` redirects, CTAs render, dark toggle persists, publisher dashboard analytics still show mobile reading.
+- `[x]` 6. User deploy/QA: migration `0010` applied to remote D1 via `migrate-d1.yml` (apply_remote=true, 2026-08-29 — rate limiting live); old MailChannels key revoked + NEW key set on both `bukoo-web` and `bukoo-api` workers. Remaining: replace placeholder store URLs in `apps/web/src/lib/app-links.ts`; browser QA (read-route redirect, CTAs, dark toggle, publisher logout→login, OTP email delivery).
 - `[x]` 7. Strategy note: bukoo.id = browse/discovery only (Netflix model); reading ONLY in mobile app. Publisher analytics unaffected (mobile feeds via apps/api). No D1 migrations needed.
 
 # Publisher "Masuk" Auto-Login After Logout — 2026-08-29
@@ -19,21 +19,21 @@
 - `[x]` 7. Tests: `logout-cookies.test.ts` (10 cases); web suite 37/37 green.
 - `[x]` 8. Verification: web typecheck ✅, eslint 0 errors ✅ (3 pre-existing warnings).
 - `[x]` 9. Incidental fix: `ipHeaders()` in `(auth)/actions.ts` awaited (`headers()` is async in Next 16) — pre-existing uncommitted web-auth-hardening work did not compile.
-- `[ ]` 10. Deploy (preview → prod) + manual QA: Keluar → landing → Masuk → **login form appears**; customer/admin logout regression.
+- `[x]` 10. Deploy (committed + pushed 2026-08-29, CI green, prod deployed) — remaining manual QA: Keluar → landing → Masuk → **login form appears**; customer/admin logout regression.
 
 # Web Auth Hardening — OTP Password Reset + D1 Rate Limiting — 2026-08-29
 
-- `[ ]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-web-auth-hardening-design.md`, plan `docs/superpowers/plans/2026-08-29-web-auth-hardening.md`, ledger `.superpowers/sdd/web-auth-hardening/progress.md`.
-- `[ ]` 2. `packages/db`: new `auth_attempts` table (key unique, attempts, windowStart, lockedUntil, updatedAt) + generated migration; local D1 only (remote deferred to manual `migrate-d1.yml`).
-- `[ ]` 3. `apps/web/src/lib/rate-limit.ts`: pure limiter core + D1 storage + policy constants + `getRequestIp()`.
-- `[ ]` 4. Mail: fix `apps/api/src/lib/mail.ts` (dual `X-Api-Key`/`X-Auth-Api-Key`), copy to `apps/web/src/lib/mail.ts`.
-- `[ ]` 5. OTP reset: replace `resetPassword` with `requestPasswordReset` (generic success, create OTP + fire-and-forget email) + `verifyPasswordReset` (code/expiry check, PBKDF2 hash, cleanup).
-- `[ ]` 6. Two-step `/forgot-password` UI + new error keys (`OTP_SENT`, `OTP_INVALID`, `OTP_EXPIRED`, `RATE_LIMITED`).
-- `[ ]` 7. Lock login/register: `signIn` (email+IP), `authorize()` read-only block, `signUp`/`signUpPublisher` (IP), `signInWithGoogle` (IP).
-- `[ ]` 8. Docs/config: `AGENTS.md` (fix stale `/publisher/dashboard` middleware claim + new secrets), root `.env.example`, `apps/web/.dev.vars`, worker secrets (web+preview+api).
-- `[ ]` 9. Tests: `rate-limit.test.ts` + `otp.test.ts`; full AGENTS.md checklist per touched workspace.
-- `[ ]` 10. Deploy: preview + secrets + prod; migration via manual `migrate-d1.yml`; smoke test.
-- `[ ]` 11. ROTATE the MailChannels API key that was pasted into chat (user action — create new, update workers, revoke old).
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-web-auth-hardening-design.md`, plan `docs/superpowers/plans/2026-08-29-web-auth-hardening.md`, ledger `.superpowers/sdd/web-auth-hardening/progress.md`.
+- `[x]` 2. `packages/db`: new `auth_attempts` table (key unique, attempts, windowStart, lockedUntil, updatedAt) + generated migration `0010_glorious_gressill`; applied REMOTELY 2026-08-29 via `migrate-d1.yml` (apply_remote=true).
+- `[x]` 3. `apps/web/src/lib/rate-limit.ts`: pure limiter core + D1 storage + policy constants + `getRequestIp()`.
+- `[x]` 4. Mail: fix `apps/api/src/lib/mail.ts` (dual `X-Api-Key`/`X-Auth-Api-Key`), copy to `apps/web/src/lib/mail.ts`.
+- `[x]` 5. OTP reset: replace `resetPassword` with `requestPasswordReset` (generic success, create OTP + fire-and-forget email) + `verifyPasswordReset` (code/expiry check, PBKDF2 hash, cleanup).
+- `[x]` 6. Two-step `/forgot-password` UI + new error keys (`OTP_SENT`, `OTP_INVALID`, `OTP_EXPIRED`, `RATE_LIMITED`).
+- `[x]` 7. Lock login/register: `signIn` (email+IP), `authorize()` read-only block, `signUp`/`signUpPublisher` (IP), `signInWithGoogle` (IP).
+- `[x]` 8. Docs/config: `AGENTS.md` (fixed stale `/publisher/dashboard` middleware claim + documented new secrets), root `.env.example`, worker secrets set on web+api (MailChannels rotated 2026-08-29).
+- `[x]` 9. Tests: `rate-limit.test.ts` + `otp.test.ts`; full AGENTS.md checklist per touched workspace (web: typecheck/lint/test 60/60/build all green).
+- `[x]` 10. Deploy: committed + pushed to main 2026-08-29 (CI green, prod deploys successful); migration `0010` applied remotely via `migrate-d1.yml` (apply_remote=true); MailChannels key rotated (old revoked) + new key set on both workers via `wrangler secret put`.
+- `[x]` 11. ROTATE the MailChannels API key that was pasted into chat (user action — new key created + set on workers, old key revoked, 2026-08-29).
 
 # Profile Tablet Layout Fix — 2026-08-28
 
