@@ -35,7 +35,6 @@ export function PublisherBookForm({ action, submitLabel = 'Terbitkan Buku', init
       try {
         await action(fd)
       } catch (err: unknown) {
-        console.error(err)
         setErrorMsg((err as Error).message || 'Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
       }
     })

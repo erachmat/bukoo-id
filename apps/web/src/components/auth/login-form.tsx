@@ -50,7 +50,7 @@ export function LoginForm({
   const heading = isPublisher ? 'Masuk ke Portal Penerbit' : 'Masuk ke BUKOO'
   const subtitle = isPublisher
     ? 'Kelola koleksi buku dan pantau royalti Anda.'
-    : 'Masukkan email dan password untuk melanjutkan membaca'
+    : 'Masukkan email dan password untuk mengelola akun BUKOO kamu'
 
   return (
     <div>

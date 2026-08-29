@@ -74,7 +74,7 @@ export function BookCatalogCard({ book }: { book: CatalogBook }) {
               transition: 'transform 0.3s ease',
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              <span>Baca Sekarang</span>
+              <span>Lihat Detail</span>
               <span style={{ fontSize: 16 }}>→</span>
             </span>
           </div>

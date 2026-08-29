@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { BookOpen, User } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 const navLinkStyles: CSSProperties = {
   display: 'inline-flex',
@@ -82,6 +83,7 @@ export default function AppLayout({
               <User style={{ height: 20, width: 20 }} aria-hidden />
               <span className="sr-only">Akun Saya</span>
             </Link>
+            <ThemeToggle />
           </nav>
         </div>
       </header>

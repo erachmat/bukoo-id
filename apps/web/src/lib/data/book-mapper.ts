@@ -16,6 +16,8 @@ export type CatalogBook = {
   year: number
   pageCount: number
   readCount: number
+  ratingAverage: number
+  ratingCount: number
   isPremium: boolean
   subscriptionRequired?: string
 }
@@ -33,6 +35,8 @@ export function bookRowToCatalogBook(book: typeof books.$inferSelect): CatalogBo
     year: book.publishedYear ?? 0,
     pageCount: book.totalPages ?? 0,
     readCount: book.readCount,
+    ratingAverage: book.ratingAverage ?? 0,
+    ratingCount: book.ratingCount ?? 0,
     isPremium: book.subscriptionRequired !== 'FREE',
     subscriptionRequired: book.subscriptionRequired,
   }

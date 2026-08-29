@@ -4,12 +4,15 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /**
- * Serves R2 cover images (and any other R2 object) through the web worker.
+ * Serves R2 cover images through the web worker.
  *
  * R2 `cover_key` values stored in the DB are object keys like
  * `covers/abc123.png` — not public URLs. This route maps
  * `/covers/<key>` → `BUKOO_STORAGE.get(<key>)` so `<img>` tags can render them
  * without needing a public R2 custom domain.
+ *
+ * Only the `covers/` prefix is served — no other R2 objects (e.g. EPUBs in
+ * `epubs/`) are exposed through this public route.
  */
 export async function GET(
   _request: Request,
@@ -21,6 +24,10 @@ export async function GET(
   }
 
   const objectKey = key.join('/');
+  if (!objectKey.startsWith('covers/')) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
   const { env } = getCloudflareContext();
 
   const object = await env.BUKOO_STORAGE.get(objectKey);

@@ -7,10 +7,12 @@ import { bookRowToCatalogBook } from '@/lib/data/book-mapper'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Star, BookOpen, Globe, ArrowLeft, BookmarkPlus, Share2, Lock } from 'lucide-react'
+import { Star, BookOpen, Globe, ArrowLeft, Lock, Smartphone } from 'lucide-react'
 
 import { auth } from '@/lib/auth'
 import { isBookAccessible } from '@bukoo/shared-types'
+import { AppDownloadCta } from '@/components/app/app-download-cta'
+import { bookDeepLink } from '@/lib/app-links'
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
@@ -90,11 +92,13 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', fontSize: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Star style={{ marginRight: '8px', height: '20px', width: '20px', color: '#EAB308', fill: '#EAB308' }} />
-              <span style={{ fontWeight: '700', fontSize: '16px', marginRight: '4px' }}>4.8</span>
-              <span style={{ color: '#6B7280' }}>({(book.readCount / 1000).toFixed(1)}k ulasan)</span>
-            </div>
+            {book.ratingCount > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Star style={{ marginRight: '8px', height: '20px', width: '20px', color: '#EAB308', fill: '#EAB308' }} />
+                <span style={{ fontWeight: '700', fontSize: '16px', marginRight: '4px' }}>{book.ratingAverage.toFixed(1)}</span>
+                <span style={{ color: '#6B7280' }}>({book.ratingCount.toLocaleString('id-ID')} ulasan)</span>
+              </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', color: '#6B7280' }}>
               <BookOpen style={{ marginRight: '8px', height: '20px', width: '20px' }} />
               <span>{book.pageCount} halaman</span>
@@ -110,11 +114,20 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
           {userProgress && userProgress.progressPercent > 0 && (
             <div style={{ padding: '16px', backgroundColor: '#F3F4F6', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', margin: '0 0 6px 0' }}>Progres Membaca: {Math.round(userProgress.progressPercent)}%</p>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Smartphone style={{ height: 16, width: 16, color: '#00C9A7' }} />
+                  Lanjutkan di aplikasi — {Math.round(userProgress.progressPercent)}%
+                </p>
                 <div style={{ height: '6px', background: '#D1D5DB', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${Math.round(userProgress.progressPercent)}%`, backgroundColor: '#00C9A7' }}></div>
                 </div>
               </div>
+              <Link
+                href={bookDeepLink(resolvedParams.id)}
+                style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '9999px', border: '1px solid #00181A', padding: '8px 20px', fontSize: '13px', fontWeight: '700', color: '#00181A', textDecoration: 'none', whiteSpace: 'nowrap' }}
+              >
+                Buka di App
+              </Link>
             </div>
           )}
 
@@ -138,23 +151,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
                 <p style={{ fontSize: '13px', color: '#EF4444', fontWeight: '500', margin: 0 }}>Berlangganan PRO untuk membuka buku ini.</p>
               </div>
             ) : (
-              <Link
-                href={`/book/${resolvedParams.id}/read`}
-                style={{ display: 'inline-flex', height: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', backgroundColor: '#00181A', padding: '0 40px', fontSize: '16px', fontWeight: '700', color: '#ffffff', textDecoration: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-              >
-                {hasStarted ? 'Lanjutkan Membaca' : 'Mulai Baca Sekarang'}
-              </Link>
-            )}
-
-            {canRead && (
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                  <BookmarkPlus style={{ height: '20px', width: '20px', color: '#111827' }} />
-                </button>
-                <button type="button" style={{ height: '56px', width: '56px', borderRadius: '9999px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                  <Share2 style={{ height: '20px', width: '20px', color: '#111827' }} />
-                </button>
-              </div>
+              <AppDownloadCta />
             )}
           </div>
         </div>

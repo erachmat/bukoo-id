@@ -10,12 +10,12 @@ export function Features() {
         <div className="feature-row">
           <div className="feature-text">
             <div className="feature-label">📱 Multi-Platform</div>
-            <h2 className="feature-h2">Baca di Semua<br />Perangkat Kamu</h2>
-            <p className="feature-p">Mulai membaca di smartphone, lanjutkan di tablet, selesaikan di laptop. Semua tersinkronisasi secara otomatis — bahkan saat offline.</p>
+            <h2 className="feature-h2">Baca di Aplikasi<br />BUKOO</h2>
+            <p className="feature-p">Browsing katalog di web, membaca di aplikasi. Mulai di smartphone, lanjutkan di tablet — semua tersinkronisasi otomatis, bahkan saat offline.</p>
             <div className="feature-bullets">
               <div className="feature-bullet"><div className="bullet-icon">✓</div><span>Sinkronisasi otomatis posisi baca, highlight, dan catatan</span></div>
               <div className="feature-bullet"><div className="bullet-icon">✓</div><span>Download unlimited untuk baca offline tanpa internet</span></div>
-              <div className="feature-bullet"><div className="bullet-icon">✓</div><span>iOS, Android, Web browser — satu akun untuk semua</span></div>
+              <div className="feature-bullet"><div className="bullet-icon">✓</div><span>iOS &amp; Android — satu akun untuk semua perangkat</span></div>
             </div>
           </div>
           <div className="feature-visual">

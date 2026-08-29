@@ -17,6 +17,13 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
   const user = req.auth?.user as AuthUser | undefined
   const isPublisherHost = host.startsWith("publisher.") || host.includes("publisher.bukoo.id")
 
+  // Reading happens only in the mobile app — redirect stale web-reader links
+  // (e.g. from bookmarks/history) to the book detail page.
+  const readMatch = pathname.match(/^\/book\/([^/]+)\/read\/?$/)
+  if (readMatch) {
+    return NextResponse.redirect(new URL(`/book/${readMatch[1]}`, req.url))
+  }
+
   // Rewrite static .html path aliases for publisher landing pages
   const htmlPublisherMap: Record<string, string> = {
     "/penerbit-daftar.html": "/publisher/daftar",

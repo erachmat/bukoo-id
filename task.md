@@ -1,3 +1,40 @@
+# Web UX/Perf Hardening + Mobile-Only Reading — 2026-08-29
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-web-ux-performance-hardening-design.md`, plan `docs/superpowers/plans/2026-08-29-web-ux-performance-hardening.md`, ledger `.superpowers/sdd/web-ux-performance-hardening/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Phase 1: real ratings on book detail (hide when 0), console.error removal, junk-file cleanup, DB dumps untracked (were already gitignored+untracked — no-op), dead code removal (ComparisonTable; others already absent).
+- `[x]` 3. Phase 2: DELETE web reader (routes/components/download.epub/updateReadingProgress/ResumeReading); middleware `/book/:id/read` → detail; `app-links.ts` + `AppDownloadCta` (placeholder store URLs); book detail CTA "Baca di Aplikasi" + "Lanjutkan di aplikasi" card (mobile-written progress + `bukoo://` deep link); catalog card "Lihat Detail"; removed `react-reader` + `react-pdf` deps.
+- `[x]` 4. Phase 3: marketing copy sweep (Features/perangkat/FAQ/login/Hero/CTA → app-only), download strips on library+account, loading.tsx skeletons (library/publisher books/admin), refetchOnWindowFocus off, covers prefix guard, landing FeaturedBooks Suspense, dark mode toggle (hand-rolled ThemeProvider + ThemeToggle in (app) header).
+- `[x]` 5. Phase 4: vitest for app-links/subscription/rate-limit/otp (23 new → 60/60); full AGENTS.md verification (typecheck ✅ lint 0 errors ✅ tests ✅ build ✅).
+- `[ ]` 6. User QA: replace placeholder store URLs in `apps/web/src/lib/app-links.ts`; preview deploy (`npm run deploy:preview`) → verify `/book/:id/read` redirects, CTAs render, dark toggle persists, publisher dashboard analytics still show mobile reading.
+- `[x]` 7. Strategy note: bukoo.id = browse/discovery only (Netflix model); reading ONLY in mobile app. Publisher analytics unaffected (mobile feeds via apps/api). No D1 migrations needed.
+
+# Publisher "Masuk" Auto-Login After Logout — 2026-08-29
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-publisher-masuk-auto-login-design.md`, plan `docs/superpowers/plans/2026-08-29-publisher-masuk-auto-login.md`, ledger `.superpowers/sdd/publisher-masuk-auto-login/progress.md`.
+- `[x]` 2. Root cause: NextAuth server-action sign-out drops its `Set-Cookie` expiry headers on Cloudflare Workers → session JWT survives "Keluar" → `/publisher/login` auto-redirects to dashboard (no login prompt). Prior fixes 2026-08-26/27 never verified "session cleared" on prod.
+- `[x]` 3. New `apps/web/src/lib/logout-cookies.ts` — pure `clearAuthCookieHeaders()` (4 cookies, Max-Age=0, Secure only on `__Secure-` variants) + `logoutRedirectUrl()` (safeCallbackUrl semantics, default `/publisher/daftar?logout=1`).
+- `[x]` 4. New `apps/web/src/app/api/logout/route.ts` — GET+POST → hand-built 303 with all Set-Cookie headers + `Cache-Control: no-store`.
+- `[x]` 5. Publisher logout (`sidebar-client.tsx`, `topbar-client.tsx`) → `window.location.assign("/api/logout")`; "Keluar..." state kept; unused `signOut` imports removed.
+- `[x]` 6. `(auth)/actions.ts` `signOut()`: fall back to plain `redirect()` if `nextAuthSignOut` throws non-redirect (never silently no-op).
+- `[x]` 7. Tests: `logout-cookies.test.ts` (10 cases); web suite 37/37 green.
+- `[x]` 8. Verification: web typecheck ✅, eslint 0 errors ✅ (3 pre-existing warnings).
+- `[x]` 9. Incidental fix: `ipHeaders()` in `(auth)/actions.ts` awaited (`headers()` is async in Next 16) — pre-existing uncommitted web-auth-hardening work did not compile.
+- `[ ]` 10. Deploy (preview → prod) + manual QA: Keluar → landing → Masuk → **login form appears**; customer/admin logout regression.
+
+# Web Auth Hardening — OTP Password Reset + D1 Rate Limiting — 2026-08-29
+
+- `[ ]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-web-auth-hardening-design.md`, plan `docs/superpowers/plans/2026-08-29-web-auth-hardening.md`, ledger `.superpowers/sdd/web-auth-hardening/progress.md`.
+- `[ ]` 2. `packages/db`: new `auth_attempts` table (key unique, attempts, windowStart, lockedUntil, updatedAt) + generated migration; local D1 only (remote deferred to manual `migrate-d1.yml`).
+- `[ ]` 3. `apps/web/src/lib/rate-limit.ts`: pure limiter core + D1 storage + policy constants + `getRequestIp()`.
+- `[ ]` 4. Mail: fix `apps/api/src/lib/mail.ts` (dual `X-Api-Key`/`X-Auth-Api-Key`), copy to `apps/web/src/lib/mail.ts`.
+- `[ ]` 5. OTP reset: replace `resetPassword` with `requestPasswordReset` (generic success, create OTP + fire-and-forget email) + `verifyPasswordReset` (code/expiry check, PBKDF2 hash, cleanup).
+- `[ ]` 6. Two-step `/forgot-password` UI + new error keys (`OTP_SENT`, `OTP_INVALID`, `OTP_EXPIRED`, `RATE_LIMITED`).
+- `[ ]` 7. Lock login/register: `signIn` (email+IP), `authorize()` read-only block, `signUp`/`signUpPublisher` (IP), `signInWithGoogle` (IP).
+- `[ ]` 8. Docs/config: `AGENTS.md` (fix stale `/publisher/dashboard` middleware claim + new secrets), root `.env.example`, `apps/web/.dev.vars`, worker secrets (web+preview+api).
+- `[ ]` 9. Tests: `rate-limit.test.ts` + `otp.test.ts`; full AGENTS.md checklist per touched workspace.
+- `[ ]` 10. Deploy: preview + secrets + prod; migration via manual `migrate-d1.yml`; smoke test.
+- `[ ]` 11. ROTATE the MailChannels API key that was pasted into chat (user action — create new, update workers, revoke old).
+
 # Profile Tablet Layout Fix — 2026-08-28
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-28-profile-tablet-layout-fix-design.md`, plan `docs/superpowers/plans/2026-08-28-profile-tablet-layout-fix.md`, ledger `.superpowers/sdd/profile-tablet-layout-fix/progress.md`. User-approved ("Start implementation").

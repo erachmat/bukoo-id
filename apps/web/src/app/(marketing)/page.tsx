@@ -10,6 +10,7 @@ import { FAQ } from '@/components/marketing/FAQ';
 import { CallToAction } from '@/components/marketing/CallToAction';
 import { trendingBooks } from '@/components/marketing/bookData';
 import { FeaturedBooks } from '@/components/marketing/FeaturedBooks';
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,9 @@ export default function LandingPage() {
     <>
       <Hero />
       <Marquee />
-      <FeaturedBooks />
+      <Suspense fallback={<div className="featured-skeleton" style={{ minHeight: 480 }} aria-hidden /> }>
+        <FeaturedBooks />
+      </Suspense>
       <BookRow 
         id="trending-row"
         title="🔥 Trending di Indonesia" 

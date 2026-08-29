@@ -37,9 +37,8 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
     startTransition(async () => {
       try {
         await action(fd)
-      } catch (err) {
-        console.error(err)
-        setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
+      } catch {
+        setErrorMsg('Terjadi kesalahan saat menyimpan buku. Pastikan ukuran file tidak melebihi 50MB.')
       }
     })
   }

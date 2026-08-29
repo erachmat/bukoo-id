@@ -9,9 +9,9 @@ export default function PerangkatPage() {
         <div className="phero-grid"></div>
         <div className="wrap">
           <span className="eyebrow">Bantuan · Perangkat &amp; App</span>
-          <h1 className="ph-h1">Baca di <em>semua perangkat</em></h1>
+            <h1 className="ph-h1">Baca di <em>aplikasi BUKOO</em></h1>
           <p className="ph-lead">
-            Mulai membaca di ponsel saat commuting, lanjutkan di tablet malam hari. BUKOO menyinkronkan progres Anda mulus di semua perangkat.
+            Mulai membaca di ponsel saat commuting, lanjutkan di tablet malam hari. Progres Anda tersinkron otomatis antar perangkat lewat aplikasi BUKOO.
           </p>
         </div>
       </section>
@@ -33,11 +33,6 @@ export default function PerangkatPage() {
               <div className="ic">🍎</div>
               <h4>iOS</h4>
               <p>Aplikasi BUKOO di App Store untuk iPhone &amp; iPad.</p>
-            </div>
-            <div className="fcard">
-              <div className="ic">💻</div>
-              <h4>Web</h4>
-              <p>Baca langsung dari browser desktop tanpa perlu instalasi.</p>
             </div>
           </div>
         </div>

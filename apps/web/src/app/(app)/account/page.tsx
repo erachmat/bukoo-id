@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { AccountSignOut } from './account-sign-out'
+import { AppDownloadCta } from '@/components/app/app-download-cta'
 
 export const metadata: Metadata = {
   title: 'Akun',
@@ -55,6 +56,14 @@ export default async function AccountPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div style={{ marginTop: '32px' }}>
+        <AppDownloadCta
+          variant="strip"
+          title="Membaca di aplikasi BUKOO"
+          subtitle="Buka katalog ini di aplikasi BUKOO untuk mulai membaca — tersedia di iOS dan Android."
+        />
       </div>
     </div>
   )

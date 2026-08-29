@@ -24,7 +24,7 @@ export function FAQ() {
           Apa itu BUKOO dan bagaimana cara kerjanya?
           <div className="faq-icon">+</div>
         </button>
-        <div className="faq-a">BUKOO adalah platform langganan buku digital yang memungkinkan kamu mengakses 2.000+ judul buku kurasi dari puluhan penerbit Indonesia dan internasional. Cukup bayar satu biaya langganan bulanan, dan nikmati bacaan sepuasnya — mirip Netflix tapi untuk buku. Tersedia di iOS, Android, dan web browser.</div>
+        <div className="faq-a">BUKOO adalah platform langganan buku digital yang memungkinkan kamu mengakses 2.000+ judul buku kurasi dari puluhan penerbit Indonesia dan internasional. Cukup bayar satu biaya langganan bulanan, dan nikmati bacaan sepuasnya — mirip Netflix tapi untuk buku. Tersedia sebagai aplikasi di iOS dan Android.</div>
       </div>
 
       <div className="faq-item">

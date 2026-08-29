@@ -31,7 +31,7 @@ export function Hero() {
 
         <p className="hero-sub">
           Nikmati ribuan judul kurasi dari penerbit Indonesia dan dunia —
-          fiksi, non-fiksi, sampai audiobook.
+          fiksi, non-fiksi, sampai audiobook, langsung dari aplikasi BUKOO.
           Harga mulai <strong style={{ color: 'var(--amber)' }}>Rp 29.900/bulan</strong>.
         </p>
 

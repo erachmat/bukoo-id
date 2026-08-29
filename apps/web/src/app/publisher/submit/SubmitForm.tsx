@@ -48,9 +48,8 @@ export function SubmitForm() {
           if (coverFile) fd.append('cover', coverFile);
           await submitPublisherSubmission(fd);
           setSubmitted(true);
-        } catch (err: unknown) {
-          console.error(err);
-          setErrorMsg((err as Error).message || 'Terjadi kesalahan saat mengirim pengajuan.');
+        } catch {
+          setErrorMsg('Terjadi kesalahan saat mengirim pengajuan.');
         }
       });
     }

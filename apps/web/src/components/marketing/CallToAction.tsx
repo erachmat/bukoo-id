@@ -17,7 +17,7 @@ export function CallToAction() {
     <section className="cta-final">
       <div className="cta-final-bg"></div>
       <h2 className="cta-h2">Mulai Petualangan<br />Membacamu <em>Hari Ini</em></h2>
-      <p className="cta-sub">Bergabung dengan jutaan pembaca Indonesia. 7 hari pertama gratis — tidak perlu kartu kredit.</p>
+      <p className="cta-sub">Bergabung dengan jutaan pembaca Indonesia. Baca di aplikasi BUKOO untuk iOS &amp; Android — 7 hari pertama gratis.</p>
       <form className="cta-input-row" onSubmit={handleSubmit}>
         <input
           className="hero-input"
