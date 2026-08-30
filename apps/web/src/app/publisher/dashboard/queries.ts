@@ -9,9 +9,23 @@ import {
   notifications as notificationsTable,
   publisherPayouts,
   subscriptions,
+  users as usersTable,
 } from '@bukoo/db';
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
-import { bucketPremiumReaders, bucketReaderLoyalty, getPeriodRange, rankTopBooks, resolveDashboardPeriod, type DateRange } from './metrics';
+import {
+  AGE_GROUP_LABELS,
+  bucketAgeGroups,
+  bucketGenders,
+  bucketPremiumReaders,
+  bucketReaderLoyalty,
+  getPeriodRange,
+  getPreviousPeriodRange,
+  rankTopBooks,
+  resolveDashboardPeriod,
+  type AgeGroupLabel,
+  type DateRange,
+  type GenderCounts,
+} from './metrics';
 import { tierFromSubscription } from '@/lib/subscription';
 import type { PublisherCatalogBook } from '../catalog-table';
 
@@ -73,6 +87,31 @@ export const ROYALTY_CONFIG = {
   version: 'v1',
 };
 
+export interface TrendPoint {
+  /** 'YYYY-MM-DD' for daily points, 'YYYY-MM' for monthly rollup. */
+  bucket: string;
+  reads: number;
+  seconds: number;
+  completions: number;
+}
+
+export interface KpiComparison {
+  previous: number;
+  /** null when the previous window has no data → render 'baru' instead of a misleading delta. */
+  hasData: boolean;
+}
+
+export interface PublisherDemographics {
+  ageGroups: { label: AgeGroupLabel; count: number }[];
+  gender: GenderCounts;
+  knownCount: number;
+}
+
+export interface EngagementFunnel {
+  opened: number;
+  completed: number;
+}
+
 export interface PublisherDashboardOverview {
   period: DateRange;
   publisherName: string;
@@ -95,6 +134,19 @@ export interface PublisherDashboardOverview {
     readSeconds: number;
     completedReads: number;
   }[];
+  /** Per-KPI previous-window values for ▲/▼ delta chips. */
+  comparison: {
+    readers: KpiComparison;
+    seconds: KpiComparison;
+    completions: KpiComparison;
+    royalty: KpiComparison;
+  };
+  /** In-period reading activity series (daily for months/quarters, monthly for YTD). */
+  dailyTrend: TrendPoint[];
+  /** Readers-days split across each book's genres (a book with 2 genres contributes to both). */
+  genreSplit: { genre: string; readerDays: number }[];
+  demographics: PublisherDemographics | null;
+  funnel: EngagementFunnel;
   recentNotifications: {
     id: string;
     title: string;
@@ -107,6 +159,22 @@ export interface PublisherDashboardOverview {
     premiumBookCount: number;
     books: { id: string; title: string; requiredTier: string; distinctReaders: number; belowTierReaders: number; eligibleReaders: number }[];
   };
+}
+
+/** Parse a books.genre JSON text column into a string[] safely. */
+function parseGenres(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((g): g is string => typeof g === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Bucket key for the trend chart: daily ISO date, or 'YYYY-MM' when monthly=true. */
+function trendBucketKey(date: string, monthly: boolean): string {
+  return monthly ? date.slice(0, 7) : date;
 }
 
 export async function getPublisherDashboardOverview(
@@ -126,6 +194,7 @@ export async function getPublisherDashboardOverview(
       isPublished: booksTable.isPublished,
       publicationStatus: booksTable.publicationStatus,
       subscriptionRequired: booksTable.subscriptionRequired,
+      genre: booksTable.genre,
     })
     .from(booksTable)
     .where(eq(booksTable.publisherUserId, publisherUserId))
@@ -147,6 +216,18 @@ export async function getPublisherDashboardOverview(
   let readerLoyalty = bucketReaderLoyalty([]);
   let geo: { countryCode: string; readerDays: number }[] = [];
   const lifetimeMetrics = new Map<string, { readSeconds: number; completedReads: number }>();
+  const comparison = {
+    readers: { previous: 0, hasData: false },
+    seconds: { previous: 0, hasData: false },
+    completions: { previous: 0, hasData: false },
+    royalty: { previous: 0, hasData: false },
+  };
+  const dailyTrendMap = new Map<string, { reads: number; seconds: number; completions: number }>();
+  let genreSplit: { genre: string; readerDays: number }[] = [];
+  let demographics: PublisherDemographics | null = null;
+  let funnel: EngagementFunnel = { opened: 0, completed: 0 };
+
+  const previousRange = getPreviousPeriodRange(period);
 
   if (bookIds.length > 0) {
     const readerDayConditions = [inArray(publisherBookReaderDays.bookId, bookIds)];
@@ -190,6 +271,65 @@ export async function getPublisherDashboardOverview(
     totalReadingSeconds = Number(metricRows[0]?.readingSeconds ?? 0);
     totalCompletions = Number(metricRows[0]?.completedReads ?? 0);
 
+    // Trend series — daily buckets, except ytd where 200+ days would be unreadable.
+    const trendRows = await db
+      .select({
+        metricDate: publisherBookDailyMetrics.metricDate,
+        starts: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+        seconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
+        completions: sql<number>`coalesce(sum(${publisherBookDailyMetrics.completedReads}), 0)`,
+      })
+      .from(publisherBookDailyMetrics)
+      .where(and(...metricConditions))
+      .groupBy(publisherBookDailyMetrics.metricDate);
+    const monthlyBuckets = period.key === 'ytd';
+    for (const row of trendRows) {
+      const key = trendBucketKey(row.metricDate, monthlyBuckets);
+      const agg = dailyTrendMap.get(key) ?? { reads: 0, seconds: 0, completions: 0 };
+      agg.reads += Number(row.starts);
+      agg.seconds += Number(row.seconds);
+      agg.completions += Number(row.completions);
+      dailyTrendMap.set(key, agg);
+    }
+
+    // Funnel — opened = read starts, completed = completed reads in-period (privacy-safe, no % progress per reader).
+    let openedTotal = 0;
+    const startRows = await db
+      .select({ starts: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)` })
+      .from(publisherBookDailyMetrics)
+      .where(and(...metricConditions));
+    openedTotal = Number(startRows[0]?.starts ?? 0);
+    funnel = { opened: openedTotal, completed: totalCompletions };
+
+    // Previous-period aggregates for KPI deltas.
+    if (previousRange) {
+      const prevMetricConditions = [inArray(publisherBookDailyMetrics.bookId, bookIds)];
+      if (previousRange.start) prevMetricConditions.push(gte(publisherBookDailyMetrics.metricDate, previousRange.start));
+      if (previousRange.endExclusive) prevMetricConditions.push(sql`${publisherBookDailyMetrics.metricDate} < ${previousRange.endExclusive}`);
+      const prevMetricRows = await db
+        .select({
+          seconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
+          completions: sql<number>`coalesce(sum(${publisherBookDailyMetrics.completedReads}), 0)`,
+          starts: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+        })
+        .from(publisherBookDailyMetrics)
+        .where(and(...prevMetricConditions));
+      const prevSeconds = Number(prevMetricRows[0]?.seconds ?? 0);
+      const prevCompletions = Number(prevMetricRows[0]?.completions ?? 0);
+      const prevReaders = await db
+        .select({ distinctReaders: sql<number>`count(distinct ${publisherBookReaderDays.userId})` })
+        .from(publisherBookReaderDays)
+        .where(and(
+          inArray(publisherBookReaderDays.bookId, bookIds),
+          ...(previousRange.start ? [gte(publisherBookReaderDays.readDate, previousRange.start)] : []),
+          ...(previousRange.endExclusive ? [sql`${publisherBookReaderDays.readDate} < ${previousRange.endExclusive}`] : []),
+        ));
+      const prevReaderCount = Number(prevReaders[0]?.distinctReaders ?? 0);
+      comparison.seconds = { previous: prevSeconds, hasData: prevSeconds > 0 };
+      comparison.completions = { previous: prevCompletions, hasData: prevCompletions > 0 };
+      comparison.readers = { previous: prevReaderCount, hasData: prevReaderCount > 0 };
+    }
+
     const lifetimeRows = await db
       .select({
         bookId: publisherBookDailyMetrics.bookId,
@@ -205,6 +345,41 @@ export async function getPublisherDashboardOverview(
         readSeconds: Number(row.readSeconds),
         completedReads: Number(row.completedReads),
       });
+    }
+
+    // Genre split — reader-days per book joined to each book's genre list.
+    const genreReaderRows = await db
+      .select({ bookId: publisherBookReaderDays.bookId, readerDays: sql<number>`count(*)` })
+      .from(publisherBookReaderDays)
+      .where(and(...readerDayConditions))
+      .groupBy(publisherBookReaderDays.bookId);
+    const genreTotals = new Map<string, number>();
+    for (const row of genreReaderRows) {
+      const bookGenres = parseGenres(publisherBooks.find((b) => b.id === row.bookId)?.genre ?? null);
+      if (bookGenres.length === 0) continue;
+      for (const genre of bookGenres) {
+        genreTotals.set(genre, (genreTotals.get(genre) ?? 0) + Number(row.readerDays));
+      }
+    }
+    genreSplit = [...genreTotals.entries()]
+      .map(([genre, readerDays]) => ({ genre, readerDays }))
+      .sort((a, b) => b.readerDays - a.readerDays);
+
+    // Demographics — anonymous buckets over distinct in-period readers.
+    const demoReaderRows = await db
+      .selectDistinct({ userId: publisherBookReaderDays.userId, ageGroup: usersTable.ageGroup, gender: usersTable.gender })
+      .from(publisherBookReaderDays)
+      .innerJoin(usersTable, eq(usersTable.id, publisherBookReaderDays.userId))
+      .where(and(...readerDayConditions));
+    if (demoReaderRows.length > 0) {
+      const knownRows = demoReaderRows.filter((r) => r.ageGroup ?? r.gender);
+      const ageBuckets = bucketAgeGroups(demoReaderRows.map((r) => r.ageGroup));
+      const genderCounts = bucketGenders(demoReaderRows.map((r) => r.gender));
+      demographics = {
+        ageGroups: AGE_GROUP_LABELS.map((label) => ({ label, count: ageBuckets[label] })),
+        gender: genderCounts,
+        knownCount: knownRows.length,
+      };
     }
   }
 
@@ -224,6 +399,15 @@ export async function getPublisherDashboardOverview(
             (rateBps / 10000),
         ) * 100
       : 0;
+
+  // Same formula applied to the previous window (pool/rate treated as constant).
+  comparison.royalty =
+    monthlyPool > 0 && previousRange
+      ? {
+          previous: Math.round((comparison.seconds.previous / 3600) * 10 * (rateBps / 10000)) * 100,
+          hasData: comparison.seconds.hasData,
+        }
+      : { previous: 0, hasData: false };
 
   const topBooks = rankTopBooks(publisherBooks, lifetimeMetrics)
     .map((b) => {
@@ -298,6 +482,13 @@ export async function getPublisherDashboardOverview(
     readerLoyalty,
     geo,
     topBooks,
+    comparison,
+    dailyTrend: [...dailyTrendMap.entries()]
+      .map(([bucket, agg]) => ({ bucket, ...agg }))
+      .sort((a, b) => a.bucket.localeCompare(b.bucket)),
+    genreSplit,
+    demographics,
+    funnel,
     recentNotifications: recentNotifications.map((n) => ({
       id: n.id,
       title: n.title,

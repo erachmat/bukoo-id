@@ -920,3 +920,15 @@ Spec: docs/superpowers/specs/2026-08-30-publisher-submit-public-design.md · Pla
 - [x] Auth branch in submit page: PUBLISHER → `<SubmitForm />`, else CTA band (Daftar/Masuk)
 - [x] Add "Submit Judul" link to dashboard showcase CTA band
 - [x] Verification: typecheck + lint + test (apps/web) all PASS — PROD verified: anon CTA band live (aliases OK), books gate intact, bukoo.id 200
+
+## Publisher Overview Redesign (mockup parity, real data) — 2026-08-30
+Spec: docs/superpowers/specs/2026-08-30-publisher-overview-redesign-design.md · Plan: docs/superpowers/plans/2026-08-30-publisher-overview-redesign.md · Ledger: .superpowers/sdd/publisher-overview-redesign/progress.md
+- [x] SDD artifacts written; user-approved ("Start implementation"; decisions: overview tab only, full data parity incl. fabricated seed demographics, Q2+YTD periods, daily-bars/monthly-rollup trend)
+- [x] Migration `0011_dry_guardsmen.sql`: `users.age_group` + `users.gender` (nullable) — generated, @bukoo/db rebuilt, applied to LOCAL D1
+- [x] Period engine: `this_quarter`/`ytd` keys + `getPreviousPeriodRange` + age/gender bucket helpers; metrics.test.ts extended (20 pass)
+- [x] `queries.ts`: comparison deltas (readers/seconds/completions/royalty), dailyTrend (monthly rollup on YTD), genreSplit, demographics, funnel
+- [x] Seed: fabricated 13-17…55+ / F-M distributions for 24 demo readers (separate PRNG stream; schedule untouched); SQL regenerated
+- [x] UI: KPI delta chips, TrendChart, GenrePanel donut, DemographicsPanel, GeoPanelCompact, FunnelPanel, PeriodChips + Kuartal/YTD; `publisher.css` `.pds-grid-3` + `.pds-empty`
+- [x] Verification: typecheck (db+web) ✅, lint ✅ (pre-existing img warning only), tests 67/67 ✅; local D1 smoke: 24 readers w/ demographics, 303 daily rows
+- [ ] (user) Apply `0011` to remote via manual `migrate-d1.yml` (dry-run review → apply_remote=true), then re-run demo seed `--remote`
+- [ ] (user) Visual pass logged in as demo-publisher@bukoo.id (wrangler dev / preview deploy)

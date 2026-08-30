@@ -139,6 +139,35 @@ const READER_COUNT = 24;
 const COUNTRIES = ['ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'ID', 'MY', 'SG', 'US', 'SA', 'AE', 'MY', 'XX', 'US'];
 const FAVORITE_GENRES = ['["Agama"]', '["Fiksi","Agama"]', '["Sejarah"]', '["Pendidikan"]', '["Filsafat","Agama"]', '["Fiksi"]'];
 
+/**
+ * Fabricated demographic distributions for the demo dashboard charts.
+ * Matches the mockup's youth-heavy reading audience (BUKOO-Publisher-Dashboard-Mizan-3.html):
+ * age 18–24 dominant, slight female majority. Values are stored on the demo-reader
+ * users rows only — real users' columns stay NULL and render as "unknown" buckets.
+ */
+const AGE_GROUPS_POOL: string[] = [
+  ...Array<string>(8).fill('13-17'),
+  ...Array<string>(15).fill('18-24'),
+  ...Array<string>(9).fill('25-34'),
+  ...Array<string>(5).fill('35-44'),
+  ...Array<string>(3).fill('45-54'),
+  ...Array<string>(2).fill('55+'),
+];
+// Interleaved F/M so even a small cohort keeps the ~54%/46% split.
+const GENDER_POOL: Array<'F' | 'M'> = ['F', 'M', 'F', 'M', 'F', 'F', 'M', 'M', 'F', 'M', 'F', 'M', 'F', 'F', 'M', 'F', 'M', 'F', 'M', 'F', 'M', 'F', 'M', 'F'];
+
+/**
+ * Deterministic demographic per demo reader (index 0-based). Age drawn from a
+ * dedicated PRNG stream; gender index-aligned for a stable F/M ratio. Use only
+ * inside buildDemoSeedSql — never mutate these arrays.
+ */
+function demographicsForReader(readerIndex: number, prng: () => number): { ageGroup: string; gender: 'F' | 'M' } {
+  return {
+    ageGroup: AGE_GROUPS_POOL[Math.floor(prng() * AGE_GROUPS_POOL.length)],
+    gender: GENDER_POOL[readerIndex % GENDER_POOL.length],
+  };
+}
+
 interface DemoSubscription {
   readerIndex: number; // 0-based
   planId: string;
@@ -267,18 +296,24 @@ export function buildDemoSeedSql(now: Date = new Date()): string {
   const stmts: string[] = [];
   const winStart = windowStart(now);
   const schedule = buildSchedule(now);
+  // Separate PRNG stream for demographics — independent of the schedule stream so
+  // the reader-day layout is untouched and existing deployments stay stable.
+  const demoPrng = mulberry32(PRNG_SEED + 1);
 
   const publisherIdExpr = `(SELECT id FROM users WHERE email = ${q(DEMO_PUBLISHER_EMAIL)})`;
 
   // 1) Demo READERS (users) — inserted first so table FKs resolve. Re-runs upsert.
+  //    age_group/gender are FABRICATED for chart demos; real readers stay NULL.
   for (let i = 1; i <= READER_COUNT; i++) {
     const id = `demo-reader-${i}`;
     const name = `Demo Pembaca ${i}`;
     const email = `demo-reader-${i}@demo.bukoo.id`;
     const genres = FAVORITE_GENRES[i % FAVORITE_GENRES.length];
+    const demo = demographicsForReader(i - 1, demoPrng);
     stmts.push(
-      `INSERT INTO users (id, email, name, role, favorite_genres) VALUES (${q(id)}, ${q(email)}, ${q(name)}, 'USER', ${q(genres)}) ` +
-        `ON CONFLICT(id) DO UPDATE SET email = excluded.email, name = excluded.name, role = 'USER', favorite_genres = excluded.favorite_genres;`,
+      `INSERT INTO users (id, email, name, role, favorite_genres, age_group, gender) ` +
+        `VALUES (${q(id)}, ${q(email)}, ${q(name)}, 'USER', ${q(genres)}, ${q(demo.ageGroup)}, ${q(demo.gender)}) ` +
+        `ON CONFLICT(id) DO UPDATE SET email = excluded.email, name = excluded.name, role = 'USER', favorite_genres = excluded.favorite_genres, age_group = excluded.age_group, gender = excluded.gender;`,
     );
   }
 

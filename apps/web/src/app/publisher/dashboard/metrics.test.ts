@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   addOneUtcDay,
   aggregateOwnedMetricRows,
+  bucketAgeGroups,
+  bucketGenders,
   bucketReaderLoyalty,
   dateInRange,
   getCurrentMonthStart,
   getPeriodRange,
+  getPreviousPeriodRange,
   normalizeCountryCode,
   countryLabel,
   bucketPremiumReaders,
@@ -73,6 +76,74 @@ describe('publisher dashboard metrics', () => {
       start: '2025-12-01',
       endExclusive: '2026-01-01',
     });
+  });
+
+  it('resolves quarter bounds (Q3 = Jul–Sep)', () => {
+    const range = getPeriodRange('this_quarter', new Date('2026-08-27T12:00:00Z'));
+    expect(range).toEqual({
+      key: 'this_quarter',
+      start: '2026-07-01',
+      endExclusive: '2026-10-01',
+      label: 'Kuartal 3 2026',
+    });
+  });
+
+  it('wraps quarter bounds across years (Q4 → next Jan)', () => {
+    expect(getPeriodRange('this_quarter', new Date('2026-11-20T00:00:00Z'))).toMatchObject({
+      start: '2026-10-01',
+      endExclusive: '2027-01-01',
+    });
+  });
+
+  it('resolves YTD from January through the current month', () => {
+    expect(getPeriodRange('ytd', new Date('2026-08-27T12:00:00Z'))).toEqual({
+      key: 'ytd',
+      start: '2026-01-01',
+      endExclusive: '2026-09-01',
+      label: 'YTD 2026',
+    });
+  });
+
+  it('shifts deltas to the equivalent previous window', () => {
+    const now = new Date('2026-08-27T12:00:00Z');
+    expect(getPreviousPeriodRange(getPeriodRange('this_month', now))).toMatchObject({
+      start: '2026-07-01',
+      endExclusive: '2026-08-01',
+    });
+    expect(getPreviousPeriodRange(getPeriodRange('last_month', now))).toMatchObject({
+      start: '2026-06-01',
+      endExclusive: '2026-07-01',
+    });
+    expect(getPreviousPeriodRange(getPeriodRange('this_quarter', now))).toMatchObject({
+      start: '2026-04-01',
+      endExclusive: '2026-07-01',
+    });
+    expect(getPreviousPeriodRange(getPeriodRange('ytd', now))).toMatchObject({
+      start: '2025-01-01',
+      endExclusive: '2025-09-01',
+    });
+    expect(getPreviousPeriodRange(getPeriodRange('all_time', now))).toBeNull();
+    expect(getPreviousPeriodRange(resolveDashboardPeriod({ from: '2026-08-01', to: '2026-08-05' }))).toMatchObject({
+      start: '2026-07-27',
+      endExclusive: '2026-08-01',
+    });
+  });
+
+  it('accepts quarter and YTD period keys from the URL', () => {
+    const now = new Date('2026-08-27T12:00:00Z');
+    expect(resolveDashboardPeriod({ period: 'this_quarter', now }).key).toBe('this_quarter');
+    expect(resolveDashboardPeriod({ period: 'ytd', now }).key).toBe('ytd');
+    expect(resolveDashboardPeriod({ period: 'bogus', now }).key).toBe('this_month');
+  });
+
+  it('buckets age groups and drops unknown values', () => {
+    expect(bucketAgeGroups(['13-17', '18-24', '18-24', null, undefined, '99'])).toEqual({
+      '13-17': 1, '18-24': 2, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0,
+    });
+  });
+
+  it('buckets genders with an unknown remainder', () => {
+    expect(bucketGenders(['F', 'M', 'F', null])).toEqual({ female: 2, male: 1, unknown: 1 });
   });
 
   it('resolves custom inclusive date ranges', () => {

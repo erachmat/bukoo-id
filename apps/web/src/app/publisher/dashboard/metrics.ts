@@ -8,7 +8,10 @@ export interface DashboardMetricRow {
   completedReads?: number;
 }
 
-export type PeriodKey = 'this_month' | 'last_month' | 'all_time' | 'custom';
+export type PeriodKey = 'this_month' | 'last_month' | 'this_quarter' | 'ytd' | 'all_time' | 'custom';
+
+export const AGE_GROUP_LABELS = ['13-17', '18-24', '25-34', '35-44', '45-54', '55+'] as const;
+export type AgeGroupLabel = (typeof AGE_GROUP_LABELS)[number];
 
 export interface DateRange {
   key: PeriodKey;
@@ -39,7 +42,7 @@ export function getCurrentMonthStart(date: Date): string {
 }
 
 export function parsePeriodKey(value: string | undefined | null): PeriodKey {
-  if (value === 'last_month' || value === 'all_time' || value === 'custom') return value;
+  if (value === 'last_month' || value === 'this_quarter' || value === 'ytd' || value === 'all_time' || value === 'custom') return value;
   return 'this_month';
 }
 
@@ -48,6 +51,8 @@ export function monthStartUtc(year: number, monthIndex: number): string {
   const m = ((monthIndex % 12) + 12) % 12;
   return `${y}-${String(m + 1).padStart(2, '0')}-01`;
 }
+
+const QUARTER_START_MONTH = [0, 3, 6, 9]; // Jan, Apr, Jul, Oct (0-based UTC month index)
 
 export function getPeriodRange(key: Exclude<PeriodKey, 'custom'>, now: Date): DateRange {
   if (key === 'all_time') {
@@ -64,6 +69,24 @@ export function getPeriodRange(key: Exclude<PeriodKey, 'custom'>, now: Date): Da
       label: 'Bulan ini',
     };
   }
+  if (key === 'this_quarter') {
+    const quarterIndex = Math.floor(month / 3); // 0..3
+    const startMonth = QUARTER_START_MONTH[quarterIndex];
+    return {
+      key,
+      start: monthStartUtc(year, startMonth),
+      endExclusive: monthStartUtc(year, startMonth + 3),
+      label: `Kuartal ${quarterIndex + 1} ${year}`,
+    };
+  }
+  if (key === 'ytd') {
+    return {
+      key,
+      start: monthStartUtc(year, 0),
+      endExclusive: monthStartUtc(year, month + 1),
+      label: `YTD ${year}`,
+    };
+  }
 
   return {
     key,
@@ -71,6 +94,39 @@ export function getPeriodRange(key: Exclude<PeriodKey, 'custom'>, now: Date): Da
     endExclusive: monthStartUtc(year, month),
     label: 'Bulan lalu',
   };
+}
+
+/**
+ * The comparable window immediately before `range` — used for ▲/▼ KPI deltas.
+ * all_time and custom ranges have no equivalent previous window → null.
+ */
+export function getPreviousPeriodRange(range: DateRange): DateRange | null {
+  if (range.start === null || range.endExclusive === null) return null;
+  const anchorFromStart = new Date(Date.UTC(
+    Number(range.start.slice(0, 4)),
+    Number(range.start.slice(5, 7)) - 1,
+    Number(range.start.slice(8, 10)),
+  ));
+  const lengthDays = Math.round(
+    (Date.parse(`${range.endExclusive}T00:00:00Z`) - Date.parse(`${range.start}T00:00:00Z`)) / 86_400_000,
+  );
+  if (range.key === 'this_month' || range.key === 'last_month') {
+    const prevStart = monthStartUtc(anchorFromStart.getUTCFullYear(), anchorFromStart.getUTCMonth() - 1);
+    return { key: range.key, start: prevStart, endExclusive: range.start, label: 'periode sebelumnya' };
+  }
+  if (range.key === 'this_quarter') {
+    const prevQuarterAnchor = new Date(anchorFromStart);
+    prevQuarterAnchor.setUTCMonth(prevQuarterAnchor.getUTCMonth() - 3);
+    const prevStart = monthStartUtc(prevQuarterAnchor.getUTCFullYear(), prevQuarterAnchor.getUTCMonth());
+    return { key: range.key, start: prevStart, endExclusive: range.start, label: 'kuartal sebelumnya' };
+  }
+  if (range.key === 'ytd') {
+    const prevYear = anchorFromStart.getUTCFullYear() - 1;
+    return { key: range.key, start: `${prevYear}-01-01`, endExclusive: `${prevYear}${range.endExclusive.slice(4)}`, label: 'YTD tahun lalu' };
+  }
+  // last_month handled above; all_time/custom excluded — defensive fallback:
+  const prevStart = new Date(Date.parse(`${range.start}T00:00:00Z`) - lengthDays * 86_400_000).toISOString().slice(0, 10);
+  return { key: range.key, start: prevStart, endExclusive: range.start, label: 'periode sebelumnya' };
 }
 
 export function resolveDashboardPeriod(input: {
@@ -171,6 +227,31 @@ export function bucketReaderLoyalty(dayCounts: number[]): LoyaltyBuckets {
     else buckets.fivePlusDays += 1;
   }
   return buckets;
+}
+
+/** Age-group bucket for publisher demographics — null/unknown → omitted. */
+export function bucketAgeGroups(values: (string | null | undefined)[]): Record<AgeGroupLabel, number> {
+  const buckets: Record<AgeGroupLabel, number> = { '13-17': 0, '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0 };
+  for (const value of values) {
+    if (value && value in buckets) buckets[value as AgeGroupLabel] += 1;
+  }
+  return buckets;
+}
+
+export interface GenderCounts {
+  female: number;
+  male: number;
+  unknown: number;
+}
+
+export function bucketGenders(values: (string | null | undefined)[]): GenderCounts {
+  const counts: GenderCounts = { female: 0, male: 0, unknown: 0 };
+  for (const value of values) {
+    if (value === 'F') counts.female += 1;
+    else if (value === 'M') counts.male += 1;
+    else counts.unknown += 1;
+  }
+  return counts;
 }
 
 /** ISO 3166-1 alpha-2, or XX when missing/invalid. Never stores an IP. */

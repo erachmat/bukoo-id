@@ -51,6 +51,14 @@ export const users = sqliteTable('users', {
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).notNull().default(false),
   /** Favorite reading genres — JSON text array e.g. '["Fiksi","Agama"]' */
   favoriteGenres:      text('favorite_genres').notNull().default('[]'),
+  /**
+   * Self-declared age group — '13-17' | '18-24' | '25-34' | '35-44' | '45-54' | '55+'.
+   * Nullable: only populated when the reader shares it (demo readers always do).
+   * Aggregated in publisher analytics WITHOUT any user identity exposure.
+   */
+  ageGroup:            text('age_group'),
+  /** Self-declared gender — 'F' | 'M'. Nullable for the same privacy reasons. */
+  gender:              text('gender'),
   createdAt:           text('created_at').notNull().default(now()),
   updatedAt:           text('updated_at').notNull().default(now()),
 });
