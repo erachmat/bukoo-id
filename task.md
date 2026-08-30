@@ -930,5 +930,5 @@ Spec: docs/superpowers/specs/2026-08-30-publisher-overview-redesign-design.md ·
 - [x] Seed: fabricated 13-17…55+ / F-M distributions for 24 demo readers (separate PRNG stream; schedule untouched); SQL regenerated
 - [x] UI: KPI delta chips, TrendChart, GenrePanel donut, DemographicsPanel, GeoPanelCompact, FunnelPanel, PeriodChips + Kuartal/YTD; `publisher.css` `.pds-grid-3` + `.pds-empty`
 - [x] Verification: typecheck (db+web) ✅, lint ✅ (pre-existing img warning only), tests 67/67 ✅; local D1 smoke: 24 readers w/ demographics, 303 daily rows
-- [ ] (user) Apply `0011` to remote via manual `migrate-d1.yml` (dry-run review → apply_remote=true), then re-run demo seed `--remote`
-- [ ] (user) Visual pass logged in as demo-publisher@bukoo.id (wrangler dev / preview deploy)
+- [x] Pushed `308028a` → CI green; migration `0011` applied to remote `bukoo-db` via manual `migrate-d1.yml` (apply_remote=true, run 333052ᵉ); demo seed re-applied remote (24 demo readers w/ demographics, 347 daily rows); Deploy Web success → live on bukoo.id
+- [ ] (user) Visual pass logged in as demo-publisher@bukoo.id (overview: KPI deltas, trend bars, genre donut, demographics, funnel; switch periode Kuartal/YTD)
