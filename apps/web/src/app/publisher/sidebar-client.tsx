@@ -14,13 +14,14 @@ interface SidebarProps {
 }
 
 const analyticsNav = [
-  { id: "overview",  label: "Overview",      icon: "📊" },
-  { id: "performa",  label: "Performa Buku", icon: "📈" },
-  { id: "royalti",   label: "Royalti",       icon: "💰" },
-  { id: "pembaca",   label: "Pembaca",        icon: "👥" },
-  { id: "waktu",     label: "Waktu Baca",     icon: "⏱️" },
-  { id: "geo",      label: "Sebaran Geografis", icon: "🌏" },
-  { id: "metadata",  label: "Metadata",        icon: "📝" },
+  { id: "overview",   label: "Overview",           icon: "📊" },
+  { id: "performa",   label: "Performa Buku",      icon: "📈" },
+  { id: "royalti",    label: "Royalti",            icon: "💰" },
+  { id: "pembaca",    label: "Pembaca",            icon: "👥" },
+  { id: "waktu",      label: "Waktu Baca",         icon: "⏱️" },
+  { id: "demografi",  label: "Demografi",          icon: "🧬" },
+  { id: "geo",        label: "Sebaran Geografis",  icon: "🌏" },
+  { id: "metadata",   label: "Metadata",           icon: "📝" },
 ];
 
 const contentNav = [

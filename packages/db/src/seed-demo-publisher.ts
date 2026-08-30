@@ -156,6 +156,13 @@ const AGE_GROUPS_POOL: string[] = [
 // Interleaved F/M so even a small cohort keeps the ~54%/46% split.
 const GENDER_POOL: Array<'F' | 'M'> = ['F', 'M', 'F', 'M', 'F', 'F', 'M', 'M', 'F', 'M', 'F', 'M', 'F', 'F', 'M', 'F', 'M', 'F', 'M', 'F', 'M', 'F', 'M', 'F'];
 
+/** Indonesian cities cycled for readers whose COUNTRIES entry is 'ID'. */
+const CITY_POOL_ID = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Medan', 'Makassar', 'Denpasar', 'Semarang'];
+/** Foreign city per non-ID country code. */
+const CITY_BY_COUNTRY: Record<string, string> = {
+  MY: 'Kuala Lumpur', SG: 'Singapura', US: 'New York', SA: 'Riyadh', AE: 'Dubai',
+};
+
 /**
  * Deterministic demographic per demo reader (index 0-based). Age drawn from a
  * dedicated PRNG stream; gender index-aligned for a stable F/M ratio. Use only
@@ -310,10 +317,14 @@ export function buildDemoSeedSql(now: Date = new Date()): string {
     const email = `demo-reader-${i}@demo.bukoo.id`;
     const genres = FAVORITE_GENRES[i % FAVORITE_GENRES.length];
     const demo = demographicsForReader(i - 1, demoPrng);
+    const country = COUNTRIES[(i - 1) % COUNTRIES.length];
+    const city = country === 'ID'
+      ? CITY_POOL_ID[(i - 1) % CITY_POOL_ID.length]
+      : CITY_BY_COUNTRY[country] ?? 'Lainnya';
     stmts.push(
-      `INSERT INTO users (id, email, name, role, favorite_genres, age_group, gender) ` +
-        `VALUES (${q(id)}, ${q(email)}, ${q(name)}, 'USER', ${q(genres)}, ${q(demo.ageGroup)}, ${q(demo.gender)}) ` +
-        `ON CONFLICT(id) DO UPDATE SET email = excluded.email, name = excluded.name, role = 'USER', favorite_genres = excluded.favorite_genres, age_group = excluded.age_group, gender = excluded.gender;`,
+      `INSERT INTO users (id, email, name, role, favorite_genres, age_group, gender, city) ` +
+        `VALUES (${q(id)}, ${q(email)}, ${q(name)}, 'USER', ${q(genres)}, ${q(demo.ageGroup)}, ${q(demo.gender)}, ${q(city)}) ` +
+        `ON CONFLICT(id) DO UPDATE SET email = excluded.email, name = excluded.name, role = 'USER', favorite_genres = excluded.favorite_genres, age_group = excluded.age_group, gender = excluded.gender, city = excluded.city;`,
     );
   }
 
@@ -346,11 +357,15 @@ export function buildDemoSeedSql(now: Date = new Date()): string {
   // 4) publisher_book_reader_days — PK (book_id, user_id, read_date).
   const byBookDate = new Map<string, { starts: number; seconds: number; completed: number }>();
   const byBookDateCountry = new Map<string, number>();
+  const lastDayByReaderBook = new Map<string, { day: string; completed: boolean; totalMinutes: number }>();
   for (const s of schedule) {
     const day = isoDay(addDays(winStart, s.dayOffset));
     const readerId = `demo-reader-${s.readerNumber}`;
     const firstAt = `${day}T02:00:00.000Z`;
-    const lastAt = `${day}T08:${String((s.readerNumber * 3) % 60).padStart(2, '0')}:00.000Z`;
+    // Evening-weighted hour (6–23, peaks 20–22) so the Waktu Baca rhythm chart is plausible.
+    const hourRoll = demoPrng();
+    const readHour = hourRoll < 0.45 ? 20 + Math.floor(demoPrng() * 3) : 6 + Math.floor(demoPrng() * 14);
+    const lastAt = `${day}T${String(readHour).padStart(2, '0')}:${String((s.readerNumber * 3) % 60).padStart(2, '0')}:00.000Z`;
     stmts.push(
       `INSERT INTO publisher_book_reader_days (book_id, user_id, read_date, first_read_at, last_read_at) ` +
         `VALUES (${q(s.bookId)}, ${q(readerId)}, ${q(day)}, ${q(firstAt)}, ${q(lastAt)}) ` +
@@ -364,6 +379,28 @@ export function buildDemoSeedSql(now: Date = new Date()): string {
     byBookDate.set(key, agg);
     const cKey = `${key}|${COUNTRIES[(s.readerNumber - 1) % COUNTRIES.length]}`;
     byBookDateCountry.set(cKey, (byBookDateCountry.get(cKey) ?? 0) + 1);
+    // Track the LAST session per reader×book pair for reading_progress fabrication.
+    lastDayByReaderBook.set(`${s.bookId}|${s.readerNumber}`, {
+      day,
+      completed: s.completed,
+      totalMinutes: Math.round(s.seconds / 60) + (lastDayByReaderBook.get(`${s.bookId}|${s.readerNumber}`)?.totalMinutes ?? 0),
+    });
+  }
+
+  // 4b) reading_progress — one FABRICATED row per reader×book pair (unique index
+  //     reading_progress_user_book_idx on (user_id, book_id)). Completed pairs get
+  //     100%, in-progress pairs 5–85%. Lets the funnel show mid-steps.
+  for (const [pairKey, session] of lastDayByReaderBook) {
+    const [bookId, readerNumber] = pairKey.split('|');
+    const userId = `demo-reader-${readerNumber}`;
+    const progress = session.completed ? 100 : 5 + Math.floor(demoPrng() * 80);
+    const lastReadAt = `${session.day}T22:00:00.000Z`;
+    const id = `demo-rp-${bookId}-${readerNumber}`;
+    stmts.push(
+      `INSERT INTO reading_progress (id, user_id, book_id, progress_percent, current_page, total_pages, cfi_position, reading_time_minutes, reading_time_seconds, last_read_at, updated_at) ` +
+        `VALUES (${q(id)}, ${q(userId)}, ${q(bookId)}, ${progress}, 0, 0, NULL, ${session.totalMinutes}, ${session.totalMinutes * 60}, ${q(lastReadAt)}, ${q(lastReadAt)}) ` +
+        `ON CONFLICT(user_id, book_id) DO UPDATE SET progress_percent = excluded.progress_percent, reading_time_minutes = excluded.reading_time_minutes, reading_time_seconds = excluded.reading_time_seconds, last_read_at = excluded.last_read_at, updated_at = excluded.updated_at;`,
+    );
   }
 
   // 5) publisher_book_daily_metrics — unique (book_id, metric_date).

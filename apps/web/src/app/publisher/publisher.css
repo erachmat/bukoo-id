@@ -3869,6 +3869,18 @@ td.td-pct {
 .pub-dashboard-shell .pds-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
 @media (max-width: 1100px) { .pub-dashboard-shell .pds-grid-3 { grid-template-columns: 1fr; } }
 
+/* 2-column panel grid (demografi/waktu/geo detail pages) */
+.pub-dashboard-shell .pds-grid-2col { grid-template-columns: 1fr 1fr; }
+@media (max-width: 900px) { .pub-dashboard-shell .pds-grid-2col { grid-template-columns: 1fr; } }
+
+/* inline status chips row (katalog) */
+.pub-dashboard-shell .pds-flex-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* consistent zero-data state inside panels */
 .pub-dashboard-shell .pds-empty {
   padding: 26px 16px;

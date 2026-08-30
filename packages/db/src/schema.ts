@@ -59,6 +59,11 @@ export const users = sqliteTable('users', {
   ageGroup:            text('age_group'),
   /** Self-declared gender — 'F' | 'M'. Nullable for the same privacy reasons. */
   gender:              text('gender'),
+  /**
+   * Self-declared city name (free text, aggregated anonymously in publisher
+   * analytics). Nullable — demo readers always have it; real users may not.
+   */
+  city:                text('city'),
   createdAt:           text('created_at').notNull().default(now()),
   updatedAt:           text('updated_at').notNull().default(now()),
 });

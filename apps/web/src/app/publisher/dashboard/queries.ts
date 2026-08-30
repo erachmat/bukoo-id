@@ -8,6 +8,7 @@ import {
   publisherProfiles,
   notifications as notificationsTable,
   publisherPayouts,
+  readingProgress as readingProgressTable,
   subscriptions,
   users as usersTable,
 } from '@bukoo/db';
@@ -109,7 +110,35 @@ export interface PublisherDemographics {
 
 export interface EngagementFunnel {
   opened: number;
+  /** Progress ≥10% — null when the publisher has no reading_progress data (2-step fallback). */
+  tenPlus: number | null;
+  /** Progress ≥50% — null when the publisher has no reading_progress data. */
+  fiftyPlus: number | null;
   completed: number;
+  hasProgressData: boolean;
+}
+
+export interface CityReaders {
+  city: string;
+  readers: number;
+}
+
+export interface RhythmPoint {
+  bucket: string;
+  reads: number;
+}
+
+export interface PublisherBookStat {
+  id: string;
+  title: string;
+  author: string;
+  coverKey: string | null;
+  subscriptionRequired: string;
+  isPublished: boolean;
+  lifetimeReads: number;
+  reads: number;
+  seconds: number;
+  completions: number;
 }
 
 export interface PublisherDashboardOverview {
@@ -147,6 +176,14 @@ export interface PublisherDashboardOverview {
   genreSplit: { genre: string; readerDays: number }[];
   demographics: PublisherDemographics | null;
   funnel: EngagementFunnel;
+  /** Distinct in-period readers by self-declared city (top 8 + Lainnya). */
+  cities: CityReaders[];
+  /** Reads per weekday, '0'=Minggu … '6'=Sabtu. */
+  weekdayRhythm: RhythmPoint[];
+  /** Reads per hour-of-day (00–23) from reader-day last_read_at. */
+  hourRhythm: RhythmPoint[];
+  /** Per-book period stats for the Performa tab (all books, not just top N). */
+  bookStats: PublisherBookStat[];
   recentNotifications: {
     id: string;
     title: string;
@@ -225,7 +262,11 @@ export async function getPublisherDashboardOverview(
   const dailyTrendMap = new Map<string, { reads: number; seconds: number; completions: number }>();
   let genreSplit: { genre: string; readerDays: number }[] = [];
   let demographics: PublisherDemographics | null = null;
-  let funnel: EngagementFunnel = { opened: 0, completed: 0 };
+  let funnel: EngagementFunnel = { opened: 0, tenPlus: null, fiftyPlus: null, completed: 0, hasProgressData: false };
+  let cities: CityReaders[] = [];
+  let weekdayRhythm: RhythmPoint[] = [];
+  let hourRhythm: RhythmPoint[] = [];
+  const bookStatsMap = new Map<string, { reads: number; seconds: number; completions: number }>();
 
   const previousRange = getPreviousPeriodRange(period);
 
@@ -292,14 +333,82 @@ export async function getPublisherDashboardOverview(
       dailyTrendMap.set(key, agg);
     }
 
-    // Funnel — opened = read starts, completed = completed reads in-period (privacy-safe, no % progress per reader).
-    let openedTotal = 0;
+    // Funnel — opened = distinct reader×book pairs; mid-steps from reading_progress
+    // (progress_percent 0–100); completed = daily-metric completions. The progress
+    // join is skipped when the publisher has no progress rows (hasProgressData=false).
+    const pairRows = await db
+      .select({ userId: publisherBookReaderDays.userId, bookId: publisherBookReaderDays.bookId })
+      .from(publisherBookReaderDays)
+      .where(and(...readerDayConditions))
+      .groupBy(publisherBookReaderDays.userId, publisherBookReaderDays.bookId);
+
+    let startRowsOpen = 0;
     const startRows = await db
       .select({ starts: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)` })
       .from(publisherBookDailyMetrics)
       .where(and(...metricConditions));
-    openedTotal = Number(startRows[0]?.starts ?? 0);
-    funnel = { opened: openedTotal, completed: totalCompletions };
+    startRowsOpen = Number(startRows[0]?.starts ?? 0);
+
+    let tenPlus: number | null = null;
+    let fiftyPlus: number | null = null;
+    let hasProgressData = false;
+    if (pairRows.length > 0) {
+      const pairSet = new Set(pairRows.map((p) => `${p.userId}|${p.bookId}`));
+      const progressRows = await db
+        .select({ userId: readingProgressTable.userId, bookId: readingProgressTable.bookId, progress: readingProgressTable.progressPercent })
+        .from(readingProgressTable)
+        .where(and(
+          inArray(readingProgressTable.userId, pairRows.map((p) => p.userId)),
+          inArray(readingProgressTable.bookId, bookIds),
+        ));
+      const inScope = progressRows.filter((r) => pairSet.has(`${r.userId}|${r.bookId}`));
+      if (inScope.length > 0) {
+        hasProgressData = true;
+        tenPlus = inScope.filter((r) => r.progress >= 10).length;
+        fiftyPlus = inScope.filter((r) => r.progress >= 50).length;
+      }
+    }
+    funnel = { opened: startRowsOpen, tenPlus, fiftyPlus, completed: totalCompletions, hasProgressData };
+
+    // Weekday rhythm — reads per day-of-week ('0'=Minggu … '6'=Sabtu).
+    const weekdayRows = await db
+      .select({
+        dow: sql<string>`strftime('%w', ${publisherBookDailyMetrics.metricDate})`,
+        reads: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+      })
+      .from(publisherBookDailyMetrics)
+      .where(and(...metricConditions))
+      .groupBy(sql`strftime('%w', ${publisherBookDailyMetrics.metricDate})`);
+    weekdayRhythm = weekdayRows.map((r) => ({ bucket: r.dow, reads: Number(r.reads) }));
+
+    // Hour rhythm — last-session hour per reader-day.
+    const hourRows = await db
+      .select({
+        hour: sql<string>`strftime('%H', ${publisherBookReaderDays.lastReadAt})`,
+        reads: sql<number>`count(*)`,
+      })
+      .from(publisherBookReaderDays)
+      .where(and(...readerDayConditions))
+      .groupBy(sql`strftime('%H', ${publisherBookReaderDays.lastReadAt})`);
+    hourRhythm = hourRows.map((r) => ({ bucket: r.hour, reads: Number(r.reads) }));
+
+    // Cities — distinct in-period readers by self-declared city.
+    const cityRows = await db
+      .select({
+        city: usersTable.city,
+        readers: sql<number>`count(distinct ${publisherBookReaderDays.userId})`,
+      })
+      .from(publisherBookReaderDays)
+      .innerJoin(usersTable, eq(usersTable.id, publisherBookReaderDays.userId))
+      .where(and(...readerDayConditions))
+      .groupBy(usersTable.city);
+    const cityList = cityRows
+      .map((r) => ({ city: r.city || 'Lainnya', readers: Number(r.readers) }))
+      .sort((a, b) => b.readers - a.readers);
+    const topCities = cityList.slice(0, 8);
+    const restReaders = cityList.slice(8).reduce((sum, c) => sum + c.readers, 0);
+    if (restReaders > 0) topCities.push({ city: 'Lainnya', readers: restReaders });
+    cities = topCities;
 
     // Previous-period aggregates for KPI deltas.
     if (previousRange) {
@@ -344,6 +453,25 @@ export async function getPublisherDashboardOverview(
       lifetimeMetrics.set(row.bookId, {
         readSeconds: Number(row.readSeconds),
         completedReads: Number(row.completedReads),
+      });
+    }
+
+    // Per-book period stats (Performa tab) — reads/seconds/completions grouped by book.
+    const perBookPeriod = await db
+      .select({
+        bookId: publisherBookDailyMetrics.bookId,
+        reads: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+        seconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
+        completions: sql<number>`coalesce(sum(${publisherBookDailyMetrics.completedReads}), 0)`,
+      })
+      .from(publisherBookDailyMetrics)
+      .where(and(...metricConditions))
+      .groupBy(publisherBookDailyMetrics.bookId);
+    for (const row of perBookPeriod) {
+      bookStatsMap.set(row.bookId, {
+        reads: Number(row.reads),
+        seconds: Number(row.seconds),
+        completions: Number(row.completions),
       });
     }
 
@@ -489,6 +617,19 @@ export async function getPublisherDashboardOverview(
     genreSplit,
     demographics,
     funnel,
+    cities,
+    weekdayRhythm,
+    hourRhythm,
+    bookStats: publisherBooks.map((b) => ({
+      id: b.id,
+      title: b.title,
+      author: b.author,
+      coverKey: b.coverKey,
+      subscriptionRequired: b.subscriptionRequired,
+      isPublished: b.isPublished,
+      lifetimeReads: b.readCount,
+      ...(bookStatsMap.get(b.id) ?? { reads: 0, seconds: 0, completions: 0 }),
+    })),
     recentNotifications: recentNotifications.map((n) => ({
       id: n.id,
       title: n.title,
