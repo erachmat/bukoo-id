@@ -1,0 +1,112 @@
+/*
+ * Admin dark theme — mirrors the publisher dashboard design language
+ * (forest/teal/amber, serif headings). Admin pages keep their inline styles;
+ * this file supplies the token values and shell chrome they reference.
+ * Imported by apps/web/src/app/admin/layout.tsx.
+ */
+:root {
+  --ad-bg: #0d1117;
+  --ad-panel: #0a1018;
+  --ad-panel-raised: #101821;
+  --ad-border: rgba(255, 255, 255, 0.08);
+  --ad-border-soft: rgba(255, 255, 255, 0.05);
+  --ad-text: #f0f4ff;
+  --ad-dim: rgba(255, 255, 255, 0.55);
+  --ad-muted: rgba(255, 255, 255, 0.3);
+  --ad-teal: #00c9a7;
+  --ad-teal-dim: rgba(0, 201, 167, 0.12);
+  --ad-amber: #c9952a;
+  --ad-amber-lt: #f0d080;
+  --ad-coral: #ff6b6b;
+  --ad-serif: 'Playfair Display', Georgia, serif;
+  --ad-sans: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  --ad-radius: 12px;
+}
+
+body.admin-shell {
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(30, 64, 53, 0.35) 0%, transparent 55%),
+    var(--ad-bg);
+  color: var(--ad-text);
+  font-family: var(--ad-sans);
+  min-height: 100vh;
+}
+
+/* Sidebar shell — same pattern as the publisher sidebar */
+.admin-shell-sidebar {
+  background: var(--ad-panel);
+  border-right: 1px solid var(--ad-border-soft);
+}
+
+.admin-shell-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ad-dim);
+  text-decoration: none;
+  transition: 0.15s;
+}
+.admin-shell-nav-item:hover {
+  color: var(--ad-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+.admin-shell-nav-item.active {
+  background: var(--ad-teal-dim);
+  color: var(--ad-teal);
+}
+
+.admin-shell-card {
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-border-soft);
+  border-radius: var(--ad-radius);
+  padding: 16px 18px;
+}
+
+.admin-shell-title {
+  font-family: var(--ad-serif);
+  font-weight: 700;
+  color: var(--ad-text);
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.admin-shell-sub {
+  font-size: 12px;
+  color: var(--ad-dim);
+  margin-top: 3px;
+}
+
+/* Tables keep inline layouts but inherit readable colors */
+.admin-shell table {
+  color: var(--ad-dim);
+}
+.admin-shell th {
+  color: var(--ad-muted);
+}
+
+/* Form controls render dark inside admin */
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ad-border);
+  border-radius: 8px;
+  color: var(--ad-text);
+  padding: 9px 12px;
+  font-family: var(--ad-sans);
+  font-size: 12.5px;
+}
+.admin-shell input:focus,
+.admin-shell select:focus,
+.admin-shell textarea:focus {
+  outline: none;
+  border-color: rgba(0, 201, 167, 0.4);
+}
+.admin-shell select option {
+  background: var(--ad-panel);
+  color: var(--ad-text);
+}

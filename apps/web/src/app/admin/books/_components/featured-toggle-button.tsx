@@ -15,5 +15,5 @@ export function FeaturedToggleButton({ bookId, featured, disabled }: { bookId: s
     })
   }
 
-  return <button type="button" onClick={handleClick} disabled={disabled || pending} aria-label={featured ? 'Hapus dari unggulan' : 'Jadikan unggulan'} style={{ border: '1px solid #E8ECF0', borderRadius: 7, background: featured ? '#FFF7E6' : '#fff', color: featured ? '#B7791F' : '#6B7A8D', padding: '5px 8px', cursor: disabled || pending ? 'default' : 'pointer', opacity: pending ? 0.6 : 1 }}>{pending ? '...' : featured ? '★ Unggulan' : '☆ Unggulkan'}</button>
+  return <button type="button" onClick={handleClick} disabled={disabled || pending} aria-label={featured ? 'Hapus dari unggulan' : 'Jadikan unggulan'} style={{ border: '1px solid var(--ad-border)', borderRadius: 7, background: featured ? 'rgba(201,149,42,0.12)' : 'var(--ad-panel)', color: featured ? 'var(--ad-amber-lt)' : 'var(--ad-dim)', padding: '5px 8px', cursor: disabled || pending ? 'default' : 'pointer', opacity: pending ? 0.6 : 1 }}>{pending ? '...' : featured ? '★ Unggulan' : '☆ Unggulkan'}</button>
 }

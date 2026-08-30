@@ -18,8 +18,8 @@ export default async function AdminSettingsPage() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A2332', marginBottom: 6 }}>Pengaturan platform</h1>
-      <p style={{ color: '#6B7A8D', marginBottom: 24 }}>Kelola parameter yang digunakan untuk perhitungan estimasi publisher.</p>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 6 }}>Pengaturan platform</h1>
+      <p style={{ color: 'var(--ad-dim)', marginBottom: 24 }}>Kelola parameter yang digunakan untuk perhitungan estimasi publisher.</p>
       <RoyaltySettingsForm monthlyPool={monthlyPool ?? '0'} rateBps={rateBps ?? '6500'} />
     </div>
   )

@@ -44,11 +44,11 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #D1D9E0',
-    fontSize: 14, color: '#1A2332', background: '#fff', outline: 'none', boxSizing: 'border-box',
+    width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--ad-border)',
+    fontSize: 14, color: 'var(--ad-text)', background: 'var(--ad-panel)', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    display: 'block', fontSize: 12, fontWeight: 700, color: '#6B7A8D',
+    display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--ad-dim)',
     textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6,
   }
 
@@ -62,7 +62,7 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'flex-start' }}>
 
         {/* Left: Metadata */}
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8ECF0', padding: 28, boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ background: 'var(--ad-panel)', borderRadius: 16, border: '1px solid var(--ad-border)', padding: 28, boxShadow: '0 4px 18px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <label style={labelStyle}>Judul Buku *</label>
@@ -136,35 +136,35 @@ export function BookForm({ action, defaultValues = {}, submitLabel = 'Simpan & T
         {/* Right: Files */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Cover */}
-          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8ECF0', padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+          <div style={{ background: 'var(--ad-panel)', borderRadius: 16, border: '1px solid var(--ad-border)', padding: 20, boxShadow: '0 4px 18px rgba(0,0,0,0.3)' }}>
             <label style={labelStyle}>Cover Buku</label>
             {defaultValues.coverUrl && !coverName && (
-              <img src={defaultValues.coverUrl} alt="Current cover" style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', borderRadius: 8, marginBottom: 12, border: '1px solid #E8ECF0' }} />
+              <img src={defaultValues.coverUrl} alt="Current cover" style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', borderRadius: 8, marginBottom: 12, border: '1px solid var(--ad-border)' }} />
             )}
-            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: coverName ? '#ECFDF5' : '#F8FAFB', textAlign: 'center' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed var(--ad-border)', borderRadius: 12, cursor: 'pointer', background: coverName ? 'rgba(52,211,153,0.08)' : 'var(--ad-bg)', textAlign: 'center' }}>
               <span style={{ fontSize: 28 }}>🖼️</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: coverName ? '#047857' : '#6B7A8D' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: coverName ? '#34D399' : 'var(--ad-dim)' }}>
                 {coverName ? coverName : (defaultValues.coverUrl ? 'Ganti cover' : 'Upload Cover')}
               </span>
-              {!coverName && <span style={{ fontSize: 11, color: '#AAB4C0' }}>JPG / PNG · Rasio 2:3</span>}
+              {!coverName && <span style={{ fontSize: 11, color: 'var(--ad-muted)' }}>JPG / PNG · Rasio 2:3</span>}
               <input type="file" name="cover" accept="image/*" style={{ display: 'none' }} onChange={(e) => setCoverName(e.target.files?.[0]?.name ?? null)} />
             </label>
           </div>
 
           {/* File */}
-          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8ECF0', padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+          <div style={{ background: 'var(--ad-panel)', borderRadius: 16, border: '1px solid var(--ad-border)', padding: 20, boxShadow: '0 4px 18px rgba(0,0,0,0.3)' }}>
             <label style={labelStyle}>File Buku (EPUB/PDF)</label>
             {defaultValues.fileUrl && !epubName && (
-              <div style={{ marginBottom: 10, fontSize: 12, color: '#00856F', padding: '6px 12px', background: 'rgba(0,201,167,0.08)', borderRadius: 8, wordBreak: 'break-all' }}>
+              <div style={{ marginBottom: 10, fontSize: 12, color: '#00c9a7', padding: '6px 12px', background: 'rgba(0,201,167,0.08)', borderRadius: 8, wordBreak: 'break-all' }}>
                 ✓ {defaultValues.fileUrl.split('/').pop()}
               </div>
             )}
-            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #D1D9E0', borderRadius: 12, cursor: 'pointer', background: epubName ? '#ECFDF5' : '#F8FAFB', textAlign: 'center' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed var(--ad-border)', borderRadius: 12, cursor: 'pointer', background: epubName ? 'rgba(52,211,153,0.08)' : 'var(--ad-bg)', textAlign: 'center' }}>
               <span style={{ fontSize: 28 }}>📄</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: epubName ? '#047857' : '#6B7A8D' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: epubName ? '#34D399' : 'var(--ad-dim)' }}>
                 {epubName ? epubName : (defaultValues.fileUrl ? 'Ganti file' : 'Upload File')}
               </span>
-              {!epubName && <span style={{ fontSize: 11, color: '#AAB4C0' }}>EPUB atau PDF · Maks 50MB</span>}
+              {!epubName && <span style={{ fontSize: 11, color: 'var(--ad-muted)' }}>EPUB atau PDF · Maks 50MB</span>}
               <input type="file" name="epub" accept=".epub,.pdf" style={{ display: 'none' }} onChange={(e) => setEpubName(e.target.files?.[0]?.name ?? null)} />
             </label>
           </div>

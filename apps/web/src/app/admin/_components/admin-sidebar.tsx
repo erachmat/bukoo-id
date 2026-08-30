@@ -20,8 +20,8 @@ export function AdminSidebar() {
   return (
     <aside style={{
       width: '260px',
-      backgroundColor: '#ffffff',
-      borderRight: '1px solid #E8ECF0',
+      backgroundColor: 'var(--ad-panel)',
+      borderRight: '1px solid var(--ad-border-soft)',
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
@@ -32,16 +32,17 @@ export function AdminSidebar() {
         display: 'flex',
         alignItems: 'center',
         padding: '0 24px',
-        borderBottom: '1px solid #E8ECF0'
+        borderBottom: '1px solid var(--ad-border-soft)'
       }}>
         <Link href="/admin" style={{ textDecoration: 'none' }}>
           <span style={{
             fontSize: '20px',
             fontWeight: '800',
             letterSpacing: '-0.5px',
-            color: '#1A2332'
+            color: 'var(--ad-amber)',
+            fontFamily: 'var(--ad-serif)'
           }}>
-            BUKOO <span style={{ color: '#6B7A8D', fontSize: '13px', fontWeight: '400', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '4px' }}>Admin</span>
+            BUKOO <span style={{ color: 'var(--ad-muted)', fontSize: '13px', fontWeight: '400', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '4px' }}>Admin</span>
           </span>
         </Link>
       </div>
@@ -63,8 +64,8 @@ export function AdminSidebar() {
                 borderRadius: '8px',
                 textDecoration: 'none',
                 transition: 'all 0.2s',
-                backgroundColor: isActive ? 'rgba(0, 201, 167, 0.08)' : 'transparent',
-                color: isActive ? '#00C9A7' : '#6B7A8D',
+                backgroundColor: isActive ? 'var(--ad-teal-dim)' : 'transparent',
+                color: isActive ? 'var(--ad-teal)' : 'var(--ad-dim)',
               }}
             >
               <Icon size={20} />
@@ -74,7 +75,7 @@ export function AdminSidebar() {
         })}
       </nav>
       
-      <div style={{ padding: '16px', borderTop: '1px solid #E8ECF0' }}>
+      <div style={{ padding: '16px', borderTop: '1px solid var(--ad-border-soft)' }}>
         <button 
           onClick={() => signOut()}
           style={{

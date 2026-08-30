@@ -9,16 +9,16 @@ export function RoyaltySettingsForm({ monthlyPool, rateBps }: { monthlyPool: str
   const [state, action, pending] = useActionState(saveRoyaltySettings, initialState);
 
   return (
-    <form action={action} style={{ maxWidth: 560, background: '#fff', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1A2332', marginTop: 0 }}>Konfigurasi estimasi royalti</h2>
-      <p style={{ color: '#6B7A8D', fontSize: 13, lineHeight: 1.6 }}>
+    <form action={action} style={{ maxWidth: 560, background: 'var(--ad-panel)', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ad-text)', marginTop: 0 }}>Konfigurasi estimasi royalti</h2>
+      <p style={{ color: 'var(--ad-dim)', fontSize: 13, lineHeight: 1.6 }}>
         Nilai ini diatur admin dan digunakan sebagai estimasi, bukan janji pembayaran atau transfer otomatis.
       </p>
-      <label style={{ display: 'block', color: '#1A2332', fontSize: 13, fontWeight: 600, marginTop: 20 }}>
+      <label style={{ display: 'block', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, marginTop: 20 }}>
         Pool pendapatan bulanan (IDR)
         <input name="monthlyPool" type="number" min="0" step="1" defaultValue={monthlyPool} required style={{ display: 'block', width: '100%', marginTop: 8, padding: '10px 12px', border: '1px solid #DDE3E9', borderRadius: 8 }} />
       </label>
-      <label style={{ display: 'block', color: '#1A2332', fontSize: 13, fontWeight: 600, marginTop: 16 }}>
+      <label style={{ display: 'block', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, marginTop: 16 }}>
         Bagian penerbit (basis poin, 6500 = 65%)
         <input name="rateBps" type="number" min="0" max="10000" step="1" defaultValue={rateBps} required style={{ display: 'block', width: '100%', marginTop: 8, padding: '10px 12px', border: '1px solid #DDE3E9', borderRadius: 8 }} />
       </label>

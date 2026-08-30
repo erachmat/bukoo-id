@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, desc, and, sql } from 'drizzle-orm';
-import { books, readingProgress, shelfBooks, libraryShelves, users } from '@bukoo/db';
+import { books, readingProgress, shelfBooks, libraryShelves, users, publisherBookReaderDays } from '@bukoo/db';
 import { isBookAccessible, type BookDto, type SubscriptionTier } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -263,19 +263,80 @@ booksRouter.get('/recommendations', async (c) => {
 
   const allBooks = await db.select().from(books).where(eq(books.isPublished, true)).limit(20);
 
+  // Cohort genre-affinity: reader-day counts joined to reader demographics, grouped
+  // by (book, ageGroup, gender) — bounded to ≈books × ≤8 buckets. NULL demographics
+  // simply produce additional buckets that never match a NULL-cohort reader.
+  let cohortByGenreAge = new Map<string, number>();
+  let cohortByGenreGender = new Map<string, number>();
+  {
+    const cohortRows = await db
+      .select({
+        bookId: publisherBookReaderDays.bookId,
+        ageGroup: users.ageGroup,
+        gender: users.gender,
+        days: sql<number>`count(*)`,
+      })
+      .from(publisherBookReaderDays)
+      .innerJoin(users, eq(users.id, publisherBookReaderDays.userId))
+      .groupBy(publisherBookReaderDays.bookId, users.ageGroup, users.gender);
+    const genreAge = new Map<string, number>();
+    const genreGender = new Map<string, number>();
+    for (const row of cohortRows) {
+      const book = allBooks.find((b) => b.id === row.bookId);
+      if (!book) continue;
+      const bookGenres = parseJsonArray(book.genre);
+      const days = Number(row.days);
+      for (const genre of bookGenres) {
+        if (row.ageGroup) genreAge.set(`${row.ageGroup}|${genre}`, (genreAge.get(`${row.ageGroup}|${genre}`) ?? 0) + days);
+        if (row.gender) genreGender.set(`${row.gender}|${genre}`, (genreGender.get(`${row.gender}|${genre}`) ?? 0) + days);
+      }
+    }
+    cohortByGenreAge = genreAge;
+    cohortByGenreGender = genreGender;
+  }
+  const maxAgeAffinity = Math.max(1, ...cohortByGenreAge.values(), 1);
+  const maxGenderAffinity = Math.max(1, ...cohortByGenreGender.values(), 1);
+  const readerAgeGroup = userRecord?.ageGroup ?? null;
+  const readerGender = userRecord?.gender ?? null;
+
+  const maxReadCount = Math.max(1, ...allBooks.map((b) => b.readCount));
+
   const recommendations = allBooks.map((book) => {
     const bookGenres = parseJsonArray(book.genre);
     const overlapping = favoriteGenres.filter((g) => bookGenres.includes(g));
     const hasOverlap = overlapping.length > 0;
-    const baseScore = hasOverlap ? 85 + overlapping.length * 3 : 75;
+
+    // Popularity: log-scaled readCount (0–8 pts).
+    const popularity = Math.round(Math.log10(1 + book.readCount) / Math.log10(1 + maxReadCount) * 8);
+
+    // Cohort affinity: up to 4 pts per dimension when the reader shares the attribute.
+    const ageAffinity = readerAgeGroup
+      ? Math.max(0, ...bookGenres.map((g) => cohortByGenreAge.get(`${readerAgeGroup}|${g}`) ?? 0)) / maxAgeAffinity
+      : 0;
+    const genderAffinity = readerGender
+      ? Math.max(0, ...bookGenres.map((g) => cohortByGenreGender.get(`${readerGender}|${g}`) ?? 0)) / maxGenderAffinity
+      : 0;
+    const cohortBoost = Math.round((ageAffinity + genderAffinity) * 4);
+
+    const baseScore = (hasOverlap ? 85 + overlapping.length * 3 : 75) + popularity + cohortBoost;
     const matchPercent = Math.min(99, baseScore + Math.floor((book.ratingAverage || 4.5) * 2));
+
+    const cohortLabel = (() => {
+      const bits: string[] = [];
+      if (cohortBoost > 0 && readerAgeGroup) bits.push(`populer di kalangan pembaca ${readerAgeGroup}`);
+      if (cohortBoost > 0 && readerGender) bits.push(readerGender === 'F' ? 'pembaca perempuan' : 'pembaca laki-laki');
+      return bits.length > 0 ? ` · ${bits.join(' & ')}` : '';
+    })();
+
     return {
       ...formatBook(book, userTier),
       matchPercent,
       isGenreMatch: hasOverlap,
       aiReason: hasOverlap
-        ? `Sesuai minat genre (${overlapping.join(', ')})`
-        : 'Rekomendasi populer di BUKOO',
+        ? `Sesuai minat genre (${overlapping.join(', ')})${cohortLabel}`
+        : popularity > 4
+          ? `Populer di BUKOO (${book.readCount.toLocaleString('id-ID')} pembacaan)${cohortLabel}`
+          : `Rekomendasi populer di BUKOO${cohortLabel}`,
     };
   });
 

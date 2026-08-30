@@ -1,13 +1,14 @@
 export const COLORS = {
-  forest: '#1B3A2D',           // Legacy forest accent
+  forest: '#1E4035',           // Forest accent — aligned with web brand
   creamLight: '#FAF8F5',       // Legacy creamLight background
-  forestDark: '#0B1914',       // Deep forest background
-  forestCard: '#112821',       // Main dark forest card surface
-  forestBorder: '#1B362D',     // Subtle card border
-  gold: '#D4971E',             // Primary brand gold accent
-  goldDark: '#C89319',         // Gold CTA button background
-  goldLight: '#E8B653',        // Soft gold highlight
-  goldPill: 'rgba(212, 151, 30, 0.18)', // Gold tab/pill active background
+  forestDark: '#0B1914',       // Deep forest background (matches native splash)
+  forestCard: '#0F2019',       // Main dark forest card surface
+  forestBorder: '#1E4035',     // Subtle card border
+  gold: '#00C9A7',             // Primary brand accent — teal (publisher-dashboard parity)
+  goldDark: '#00957A',         // CTA button background
+  goldLight: '#4ADFC8',        // Soft highlight
+  goldPill: 'rgba(0, 201, 167, 0.14)', // Tab/pill active background
+  amberLt: '#F0D080',          // Amber emphasis (dashboard parity)
   blueBadge: '#1E3F52',        // 'Sedang dibaca' badge surface
   greenBadge: '#18372C',       // 'PLUS' and 'Baca Bareng' badge surface
   cream: '#F4F1E8',

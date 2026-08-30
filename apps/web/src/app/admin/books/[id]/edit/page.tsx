@@ -21,11 +21,11 @@ export default async function EditBookPage(props: { params: Promise<{ id: string
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <Link href="/admin/books" style={{ color: '#6B7A8D', fontSize: 14, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Link href="/admin/books" style={{ color: 'var(--ad-dim)', fontSize: 14, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Kembali
         </Link>
-        <span style={{ color: '#D1D9E0' }}>/</span>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A2332', margin: 0 }}>Edit: {book.title}</h1>
+        <span style={{ color: 'var(--ad-muted)' }}>/</span>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--ad-text)', margin: 0 }}>Edit: {book.title}</h1>
       </div>
       <BookForm
         action={boundAction}

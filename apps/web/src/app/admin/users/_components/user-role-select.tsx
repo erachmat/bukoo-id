@@ -19,8 +19,8 @@ export function UserRoleSelect({ userId, currentRole }: { userId: string; curren
       onChange={handleChange}
       disabled={isPending}
       style={{
-        padding: '5px 10px', borderRadius: 8, border: '1px solid #D1D9E0',
-        fontSize: 12, fontWeight: 700, color: '#3D4A5C', background: '#F8FAFB',
+        padding: '5px 10px', borderRadius: 8, border: '1px solid var(--ad-border)',
+        fontSize: 12, fontWeight: 700, color: 'var(--ad-dim)', background: 'var(--ad-bg)',
         cursor: isPending ? 'wait' : 'pointer', opacity: isPending ? 0.6 : 1,
       }}
     >

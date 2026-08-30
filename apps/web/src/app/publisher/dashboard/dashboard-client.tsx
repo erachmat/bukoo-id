@@ -420,6 +420,9 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
     <>
       <div className="pds-page-head">
         <div><div className="pds-page-title">Royalti</div><div className="pds-page-sub">Estimasi berbasis data baca · {overview?.period.label ?? 'Bulan ini'} · nilai final dihitung dari settlement resmi</div></div>
+        <div className="pds-head-actions">
+          <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>📥 Unduh CSV</a>
+        </div>
       </div>
       <div className="pds-kpi-row">
         <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti ({overview?.period.label ?? 'Periode'})</div><div className="pds-kpi-num">{estimate > 0 ? fmtRp.format(estimate) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · pool diatur admin</div></div>
@@ -475,7 +478,9 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
 function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: PublisherCatalogBook[] }) {
   const stats = (overview?.bookStats ?? []).slice().sort((a, b) => b.reads - a.reads || b.lifetimeReads - a.lifetimeReads);
   return <>
-    <div className="pds-page-head"><div><div className="pds-page-title">Performa Buku</div><div className="pds-page-sub">Pembacaan, waktu baca & penyelesaian per judul · {overview?.period.label ?? 'periode terpilih'}</div></div></div>
+    <div className="pds-page-head"><div><div className="pds-page-title">Performa Buku</div><div className="pds-page-sub">Pembacaan, waktu baca & penyelesaian per judul · {overview?.period.label ?? 'periode terpilih'}</div></div>
+      <div className="pds-head-actions"><a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>📥 Unduh CSV</a></div>
+    </div>
     <div className="pds-panel">
       <div className="pds-tbl-scroll">
         <table className="pds-tbl">
