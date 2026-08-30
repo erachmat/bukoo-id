@@ -941,3 +941,12 @@ Spec: docs/superpowers/specs/2026-08-30-publisher-tabs-rollout-design.md · Plan
 - [x] Real tabs: **Demografi** (NEW + sidebar 🧬) and **Waktu Baca** (hour/weekday rhythm); Geo/Pembaca/Royalti/Performa/Katalog upgraded; overview funnel now 4-step
 - [x] Pushed `ef7751f` ��� CI green, Deploy Web success (live); remote seed verified (14 cities / 75 rows)
 - [ ] (user) Visual pass: Demografi / Waktu Baca / Geo / Pembaca / Royalti / Performa / Katalog as demo-publisher
+
+## Cross-Dashboard Polish (CSV export, cohort recs, admin dark, mobile teal) — 2026-08-30
+Spec: docs/superpowers/specs/2026-08-30-cross-dashboard-polish-design.md · Plan: docs/superpowers/plans/2026-08-30-cross-dashboard-polish.md · Ledger: .superpowers/sdd/cross-dashboard-polish/progress.md
+- [x] CSV export: `/publisher/dashboard/export?kind=book-stats|payouts|top-books` (session-guarded, period-aware, UTF-8 BOM) + Unduh CSV buttons on Royalti/Performa
+- [x] Recommendations: popularity (log readCount) + cohort genre-affinity from reader-day demographics (nullable-safe, aiReason labels)
+- [x] Admin: full dark theme via `admin/admin.css` tokens; every page/sidebar swept, 0 light literals remain
+- [x] Mobile: COLORS.ts gold→teal parity (single-point change, splash untouched, phone layout unchanged)
+- [x] Pushed `1a407e9`: web tsc/lint/67 tests ✅, api tsc/14 tests ✅, mobile tsc ✅
+- [ ] (user) Manual: CSV download click-through, admin visual pass, mobile accent check on dev build
