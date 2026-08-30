@@ -1,3 +1,11 @@
+# Landing Navbar Auth Button Flicker on Back-Navigation — 2026-08-30
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-30-navbar-auth-flicker-design.md`, plan `docs/superpowers/plans/2026-08-30-navbar-auth-flicker.md`, ledger `.superpowers/sdd/navbar-auth-flicker/progress.md`. User-approved ("Start implementation"; `refetchOnWindowFocus` stays off).
+- `[x]` 2. Root cause: `(marketing)/Navbar.tsx` ran `useEffect(() => update(), [update])` on every mount; `update()` in `next-auth@5.0.0-beta.31` unconditionally `setLoading(true)` → `renderAuthButtons()` swapped Masuk/Coba Gratis for an invisible 160×40 placeholder → blink. Triggered by back-nav from `/login` because `(auth)` and `(marketing)` are separate route groups (Navbar remounts), while in-group navigation keeps it mounted.
+- `[x]` 3. Fix: removed the `update()` mount effect + dropped `update` from the `useSession()` destructure in `apps/web/src/app/(marketing)/Navbar.tsx`. Session is server-seeded per request via `auth()` → `<SessionProvider session={session}>`, so `status` starts correct with `loading=false`. `renderAuthButtons()` untouched (loading branch now a dead-path safety net).
+- `[x]` 4. Verification: web typecheck ✅, lint 0 errors (29 pre-existing warnings, unrelated files) ✅, tests 60/60 ✅. Gap flagged per AGENTS.md: no component test covers Navbar (web suite is lib-only).
+- `[ ]` 5. Manual QA (user): landing → click `Masuk` → browser Back → buttons render immediately, no blink; signed-in regression: `Library`/`Keluar` render immediately, `Keluar` server-action sign-out still works.
+
 # Web UX/Perf Hardening + Mobile-Only Reading — 2026-08-29
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-29-web-ux-performance-hardening-design.md`, plan `docs/superpowers/plans/2026-08-29-web-ux-performance-hardening.md`, ledger `.superpowers/sdd/web-ux-performance-hardening/progress.md`. User-approved ("Start implementation").

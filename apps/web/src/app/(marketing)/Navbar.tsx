@@ -9,7 +9,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
-  const { status, update } = useSession();
+  const { status } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,10 +19,6 @@ export default function Navbar() {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    update();
-  }, [update]);
 
   const handleSignOut = () => {
     signOut();
