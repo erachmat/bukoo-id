@@ -264,6 +264,9 @@ export function PublisherDashboardShowcase() {
               <Link href="/publisher/login?callbackUrl=/publisher/dashboard" className="btn-ghost btn-lg">
                 Masuk ke Dashboard
               </Link>
+              <Link href="/publisher/submit" className="btn-ghost btn-lg">
+                Submit Judul
+              </Link>
             </div>
           </div>
         </div>

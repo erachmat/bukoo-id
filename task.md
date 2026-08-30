@@ -913,3 +913,10 @@ Verification: mobile `tsc --noEmit` ✅, mobile lint ✅ (no errors; fixed one `
 - [x] Apply seed remote + verify DB/FTS/assets (idempotent re-run clean)
 - [ ] Visual dashboard pass logged in as demo publisher (user manual check)
 Runbook: `.superpowers/sdd/publisher-demo-data/progress.md`
+
+## Public "Submit Judul" Page (2026-08-30)
+Spec: docs/superpowers/specs/2026-08-30-publisher-submit-public-design.md · Plan: docs/superpowers/plans/2026-08-30-publisher-submit-public.md · Ledger: .superpowers/sdd/publisher-submit-public/progress.md
+- [x] Remove `/publisher/submit` middleware gate (keep `/publisher/books` gate)
+- [x] Auth branch in submit page: PUBLISHER → `<SubmitForm />`, else CTA band (Daftar/Masuk)
+- [x] Add "Submit Judul" link to dashboard showcase CTA band
+- [x] Verification: typecheck + lint + test (apps/web) all PASS — manual anon/publisher/books-gate checks pending preview deploy

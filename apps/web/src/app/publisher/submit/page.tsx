@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
 import { SubmitForm } from "./SubmitForm";
 
@@ -7,7 +9,34 @@ export const metadata = {
   description: "Kirim judul Anda ke jutaan pembaca. Ajukan judul untuk masuk katalog BUKOO.",
 };
 
-export default function PublisherSubmitPage() {
+// Auth-dependent render (PUBLISHER wizard vs public CTA band) — must not be statically cached.
+export const dynamic = "force-dynamic";
+
+// Public signup band shown instead of the 4-step wizard to visitors who are not
+// signed-in PUBLISHER users. Pure server component, reuses publisher.css CTA styles.
+function SubmitSignupBand() {
+  return (
+    <div className="dash-cta">
+      <h3>Siap mengajukan judul pertama Anda?</h3>
+      <p>
+        Daftar sebagai penerbit mitra BUKOO atau masuk ke akun penerbit Anda untuk membuka formulir pengajuan 4 langkah.
+      </p>
+      <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+        <Link href="/publisher/register" className="dash-cta-btn">
+          Daftar sebagai penerbit &rarr;
+        </Link>
+        <Link href="/publisher/login?callbackUrl=/publisher/submit" className="btn-ghost btn-lg">
+          Masuk
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default async function PublisherSubmitPage() {
+  const session = await auth();
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+  const isPublisher = userRole === "PUBLISHER";
   return (
     <div className="pub-page-wrap">
       <PublisherNav currentTab="submit" />
@@ -77,7 +106,7 @@ export default function PublisherSubmitPage() {
               Ajukan judul dalam <em>4 langkah</em>
             </h2>
           </div>
-          <SubmitForm />
+          {isPublisher ? <SubmitForm /> : <SubmitSignupBand />}
         </div>
       </section>
 

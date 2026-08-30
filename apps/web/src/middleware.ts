@@ -104,13 +104,9 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
     }
   }
 
-  // Protected publisher submit — require PUBLISHER role
-  if (pathname.startsWith("/publisher/submit")) {
-    if (!user || user.role !== "PUBLISHER") {
-      const loginTarget = isPublisherHost ? "/publisher/login" : "/login"
-      return NextResponse.redirect(new URL(`${loginTarget}?callbackUrl=${encodeURIComponent(pathname + search)}`, req.url))
-    }
-  }
+  // NOTE: /publisher/submit is intentionally public (marketing page — same pattern as
+  // /publisher/dashboard). Actual submissions stay guard-walled server-side by
+  // getPublisherUser() in publisher/submit/actions.ts.
 
   return NextResponse.next()
 })
