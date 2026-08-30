@@ -919,4 +919,4 @@ Spec: docs/superpowers/specs/2026-08-30-publisher-submit-public-design.md · Pla
 - [x] Remove `/publisher/submit` middleware gate (keep `/publisher/books` gate)
 - [x] Auth branch in submit page: PUBLISHER → `<SubmitForm />`, else CTA band (Daftar/Masuk)
 - [x] Add "Submit Judul" link to dashboard showcase CTA band
-- [x] Verification: typecheck + lint + test (apps/web) all PASS — manual anon/publisher/books-gate checks pending preview deploy
+- [x] Verification: typecheck + lint + test (apps/web) all PASS — PROD verified: anon CTA band live (aliases OK), books gate intact, bukoo.id 200
