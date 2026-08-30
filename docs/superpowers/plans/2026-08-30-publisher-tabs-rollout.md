@@ -30,7 +30,11 @@ Superpowers: subagent-driven-development · Spec: `docs/superpowers/specs/2026-0
 - [ ] Minor `publisher.css` additions if needed
 
 ## Task 5 — Verification & rollout
-- [ ] typecheck/lint/test (packages/db, apps/web); note db has no test script
-- [ ] Local 0012 + seed re-apply + smoke SQLs
-- [ ] Commit (only task files) → push → `migrate-d1.yml` apply_remote=true → remote seed
-- [ ] Ledger + task.md
+- [x] typecheck/lint/test (packages/db, apps/web); note db has no test script
+- [x] Local 0012 + seed re-apply + smoke SQLs (14 cities, 75 progress rows, 17 hours)
+- [x] Commit `ef7751f` → push → `migrate-d1.yml` apply_remote=true → remote seed (14 cities / 75 rows confirmed)
+- [x] Ledger `.superpowers/sdd/publisher-tabs-rollout/progress.md` + task.md
+- [ ] (user) Visual pass on live tabs
+
+---
+(All Tasks 1–4 complete — see ledger for per-task detail.)

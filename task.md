@@ -932,3 +932,12 @@ Spec: docs/superpowers/specs/2026-08-30-publisher-overview-redesign-design.md ·
 - [x] Verification: typecheck (db+web) ✅, lint ✅ (pre-existing img warning only), tests 67/67 ✅; local D1 smoke: 24 readers w/ demographics, 303 daily rows
 - [x] Pushed `308028a` → CI green; migration `0011` applied to remote `bukoo-db` via manual `migrate-d1.yml` (apply_remote=true, run 333052ᵉ); demo seed re-applied remote (24 demo readers w/ demographics, 347 daily rows); Deploy Web success → live on bukoo.id
 - [ ] (user) Visual pass logged in as demo-publisher@bukoo.id (overview: KPI deltas, trend bars, genre donut, demographics, funnel; switch periode Kuartal/YTD)
+
+## Publisher Dashboard All-Tab Rollout — 2026-08-30
+Spec: docs/superpowers/specs/2026-08-30-publisher-tabs-rollout-design.md · Plan: docs/superpowers/plans/2026-08-30-publisher-tabs-rollout.md · Ledger: .superpowers/sdd/publisher-tabs-rollout/progress.md
+- [x] Migration `0012_clear_mauler.sql`: `users.city` (nullable) — LOCAL + REMOTE via migrate-d1.yml
+- [x] Seed: fabricated cities (14 distinct) + 75 `reading_progress` rows (avg 54%) + evening-weighted read hours (17 distinct) — deterministic/idempotent
+- [x] Queries: cities, weekday/hour rhythm, per-book stats, 4-step funnel (≥10%/≥50% via reading_progress, graceful 2-step fallback)
+- [x] Real tabs: **Demografi** (NEW + sidebar 🧬) and **Waktu Baca** (hour/weekday rhythm); Geo/Pembaca/Royalti/Performa/Katalog upgraded; overview funnel now 4-step
+- [x] Pushed `ef7751f` ��� CI green, Deploy Web success (live); remote seed verified (14 cities / 75 rows)
+- [ ] (user) Visual pass: Demografi / Waktu Baca / Geo / Pembaca / Royalti / Performa / Katalog as demo-publisher
