@@ -1,3 +1,10 @@
+# New Homepage Redesign — 2026-09-09
+
+- `[x]` SDD spec, implementation plan, and progress ledger created.
+- `[x]` Copy supplied Figma assets into the web public asset directory.
+- `[x]` Replace homepage composition and implement the new reference design.
+- `[x]` Verify web typecheck, lint, tests, and build; browser QA remains.
+
 # Landing Navbar Auth Button Flicker on Back-Navigation — 2026-08-30
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-08-30-navbar-auth-flicker-design.md`, plan `docs/superpowers/plans/2026-08-30-navbar-auth-flicker.md`, ledger `.superpowers/sdd/navbar-auth-flicker/progress.md`. User-approved ("Start implementation"; `refetchOnWindowFocus` stays off).
