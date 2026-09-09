@@ -16,18 +16,19 @@ export function CallToAction() {
   return (
     <section className="cta-final">
       <div className="cta-final-bg"></div>
-      <h2 className="cta-h2">Mulai Petualangan<br />Membacamu <em>Hari Ini</em></h2>
-      <p className="cta-sub">Bergabung dengan jutaan pembaca Indonesia. Baca di aplikasi BUKOO untuk iOS &amp; Android — 7 hari pertama gratis.</p>
+      <h2 className="cta-h2">Siap Mulai Membaca?</h2>
+      <p className="cta-sub">Ratusan Judul kurasi dari penerbit Indonesia — fiksi, non-fiksi semua langsung dari aplikasi BUKOO.</p>
+      <p className="cta-price">Mulai Rp 29.900/bulan. Batalkan kapan saja.</p>
       <form className="cta-input-row" onSubmit={handleSubmit}>
         <input
           className="hero-input"
           type="email"
-          placeholder="Masukkan email kamu"
+          placeholder="Masukkan email untuk memulai"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button className="hero-btn" type="submit">Mulai Gratis →</button>
+        <button className="hero-btn" type="submit">MULAI</button>
       </form>
       <div className="cta-fine">Dengan mendaftar, kamu menyetujui Syarat &amp; Ketentuan dan Kebijakan Privasi BUKOO</div>
     </section>

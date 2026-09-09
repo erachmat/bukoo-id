@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { signOut } from '@/app/(auth)/actions';
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const minimal = pathname === '/';
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function Navbar() {
           <span>BUKOO</span>
         </Link>
 
-        <ul className="nav-links">
+        {!minimal && <ul className="nav-links">
           {/* 1. Beranda */}
           <li className="nav-item">
             <Link href="/" className="nav-link">Beranda</Link>
@@ -147,13 +150,13 @@ export default function Navbar() {
               <Link href="/faq" className="nav-dropdown-item">FAQ</Link>
             </div>
           </li>
-        </ul>
+        </ul>}
 
         <div className="nav-right">
           {renderAuthButtons()}
         </div>
 
-        <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        {!minimal && <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? (
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -166,7 +169,7 @@ export default function Navbar() {
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           )}
-        </div>
+        </div>}
       </nav>
 
       {/* Mobile Drawer */}

@@ -1,31 +1,33 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 const features = [
-  { icon: 'book-open-01.png', title: 'Koleksi Pilihan', text: 'Ribuan buku pilihan dari penerbit terbaik Indonesia dan dunia.' },
-  { icon: 'cafe.png', title: 'Baca Sesuai Ritmemu', text: 'Temukan ruang tenang untuk membaca kapan pun dan di mana pun.' },
-  { icon: 'elements.png', title: 'Pengalaman Personal', text: 'Rekomendasi yang memahami selera dan perjalanan bacamu.' },
-  { icon: 'elements01.png', title: 'Baca Bersama', text: 'Bagikan insight dan bertumbuh bersama komunitas pembaca.' },
+  ['book-open-01.png', 'Satu langganan, ribuan judul', 'Akses banyak judul kurasi dari penerbit Indonesia. Bayar sekali sebulan, baca sepuasnya — tanpa beli buku satuan.'],
+  ['cafe.png', 'Semurah secangkir kopi', 'Mulai Rp 29.900 per bulan untuk akses penuh. Jauh lebih hemat dibanding membeli buku fisik satu per satu.'],
+  ['elements.png', 'Karya Indonesia untuk dunia', 'Kami mengangkat karya dari banyak penulis Indonesia, agar bisa dinikmati pembaca di mana saja.'],
+  ['elements03.png', 'Baca di mana saja, bahkan offline', 'iOS & Android, sinkron otomatis antar perangkat. Unduh buku untuk dibaca tanpa koneksi internet.'],
+  ['elements02.png', 'Bukoo Assistant', 'Akses banyak judul kurasi dari penerbit Indonesia. Bayar sekali sebulan, baca sepuasnya — tanpa beli buku satuan.'],
+  ['elements01.png', 'Fleksibel & tanpa kontrak', 'Akses banyak judul kurasi dari penerbit Indonesia. Bayar sekali sebulan, baca sepuasnya — tanpa beli buku satuan.'],
+] as const;
+
+const assistantBullets = [
+  'Rekomendasi personal sesuai riwayat dan suasana bacamu',
+  'Rangkuman bab otomatis dan insight kunci tiap buku',
+  'Peta baca: jalur membaca yang dikurasi sesuai tujuanmu',
 ];
 
-function ProductSection({
-  eyebrow,
-  title,
-  text,
-  bullets,
-  image,
-  reverse = false,
-  href,
-  linkLabel,
-}: {
-  eyebrow: string;
+const communityBullets = [
+  'Club Baca virtual & tantangan membaca bulanan',
+  'Bagikan highlight, catatan, dan review langsung dari buku',
+  'Profil pembaca dengan streak, badge, dan statistik personal',
+];
+
+function ProductSection({ eyebrow, title, text, bullets, image, reverse = false }: {
+  eyebrow: React.ReactNode;
   title: React.ReactNode;
   text: string;
   bullets: string[];
   image: string;
   reverse?: boolean;
-  href: string;
-  linkLabel: string;
 }) {
   return (
     <section className={`homepage-product ${reverse ? 'homepage-product-reverse' : ''}`}>
@@ -33,10 +35,7 @@ function ProductSection({
         <p className="homepage-eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
         <p className="homepage-lede">{text}</p>
-        <ul>
-          {bullets.map((bullet) => <li key={bullet}><span>✓</span>{bullet}</li>)}
-        </ul>
-        <Link className="homepage-text-link" href={href}>{linkLabel} <span>→</span></Link>
+        <ul>{bullets.map((bullet) => <li key={bullet}><span>✓</span>{bullet}</li>)}</ul>
       </div>
       <div className="homepage-product-art">
         <Image src={`/homepage-assets/${image}`} alt="" width={960} height={1100} />
@@ -49,59 +48,39 @@ export function HomepageSections() {
   return (
     <>
       <section className="homepage-intro">
-        <p className="homepage-eyebrow">Satu aplikasi, banyak kemungkinan</p>
-        <h2>Lebih dari sekadar<br /><em>membaca buku.</em></h2>
-        <p className="homepage-section-lede">BUKOO hadir untuk menemani setiap langkah dalam perjalanan membaca dan menemukan ide-ide baru.</p>
+        <p className="homepage-eyebrow">Kenapa membaca di <span>BUKOO</span>?</p>
+        <h2>Lebih dari sekadar<br /><em>rak buku digital.</em></h2>
+        <p className="homepage-section-lede">Bukan sekadar rak buku digital — sebuah cara baru menikmati bacaan tanpa harus membeli satu per satu.</p>
         <div className="homepage-feature-grid">
-          {features.map((feature) => (
-            <article className="homepage-feature-card" key={feature.title}>
-              <Image src={`/homepage-assets/${feature.icon}`} alt="" width={72} height={72} />
-              <h3>{feature.title}</h3>
-              <p>{feature.text}</p>
+          {features.map(([icon, title, text]) => (
+            <article className="homepage-feature-card" key={title}>
+              <Image src={`/homepage-assets/${icon}`} alt="" width={72} height={72} />
+              <h3>{title}</h3>
+              <p>{text}</p>
             </article>
           ))}
         </div>
       </section>
 
       <ProductSection
-        eyebrow="Bukoo Assistant"
-        title={<>Teman baca yang<br /><em>selalu mengerti.</em></>}
-        text="Dapatkan panduan personal untuk membaca lebih bermakna. Tanyakan apa saja, temukan rekomendasi baru, dan bangun kebiasaan membaca yang bertahan lama."
-        bullets={['Rekomendasi sesuai minat dan tujuanmu', 'Rangkuman dan insight dari buku yang sedang dibaca', 'Peta baca personal untuk perjalananmu']}
+        eyebrow={<>✦ Bukoo Assistant</>}
+        title={<>Asisten baca yang<br /><em>mengenal seleramu</em></>}
+        text="Lebih dari sekadar merekomendasikan buku — ia membangun peta baca personal, merangkum bab, dan menjawab pertanyaanmu tentang isi bacaan."
+        bullets={assistantBullets}
         image="Group01.png"
-        href="/ai-companion"
-        linkLabel="Kenali Bukoo Assistant"
       />
 
       <ProductSection
-        eyebrow="Komunitas Bukoo"
-        title={<>Karena membaca<br /><em>lebih seru bersama.</em></>}
-        text="Temukan pembaca dengan rasa ingin tahu yang sama. Ikut baca bareng, bagikan pendapat, dan rayakan setiap halaman yang kamu selesaikan."
-        bullets={['Ikuti klub dan tantangan baca', 'Bagikan highlight, catatan, dan ulasan', 'Temukan teman baca dengan selera serupa']}
-        image="Group02.png"
-        reverse
-        href="/komunitas"
-        linkLabel="Jelajahi komunitas"
-      />
-
-      <ProductSection
-        eyebrow="Dibuat untuk pembaca"
-        title={<>Buka dunia baru,<br /><em>satu halaman sekali.</em></>}
-        text="Dari cerita yang menghibur sampai gagasan yang mengubah cara pandang, selalu ada sesuatu yang menunggumu di BUKOO."
-        bullets={['Akses dari aplikasi iOS dan Android', 'Sinkronisasi otomatis di semua perangkat', 'Simpan buku untuk dibaca offline']}
+        eyebrow={<>Komunitas <span>BUKOO</span></>}
+        title={<>Membaca Lebih<br /><em>Menyenangkan Bersama</em></>}
+        text="Bergabung dengan komunitas pembaca Indonesia. Ikut tantangan baca, bagikan insight, dan temukan teman baca yang punya selera serupa."
+        bullets={communityBullets}
         image="Group03.png"
-        href="/koleksi"
-        linkLabel="Lihat koleksi buku"
+        reverse
       />
 
       <section className="homepage-publisher-band">
-        <div>
-          <p className="homepage-eyebrow">Untuk penerbit</p>
-          <h2>Jadikan ceritamu<br /><em>lebih mudah ditemukan.</em></h2>
-          <p>BUKOO membantu penerbit menjangkau pembaca baru dan membangun hubungan yang lebih dekat dengan komunitas literasi Indonesia.</p>
-          <a className="homepage-button homepage-button-light" href="https://publisher.bukoo.id/publisher/daftar" target="_blank" rel="noopener noreferrer">Bergabung sebagai penerbit →</a>
-        </div>
-        <Image src="/homepage-assets/elements03.png" alt="" width={208} height={230} />
+        <p>Bermitra dengan penerbit terbaik Indonesia — mengangkat karya anak bangsa.</p>
       </section>
     </>
   );

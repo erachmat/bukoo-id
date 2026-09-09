@@ -1,16 +1,17 @@
 'use client';
 
-import React from 'react';
+import { useState } from 'react';
+
+const items = [
+  ['Apa itu BUKOO dan bagaimana cara kerjanya?', 'BUKOO adalah platform langganan buku digital yang memberi akses ke koleksi buku kurasi dari penerbit Indonesia melalui aplikasi BUKOO.'],
+  ['Apakah saya bisa membaca offline tanpa internet?', 'Ya. Buku dapat diunduh melalui aplikasi untuk dibaca tanpa koneksi internet.'],
+  ['Buku apa saja yang tersedia di BUKOO?', 'BUKOO menghadirkan berbagai genre fiksi dan non-fiksi dari penerbit serta penulis Indonesia.'],
+  ['Apa itu Bukoo Assistant?', 'Bukoo Assistant membantu memberi rekomendasi personal, merangkum bab, dan menjawab pertanyaan tentang bacaanmu.'],
+  ['Bagaimana sistem pembayarannya?', 'Pilih paket yang sesuai dan bayar secara bulanan. Kamu dapat upgrade atau membatalkan kapan saja.'],
+] as const;
 
 export function FAQ() {
-  const toggleFaq = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const item = e.currentTarget.parentElement;
-    if (item) {
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
-    }
-  };
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="faq-section">
@@ -19,53 +20,19 @@ export function FAQ() {
         <h2 className="s-h2">Ada yang Ingin<br />Kamu Tanyakan?</h2>
       </div>
 
-      <div className="faq-item open">
-        <button className="faq-q" onClick={toggleFaq}>
-          Apa itu BUKOO dan bagaimana cara kerjanya?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">BUKOO adalah platform langganan buku digital yang memungkinkan kamu mengakses 2.000+ judul buku kurasi dari puluhan penerbit Indonesia dan internasional. Cukup bayar satu biaya langganan bulanan, dan nikmati bacaan sepuasnya — mirip Netflix tapi untuk buku. Tersedia sebagai aplikasi di iOS dan Android.</div>
-      </div>
-
-      <div className="faq-item">
-        <button className="faq-q" onClick={toggleFaq}>
-          Apakah saya bisa membaca offline tanpa internet?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">Ya! Semua tier berbayar mendukung offline reading. Tier Baca (Rp 29.900) memungkinkan download hingga 10 judul, sementara tier Plus ke atas mendapatkan offline unlimited tanpa batasan. Sangat cocok untuk daerah dengan koneksi internet tidak stabil.</div>
-      </div>
-
-      <div className="faq-item">
-        <button className="faq-q" onClick={toggleFaq}>
-          Apakah ada kontrak jangka panjang?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">Tidak sama sekali. BUKOO menggunakan model langganan bulanan tanpa kontrak. Kamu bisa upgrade, downgrade, atau membatalkan langganan kapan saja tanpa biaya penalti. Pembatalan berlaku di akhir periode billing yang sudah dibayar.</div>
-      </div>
-
-      <div className="faq-item">
-        <button className="faq-q" onClick={toggleFaq}>
-          Buku apa saja yang tersedia di BUKOO?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">BUKOO memiliki 2.000+ judul kurasi mencakup berbagai genre: self-development, fiksi dan sastra Indonesia, bisnis dan keuangan, sains, akademik, hingga buku anak. Kami bermitra dengan 50 penerbit pilihan termasuk Gramedia Pustaka Utama, Mizan, Bentang, Penguin Random House, dan banyak lagi.</div>
-      </div>
-
-      <div className="faq-item">
-        <button className="faq-q" onClick={toggleFaq}>
-          Apa itu Bukoo Assistant?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">Bukoo Assistant adalah asisten membaca personal yang ada di tier Plus ke atas. Ia bisa merekomendasikan buku sesuai selera, membuat rangkuman bab, menjawab pertanyaan tentang isi buku, dan membangun &quot;Peta Baca&quot; — jalur membaca yang dikurasi AI berdasarkan tujuan dan minatmu.</div>
-      </div>
-
-      <div className="faq-item">
-        <button className="faq-q" onClick={toggleFaq}>
-          Bagaimana sistem pembayaran BUKOO?
-          <div className="faq-icon">+</div>
-        </button>
-        <div className="faq-a">BUKOO menerima berbagai metode pembayaran yang umum di Indonesia: kartu kredit/debit (Visa, Mastercard), transfer bank, GoPay, OVO, Dana, ShopeePay, dan Indomaret/Alfamart. Semua transaksi dalam Rupiah — tidak ada biaya kurs dolar!</div>
-      </div>
+      {items.map(([question, answer], index) => {
+        const isOpen = openIndex === index;
+        const panelId = `homepage-faq-panel-${index}`;
+        return (
+          <div className={`faq-item ${isOpen ? 'open' : ''}`} key={question}>
+            <button className="faq-q" type="button" aria-expanded={isOpen} aria-controls={panelId} onClick={() => setOpenIndex(isOpen ? null : index)}>
+              <span>{question}</span>
+              <span className="faq-icon" aria-hidden="true">+</span>
+            </button>
+            <div id={panelId} className="faq-a" role="region">{answer}</div>
+          </div>
+        );
+      })}
     </section>
   );
 }

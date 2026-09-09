@@ -1,6 +1,6 @@
 import { Hero } from '@/components/marketing/Hero';
 import { HomepageSections } from '@/components/marketing/HomepageSections';
-import { Pricing } from '@/components/marketing/Pricing';
+import { PricingTeaser } from '@/components/marketing/PricingTeaser';
 import { FAQ } from '@/components/marketing/FAQ';
 import { CallToAction } from '@/components/marketing/CallToAction';
 
@@ -11,7 +11,7 @@ export default function LandingPage() {
     <>
       <Hero />
       <HomepageSections />
-      <Pricing />
+      <PricingTeaser />
       <FAQ />
       <CallToAction />
     </>

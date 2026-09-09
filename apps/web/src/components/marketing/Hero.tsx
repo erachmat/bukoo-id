@@ -20,29 +20,27 @@ export function Hero() {
       <div className="homepage-hero-overlay" />
 
       <div className="hero-content">
-        <div className="hero-badge">Platform membaca digital Indonesia</div>
-
         <h1 className="hero-h1">
-          Temukan cerita yang
-          <em>menemani langkahmu.</em>
+          Baca Tanpa Batas,
+          <em>Mulai Hari ini</em>
         </h1>
 
         <p className="hero-sub">
-          Ribuan buku, ide, dan perjalanan baru ada di satu tempat. Baca dengan ritmemu sendiri bersama BUKOO.
+          Ratusan Judul kurasi dari penerbit Indonesia — fiksi, non-fiksi semua langsung dari aplikasi BUKOO.
         </p>
+        <p className="hero-price">Mulai Rp 29.900/bulan. Batalkan kapan saja.</p>
 
         <form className="hero-input-row" onSubmit={handleSubmit}>
           <input
             className="hero-input"
             type="email"
-            placeholder="Masukkan email kamu untuk memulai"
+            placeholder="Masukkan email untuk memulai"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button className="hero-btn" type="submit">Mulai Gratis →</button>
+          <button className="hero-btn" type="submit">MULAI GRATIS</button>
         </form>
-        <div className="hero-fine">Mulai gratis · Tanpa kartu kredit · Batalkan kapan saja</div>
       </div>
     </section>
   );

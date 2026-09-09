@@ -12,7 +12,9 @@
 - `[x]` 3. Fix: removed the `update()` mount effect + dropped `update` from the `useSession()` destructure in `apps/web/src/app/(marketing)/Navbar.tsx`. Session is server-seeded per request via `auth()` → `<SessionProvider session={session}>`, so `status` starts correct with `loading=false`. `renderAuthButtons()` untouched (loading branch now a dead-path safety net).
 - `[x]` 4. Verification: web typecheck ✅, lint 0 errors (29 pre-existing warnings, unrelated files) ✅, tests 60/60 ✅. Gap flagged per AGENTS.md: no component test covers Navbar (web suite is lib-only).
 - `[x]` 5. Deploy: committed + pushed to main 2026-08-30 (`6753daa`); `Deploy Web` CI green — production `bukoo-web` deployed via `deploy:prod`, smoke test `https://bukoo.id` passed (HTTP 200, `Masuk` rendered).
-- `[ ]` 6. Manual QA (user): landing → click `Masuk` → browser Back → buttons render immediately, no blink; signed-in regression: `Library`/`Keluar` render immediately, `Keluar` server-action sign-out still works.
+- `[x]` 6. Homepage redesign implementation audited and completed: homepage-only minimal header, requested sections/copy, pricing teaser, closed FAQ, final CTA, route-aware footer, and responsive styling.
+- `[x]` 7. Verification: monorepo typecheck 7/7, web lint 0 errors with 29 pre-existing warnings, web tests 67/67, production build compiled. Browser QA confirmed homepage route and expected content; mobile visual QA remains.
+- `[ ]` 8. Content owner follow-up: feature cards 5–6 use duplicated placeholder copy; source final CTA shows Rp 29.800 while implementation uses canonical Rp 29.900.
 
 # Web UX/Perf Hardening + Mobile-Only Reading — 2026-08-29
 
