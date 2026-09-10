@@ -166,7 +166,7 @@ export function PublisherDashboardShowcase() {
               <div className="dash-util-idle">56% Belum Tersentuh</div>
             </div>
             <div className="dash-insight">
-              Sebagian besar katalog Anda punya potensi yang belum tergali. Lewat fitur <b>Featured Book</b> dan rekomendasi AI BUKOO, judul yang &ldquo;tidur&rdquo; bisa diaktifkan kembali — menghidupkan pendapatan dari aset yang selama ini pasif, tanpa biaya cetak tambahan.
+              Sebagian besar katalog Anda punya potensi yang belum tergali. Lewat fitur <b>Featured Book</b>  dan rekomendasi AI BUKOO, judul yang &ldquo;tidur&rdquo; bisa diaktifkan kembali — menghidupkan pendapatan dari aset yang selama ini pasif, tanpa biaya cetak tambahan.
             </div>
           </div>
 

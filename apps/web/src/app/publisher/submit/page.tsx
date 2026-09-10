@@ -102,7 +102,7 @@ export default async function PublisherSubmitPage() {
         <div className="pub-wrap">
           <div className="sec-head" style={{ marginBottom: 24 }}>
             <span className="eyebrow">Formulir Pengajuan</span>
-            <h2 className="h2">
+            <h2 className="h2" style={{ color: '#fffff' }}>
               Ajukan judul dalam <em>4 langkah</em>
             </h2>
           </div>

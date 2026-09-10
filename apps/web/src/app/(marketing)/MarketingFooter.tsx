@@ -8,7 +8,7 @@ export default function MarketingFooter() {
 
   return (
     <footer className="footer">
-      <div className="footer-grid">
+      <div className={`footer-grid${isHomepage ? ' footer-grid-home' : ''}`}>
         <div className="footer-brand">
           <div className="footer-logo">
             <img src="/bukoo-logo.svg" alt="BUKOO" className="footer-logo-img" />
@@ -22,7 +22,10 @@ export default function MarketingFooter() {
           ) : (
             <p className="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
           )}
-          <div className="social-row"><div className="social-btn">📘</div><div className="social-btn">📷</div><div className="social-btn">🎵</div><div className="social-btn">▶</div></div>
+          <div className="social-row">
+            <a className="social-btn" href="https://www.instagram.com/bukooid" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-ig-icon.png" alt="Instagram" /></a>
+            <a className="social-btn" href="https://www.linkedin.com/company/bukoo-indonesia/" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-linkedin-icon.png" alt="LinkedIn" /></a>
+          </div>
         </div>
 
         {isHomepage ? (

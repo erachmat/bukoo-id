@@ -8137,3 +8137,9 @@
 {"_e":"devserver:start","_t":1787522739714,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
 {"_e":"metro:config","_t":1787522741218,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
 {"_e":"metro:instantiate","_t":1787522756444,"atlas":false,"workers":6,"host":"::","port":8081}
+{"_e":"root:init","_t":1788987461180,"format":"v0-jsonl","version":"56.1.24"}
+{"_e":"env:mode","_t":1788987461182,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1788987461188,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"https://api.bukoo.id/v1","EXPO_PUBLIC_GOOGLE_CLIENT_ID":"576187863248-9voo043m0bm915b8g6b0k1m5ios9qai2.apps.googleusercontent.com"}}
+{"_e":"devserver:start","_t":1788987462156,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1788987464846,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1788987488534,"atlas":false,"workers":6,"host":"::","port":8081}

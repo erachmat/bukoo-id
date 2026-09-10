@@ -57,9 +57,8 @@ export default function PublisherPanduanPage() {
                 <p>
                   Prinsipnya sederhana: <strong>Anda menyediakan buku, kami menyediakan platform, pembaca, dan teknologi.</strong> Anda tidak menanggung biaya cetak, gudang, atau distribusi &mdash; dan tetap memegang kendali penuh atas katalog Anda.
                 </p>
-                <div className="callout">
-                  <b>Inti filosofi kami:</b> BUKOO hadir untuk <b>menambah</b> kanal pendapatan Anda dan menjadi corong penemuan menuju penjualan fisik &mdash; bukan menggantikannya.
-                </div>
+                <p><strong>Inti filosofi kami:</strong> BUKOO hadir untuk <strong>menambah</strong> kanal pendapatan Anda dan menjadi corong penemuan menuju penjualan fisik &mdash; bukan menggantikannya.
+                </p>
               </div>
 
               {/* Section 02 */}
@@ -158,9 +157,9 @@ export default function PublisherPanduanPage() {
                 <p>
                   Seluruh buku dilindungi <strong>DRM (Digital Rights Management)</strong>. Konten tidak bisa diunduh mentah, disalin, atau disebarluaskan di luar aplikasi BUKOO.
                 </p>
-                <div className="callout">
-                  <b>Aman untuk Anda:</b> pembajakan adalah kekhawatiran utama penerbit digital. Arsitektur BUKOO dirancang agar karya Anda hanya bisa dinikmati di dalam aplikasi, terenkripsi &amp; terlindungi.
-                </div>
+                <p>
+                  <strong>Aman untuk Anda:</strong> pembajakan adalah kekhawatiran utama penerbit digital. Arsitektur BUKOO dirancang agar karya Anda hanya bisa dinikmati di dalam aplikasi, terenkripsi &amp; terlindungi.
+                </p>
               </div>
 
               {/* Section 07 */}

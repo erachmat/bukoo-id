@@ -1,3 +1,15 @@
+# Homepage bukoo.id Visual Refinements — 2026-09-10
+
+- `[x]` 1. Assets: copied `bukoo-assistant-logo.png`, `green-checklist-icon.png`, `bukoo-ig-icon.png`, `bukoo-linkedin-icon.png` into `apps/web/public/homepage-assets/`.
+- `[x]` 2. Gold text token `--gold: #B58418` added to `:root`; repointed all homepage gold *accent text* (hero headline em + price, eyebrows, section h2 em, feature card h3, publisher band p, pricing teaser em/strong, cta-price, footer logo). Button backgrounds/borders keep `--amber`.
+- `[x]` 3. Hero + final CTA email field separated from its button (full 8px radius each, restored field right border, `gap: 12px` on `.hero-input-row` / `.cta-input-row`).
+- `[x]` 4. Bukoo Assistant eyebrow: `bukoo-assistant-logo.png` replaces `✦`; `Assistant` rendered plain (`.assistant-plain`, no bold/italic).
+- `[x]` 5. Product bullets: gold `✓` circle replaced with `green-checklist-icon.png` (rule now `.homepage-product-copy li img`).
+- `[x]` 6. Publisher band text block centered (`margin-left/right: auto`).
+- `[x]` 7. Footer: `Perusahaan` + `Penerbit` pushed to the right edge via `.footer-grid-home` (`1fr auto auto`); 768px override still collapses to one column.
+- `[x]` 8. Footer social row now exactly Instagram (`https://www.instagram.com/bukooid`) + LinkedIn (`https://www.linkedin.com/company/bukoo-indonesia/`) as linked PNG icons; Facebook, TikTok, YouTube removed.
+- `[x]` 9. Verification: web typecheck ✅, lint 0 errors (31 pre-existing warnings; 3 new `<img>` warnings in `MarketingFooter.tsx` match the existing footer logo pattern), tests 67/67 ✅. Manual browser QA of the homepage render remains.
+
 # New Homepage Redesign — 2026-09-09
 
 - `[x]` SDD spec, implementation plan, and progress ledger created.

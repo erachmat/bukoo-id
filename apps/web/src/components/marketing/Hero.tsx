@@ -15,7 +15,7 @@ export function Hero() {
   }
 
   return (
-    <section className="hero homepage-hero">
+    <section className="homepage-hero">
       <Image className="homepage-hero-image" src="/homepage-assets/hero01.png" alt="Buku dan ponsel BUKOO di dekat jendela" fill priority sizes="100vw" />
       <div className="homepage-hero-overlay" />
 

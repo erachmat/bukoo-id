@@ -5,8 +5,8 @@ const features = [
   ['cafe.png', 'Semurah secangkir kopi', 'Mulai Rp 29.900 per bulan untuk akses penuh. Jauh lebih hemat dibanding membeli buku fisik satu per satu.'],
   ['elements.png', 'Karya Indonesia untuk dunia', 'Kami mengangkat karya dari banyak penulis Indonesia, agar bisa dinikmati pembaca di mana saja.'],
   ['elements03.png', 'Baca di mana saja, bahkan offline', 'iOS & Android, sinkron otomatis antar perangkat. Unduh buku untuk dibaca tanpa koneksi internet.'],
-  ['elements02.png', 'Bukoo Assistant', 'Akses banyak judul kurasi dari penerbit Indonesia. Bayar sekali sebulan, baca sepuasnya — tanpa beli buku satuan.'],
-  ['elements01.png', 'Fleksibel & tanpa kontrak', 'Akses banyak judul kurasi dari penerbit Indonesia. Bayar sekali sebulan, baca sepuasnya — tanpa beli buku satuan.'],
+  ['elements02.png', 'Bukoo Assistant', 'Asisten baca berbasis AI yang membangun peta baca personal, merangkum bab, dan menjawab pertanyaanmu tentang isi bacaan.'],
+  ['elements01.png', 'Fleksibel & tanpa kontrak', 'Berlangganan bulanan tanpa kontrak. Batalkan kapan saja langsung dari aplikasi — tanpa penalti, tanpa ribet.'],
 ] as const;
 
 const assistantBullets = [
@@ -35,7 +35,7 @@ function ProductSection({ eyebrow, title, text, bullets, image, reverse = false 
         <p className="homepage-eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
         <p className="homepage-lede">{text}</p>
-        <ul>{bullets.map((bullet) => <li key={bullet}><span>✓</span>{bullet}</li>)}</ul>
+        <ul>{bullets.map((bullet) => <li key={bullet}><Image src="/homepage-assets/green-checklist-icon.png" alt="" width={21} height={21} />{bullet}</li>)}</ul>
       </div>
       <div className="homepage-product-art">
         <Image src={`/homepage-assets/${image}`} alt="" width={960} height={1100} />
@@ -48,8 +48,7 @@ export function HomepageSections() {
   return (
     <>
       <section className="homepage-intro">
-        <p className="homepage-eyebrow">Kenapa membaca di <span>BUKOO</span>?</p>
-        <h2>Lebih dari sekadar<br /><em>rak buku digital.</em></h2>
+        <h2>Kenapa membaca di<br /><em>BUKOO?</em></h2>
         <p className="homepage-section-lede">Bukan sekadar rak buku digital — sebuah cara baru menikmati bacaan tanpa harus membeli satu per satu.</p>
         <div className="homepage-feature-grid">
           {features.map(([icon, title, text]) => (
@@ -63,7 +62,7 @@ export function HomepageSections() {
       </section>
 
       <ProductSection
-        eyebrow={<>✦ Bukoo Assistant</>}
+        eyebrow={<><Image src="/homepage-assets/bukoo-assistant-logo.png" alt="" width={22} height={22} />Bukoo <span className="assistant-plain">Assistant</span></>}
         title={<>Asisten baca yang<br /><em>mengenal seleramu</em></>}
         text="Lebih dari sekadar merekomendasikan buku — ia membangun peta baca personal, merangkum bab, dan menjawab pertanyaanmu tentang isi bacaan."
         bullets={assistantBullets}
@@ -71,7 +70,7 @@ export function HomepageSections() {
       />
 
       <ProductSection
-        eyebrow={<>Komunitas <span>BUKOO</span></>}
+        eyebrow={<>Komunitas <em>Bukoo</em></>}
         title={<>Membaca Lebih<br /><em>Menyenangkan Bersama</em></>}
         text="Bergabung dengan komunitas pembaca Indonesia. Ikut tantangan baca, bagikan insight, dan temukan teman baca yang punya selera serupa."
         bullets={communityBullets}

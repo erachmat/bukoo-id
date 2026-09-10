@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUKOO — Submit Judul</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --forest:#1E4035; --forest-d:#122A22; --forest-dd:#0A1A15;
+  --forest-l:#2A5A48; --forest-ll:#34705A; --forest-lll:#4A907A;
+  --amber:#C9952A; --amber-lt:#F0D080;
+  --teal:#00C9A7; --teal-d:#00957A; --coral:#FF6B4A;
+  --cream:#FAF7F2; --text:#F0EDE6;
+  --text-dim:rgba(240,237,230,0.65); --text-muted:rgba(240,237,230,0.35);
+  --border:rgba(201,149,42,0.12); --border-hi:rgba(201,149,42,0.3);
+  --card-bg:rgba(255,255,255,0.04); --card-bg-hi:rgba(255,255,255,0.07);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--forest-dd);color:var(--text);overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;}
+img{display:block;max-width:100%;}
+a{text-decoration:none;color:inherit;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--forest-dd);}
+::-webkit-scrollbar-thumb{background:var(--forest-l);border-radius:3px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size:256px;opacity:0.4;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 60px;position:relative;z-index:2;}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 60px;background:linear-gradient(180deg,rgba(10,26,21,0.95) 0%,transparent 100%);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,149,42,0.08);transition:background .3s;}
+.nav.scrolled{background:rgba(10,26,21,0.98);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--amber);letter-spacing:-1px;}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;}
+.nav-links a{font-size:13px;font-weight:600;color:var(--text-dim);transition:color .2s;letter-spacing:.2px;}
+.nav-links a:hover,.nav-links a.on{color:var(--amber);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.btn-ghost{font-size:13px;font-weight:700;color:var(--text-dim);padding:8px 20px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;transition:all .2s;cursor:pointer;background:transparent;display:inline-block;}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);}
+.btn-cta{font-size:13px;font-weight:800;color:var(--forest-dd);background:var(--amber);padding:9px 24px;border-radius:6px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.2px;display:inline-block;}
+.btn-cta:hover{background:var(--amber-lt);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,149,42,0.35);}
+.btn-lg{font-size:15px;padding:14px 32px;}
+
+.subnav{position:fixed;top:68px;left:0;right:0;z-index:99;background:rgba(18,42,34,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.subnav-in{max-width:1180px;margin:0 auto;padding:0 60px;display:flex;align-items:center;gap:8px;height:52px;overflow-x:auto;}
+.subnav-in::-webkit-scrollbar{height:0;}
+.subnav-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-right:14px;white-space:nowrap;}
+.subnav a{font-size:13px;font-weight:600;color:var(--text-dim);padding:7px 15px;border-radius:100px;white-space:nowrap;transition:all .18s;border:1px solid transparent;}
+.subnav a:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+.subnav a.on{color:var(--forest-dd);background:var(--amber);}
+.subnav-back{margin-left:auto;font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.subnav-back:hover{color:var(--amber);}
+
+.phero{position:relative;padding:170px 0 70px;overflow:hidden;}
+.phero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 15% 0%,rgba(201,149,42,0.13) 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(0,201,167,0.08) 0%,transparent 55%),linear-gradient(180deg,#0A1A15 0%,#122A22 60%,#0A1A15 100%);}
+.phero-grid{position:absolute;inset:0;z-index:0;opacity:.6;background-image:linear-gradient(rgba(201,149,42,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,149,42,0.05) 1px,transparent 1px);background-size:64px 64px;}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;color:var(--amber);margin-bottom:22px;}
+.eyebrow::before{content:'';width:26px;height:1.5px;background:var(--amber);}
+.ph-h1{font-family:'Playfair Display',serif;font-size:clamp(34px,5.5vw,58px);font-weight:700;line-height:1.06;color:#fff;max-width:18ch;}
+.ph-h1 em{font-style:italic;color:var(--amber);}
+.ph-h1 .q{color:var(--text-muted);font-weight:400;}
+.ph-lead{font-size:clamp(15px,1.8vw,19px);color:var(--text-dim);max-width:60ch;margin-top:24px;font-weight:300;line-height:1.7;}
+.ph-lead strong{color:var(--text);font-weight:600;}
+.hero-ctas{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;}
+
+.sec{padding:80px 0;position:relative;}
+.sec.alt{background:var(--forest-d);}
+.sec-head{max-width:720px;margin-bottom:44px;}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+.sec-head.center .eyebrow{justify-content:center;}
+.h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3.6vw,42px);font-weight:700;color:#fff;line-height:1.12;}
+.h2 em{font-style:italic;color:var(--amber);}
+.sec-desc{font-size:16px;color:var(--text-dim);margin-top:18px;line-height:1.7;max-width:62ch;}
+.sec-head.center .sec-desc{margin-left:auto;margin-right:auto;}
+
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:30px;transition:.25s;}
+.pill{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);padding:4px 11px;border:1px solid var(--border-hi);border-radius:100px;display:inline-block;}
+.pill-teal{color:var(--teal);border-color:rgba(0,201,167,.3);}
+.pill-coral{color:var(--coral);border-color:rgba(255,107,74,.3);}
+.disc{background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.24);border-radius:12px;padding:16px 20px;font-size:12.5px;color:var(--text-dim);line-height:1.65;}
+.disc b{color:var(--amber);}
+.callout{background:rgba(0,201,167,.07);border:1px solid rgba(0,201,167,.24);border-radius:12px;padding:18px 20px;font-size:14px;color:var(--text-dim);line-height:1.65;}
+.callout b{color:var(--teal);}
+
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+.fcard{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:30px 26px;transition:.25s;}
+.fcard:hover{transform:translateY(-4px);border-color:var(--border-hi);background:var(--card-bg-hi);}
+.fcard .ic{font-size:28px;margin-bottom:16px;}
+.fcard h4{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:9px;line-height:1.25;}
+.fcard p{font-size:13.5px;color:var(--text-dim);line-height:1.65;}
+.fcard .tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;display:inline-block;}
+
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(201,149,42,.16);border-bottom:1px solid rgba(201,149,42,.16);}
+.statrow .st{padding:26px 22px;border-right:1px solid rgba(255,255,255,.07);}
+.statrow .st:last-child{border-right:none;}
+.st-n{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);font-weight:700;color:var(--amber);line-height:1;}
+.st-n small{font-size:16px;color:var(--text-muted);}
+.st-l{font-size:12.5px;color:var(--text-dim);margin-top:9px;line-height:1.45;}
+
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+.steps.s3{grid-template-columns:repeat(3,1fr);}
+.steps.s5{grid-template-columns:repeat(5,1fr);}
+.steps-line{position:absolute;top:26px;left:11%;right:11%;height:1.5px;background:var(--border);}
+.step{text-align:center;padding:0 16px;position:relative;}
+.step .d{width:52px;height:52px;border-radius:50%;background:var(--forest-dd);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:20px;position:relative;z-index:2;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber);}
+.step h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;}
+.step p{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+
+.checklist{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.checklist li{font-size:14.5px;color:var(--text-dim);display:flex;gap:12px;line-height:1.6;}
+.checklist li::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;}
+.checklist li b{color:var(--text);}
+
+.listcard{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:26px;transition:.2s;display:block;}
+.listcard:hover{border-color:var(--border-hi);background:var(--card-bg-hi);}
+.listcard .meta{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap;}
+.listcard h4{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.25;}
+.listcard p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+.listcard .more{font-size:12.5px;font-weight:700;color:var(--teal);margin-top:14px;display:inline-block;}
+
+.faq{max-width:840px;}
+.faq.center{margin:0 auto;}
+.faq-i{border-bottom:1px solid var(--border);}
+.faq-q{width:100%;text-align:left;background:none;border:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15.5px;font-weight:600;padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.faq-q .ic{color:var(--amber);font-size:22px;flex-shrink:0;transition:transform .2s;}
+.faq-i.open .faq-q .ic{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-a p{font-size:14px;color:var(--text-dim);line-height:1.7;padding:0 0 20px;margin:0;}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+.contact-ch{display:flex;gap:16px;padding:20px;background:var(--card-bg);border:1px solid var(--border);border-radius:13px;margin-bottom:14px;}
+.contact-ch .ic{font-size:22px;flex-shrink:0;}
+.contact-ch h5{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px;}
+.contact-ch p{font-size:13px;color:var(--text-dim);}
+.contact-ch a{color:var(--amber);}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:7px;}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:.18s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--amber);}
+.fg textarea{resize:vertical;min-height:90px;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-submit{width:100%;font-size:15px;font-weight:800;color:var(--forest-dd);background:var(--amber);padding:15px;border-radius:9px;border:none;cursor:pointer;transition:.2s;}
+.form-submit:hover{background:var(--amber-lt);}
+.form-ok{display:none;background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.3);border-radius:12px;padding:24px;text-align:center;}
+.form-ok h4{font-family:'Playfair Display',serif;color:var(--teal);font-size:20px;margin-bottom:8px;}
+.form-ok p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;}
+.chip{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px;}
+.chip .ic{font-size:16px;}
+
+.cband{background:var(--forest);border:1px solid var(--border-hi);border-radius:18px;padding:44px;text-align:center;}
+.cband h3{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,32px);color:#fff;margin-bottom:12px;line-height:1.15;}
+.cband h3 em{font-style:italic;color:var(--amber);}
+.cband p{font-size:15px;color:var(--text-dim);max-width:56ch;margin:0 auto 22px;line-height:1.6;}
+
+.footer{background:var(--forest-dd);border-top:1px solid var(--border);padding:60px 0 30px;position:relative;z-index:2;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--amber);letter-spacing:-0.5px;margin-bottom:12px;}
+.footer-tagline{font-size:13px;color:var(--text-muted);line-height:1.65;max-width:240px;margin-bottom:20px;}
+.social-row{display:flex;gap:10px;}
+.social-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;}
+.social-btn:hover{background:rgba(201,149,42,0.1);border-color:rgba(201,149,42,0.3);}
+.footer-col-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:16px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-links a{font-size:13px;color:var(--text-muted);transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:12px;color:var(--text-muted);}
+.footer-legal{display:flex;gap:24px;}
+.footer-legal a{font-size:12px;color:var(--text-muted);transition:color .2s;}
+.footer-legal a:hover{color:var(--text);}
+
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+.rv.in{opacity:1;transform:none;}
+
+@media(max-width:900px){
+  .wrap{padding:0 24px;} .nav{padding:0 24px;} .nav-links{display:none;}
+  .subnav-in{padding:0 24px;}
+  .phero{padding:150px 0 56px;} .sec{padding:60px 0;}
+  .grid3,.grid4,.grid2{grid-template-columns:1fr;}
+  .statrow{grid-template-columns:1fr 1fr;} .statrow .st{border-right:none;padding:18px;}
+  .statrow .st:nth-child(odd){border-right:1px solid rgba(255,255,255,.07);}
+  .steps,.steps.s3,.steps.s5{grid-template-columns:1fr 1fr;gap:28px 0;} .steps-line{display:none;}
+  .contact-grid{grid-template-columns:1fr;} .fg-row{grid-template-columns:1fr;}
+}
+@media(max-width:560px){ .footer-grid{grid-template-columns:1fr;} .statrow{grid-template-columns:1fr;} .statrow .st:nth-child(odd){border-right:none;} }
+
+
+.req{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.req-c{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;padding:22px;}
+.req-i{font-size:24px;margin-bottom:12px;}
+.req-c h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;}
+.req-c p{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+.req-c code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amber);}
+
+/* stepper */
+.stepper{display:flex;align-items:center;margin-bottom:32px;}
+.step-dot{display:flex;align-items:center;gap:12px;}
+.sd-n{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text-muted);transition:.2s;}
+.step-dot.active .sd-n{background:var(--amber);border-color:var(--amber);color:var(--forest-dd);}
+.step-dot.done .sd-n{background:var(--teal);border-color:var(--teal);color:var(--forest-dd);}
+.sd-l{font-size:12.5px;font-weight:600;color:var(--text-muted);}
+.step-dot.active .sd-l{color:var(--text);}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 14px;}
+.form-card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:36px;}
+.fstep{display:none;}
+.fstep.on{display:block;animation:fade .3s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;}}
+.fstep h3{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:6px;}
+.fstep .sub{font-size:13px;color:var(--text-dim);margin-bottom:24px;}
+.fg{margin-bottom:18px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:7px;}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:.18s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--amber);}
+.fg textarea{resize:vertical;min-height:80px;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.drop{border:1.5px dashed rgba(201,149,42,.35);border-radius:12px;padding:34px;text-align:center;background:rgba(201,149,42,.04);cursor:pointer;transition:.2s;}
+.drop:hover{background:rgba(201,149,42,.08);border-color:var(--amber);}
+.drop .ic{font-size:34px;margin-bottom:10px;}
+.drop b{color:var(--text);font-size:14px;}
+.drop p{font-size:12px;color:var(--text-muted);margin-top:5px;}
+.review-list{display:flex;flex-direction:column;gap:12px;}
+.rv-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;}
+.rv-row span:first-child{color:var(--text-muted);}
+.rv-row span:last-child{color:var(--text);font-weight:500;}
+.step-btns{display:flex;justify-content:space-between;margin-top:28px;gap:12px;}
+.form-ok{display:none;text-align:center;padding:20px 0;}
+.form-ok.show{display:block;}
+.form-ok .big{font-size:44px;margin-bottom:12px;}
+.form-ok h3{color:var(--teal);}
+.form-ok p{font-size:14px;color:var(--text-dim);max-width:46ch;margin:10px auto 0;line-height:1.6;}
+
+/* process timeline */
+.proc{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+.proc-line{position:absolute;top:24px;left:11%;right:11%;height:1.5px;background:var(--border);}
+.proc-s{text-align:center;padding:0 16px;position:relative;}
+.proc-d{width:50px;height:50px;border-radius:50%;background:var(--forest-dd);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:20px;position:relative;z-index:2;}
+.proc-s h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;}
+.proc-s p{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+@media(max-width:900px){.req{grid-template-columns:1fr 1fr;}.fg-row{grid-template-columns:1fr;}.proc{grid-template-columns:1fr 1fr;gap:28px 0;}.proc-line{display:none;}.stepper{overflow-x:auto;}.sd-l{display:none;}}
+
+</style></head><body>
+<nav class="nav" id="navbar">
+  <a href="bukoo-website.html" class="nav-logo">BUKOO</a>
+  <ul class="nav-links">
+    <li><a href="bukoo-website.html">Beranda</a></li>
+    <li><a href="produk-koleksi.html">Produk</a></li>
+    <li><a href="produk-harga.html">Harga</a></li>
+    <li><a href="penerbit-daftar.html" class="on">Untuk Penerbit</a></li>
+    <li><a href="perusahaan-tentang.html">Perusahaan</a></li>
+    <li><a href="bantuan-pusat.html">Bantuan</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="bantuan-langganan.html" class="btn-ghost">Masuk</a>
+    <a href="produk-harga.html" class="btn-cta">Coba Gratis</a>
+  </div>
+</nav>
+<div class="subnav"><div class="subnav-in"><span class="subnav-tag">Untuk Penerbit</span><a href="penerbit-daftar.html">Daftar Penerbit</a><a href="penerbit-dashboard.html">Dashboard</a><a href="penerbit-royalti.html">Kebijakan Royalti</a><a href="penerbit-submit.html" class="on">Submit Judul</a><a href="penerbit-panduan.html">Panduan Penerbit</a><a href="bukoo-website.html" class="subnav-back">← Kembali ke BUKOO</a></div></div>
+
+<section class="phero" style="padding-bottom:40px;">
+  <div class="phero-bg"></div><div class="phero-grid"></div>
+  <div class="wrap">
+    <span class="eyebrow">Submit Judul</span>
+    <h1 class="ph-h1">Kirim judul Anda ke <em>jutaan pembaca</em></h1>
+    <p class="ph-lead">Ajukan judul untuk masuk katalog BUKOO. Anda tetap memegang kendali penuh: pilih judul, atur jendela rilis, dan tentukan positioning. Tim kurasi kami memandu setiap langkah.</p>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:24px;">
+  <div class="wrap">
+    <div class="sec-head rv" style="margin-bottom:24px;"><span class="eyebrow">Syarat Berkas</span><h2 class="h2">Yang perlu Anda <em>siapkan</em></h2></div>
+    <div class="req rv">
+      <div class="req-c"><div class="req-i">📄</div><h4>File buku</h4><p>Format <code>EPUB</code> atau <code>PDF</code> berkualitas. EPUB direkomendasikan untuk pengalaman baca terbaik.</p></div>
+      <div class="req-c"><div class="req-i">🖼️</div><h4>Cover</h4><p>Resolusi tinggi, minimal <code>1400×2100 px</code>, format JPG/PNG.</p></div>
+      <div class="req-c"><div class="req-i">🏷️</div><h4>Metadata</h4><p>Judul, penulis, ISBN, sinopsis, genre, tahun terbit, & bahasa.</p></div>
+      <div class="req-c"><div class="req-i">🔒</div><h4>Hak digital</h4><p>Konfirmasi Anda memegang hak distribusi digital untuk judul tersebut.</p></div>
+    </div>
+    <div class="disc rv"><b>Perlindungan konten.</b> Semua buku dilindungi DRM — tidak bisa diunduh mentah, disalin, atau disebarluaskan di luar aplikasi BUKOO. Anda menentukan jendela rilis (windowing), mis. digital menyusul beberapa bulan setelah rilis fisik.</div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head rv" style="margin-bottom:24px;"><span class="eyebrow">Formulir Pengajuan</span><h2 class="h2">Ajukan judul dalam <em>4 langkah</em></h2></div>
+    <div class="form-card rv" style="max-width:760px;margin:0 auto;">
+      <div class="stepper" id="stepper">
+        <div class="step-dot active" data-s="1"><div class="sd-n">1</div><span class="sd-l">Detail buku</span></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-s="2"><div class="sd-n">2</div><span class="sd-l">Berkas</span></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-s="3"><div class="sd-n">3</div><span class="sd-l">Rilis & harga</span></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-s="4"><div class="sd-n">4</div><span class="sd-l">Tinjau</span></div>
+      </div>
+
+      <div class="fstep on" data-step="1">
+        <h3>Detail buku</h3><p class="sub">Informasi dasar tentang judul yang Anda ajukan.</p>
+        <div class="fg"><label>Judul buku</label><input type="text" id="f_title" placeholder="Judul lengkap"></div>
+        <div class="fg-row"><div class="fg"><label>Penulis</label><input type="text" id="f_author" placeholder="Nama penulis"></div><div class="fg"><label>ISBN</label><input type="text" placeholder="978-..."></div></div>
+        <div class="fg-row"><div class="fg"><label>Genre</label><select id="f_genre"><option>Sastra & Fiksi</option><option>Non-fiksi</option><option>Bisnis & Keuangan</option><option>Self-development</option><option>Akademik & Sains</option><option>Anak & Remaja</option></select></div><div class="fg"><label>Tahun terbit</label><input type="text" placeholder="2024"></div></div>
+        <div class="fg"><label>Sinopsis singkat</label><textarea placeholder="2–4 kalimat yang menggambarkan isi buku."></textarea></div>
+      </div>
+
+      <div class="fstep" data-step="2">
+        <h3>Unggah berkas</h3><p class="sub">Contoh antarmuka — pada versi live, berkas diunggah aman ke server BUKOO.</p>
+        <div class="fg"><label>File buku (EPUB / PDF)</label><div class="drop"><div class="ic">📄</div><b>Klik untuk memilih atau tarik berkas ke sini</b><p>EPUB atau PDF · maks 100 MB</p></div></div>
+        <div class="fg"><label>Cover (JPG / PNG)</label><div class="drop"><div class="ic">🖼️</div><b>Unggah gambar cover</b><p>Min 1400×2100 px</p></div></div>
+      </div>
+
+      <div class="fstep" data-step="3">
+        <h3>Rilis & positioning</h3><p class="sub">Anda yang menentukan bagaimana buku ini hadir di BUKOO.</p>
+        <div class="fg-row">
+          <div class="fg"><label>Jendela rilis digital</label><select><option>Segera setelah disetujui</option><option>3 bulan setelah rilis fisik</option><option>6 bulan setelah rilis fisik</option><option>Tanggal khusus</option></select></div>
+          <div class="fg"><label>Positioning</label><select><option>Katalog reguler (semua tier)</option><option>Premium (tier Plus ke atas)</option><option>Kredit buku (in-app)</option></select></div>
+        </div>
+        <div class="fg"><label>Tautan pembelian fisik (opsional)</label><input type="url" placeholder="https://toko-anda.id/judul"></div>
+        <div class="disc" style="margin-top:6px"><b>Tetap kendali Anda.</b> Pengaturan ini bisa diubah kapan saja lewat dashboard penerbit.</div>
+      </div>
+
+      <div class="fstep" data-step="4">
+        <h3>Tinjau pengajuan</h3><p class="sub">Periksa kembali sebelum mengirim.</p>
+        <div class="review-list" id="reviewList">
+          <div class="rv-row"><span>Judul</span><span id="r_title">—</span></div>
+          <div class="rv-row"><span>Penulis</span><span id="r_author">—</span></div>
+          <div class="rv-row"><span>Genre</span><span id="r_genre">—</span></div>
+          <div class="rv-row"><span>Berkas</span><span>EPUB + cover (contoh)</span></div>
+          <div class="rv-row"><span>Status</span><span style="color:var(--amber)">Siap dikirim ke tim kurasi</span></div>
+        </div>
+      </div>
+
+      <div class="form-ok" id="formOk">
+        <div class="big">✓</div><h3>Judul terkirim ke tim kurasi</h3>
+        <p>Tim kurasi BUKOO akan meninjau dalam 5–7 hari kerja dan menghubungi Anda via dashboard. Terima kasih telah memperkaya katalog Indonesia.</p>
+      </div>
+
+      <div class="step-btns" id="stepBtns">
+        <button class="btn-ghost" id="btnPrev" style="visibility:hidden">← Kembali</button>
+        <button class="btn-cta" id="btnNext">Lanjut →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head center rv"><span class="eyebrow">Proses Setelah Submit</span><h2 class="h2">Dari pengajuan ke <em>tayang</em></h2></div>
+    <div class="proc rv">
+      <div class="proc-line"></div>
+      <div class="proc-s"><div class="proc-d">📤</div><h4>1. Pengajuan</h4><p>Anda kirim judul & berkas lewat formulir ini.</p></div>
+      <div class="proc-s"><div class="proc-d">🔍</div><h4>2. Kurasi</h4><p>Tim editorial meninjau kualitas & kelengkapan (5–7 hari kerja).</p></div>
+      <div class="proc-s"><div class="proc-d">⚙️</div><h4>3. Onboarding</h4><p>Buku diproses, di-DRM, & disiapkan sesuai pengaturan Anda.</p></div>
+      <div class="proc-s"><div class="proc-d">🚀</div><h4>4. Tayang</h4><p>Buku tampil untuk pembaca, royalti mulai berjalan di dashboard.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">BUKOO</div>
+        <p class="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
+        <div class="social-row"><div class="social-btn">📘</div><div class="social-btn">📷</div><div class="social-btn">🎵</div><div class="social-btn">🐦</div><div class="social-btn">▶</div></div></div>
+      <div><div class="footer-col-title">Produk</div><ul class="footer-links">
+        <li><a href="produk-koleksi.html">Koleksi Buku</a></li><li><a href="produk-audiobook.html">Audiobook</a></li>
+        <li><a href="produk-originals.html">BUKOO Originals</a></li><li><a href="produk-ai-companion.html">AI Companion</a></li>
+        <li><a href="produk-komunitas.html">Komunitas</a></li><li><a href="produk-harga.html">Harga &amp; Paket</a></li></ul></div>
+      <div><div class="footer-col-title">Perusahaan</div><ul class="footer-links">
+        <li><a href="perusahaan-tentang.html">Tentang BUKOO</a></li><li><a href="perusahaan-karir.html">Karir</a></li>
+        <li><a href="perusahaan-newsroom.html">Newsroom</a></li><li><a href="perusahaan-investor.html">Investor Relations</a></li>
+        <li><a href="perusahaan-blog.html">Blog</a></li><li><a href="perusahaan-kontak.html">Kontak</a></li></ul></div>
+      <div><div class="footer-col-title">Untuk Penerbit</div><ul class="footer-links">
+        <li><a href="penerbit-daftar.html">Daftar Penerbit</a></li><li><a href="penerbit-dashboard.html">Publisher Dashboard</a></li>
+        <li><a href="penerbit-royalti.html">Kebijakan Royalti</a></li><li><a href="penerbit-submit.html">Submit Judul</a></li>
+        <li><a href="penerbit-panduan.html">Panduan Penerbit</a></li></ul></div>
+      <div><div class="footer-col-title">Bantuan</div><ul class="footer-links">
+        <li><a href="bantuan-pusat.html">Pusat Bantuan</a></li><li><a href="bantuan-langganan.html">Cara Berlangganan</a></li>
+        <li><a href="bantuan-pembayaran.html">Pembayaran</a></li><li><a href="bantuan-perangkat.html">Perangkat &amp; App</a></li>
+        <li><a href="bantuan-faq.html">Komunitas FAQ</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><div class="footer-copy">© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</div>
+      <div class="footer-legal"><a href="perusahaan-kontak.html">Kontak</a><a href="bukoo-website.html">Privasi</a><a href="bantuan-pusat.html">Bantuan</a></div></div>
+  </div></footer>
+<script>
+
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+window.addEventListener('scroll',function(){var n=document.getElementById('navbar');if(n){if(window.scrollY>50)n.classList.add('scrolled');else n.classList.remove('scrolled');}});
+document.addEventListener('click',function(e){var q=e.target.closest('.faq-q');if(!q)return;var i=q.parentElement,a=q.nextElementSibling,open=i.classList.contains('open');if(open){i.classList.remove('open');a.style.maxHeight=null;}else{i.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}});
+document.addEventListener('submit',function(e){var f=e.target.closest('.demo-form');if(!f)return;e.preventDefault();var ok=f.querySelector('.form-ok');f.querySelectorAll('.fg,.form-submit').forEach(function(x){x.style.display='none';});if(ok){ok.style.display='block';ok.scrollIntoView({behavior:'smooth',block:'center'});}});
+
+
+var cur=1,total=4;
+var dots=document.querySelectorAll('#stepper .step-dot'),steps=document.querySelectorAll('.fstep');
+var btnPrev=document.getElementById('btnPrev'),btnNext=document.getElementById('btnNext');
+function render(){
+  steps.forEach(function(s){s.classList.toggle('on',+s.dataset.step===cur);});
+  dots.forEach(function(d){var n=+d.dataset.s;d.classList.toggle('active',n===cur);d.classList.toggle('done',n<cur);});
+  btnPrev.style.visibility=cur===1?'hidden':'visible';
+  btnNext.textContent=cur===total?'Kirim ke tim kurasi ✓':'Lanjut →';
+  if(cur===4){
+    document.getElementById('r_title').textContent=document.getElementById('f_title').value||'(belum diisi)';
+    document.getElementById('r_author').textContent=document.getElementById('f_author').value||'(belum diisi)';
+    document.getElementById('r_genre').textContent=document.getElementById('f_genre').value;
+  }
+}
+btnNext.addEventListener('click',function(){
+  if(cur<total){cur++;render();document.querySelector('.form-card').scrollIntoView({behavior:'smooth',block:'start'});}
+  else{document.querySelectorAll('.fstep').forEach(function(s){s.classList.remove('on');});document.getElementById('stepper').style.display='none';document.getElementById('stepBtns').style.display='none';document.getElementById('formOk').classList.add('show');}
+});
+btnPrev.addEventListener('click',function(){if(cur>1){cur--;render();}});
+render();
+
+</script></body></html>
