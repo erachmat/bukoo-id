@@ -1839,7 +1839,6 @@ a {
   height: 18px;
   object-fit: contain;
   display: block;
-} transition: all .2s;
 }
 
 .social-btn:hover {
