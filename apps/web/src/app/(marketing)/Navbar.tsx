@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -10,18 +10,37 @@ export default function Navbar() {
   const pathname = usePathname();
   const minimal = pathname === '/';
   const [scrolled, setScrolled] = useState(false);
+  const [hiddenOnScroll, setHiddenOnScroll] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuOpenRef = useRef(false);
+  const previousScrollY = useRef(0);
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
   const { status } = useSession();
 
   useEffect(() => {
+    let frame = 0;
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        const scrollingDown = currentScrollY > previousScrollY.current;
+
+        setScrolled(currentScrollY > 50);
+        setHiddenOnScroll(currentScrollY > 80 && scrollingDown && !mobileMenuOpenRef.current);
+        previousScrollY.current = currentScrollY;
+        frame = 0;
+      });
     };
-    window.addEventListener('scroll', handleScroll);
+
+    previousScrollY.current = window.scrollY;
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [mobileMenuOpen]);
 
   const handleSignOut = () => {
     signOut();
@@ -32,6 +51,7 @@ export default function Navbar() {
   };
 
   const closeMobileMenu = () => {
+    mobileMenuOpenRef.current = false;
     setMobileMenuOpen(false);
     setActiveMobileSub(null);
   };
@@ -58,7 +78,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`nav ${minimal ? 'minimal' : ''} ${scrolled ? 'scrolled' : ''}`} id="navbar">
+      <nav className={`nav ${minimal ? 'minimal' : ''} ${scrolled ? 'scrolled' : ''} ${hiddenOnScroll ? 'hidden-on-scroll' : ''}`} id="navbar">
         <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>
           <img src="/bukoo-logo.svg" alt="BUKOO" className="nav-logo-img" />
           <span>BUKOO</span>
@@ -156,7 +176,11 @@ export default function Navbar() {
           {renderAuthButtons()}
         </div>
 
-        {!minimal && <div className="nav-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        {!minimal && <div className="nav-mobile-menu" onClick={() => {
+          const nextOpen = !mobileMenuOpen;
+          mobileMenuOpenRef.current = nextOpen;
+          setMobileMenuOpen(nextOpen);
+        }}>
           {mobileMenuOpen ? (
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>

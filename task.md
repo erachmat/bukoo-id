@@ -1,9 +1,10 @@
 # Homepage bukoo.id Navbar Reference Match — 2026-09-10
 
 - `[x]` Homepage header is transparent over the hero image; non-home marketing nav behavior remains unchanged.
-- `[x]` Homepage `Masuk`/`Coba Gratis` styling matches the reference: centered controls, Playfair Display serif, 16px, 50px tall, 16px radius; outlined white login and filled gold CTA.
-- `[x]` Verified locally in browser at 1280px: transparent header, no border/backdrop, button geometry and computed styles match the target.
-- `[x]` Verification: shared-types/db builds, web typecheck, lint (0 errors, 31 pre-existing warnings), web tests 67/67. Local dev homepage returned HTTP 200.
+- `[x]` Homepage `Masuk`/`Coba Gratis` controls are right-aligned at desktop and mobile widths.
+- `[x]` Navbar hides with an animated upward transform after downward scrolling past 80px and reappears when scrolling upward; mobile drawer state keeps the nav visible.
+- `[ ]` Browser visual/scroll QA remains unavailable in this headless session; local dev homepage returned HTTP 200.
+- `[x]` Verification: web typecheck (with 2GB Node heap), lint (0 errors, 31 pre-existing warnings), web tests 67/67.
 
 # Homepage bukoo.id Visual Refinements — 2026-09-10
 

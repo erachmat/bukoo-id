@@ -199,11 +199,21 @@ a {
 
 .nav.minimal {
   height: 80px;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 28px 30px 0;
   background: transparent;
   backdrop-filter: none;
   border-bottom: 0;
+}
+
+.nav.hidden-on-scroll {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.nav {
+  transition: transform 0.24s ease, background 0.3s, backdrop-filter 0.3s;
+  will-change: transform;
 }
 
 .nav.minimal .nav-logo {
@@ -2164,6 +2174,7 @@ a {
 
   .nav.minimal {
     height: 78px;
+    justify-content: flex-end;
     padding: 24px 20px 0;
   }
 
