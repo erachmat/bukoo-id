@@ -1,12 +1,10 @@
 'use client'
 
-import { signOut } from '@/app/(auth)/actions'
-
 export function AccountSignOut() {
   return (
     <button
       type="button"
-      onClick={() => signOut()}
+      onClick={() => window.location.assign('/api/logout?redirectTo=%2F')}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

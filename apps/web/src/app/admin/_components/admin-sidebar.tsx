@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, BookText, Users, Settings, LogOut, Megaphone, Inbox } from 'lucide-react'
-import { signOut } from '@/app/(auth)/actions'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -77,7 +76,7 @@ export function AdminSidebar() {
       
       <div style={{ padding: '16px', borderTop: '1px solid var(--ad-border-soft)' }}>
         <button 
-          onClick={() => signOut()}
+          onClick={() => window.location.assign('/api/logout?redirectTo=%2F')}
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { signOut } from '@/app/(auth)/actions';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -43,7 +42,9 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   const handleSignOut = () => {
-    signOut();
+    // Route handlers control Set-Cookie headers reliably on Cloudflare Workers;
+    // Server Action sign-out can leave the JWT session cookie behind.
+    window.location.assign('/api/logout?redirectTo=%2F');
   };
 
   const toggleMobileSub = (key: string) => {

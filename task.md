@@ -1,3 +1,9 @@
+# Logout Reliability Across Customer/Admin UI — 2026-09-10
+
+- `[x]` Root cause: customer Navbar, account, and admin sign-out buttons still called the NextAuth Server Action, whose cookie expiry can be dropped on Cloudflare Workers; the deterministic `/api/logout` route already clears both secure/plain auth cookies.
+- `[x]` Updated all three UI surfaces to navigate through `/api/logout?redirectTo=%2F` so logout clears the JWT and returns to the public homepage.
+- `[x]` Verification: web typecheck passed, lint passed with 31 pre-existing warnings, 67/67 web tests passed, and the local logout endpoint returned `303`, homepage `Location`, `Cache-Control: no-store`, and four expiring `Set-Cookie` headers.
+
 # Homepage bukoo.id Navbar Reference Match — 2026-09-10
 
 - `[x]` Homepage header is transparent over the hero image; non-home marketing nav behavior remains unchanged.
