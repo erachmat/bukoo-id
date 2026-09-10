@@ -35,7 +35,7 @@
   overflow: hidden;
   background: var(--forest-dd);
 }
-.homepage-hero-image { object-fit: cover; object-position: center; z-index: -2; }
+.homepage-hero-image { object-fit: cover; object-position: 70% center; z-index: -2; }
 .homepage-hero-overlay { position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(8, 25, 19, .98) 0%, rgba(8, 25, 19, .84) 38%, rgba(8, 25, 19, .18) 78%), linear-gradient(0deg, rgba(8, 25, 19, .5), transparent 40%); }
 .homepage-hero .hero-content { width: min(620px, 100%); margin: 0 max(6vw, 24px); padding-top: 72px; }
 .homepage-hero .hero-h1 { font-size: clamp(46px, 6vw, 88px); line-height: .98; max-width: 650px; }
@@ -94,7 +94,7 @@
 .cta-price { color: var(--gold); font-weight: 700; margin-bottom: 20px; }
 @media (max-width: 768px) {
   .homepage-hero { min-height: 700px; align-items: flex-end; }
-  .homepage-hero-image { object-position: 64% center; }
+  .homepage-hero-image { object-position: 78% center; }
   .homepage-hero-overlay { background: linear-gradient(0deg, rgba(8, 25, 19, .98) 2%, rgba(8, 25, 19, .72) 58%, rgba(8, 25, 19, .18) 100%); }
   .homepage-hero .hero-content { margin: 0 24px; padding: 0 0 54px; }
   .homepage-hero .hero-h1 { font-size: clamp(42px, 13vw, 64px); }
@@ -233,8 +233,8 @@ a {
   background: transparent;
 }
 
-.nav.minimal:not(.scrolled) .btn-ghost,
-.nav.minimal:not(.scrolled) .btn-cta {
+.nav.minimal .btn-ghost,
+.nav.minimal .btn-cta {
   font-family: 'Playfair Display', serif;
   font-size: 16px;
   font-weight: 600;
@@ -244,25 +244,25 @@ a {
   padding: 0 28px;
 }
 
-.nav.minimal:not(.scrolled) .btn-ghost {
+.nav.minimal .btn-ghost {
   color: #fff;
   border: 2px solid rgba(255, 255, 255, 0.9);
   background: transparent;
 }
 
-.nav.minimal:not(.scrolled) .btn-ghost:hover {
+.nav.minimal .btn-ghost:hover {
   color: #fff;
   border-color: #fff;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.nav.minimal:not(.scrolled) .btn-cta {
+.nav.minimal .btn-cta {
   color: #fff;
   background: #D39A0A;
   border: 2px solid #D39A0A;
 }
 
-.nav.minimal:not(.scrolled) .btn-cta:hover {
+.nav.minimal .btn-cta:hover {
   color: #fff;
   background: #E0AA19;
   border-color: #E0AA19;
@@ -1816,7 +1816,8 @@ a {
 
 .social-row {
   display: flex;
-  gap: 10px;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 .social-btn {
@@ -1830,7 +1831,8 @@ a {
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
- 
+  transition: all .2s;
+}
 
 .social-btn img {
   width: 18px;
@@ -2182,8 +2184,8 @@ a {
     gap: 12px;
   }
 
-  .nav.minimal:not(.scrolled) .btn-ghost,
-  .nav.minimal:not(.scrolled) .btn-cta {
+  .nav.minimal .btn-ghost,
+  .nav.minimal .btn-cta {
     min-height: 46px;
     padding: 0 20px;
     font-size: 15px;

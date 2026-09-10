@@ -6,6 +6,13 @@
 - `[ ]` Browser visual/scroll QA remains unavailable in this headless session; local dev homepage returned HTTP 200.
 - `[x]` Verification: web typecheck (with 2GB Node heap), lint (0 errors, 31 pre-existing warnings), web tests 67/67.
 
+# Homepage Navbar, Hero Crop & Footer Spacing — 2026-09-10
+
+- `[x]` Keep homepage auth button typography, sizing, radius, and colors consistent in both initial and scrolled states.
+- `[x]` Reposition the responsive hero background toward the device mockup so mobile cropping preserves more of it.
+- `[x]` Increase homepage footer social icon spacing from the description and between buttons.
+- `[ ]` Browser visual QA remains unavailable in this headless session.
+
 # Homepage bukoo.id Visual Refinements — 2026-09-10
 
 - `[x]` 1. Assets: copied `bukoo-assistant-logo.png`, `green-checklist-icon.png`, `bukoo-ig-icon.png`, `bukoo-linkedin-icon.png` into `apps/web/public/homepage-assets/`.
