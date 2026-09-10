@@ -47,7 +47,9 @@
 .homepage-hero .hero-input-row { margin-left: 0; }
 .homepage-product-copy .homepage-eyebrow { text-transform: none; letter-spacing: .4px; font-size: 16px; font-weight: 700; color: var(--text); }
 .homepage-product-copy .homepage-eyebrow em { color: var(--gold); font-style: italic; }
-.homepage-eyebrow img { width: 22px; height: 22px; object-fit: contain; vertical-align: -5px; margin-right: 8px; }
+.homepage-eyebrow img { width: 42px; height: 28px; object-fit: contain; vertical-align: middle; margin-right: 10px; }
+.homepage-eyebrow .assistant-brand { display: inline-flex; align-items: center; gap: 0; }
+.homepage-eyebrow .assistant-brand > img { flex: 0 0 auto; }
 .homepage-product-copy .homepage-eyebrow .assistant-plain { font-weight: 400; font-style: normal; color: var(--text); }
 .homepage-intro, .homepage-product { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
 .homepage-intro { padding: 140px 0 96px; text-align: center; }

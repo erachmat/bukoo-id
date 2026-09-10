@@ -62,7 +62,7 @@ export function HomepageSections() {
       </section>
 
       <ProductSection
-        eyebrow={<><Image src="/homepage-assets/bukoo-assistant-logo.png" alt="" width={22} height={22} />Bukoo <span className="assistant-plain">Assistant</span></>}
+        eyebrow={<span className="assistant-brand"><Image src="/homepage-assets/bukoo-assistant-logo.png" alt="" width={42} height={28} /><span>Bukoo <span className="assistant-plain">Assistant</span></span></span>}
         title={<>Asisten baca yang<br /><em>mengenal seleramu</em></>}
         text="Lebih dari sekadar merekomendasikan buku — ia membangun peta baca personal, merangkum bab, dan menjawab pertanyaanmu tentang isi bacaan."
         bullets={assistantBullets}
