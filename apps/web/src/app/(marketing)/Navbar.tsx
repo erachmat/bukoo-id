@@ -58,7 +58,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`nav ${scrolled ? 'scrolled' : ''}`} id="navbar">
+      <nav className={`nav ${minimal ? 'minimal' : ''} ${scrolled ? 'scrolled' : ''}`} id="navbar">
         <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>
           <img src="/bukoo-logo.svg" alt="BUKOO" className="nav-logo-img" />
           <span>BUKOO</span>

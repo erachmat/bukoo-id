@@ -194,11 +194,69 @@ a {
   background: linear-gradient(180deg, rgba(10, 26, 21, 0.95) 0%, transparent 100%);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(201, 149, 42, 0.08);
-  transition: background 0.3s;
+  transition: background 0.3s, backdrop-filter 0.3s;
+}
+
+.nav.minimal {
+  height: 80px;
+  justify-content: center;
+  padding: 28px 30px 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: 0;
+}
+
+.nav.minimal .nav-logo {
+  display: none;
+}
+
+.nav.minimal .nav-right {
+  gap: 20px;
 }
 
 .nav.scrolled {
   background: rgba(10, 26, 21, 0.98);
+  backdrop-filter: blur(12px);
+}
+
+.nav.minimal:not(.scrolled) {
+  background: transparent;
+}
+
+.nav.minimal:not(.scrolled) .btn-ghost,
+.nav.minimal:not(.scrolled) .btn-cta {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  min-height: 50px;
+  border-radius: 16px;
+  padding: 0 28px;
+}
+
+.nav.minimal:not(.scrolled) .btn-ghost {
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+.nav.minimal:not(.scrolled) .btn-ghost:hover {
+  color: #fff;
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav.minimal:not(.scrolled) .btn-cta {
+  color: #fff;
+  background: #D39A0A;
+  border: 2px solid #D39A0A;
+}
+
+.nav.minimal:not(.scrolled) .btn-cta:hover {
+  color: #fff;
+  background: #E0AA19;
+  border-color: #E0AA19;
+  box-shadow: 0 8px 24px rgba(211, 154, 10, 0.32);
 }
 
 .nav-logo {
@@ -2101,7 +2159,24 @@ a {
 
   /* Navbar */
   .nav {
+    padding: 0 24px;
+  }
+
+  .nav.minimal {
+    height: 78px;
+    padding: 24px 20px 0;
+  }
+
+  .nav.minimal .nav-right {
+    gap: 12px;
+  }
+
+  .nav.minimal:not(.scrolled) .btn-ghost,
+  .nav.minimal:not(.scrolled) .btn-cta {
+    min-height: 46px;
     padding: 0 20px;
+    font-size: 15px;
+    border-radius: 15px;
   }
 
   .nav-links {
