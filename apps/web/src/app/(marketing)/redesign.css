@@ -199,8 +199,8 @@ a {
 
 .nav.minimal {
   height: 80px;
-  justify-content: flex-end;
-  padding: 28px 30px 0;
+  justify-content: space-between;
+  padding: 0 30px;
   background: transparent;
   backdrop-filter: none;
   border-bottom: 0;
@@ -217,7 +217,7 @@ a {
 }
 
 .nav.minimal .nav-logo {
-  display: none;
+  margin-top: 0;
 }
 
 .nav.minimal .nav-right {
@@ -2175,8 +2175,8 @@ a {
 
   .nav.minimal {
     height: 78px;
-    justify-content: flex-end;
-    padding: 24px 20px 0;
+    justify-content: space-between;
+    padding: 0 20px;
   }
 
   .nav.minimal .nav-right {
