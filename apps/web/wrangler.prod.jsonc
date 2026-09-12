@@ -24,10 +24,9 @@
   "observability": {
     "enabled": true
   },
-  // Keep workers.dev alive during the cutover window as an emergency fallback
-  // (Vercel is being decommissioned, so there's no other rollback). Set this
-  // to false after the bukoo.id smoke tests pass.
-  "workers_dev": true,
+  // workers.dev retired 2026-09-12 — bukoo.id smoke tests pass and Vercel is
+  // decommissioned, so the custom domains are the only ingress.
+  "workers_dev": false,
   // Production custom domain. Requires the bukoo.id zone to be active in the
   // same Cloudflare account (created in the dashboard, NS switched at the
   // registrar). Cloudflare auto-creates the DNS record + SSL cert for this
