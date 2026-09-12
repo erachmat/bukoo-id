@@ -770,8 +770,8 @@ Plan: `docs/superpowers/plans/2026-08-16-store-launch-option-a.md` · Spec: `doc
 - [x] 4. Smoke tests pass: home/login 200, credentials login → `/admin`, Google OAuth redirect to bukoo.id callback (authorized), SSL (Google Trust, CN=bukoo.id, → 2026-11-14).
 - [x] 5. Secrets purge: removed legacy `DATABASE_URL`/`BLOB_READ_WRITE_TOKEN` from `apps/web/.env` AND root `.env` (root .env is merged into the bundle by OpenNext), redeployed; 0 occurrences in bundle.
 - [x] 6. Removed `apps/web/vercel.json`; updated `.env.example`, `AGENTS.md`, regenerated `worker-configuration.d.ts` (`wrangler types --env-interface CloudflareEnv`).
-- [ ] 7. (user) Delete Vercel project in dashboard; confirm Neon DB no longer needed.
-- [ ] 8. (after final sign-off) Flip `workers_dev` to false in `wrangler.prod.jsonc` to retire the workers.dev URL.
+- [ ] 7. (user) Delete Vercel project in dashboard; confirm Neon DB no longer needed. — BLOCKED ON USER: no Vercel CLI or `VERCEL_TOKEN` exists on the server (checked 2026-09-12), so this must be done in the Vercel dashboard.
+- [x] 8. `workers_dev` flipped to `false` in `wrangler.prod.jsonc` (commit `b237693`, 2026-09-12) → deployed via `deploy-web.yml`; `bukoo-web.erachmat-dev.workers.dev` now returns 404 while `bukoo.id` (200) and `publisher.bukoo.id` (307) still serve. Preview worker `bukoo-web-preview` is a separate worker, unaffected.
 
 # Reader Bug Fixes — Medium/Low Cluster (2026-08-16)
 
