@@ -54,6 +54,35 @@ execute` with `--create-only` style review first, and validate generated SQL. Th
 4. The web app no longer uses Neon or `DATABASE_URL` — that var was removed from
    `apps/web/.env` (2026-08-16). `apps/api` may still use its own storage.
 
+## Demo publisher seed (`demo-publisher@bukoo.id`)
+
+The public showcase at `/publisher/dashboard` renders live data for a demo publisher
+account. The seed is a **deterministic SQL emitter** (no DB access) at
+`packages/db/src/seed-demo-publisher.ts` — same input ⇒ identical SQL ⇒ idempotent.
+
+**When to re-run:** after any schema migration that touches `books`, `users`,
+`publisher_book_daily_metrics`, `publisher_book_reader_days`,
+`publisher_book_country_metrics`, `notifications`, or `publisher_payouts` — the seed's
+`INSERT OR IGNORE`/upserts can go stale if columns change.
+
+**Re-run procedure (local):**
+1. `npx tsx packages/db/src/seed-demo-publisher.ts` → regenerates
+   `packages/db/sql/seed-demo-publisher.sql` + `...unseed....sql`.
+2. From `apps/web`: `npx wrangler d1 execute bukoo-db --local --file=packages/db/sql/seed-demo-publisher.sql`.
+3. Smoke check: demo dashboard renders all panels; run seed twice → identical counts (idempotency).
+
+**Re-run procedure (remote/prod):**
+1. Same step 1 as above (SQL must be regenerated, not reused from cache).
+2. From `apps/web`: `npx wrangler d1 execute bukoo-db --remote --file=packages/db/sql/seed-demo-publisher.sql`.
+3. Data seeding only — `migrate-d1.yml` is NOT involved.
+
+**Safety rules (enforced in the generator):**
+- NEVER emit `books_fts` DELETE/UPDATE statements (D1 throws SQLITE_ERROR 7500) — see FTS5
+  gotcha above. Unseed deletes only `demo-%` / `demo-reader-%` rows and leaves harmless
+  orphan FTS rows (the API search JOIN excludes them).
+- Deterministic PRNG (`PRNG_SEED = 20260828`) — do not introduce time/random inputs.
+- Verify unseed SQL after every regeneration: it must touch only `demo-%` rows.
+
 ## Environment
 - Copy `.env.example` → `.env` at repo root for local dev of the web app: `AUTH_SECRET`
   (`npx auth secret` to generate), `NEXT_PUBLIC_SITE_URL`. No `DATABASE_URL` needed —
