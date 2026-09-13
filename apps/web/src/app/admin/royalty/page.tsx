@@ -7,8 +7,11 @@ import {
   publisherRoyaltyPeriods,
   users as usersTable,
 } from '@bukoo/db';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { ClosePeriodForm } from './ClosePeriodForm';
+import { CreatePayoutForm } from './CreatePayoutForm';
+import { getAdminPayouts } from './payout-actions';
+import { PayoutTable } from './PayoutTable';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +61,25 @@ export default async function AdminRoyaltyPage() {
     if (prof.displayName) publisherNames.set(prof.userId, prof.displayName);
   }
 
+  // Periods ready for payout: CALCULATED without an existing payout
+  const payoutablePeriods = await db
+    .select({
+      id: publisherRoyaltyPeriods.id,
+      publisherUserId: publisherRoyaltyPeriods.publisherUserId,
+      periodStart: publisherRoyaltyPeriods.periodStart,
+      publisherShare: publisherRoyaltyPeriods.publisherShare,
+    })
+    .from(publisherRoyaltyPeriods)
+    .where(and(
+      eq(publisherRoyaltyPeriods.status, 'CALCULATED'),
+      // Left join to find periods without payout
+      sql`NOT EXISTS (SELECT 1 FROM publisher_payouts WHERE royalty_period_id = publisher_royalty_periods.id)`
+    ))
+    .orderBy(desc(publisherRoyaltyPeriods.periodStart));
+
+  // Payouts table data
+  const payouts = await getAdminPayouts();
+
   const fmtIdr = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
 
   return (
@@ -72,6 +94,38 @@ export default async function AdminRoyaltyPage() {
       <ClosePeriodForm
         publishers={publishers.map((p) => ({ id: p.id, label: publisherNames.get(p.id) || p.email, bookCount: Number(p.bookCount) }))}
       />
+
+      <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ad-text)', margin: '32px 0 12px' }}>
+        Buat payout dari periode CALCULATED
+      </h2>
+      {payoutablePeriods.length === 0 ? (
+        <p style={{ color: 'var(--ad-dim)', fontSize: 14 }}>Tidak ada periode CALCULATED yang belum dipayout.</p>
+      ) : (
+        <div style={{ background: 'var(--ad-panel)', padding: 16, borderRadius: 8, marginBottom: 24 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ textAlign: 'left', borderBottom: '1px solid #E5E9EE' }}>
+                <th style={{ padding: '10px 12px' }}>Penerbit</th>
+                <th style={{ padding: '10px 12px' }}>Periode</th>
+                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Bagian penerbit</th>
+                <th style={{ padding: '10px 12px' }}>Rekening aktif</th>
+                <th style={{ padding: '10px 12px' }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {payoutablePeriods.map((row) => (
+                <PayoutCreateRow
+                  key={row.id}
+                  period={row}
+                  publisherName={publisherNames.get(row.publisherUserId) || row.publisherUserId}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <PayoutTable payouts={payouts} />
 
       <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ad-text)', margin: '32px 0 12px' }}>
         Periode terkunci (20 terakhir)
@@ -118,5 +172,26 @@ export default async function AdminRoyaltyPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function PayoutCreateRow({
+  period,
+  publisherName,
+}: {
+  period: { id: string; publisherUserId: string; periodStart: string; publisherShare: number };
+  publisherName: string;
+}) {
+  return (
+    <tr style={{ borderBottom: '1px solid #F0F2F5' }}>
+      <td style={{ padding: '10px 12px', color: 'var(--ad-text)' }}>{publisherName}</td>
+      <td style={{ padding: '10px 12px', color: 'var(--ad-text)' }}>{period.periodStart.slice(0, 7)}</td>
+      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600, color: 'var(--ad-text)' }}>
+        Rp {period.publisherShare.toLocaleString('id-ID')}
+      </td>
+      <td style={{ padding: '10px 12px', color: 'var(--ad-dim)', fontSize: 13 }}>
+        <CreatePayoutForm periodId={period.id} />
+      </td>
+    </tr>
   );
 }
