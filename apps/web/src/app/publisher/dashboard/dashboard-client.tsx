@@ -326,7 +326,7 @@ function FunnelPanelFourStep({ overview, periodLabel }: { overview?: Overview; p
 function PremiumInsightsPanel({ insights }: { insights?: PublisherDashboardOverview['premiumInsights'] }) {
   const data = insights ?? { premiumBookCount: 0, books: [] };
   return (
-    <div className="pds-panel">
+    <div className="pds-panel pds-mb14">
       <div className="pds-panel-title">Potensi Premium <span className="tag">agregat · tanpa identitas pembaca</span></div>
       {data.premiumBookCount === 0 ? (
         <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--pds-muted)', fontSize: 12 }}>
