@@ -92,6 +92,13 @@
       "when": 1788085558625,
       "tag": "0012_clear_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1789264435310,
+      "tag": "0013_shallow_scalphunter",
+      "breakpoints": true
     }
   ]
 }

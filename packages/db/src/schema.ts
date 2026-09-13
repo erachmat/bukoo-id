@@ -740,6 +740,14 @@ export const publisherRoyaltyLines = sqliteTable(
     /** Rate in basis points (e.g. 6500 = 65%). */
     rateBps:          integer('rate_bps').notNull().default(0),
     grossAmount:      integer('gross_amount').notNull().default(0),
+    /** PPh 23 withholding tax (Indonesia) — rate in basis points, default 2300 = 23%. */
+    taxRateBps:       integer('tax_rate_bps').notNull().default(2300),
+    /** Taxable base amount (minor units). */
+    taxableAmount:    integer('taxable_amount').notNull().default(0),
+    /** Calculated tax amount (minor units). */
+    taxAmount:        integer('tax_amount').notNull().default(0),
+    /** 'PPh_23' | 'NONE' */
+    taxType:          text('tax_type').notNull().default('PPh_23'),
     netAmount:        integer('net_amount').notNull().default(0),
     /** JSON calculation metadata. */
     calcMeta:         text('calc_meta'),
