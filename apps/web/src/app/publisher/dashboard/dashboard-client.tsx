@@ -7,7 +7,7 @@ import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview, RhythmPoint } from "./queries";
 import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
 import { getCoverUrl } from "@/lib/cover-url";
-import { countryLabel } from "./metrics";
+import { countryLabel, getPeakBucket } from "./metrics";
 
 interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
@@ -706,8 +706,9 @@ function PageWaktu({ overview }: { overview?: Overview }) {
     bucket: DOW_LABELS[Number(d)],
     reads: dows.find((p) => p.bucket === d)?.reads ?? 0,
   }));
-  const peakHour = sortedHours.reduce((best, cur) => (cur.reads > best.reads ? cur : best), sortedHours[0]);
-  const totals = overview?.dailyTrend.reduce((acc, p) => ({ reads: acc.reads + p.reads, seconds: acc.seconds + p.seconds }), { reads: 0, seconds: 0 }) ?? { reads: 0, seconds: 0 };
+  const peakHour = getPeakBucket(sortedHours);
+  const peakHourLabel = peakHour && peakHour.reads > 0 ? `${peakHour.bucket}.00` : '—';
+  const totals = overview?.dailyTrend?.reduce((acc, p) => ({ reads: acc.reads + p.reads, seconds: acc.seconds + p.seconds }), { reads: 0, seconds: 0 }) ?? { reads: 0, seconds: 0 };
   const avgSession = totals.reads > 0 ? Math.round(totals.seconds / totals.reads / 60) : 0;
   return (
     <>
@@ -715,7 +716,7 @@ function PageWaktu({ overview }: { overview?: Overview }) {
       <div className="pds-kpi-row">
         <div className="pds-kpi teal"><div className="pds-kpi-label">Total Waktu Baca</div><div className="pds-kpi-num">{Math.round(totals.seconds / 3600).toLocaleString('id-ID')} jam</div><div className="pds-kpi-chg pds-flat">periode terpilih</div></div>
         <div className="pds-kpi amber"><div className="pds-kpi-label">Durasi Rata-rata Sesi</div><div className="pds-kpi-num">{avgSession} mnt</div><div className="pds-kpi-chg pds-flat">per read start</div></div>
-        <div className="pds-kpi sky"><div className="pds-kpi-label">Jam Puncak</div><div className="pds-kpi-num">{peakHour?.reads > 0 ? `${peakHour.bucket}.00` : '—'}</div><div className="pds-kpi-chg pds-flat">waktu lokal pembaca</div></div>
+        <div className="pds-kpi sky"><div className="pds-kpi-label">Jam Puncak</div><div className="pds-kpi-num">{peakHourLabel}</div><div className="pds-kpi-chg pds-flat">waktu lokal pembaca</div></div>
         <div className="pds-kpi mint"><div className="pds-kpi-label">Total Sesi</div><div className="pds-kpi-num">{totals.reads.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">read starts</div></div>
       </div>
       <div className="pds-panel pds-mb14">

@@ -1,3 +1,9 @@
+# Publisher dashboard empty-state time rhythm fix — 2026-09-13
+
+- `[ ]` 1. Root cause audit and empty-state guard for the Waktu Read peak-hour logic in `apps/web/src/app/publisher/dashboard/dashboard-client.tsx`.
+- `[ ]` 2. Regression coverage in `apps/web/src/app/publisher/dashboard/metrics.test.ts` for empty/zero-activity rhythm buckets.
+- `[ ]` 3. Verify the web workspace: `npm run typecheck --workspace=apps/web`, `npm run lint --workspace=apps/web`, and `npm run test --workspace=apps/web`.
+
 # Logout Reliability Across Customer/Admin UI — 2026-09-10
 
 - `[x]` Root cause: customer Navbar, account, and admin sign-out buttons still called the NextAuth Server Action, whose cookie expiry can be dropped on Cloudflare Workers; the deterministic `/api/logout` route already clears both secure/plain auth cookies.
@@ -18,9 +24,7 @@
 - `[x]` Reposition the responsive hero background toward the device mockup so mobile cropping preserves more of it.
 - `[x]` Increase homepage footer social icon spacing from the description and between buttons.
 - `[ ]` Browser visual QA remains unavailable in this headless session.
-
 # Homepage bukoo.id Visual Refinements — 2026-09-10
-
 - `[x]` 1. Assets: copied `bukoo-assistant-logo.png`, `green-checklist-icon.png`, `bukoo-ig-icon.png`, `bukoo-linkedin-icon.png` into `apps/web/public/homepage-assets/`.
 - `[x]` 2. Gold text token `--gold: #B58418` added to `:root`; repointed all homepage gold *accent text* (hero headline em + price, eyebrows, section h2 em, feature card h3, publisher band p, pricing teaser em/strong, cta-price, footer logo). Button backgrounds/borders keep `--amber`.
 - `[x]` 3. Hero + final CTA email field separated from its button (full 8px radius each, restored field right border, `gap: 12px` on `.hero-input-row` / `.cta-input-row`).

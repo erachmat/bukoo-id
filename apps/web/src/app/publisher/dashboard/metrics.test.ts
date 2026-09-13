@@ -7,6 +7,7 @@ import {
   bucketReaderLoyalty,
   dateInRange,
   getCurrentMonthStart,
+  getPeakBucket,
   getPeriodRange,
   getPreviousPeriodRange,
   normalizeCountryCode,
@@ -172,6 +173,12 @@ describe('publisher dashboard metrics', () => {
       ]),
     );
     expect(ranked.map((book) => book.id)).toEqual(['tie', 'hot', 'quiet']);
+  });
+
+  it('finds the peak active bucket and ignores empty or zero-activity ranges', () => {
+    expect(getPeakBucket([{ bucket: '00', reads: 5 }, { bucket: '01', reads: 9 }, { bucket: '02', reads: 3 }])).toEqual({ bucket: '01', reads: 9 });
+    expect(getPeakBucket([])).toBeUndefined();
+    expect(getPeakBucket([{ bucket: '00', reads: 0 }, { bucket: '01', reads: 0 }])).toBeUndefined();
   });
 
   it('buckets reader-day loyalty without demographic attributes', () => {

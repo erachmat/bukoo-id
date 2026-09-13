@@ -219,6 +219,12 @@ export interface LoyaltyBuckets {
   fivePlusDays: number;
 }
 
+export function getPeakBucket<T extends { bucket: string; reads: number }>(points: T[]): T | undefined {
+  const active = points.filter((point) => point.reads > 0);
+  if (active.length === 0) return undefined;
+  return active.reduce((best, current) => (current.reads > best.reads ? current : best));
+}
+
 export function bucketReaderLoyalty(dayCounts: number[]): LoyaltyBuckets {
   const buckets: LoyaltyBuckets = { oneDay: 0, twoToFourDays: 0, fivePlusDays: 0 };
   for (const days of dayCounts) {
