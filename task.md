@@ -992,3 +992,10 @@ Spec: docs/superpowers/specs/2026-08-30-cross-dashboard-polish-design.md · Plan
 - [x] Mobile: COLORS.ts gold→teal parity (single-point change, splash untouched, phone layout unchanged)
 - [x] Pushed `1a407e9`: web tsc/lint/67 tests ✅, api tsc/14 tests ✅, mobile tsc ✅
 - [ ] (user) Manual: CSV download click-through, admin visual pass, mobile accent check on dev build
+
+# Publisher Dashboard UI Antislop — 2026-09-13
+- [x] 1. Antislop-ui skill audit of publisher dashboard surface (dashboard-client, sidebar, topbar, shell, catalog-table): dominant tell = emoji-as-decoration (R-04), 30+ glyphs across panel titles, sidebar icons, buttons, badges
+- [x] 2. Removed all decorative emoji (📈🏆🎯💰🔔💎🧮🏦⏰📅🎂🏭🌏👥🗺️📉📥📕📕➕🚪✦★🏙️) from panel titles, KPI area, sidebar, buttons, notif icons, cover fallbacks
+- [x] 3. Removed decorative link arrows (Lihat semua →, Semua →, Detail →, Analitik →, Upload pertama →) per R-08
+- [x] 4. Topbar hamburger ☰/× → explicit "Menu"/"Tutup" text button; publisher badge ✦ ornament dropped; unverified "real-time" footer claim softened (R-38)
+- [x] 5. Quality gates: tsc clean, lint 0 errors (31 pre-existing warnings), 85/85 tests — pushed 0a05a8c
