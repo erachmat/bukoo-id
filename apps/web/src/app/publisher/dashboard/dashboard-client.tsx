@@ -117,14 +117,14 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
       {/* Trend + top books */}
       <div className="pds-grid pds-mb14" style={{ gridTemplateColumns: "1.6fr 1fr", alignItems: "start" }}>
         <div className="pds-panel">
-          <div className="pds-panel-title">📈 Tren Pembacaan<span className="tag">{periodLabel}</span></div>
+          <div className="pds-panel-title">Tren Pembacaan<span className="tag">{periodLabel}</span></div>
           <TrendChart trend={overview?.dailyTrend ?? []} />
           <div className="pds-chart-legend">
             <div className="pds-leg"><span className="sw" style={{ background: 'var(--pds-teal)' }} />Pembacaan (read starts)</div>
           </div>
         </div>
         <div className="pds-panel">
-          <div className="pds-panel-title">🏆 Top Buku Anda<button className="more" onClick={() => onTabChange("performa")}>Lihat semua →</button></div>
+          <div className="pds-panel-title">Top Buku Anda<button className="more" onClick={() => onTabChange("performa")}>Lihat semua</button></div>
           <div className="pds-tbl-scroll">
             <table className="pds-tbl">
               <tbody>
@@ -136,7 +136,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
                   overview!.topBooks.map((b, i) => (
                     <tr key={b.id}>
                       <td style={{ width: 24 }}><div className={`pds-rank ${i === 0 ? 'gold' : i < 3 ? 'silver' : 'bronze'}`}>{i + 1}</div></td>
-                      <td style={{ width: 34 }}><div className="pds-thumb">{b.coverKey ? <img src={getCoverUrl(b.coverKey)} alt="" /> : '📕'}</div></td>
+                      <td style={{ width: 34 }}><div className="pds-thumb">{b.coverKey ? <img src={getCoverUrl(b.coverKey)} alt="" /> : ''}</div></td>
                       <td><div className="t-main">{b.title}</div><div className="t-sub">{b.author}</div></td>
                       <td className="r"><div className="t-main num" style={{ color: "var(--pds-teal)" }}>{b.readCount.toLocaleString('id-ID')}</div><div className="t-sub">pembacaan</div></td>
                       <td className="r"><div className="t-main num">{Math.round(b.readSeconds / 60).toLocaleString('id-ID')} mnt</div><div className="t-sub">waktu baca</div></td>
@@ -162,7 +162,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
 
       {/* Notifications */}
       <div className="pds-panel">
-        <div className="pds-panel-title">🔔 Notifikasi Terbaru<button className="more" onClick={() => onTabChange("notifikasi")}>Semua →</button></div>
+        <div className="pds-panel-title">Notifikasi Terbaru<button className="more" onClick={() => onTabChange("notifikasi")}>Semua</button></div>
         <div className="pds-tbl-scroll">
           {(overview?.recentNotifications ?? []).length === 0 ? (
             <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: 12 }}>
@@ -171,8 +171,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
           ) : (
             overview!.recentNotifications.map((n) => (
               <div className={`pds-notif-item${n.read ? '' : ' unread'}`} key={n.id} style={{ cursor: 'default' }}>
-                <div className="pds-notif-ic" style={{ background: 'rgba(0,201,167,0.14)' }}>🔔</div>
-                <div className="pds-notif-body">
+                                <div className="pds-notif-body">
                   <div className="pds-notif-t">{n.title}</div>
                   <div className="pds-notif-d">{n.body}</div>
                   <div className="pds-notif-time">{new Date(n.createdAt).toLocaleString('id-ID')}</div>
@@ -204,7 +203,7 @@ function GenrePanel({ overview }: { overview?: Overview }) {
   const gradient = segments.map((s) => `${s.color} ${s.from.toFixed(1)}% ${s.to.toFixed(1)}%`).join(', ');
   return (
     <div className="pds-panel">
-      <div className="pds-panel-title">🎯 Distribusi Genre<span className="tag">reader-days</span></div>
+      <div className="pds-panel-title">Distribusi Genre<span className="tag">reader-days</span></div>
       {top.length === 0 ? (
         <div className="pds-empty">Belum ada data — lengkapi genre pada metadata judul.</div>
       ) : (
@@ -232,7 +231,7 @@ function DemographicsPanel({ overview }: { overview?: Overview }) {
   const known = demo?.knownCount ?? 0;
   return (
     <div className="pds-panel">
-      <div className="pds-panel-title">👥 Demografi<span className="tag">agregat anonim</span></div>
+      <div className="pds-panel-title">Demografi<span className="tag">agregat anonim</span></div>
       {!demo || known === 0 ? (
         <div className="pds-empty">Belum ada data demografi pembaca.</div>
       ) : (
@@ -269,7 +268,7 @@ function GeoPanelCompact({ overview, onTabChange }: { overview?: Overview; onTab
   const top = geo.slice(0, 5);
   return (
     <div className="pds-panel">
-      <div className="pds-panel-title">🗺️ Sebaran<button className="more" onClick={() => onTabChange('geo')}>Detail →</button></div>
+      <div className="pds-panel-title">Sebaran<button className="more" onClick={() => onTabChange('geo')}>Detail</button></div>
       {top.length === 0 ? (
         <div className="pds-empty">Belum ada data geografis.</div>
       ) : (
@@ -302,7 +301,7 @@ function FunnelPanelFourStep({ overview, periodLabel }: { overview?: Overview; p
   ];
   return (
     <div className="pds-panel pds-mb14">
-      <div className="pds-panel-title">📉 Corong Keterlibatan<span className="tag">{periodLabel}{funnel?.hasProgressData ? ' · estimasi dari progres baca' : ''}</span></div>
+      <div className="pds-panel-title">Corong Keterlibatan<span className="tag">{periodLabel}{funnel?.hasProgressData ? ' · estimasi dari progres baca' : ''}</span></div>
       {opened === 0 ? (
         <div className="pds-empty">Belum ada aktivitas baca pada periode ini.</div>
       ) : (
@@ -328,7 +327,7 @@ function PremiumInsightsPanel({ insights }: { insights?: PublisherDashboardOverv
   const data = insights ?? { premiumBookCount: 0, books: [] };
   return (
     <div className="pds-panel">
-      <div className="pds-panel-title">💎 Potensi Premium <span className="tag">agregat · tanpa identitas pembaca</span></div>
+      <div className="pds-panel-title">Potensi Premium <span className="tag">agregat · tanpa identitas pembaca</span></div>
       {data.premiumBookCount === 0 ? (
         <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--pds-muted)', fontSize: 12 }}>
           Belum ada buku premium. Tetapkan tier akses premium pada judul untuk melihat potensi konversi.
@@ -421,7 +420,7 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
       <div className="pds-page-head">
         <div><div className="pds-page-title">Royalti</div><div className="pds-page-sub">Estimasi berbasis data baca · {overview?.period.label ?? 'Bulan ini'} · nilai final dihitung dari settlement resmi</div></div>
         <div className="pds-head-actions">
-          <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>📥 Unduh CSV</a>
+          <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>Unduh CSV</a>
         </div>
       </div>
       <div className="pds-kpi-row">
@@ -431,7 +430,7 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
       </div>
       <div className="pds-grid pds-mb14" style={{ gridTemplateColumns: '1.5fr 1fr', alignItems: 'start' }}>
         <div className="pds-panel">
-          <div className="pds-panel-title">💰 Estimasi Royalti per Judul<span className="tag">proporsional dari waktu baca</span></div>
+          <div className="pds-panel-title">Estimasi Royalti per Judul<span className="tag">proporsional dari waktu baca</span></div>
           <div className="pds-tbl-scroll">
             <table className="pds-tbl">
               <thead><tr><th>Judul</th><th className="r">Pembacaan</th><th className="r">Waktu Baca</th><th className="r">Selesai</th><th className="r">Estimasi Royalti</th></tr></thead>
@@ -458,7 +457,7 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
           </div>
         </div>
         <div className="pds-panel">
-          <div className="pds-panel-title">🧮 Cara Estimasi Dihitung</div>
+          <div className="pds-panel-title">Cara Estimasi Dihitung</div>
           <div style={{ background: 'rgba(201,149,42,0.05)', border: '1px solid rgba(201,149,42,0.16)', borderRadius: 10, padding: 14, fontSize: 10.5, color: 'var(--pds-dim2)', lineHeight: 1.8 }}>
             <div><b style={{ color: '#fff' }}>Royalti estimasi</b> = waktu baca periode × Rp 10/jam × rate penerbit</div>
             <div style={{ borderTop: '1px solid var(--pds-border-soft)', margin: '8px 0', paddingTop: 8, color: 'var(--pds-muted)' }}>
@@ -468,7 +467,7 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
         </div>
       </div>
       <div className="pds-panel">
-        <div className="pds-panel-title">🏦 Riwayat settlement <span className="tag">ledger manual · bukan transfer langsung</span></div>
+        <div className="pds-panel-title">Riwayat settlement <span className="tag">ledger manual · bukan transfer langsung</span></div>
         <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Tanggal</th><th>Status</th><th className="r">Jumlah</th><th>Referensi</th></tr></thead><tbody>{(overview?.payouts ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada settlement.</td></tr> : overview!.payouts.map((payout) => <tr key={payout.id}><td>{new Date(payout.createdAt).toLocaleDateString('id-ID')}</td><td>{payout.status}</td><td className="r num">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</td><td>{payout.externalRef || '—'}</td></tr>)}</tbody></table></div>
       </div>
     </>
@@ -479,7 +478,7 @@ function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: Pub
   const stats = (overview?.bookStats ?? []).slice().sort((a, b) => b.reads - a.reads || b.lifetimeReads - a.lifetimeReads);
   return <>
     <div className="pds-page-head"><div><div className="pds-page-title">Performa Buku</div><div className="pds-page-sub">Pembacaan, waktu baca & penyelesaian per judul · {overview?.period.label ?? 'periode terpilih'}</div></div>
-      <div className="pds-head-actions"><a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>📥 Unduh CSV</a></div>
+      <div className="pds-head-actions"><a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>Unduh CSV</a></div>
     </div>
     <div className="pds-panel">
       <div className="pds-tbl-scroll">
@@ -499,7 +498,7 @@ function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: Pub
                   <td className="r num" style={{ color: completionPct >= 50 ? 'var(--pds-teal)' : 'var(--pds-amber-lt)' }}>{completionPct}%</td>
                   <td className="r num">{b.lifetimeReads.toLocaleString('id-ID')}</td>
                   <td className="c"><span className={`pds-chip ${b.isPublished ? 'pds-chip-live' : 'pds-chip-draft'}`}><span className="pds-dotk" />{b.isPublished ? 'Aktif' : 'Belum aktif'}</span></td>
-                  <td className="c"><Link href={`/publisher/books/${b.id}/analytics`} style={{ color: 'var(--pds-teal)', textDecoration: 'none', fontWeight: 600 }}>Analitik →</Link></td>
+                  <td className="c"><Link href={`/publisher/books/${b.id}/analytics`} style={{ color: 'var(--pds-teal)', textDecoration: 'none', fontWeight: 600 }}>Analitik</Link></td>
                 </tr>
               );
             })}
@@ -518,7 +517,7 @@ function PageGeo({ overview }: { overview?: Overview }) {
     <div className="pds-page-head"><div><div className="pds-page-title">Sebaran Geografis</div><div className="pds-page-sub">Negara & kota pembaca · {overview?.period.label ?? 'periode terpilih'} · tanpa IP/alamat</div></div></div>
     <div className="pds-grid pds-mb14 pds-grid-2col">
       <div className="pds-panel">
-        <div className="pds-panel-title">🌏 Negara<span className="tag">reader-days</span></div>
+        <div className="pds-panel-title">Negara<span className="tag">reader-days</span></div>
         {geo.length === 0 ? <div className="pds-empty">Belum ada data geografis.</div> : geo.slice(0, 10).map((row, i) => (
           <div className="pds-geo-row" key={row.countryCode}>
             <div className="pds-geo-label">{countryLabel(row.countryCode)}</div>
@@ -529,7 +528,7 @@ function PageGeo({ overview }: { overview?: Overview }) {
         <div className="pds-chart-legend"><div className="pds-leg">% dari total reader-days</div></div>
       </div>
       <div className="pds-panel">
-        <div className="pds-panel-title">🏙️ Kota Pembaca<span className="tag">self-reported · agregat anonim</span></div>
+        <div className="pds-panel-title">Kota Pembaca<span className="tag">self-reported · agregat anonim</span></div>
         {cities.length === 0 ? <div className="pds-empty">Belum ada data kota.</div> : cities.slice(0, 10).map((row, i) => (
           <div className="pds-geo-row" key={row.city}>
             <div className="pds-geo-label">{row.city}</div>
@@ -564,7 +563,7 @@ function PagePembaca({ overview }: { overview?: Overview }) {
       <div className="pds-kpi coral"><div className="pds-kpi-label">Pembaca Sekali</div><div className="pds-kpi-num">{loyalty.oneDay.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">peluang retensi</div></div>
     </div>
     <div className="pds-panel pds-mb14">
-      <div className="pds-panel-title">📉 Corong Keterlibatan{funnel?.hasProgressData ? <span className="tag">estimasi dari progres baca</span> : <span className="tag">read starts vs completions</span>}</div>
+      <div className="pds-panel-title">Corong Keterlibatan{funnel?.hasProgressData ? <span className="tag">estimasi dari progres baca</span> : <span className="tag">read starts vs completions</span>}</div>
       {opened === 0 ? <div className="pds-empty">Belum ada aktivitas baca pada periode ini.</div> : steps.map((step) => (
         <div key={step.label}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
@@ -644,7 +643,7 @@ function PageDemografi({ overview }: { overview?: Overview }) {
       </div>
       <div className="pds-grid pds-mb14 pds-grid-2col">
         <div className="pds-panel">
-          <div className="pds-panel-title">🎂 Kelompok Usia<span className="tag">agregat anonim</span></div>
+          <div className="pds-panel-title">Kelompok Usia<span className="tag">agregat anonim</span></div>
           {!demo || known === 0 ? <div className="pds-empty">Belum ada data demografi pembaca.</div> : demo.ageGroups.filter((a) => a.count > 0).map((a, i) => (
             <div className="pds-demo-row" key={a.label}>
               <div className="pds-demo-lab">{a.label} th</div>
@@ -654,7 +653,7 @@ function PageDemografi({ overview }: { overview?: Overview }) {
           ))}
         </div>
         <div className="pds-panel">
-          <div className="pds-panel-title">🏭 Kota Pembaca<span className="tag">self-reported · agregat</span></div>
+          <div className="pds-panel-title">Kota Pembaca<span className="tag">self-reported · agregat</span></div>
           {cities.length === 0 ? <div className="pds-empty">Belum ada data kota.</div> : cities.map((c, i) => (
             <div className="pds-geo-row" key={c.city}>
               <div className="pds-geo-label">{c.city}</div>
@@ -665,7 +664,7 @@ function PageDemografi({ overview }: { overview?: Overview }) {
         </div>
       </div>
       <div className="pds-panel">
-        <div className="pds-panel-title">🌏 Negara<span className="tag">ISO kode · tanpa IP</span></div>
+        <div className="pds-panel-title">Negara<span className="tag">ISO kode · tanpa IP</span></div>
         {geo.length === 0 ? <div className="pds-empty">Belum ada data negara.</div> : geo.slice(0, 6).map((g, i) => (
           <div className="pds-geo-row" key={g.countryCode}>
             <div className="pds-geo-label">{countryLabel(g.countryCode)}</div>
@@ -720,11 +719,11 @@ function PageWaktu({ overview }: { overview?: Overview }) {
         <div className="pds-kpi mint"><div className="pds-kpi-label">Total Sesi</div><div className="pds-kpi-num">{totals.reads.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">read starts</div></div>
       </div>
       <div className="pds-panel pds-mb14">
-        <div className="pds-panel-title">⏰ Ritme Jam<span className="tag">jam terakhir dibaca (00–23)</span></div>
+        <div className="pds-panel-title">Ritme Jam<span className="tag">jam terakhir dibaca (00–23)</span></div>
         {hours.length === 0 ? <div className="pds-empty">Belum ada data ritme jam.</div> : <RhythmBars points={sortedHours} highlight={(b) => b === peakHour?.bucket} />}
       </div>
       <div className="pds-panel">
-        <div className="pds-panel-title">📅 Ritme Mingguan<span className="tag">baca per hari</span></div>
+        <div className="pds-panel-title">Ritme Mingguan<span className="tag">baca per hari</span></div>
         {dows.length === 0 ? <div className="pds-empty">Belum ada data ritme mingguan.</div> : <RhythmBars points={sortedDows} highlight={(b) => b === 'Sab' || b === 'Min'} />}
       </div>
     </>

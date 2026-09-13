@@ -26,7 +26,7 @@ export default async function PublisherBooksPage() {
         </div>
         <div className="pds-head-actions">
           <Link href="/publisher/books/new" className="pds-btn pds-btn-primary">
-            ➕ Upload Buku Baru
+            Upload Buku Baru
           </Link>
         </div>
       </div>

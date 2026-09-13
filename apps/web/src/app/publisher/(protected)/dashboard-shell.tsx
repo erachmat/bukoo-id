@@ -66,7 +66,7 @@ export function DashboardShell({
           </div>
           <div className="pds-foot">
             <div className="pds-fnote">
-              Portal Penerbit BUKOO · Data real-time dari katalog dan aktivitas baca.
+              Portal Penerbit BUKOO · Data dari katalog dan aktivitas baca Anda.
               <br />© 2026 PT BUKOO DIGITAL INDONESIA · Publisher Portal
             </div>
           </div>

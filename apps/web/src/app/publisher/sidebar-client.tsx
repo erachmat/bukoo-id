@@ -14,25 +14,25 @@ interface SidebarProps {
 }
 
 const analyticsNav = [
-  { id: "overview",   label: "Overview",           icon: "📊" },
-  { id: "performa",   label: "Performa Buku",      icon: "📈" },
-  { id: "royalti",    label: "Royalti",            icon: "💰" },
-  { id: "pembaca",    label: "Pembaca",            icon: "👥" },
-  { id: "waktu",      label: "Waktu Baca",         icon: "⏱️" },
-  { id: "demografi",  label: "Demografi",          icon: "🧬" },
-  { id: "geo",        label: "Sebaran Geografis",  icon: "🌏" },
-  { id: "metadata",   label: "Metadata",           icon: "📝" },
+  { id: "overview",   label: "Overview" },
+  { id: "performa",   label: "Performa Buku" },
+  { id: "royalti",    label: "Royalti" },
+  { id: "pembaca",    label: "Pembaca" },
+  { id: "waktu",      label: "Waktu Baca" },
+  { id: "demografi",  label: "Demografi" },
+  { id: "geo",        label: "Sebaran Geografis" },
+  { id: "metadata",   label: "Metadata" },
 ];
 
 const contentNav = [
-  { id: "katalog",   label: "Katalog",        icon: "📚", href: "/publisher/books" },
-  { id: "upload",    label: "Upload Buku",    icon: "➕", href: "/publisher/books/new" },
-  { id: "promosi",   label: "Promosi",         icon: "📣", href: "/publisher/promotions" },
+  { id: "katalog",   label: "Katalog", href: "/publisher/books" },
+  { id: "upload",    label: "Upload Buku", href: "/publisher/books/new" },
+  { id: "promosi",   label: "Promosi", href: "/publisher/promotions" },
 ];
 
 const accountNav = [
-  { id: "pengaturan",  label: "Pengaturan",    icon: "⚙️", href: "/publisher/settings" },
-  { id: "notifikasi",  label: "Notifikasi",    icon: "🔔", href: "/publisher/notifications" },
+  { id: "pengaturan",  label: "Pengaturan", href: "/publisher/settings" },
+  { id: "notifikasi",  label: "Notifikasi", href: "/publisher/notifications" },
 ];
 
 export function PublisherSidebar({ user: _user, activeTab, onTabChange }: SidebarProps) {
@@ -48,21 +48,19 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
     });
   };
 
-  const renderItem = (item: { id: string; label: string; icon: string; href?: string; badge?: string }) => {
+  const renderItem = (item: { id: string; label: string; href?: string; badge?: string }) => {
     const isActive = item.href ? pathname === item.href : activeTab === item.id;
     const cls = `pds-side-item${isActive ? " active" : ""}`;
 
     if (item.href) {
       return (
         <Link key={item.id} href={item.href} className={cls}>
-          <span className="pds-side-icon">{item.icon}</span>
           {item.label}
         </Link>
       );
     }
     return (
       <button key={item.id} className={cls} onClick={() => onTabChange(item.id)}>
-        <span className="pds-side-icon">{item.icon}</span>
         {item.label}
         {item.badge && <span className="pds-side-badge">{item.badge}</span>}
       </button>
@@ -107,7 +105,7 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
             opacity: isSigningOut ? 0.6 : 1,
           }}
         >
-          🚪 {isSigningOut ? "Keluar..." : "Keluar"}
+          {isSigningOut ? "Keluar..." : "Keluar"}
         </button>
       </div>
     </aside>

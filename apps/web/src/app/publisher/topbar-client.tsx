@@ -96,7 +96,7 @@ export function PublisherTopbar({
           aria-controls="publisher-mobile-nav"
           onClick={() => setMobileNavOpen((open) => !open)}
         >
-          {mobileNavOpen ? "×" : "☰"}
+          {mobileNavOpen ? "Tutup" : "Menu"}
         </button>
         {mobileNavOpen && (
           <nav id="publisher-mobile-nav" className="pds-mobile-nav" aria-label="Navigasi penerbit">
@@ -115,7 +115,7 @@ export function PublisherTopbar({
         )}
       </div>
       <div className="pds-tb-right">
-        <div className="pds-pub-badge">✦ {publisherName}</div>
+        <div className="pds-pub-badge">{publisherName}</div>
         <div ref={avatarWrapRef} style={{ position: "relative" }}>
           <button
             className="pds-avatar"
@@ -148,7 +148,7 @@ export function PublisherTopbar({
                   });
                 }}
               >
-                🚪 {isSigningOut ? "Keluar..." : "Keluar"}
+                {isSigningOut ? "Keluar..." : "Keluar"}
               </button>
             </div>
           )}
