@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookText, Users, Settings, LogOut, Megaphone, Inbox } from 'lucide-react'
+import { LayoutDashboard, BookText, Users, Settings, LogOut, Megaphone, Inbox, Wallet } from 'lucide-react'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -11,6 +11,7 @@ export function AdminSidebar() {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Kelola Buku', href: '/admin/books', icon: BookText },
     { name: 'Pengguna', href: '/admin/users', icon: Users },
+    { name: 'Royalti', href: '/admin/royalty', icon: Wallet },
     { name: 'Kampanye', href: '/admin/campaigns', icon: Megaphone },
     { name: 'Pengajuan Buku', href: '/admin/submissions', icon: Inbox },
     { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
