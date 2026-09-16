@@ -46,7 +46,7 @@ export default function PublisherDaftarPage() {
             </div>
             <div className="dp-m">
               <div className="dp-m-n">
-                60&ndash;70<small>%</small>
+                60&ndash;65<small>%</small>
               </div>
               <div className="dp-m-l">Bagi hasil revenue digital untuk penerbit mitra</div>
             </div>
