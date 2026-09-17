@@ -1014,3 +1014,16 @@ Spec: docs/superpowers/specs/2026-08-30-cross-dashboard-polish-design.md · Plan
 - [x] 3. Removed decorative link arrows (Lihat semua →, Semua →, Detail →, Analitik →, Upload pertama →) per R-08
 - [x] 4. Topbar hamburger ☰/× → explicit "Menu"/"Tutup" text button; publisher badge ✦ ornament dropped; unverified "real-time" footer claim softened (R-38)
 - [x] 5. Quality gates: tsc clean, lint 0 errors (31 pre-existing warnings), 85/85 tests — pushed 0a05a8c
+
+# Publisher Landing Redesign (publisher.bukoo.id home) — 2026-09-17
+Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/bukoo-redesign/design_spec.md` + `regions_spec.md`
+- [x] Full verbatim transcription of the new design: every section, heading, card, list item, form label, footer link + hex colours, font sizes, radii, spacing
+- [x] Palette established: warm ochre `#C88C22` / cream `#FAF5EB` / deep forest `#1E352B` / terracotta `#B9441B`; card accents mint `#4DB885`, amber `#C89B48`, coral `#E27D60` (NOT the old teal/green)
+- [x] Hero photo matched to existing asset `public/homepage-assets/hero01.png` (5120x2048 = 4x of the design's 1280x512 crop; mean-abs-diff 24 vs 55 for other candidates) — no new asset needed
+- [x] Rewrote `apps/web/src/app/publisher/daftar/{page.tsx,DaftarForm.tsx}` + new `{landing.css,LandingNav.tsx,LandingFooter.tsx,icons.tsx}`; all styles scoped `.bl-*`
+- [x] Deliberately left shared `components/publisher/PublisherNav.tsx` + `publisher.css` untouched (royalti/submit/panduan/dashboard import them) so the redesign is landing-only
+- [x] Form still calls the existing `submitPublisherLead` server action unchanged
+- [x] Quality gates: `next build` clean (x3), `tsc --noEmit` clean, eslint clean, vitest 85/85
+- [x] Live DOM verification of the built app: 6 sections in spec order, 4 flywheel cards, 3 value cards, 9 checks, both footer columns; computed styles match spec; no horizontal overflow at 320/390/768/1440
+- [x] All 78 spec strings present verbatim; zero stale copy
+- [ ] (user) Visual pass against the design screenshots before deploy
