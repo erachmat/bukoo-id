@@ -1,3 +1,14 @@
+# Publisher Homepage Redesign (publisher.bukoo.id) — 2026-09-17
+
+- `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-09-17-publisher-homepage-redesign-design.md`, plan `docs/superpowers/plans/2026-09-17-publisher-homepage-redesign.md`, ledger `.superpowers/sdd/publisher-homepage-redesign/progress.md`. User-approved ("Start implementation").
+- `[x]` 2. Hero asset: `new-homepage-assets/publisher-hero.png` (5120×2048, 9.7MB) down-converted to `publisher-hero.jpg` (2560×1024, 167KB) + `publisher-hero@1280.jpg` (1280×512, 55KB) — replaced the old hero photos, oversized PNG not shipped. Zero markup change needed (paths already matched).
+- `[x]` 3. Composition: cream/dark alternating bands per the reference; hero reduced to one primary CTA; metrics moved from hero into the new cream intro band; flywheel cards restyled with inline SVG icons (replacing `01 · JELAJAH` text); value cards inverted to dark-green with coloured top bars + numbered titles; form wrapped in an elevated card.
+- `[x]` 4. Preserved: all Indonesian copy, `DaftarForm`/`submitPublisherLead`, `LogoutMarkerCleanup`, `PublisherNav` destinations, `middleware.ts` host/auth routing, and every non-landing publisher page. No `--pds-*` rules touched.
+- `[x]` 5. Fixed en route: fixed-nav overlap on `#daftar`/`#nilai` anchors (`scroll-padding-top` + smooth scroll), nav link wrapping, and added `:focus-visible` rings for form controls/buttons.
+- `[x]` 6. Verification: web typecheck ✅, lint 0 errors (32 pre-existing warnings) ✅, tests 86/86 ✅, production build ✅. Browser QA at 1440/820/390px — correct grids, no horizontal overflow. Regression spot-check of `/publisher/dashboard`, `/publisher/login`, `/publisher/panduan` — 200, unaffected.
+- `[ ]` 7. Manual QA remaining: real-device browser check (iOS Safari / Android Chrome); optional further hero optimization (AVIF/WebP).
+- `[ ]` 8. Note (pre-existing, unrelated): lead-form submit 500s under plain `next dev` because `getDb()` needs `initOpenNextCloudflareForDev`; D1 binding is only present under `wrangler dev`. Behaviour unchanged by this work.
+
 # Publisher dashboard empty-state time rhythm fix — 2026-09-13
 
 - `[ ]` 1. Root cause audit and empty-state guard for the Waktu Read peak-hour logic in `apps/web/src/app/publisher/dashboard/dashboard-client.tsx`.

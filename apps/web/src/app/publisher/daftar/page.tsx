@@ -17,8 +17,16 @@ export default function PublisherDaftarPage() {
 
       {/* Hero Section */}
       <section className="phero">
-        <div className="phero-bg" />
-        <div className="phero-grid" />
+        <img
+          className="phero-photo"
+          src="/publisher-assets/publisher-hero.jpg"
+          srcSet="/publisher-assets/publisher-hero@1280.jpg 1280w, /publisher-assets/publisher-hero.jpg 2560w"
+          sizes="100vw"
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+        />
+        <div className="phero-scrim" />
         <div className="pub-wrap">
           <span className="eyebrow">Undangan Kerjasama Mitra Penerbit</span>
           <h1 className="ph-h1">
@@ -31,13 +39,26 @@ export default function PublisherDaftarPage() {
           </p>
           <div className="pub-hero-ctas">
             <a href="#daftar" className="btn-cta btn-lg">
-              Daftar sebagai penerbit &rarr;
-            </a>
-            <a href="#nilai" className="btn-ghost btn-lg">
-              Lihat nilai yang kami tawarkan
+              Daftar sebagai penerbit
             </a>
           </div>
-          <div className="dp-metrics">
+        </div>
+      </section>
+
+      {/* Intro Statement (light band) — metrics moved here from the hero */}
+      <section className="pub-sec light" id="nilai">
+        <div className="pub-wrap">
+          <div className="pub-sec-head center">
+            <h2 className="pub-h2-dk">
+              BUKOO bukan pesaing rak buku Penerbit
+              <br />
+              <em>kami etalasenya</em>
+            </h2>
+            <p className="pub-sec-desc-dk">
+              BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan sumber data yang selama ini tidak Anda miliki; bukan menggantikan rak buku, tapi mengisinya kembali.
+            </p>
+          </div>
+          <div className="dp-metrics light">
             <div className="dp-m">
               <div className="dp-m-n">
                 229<small> Jt</small>
@@ -63,15 +84,15 @@ export default function PublisherDaftarPage() {
       </section>
 
       {/* Menjawab Kekhawatiran (Flip Section) */}
-      <section className="pub-sec">
+      <section className="pub-sec alt">
         <div className="pub-wrap">
           <div className="pub-sec-head center">
-            <span className="eyebrow">Menjawab Kekhawatiran</span>
+            <span className="eyebrow">Mengapa Bergabung?</span>
             <h2 className="pub-h2">
-              Digital dan fisik <em>bukan lawan</em>
+              Digital dan fisik <em>bukan lawan.</em>
             </h2>
             <p className="pub-sec-desc">
-              Kami mendengar kekhawatiran ini dari setiap penerbit. Jadi mari kita hadapi langsung, dengan jujur.
+              BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan sumber data yang selama ini tidak Anda miliki; bukan menggantikan rak buku, tapi mengisinya kembali.
             </p>
           </div>
           <div className="flip">
@@ -99,12 +120,12 @@ export default function PublisherDaftarPage() {
       </section>
 
       {/* Mesin Penemuan (Flywheel Section) */}
-      <section className="pub-sec alt">
+      <section className="pub-sec">
         <div className="pub-wrap">
           <div className="pub-sec-head center">
-            <span className="eyebrow">Mesin Penemuan</span>
+            <span className="eyebrow">Mesin penemuan</span>
             <h2 className="pub-h2">
-              Bagaimana satu langganan digital <em>menghasilkan</em> penjualan fisik
+              Bagaimana satu langganan digital <em>menghasilkan penjualan fisik</em>
             </h2>
             <p className="pub-sec-desc">
               Akses ke ribuan judul bukan mengancam koleksi Anda &mdash; ia menjadi corong yang mengalirkan pembaca menuju keputusan membeli.
@@ -112,29 +133,49 @@ export default function PublisherDaftarPage() {
           </div>
           <div className="fw">
             <div className="fw-s">
-              <div className="fw-n">01 &middot; JELAJAH</div>
-              <h4>Pembaca menemukan</h4>
+              <div className="fw-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="13" height="13" rx="3" />
+                  <rect x="8" y="8" width="13" height="13" rx="3" />
+                </svg>
+              </div>
+              <h4>Pembaca Menemukan</h4>
               <p>
                 Pembaca yang tak akan pernah membeli buku Anda tanpa mencoba, kini menemukannya di katalog BUKOO &mdash; tanpa risiko finansial.
               </p>
             </div>
             <div className="fw-s">
-              <div className="fw-n">02 &middot; CINTA</div>
+              <div className="fw-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20s-6.5-4.2-8.4-8.1A4.6 4.6 0 0 1 12 6.7a4.6 4.6 0 0 1 8.4 5.2C18.5 15.8 12 20 12 20Z" />
+                  <path d="M2.5 2.5 21.5 21.5" />
+                </svg>
+              </div>
               <h4>Sebagian jatuh cinta</h4>
               <p>
                 Dari banyak yang mencicipi, sebagian menemukan buku yang benar-benar berarti bagi mereka. Ikatan emosional terbentuk.
               </p>
             </div>
             <div className="fw-s">
-              <div className="fw-n">03 &middot; MILIKI</div>
-              <h4>Mereka ingin memiliki</h4>
+              <div className="fw-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z" />
+                  <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5A2.5 2.5 0 0 1 4 20.5Z" />
+                </svg>
+              </div>
+              <h4>Mereka Ingin Memiliki</h4>
               <p>
                 Buku yang dicintai ingin dikoleksi secara fisik. Ini penjualan yang tidak akan terjadi tanpa penemuan.
               </p>
             </div>
             <div className="fw-s">
-              <div className="fw-n">04 &middot; SEBAR</div>
-              <h4>Lalu merekomendasikan</h4>
+              <div className="fw-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7.5 11a3 3 0 1 1 0-6c3.5 0 4.5 3 4.5 3s1-3 4.5-3a3 3 0 1 1 0 6c-3.8 0-4.5 3.2-4.5 3.2S11.3 11 7.5 11Z" />
+                  <path d="M8 17.5c1.5 2 4 2.5 4 2.5s2.5-.5 4-2.5" />
+                </svg>
+              </div>
+              <h4>Lalu Merekomendasikan</h4>
               <p>
                 Pembaca yang puas membicarakan buku Anda ke komunitas &mdash; memicu gelombang penemuan baru, dan siklus berputar lagi.
               </p>
@@ -143,23 +184,30 @@ export default function PublisherDaftarPage() {
         </div>
       </section>
 
-      {/* Yang Anda Dapatkan (Value Streams Section) */}
-      <section className="pub-sec" id="nilai">
+      {/* Yang Anda Dapatkan (Value Streams, light band) */}
+      <section className="pub-sec light">
         <div className="pub-wrap">
-          <div className="pub-sec-head">
-            <span className="eyebrow">Yang Anda Dapatkan</span>
-            <h2 className="pub-h2">
-              Tiga aliran nilai baru, <em>di luar</em> penjualan fisik
+          <div className="pub-sec-head center">
+            <span className="eyebrow dk">Mesin penemuan</span>
+            <h2 className="pub-h2-dk">
+              Tiga aliran nilai baru, <em>di luar penjualan fisik</em>
             </h2>
-            <p className="pub-sec-desc">
+            <p className="pub-sec-desc-dk">
               Kerjasama ini menambah tanpa mengurangi. Penjualan fisik Anda tetap berjalan &mdash; BUKOO membuka tiga sumber nilai yang selama ini tidak terjangkau.
             </p>
           </div>
           <div className="vs">
             <div className="vs-c a">
-              <div className="vs-ico">💸</div>
-              <div className="vs-k">Aliran 01</div>
-              <h3>Royalti digital berulang</h3>
+              <div className="vs-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2.5" y="6" width="19" height="12" rx="2.5" />
+                  <path d="M2.5 10h19" />
+                  <path d="M7 14.5h3" />
+                </svg>
+              </div>
+              <h3>
+                <span className="vs-k">1.</span> Royalti digital berulang
+              </h3>
               <p>
                 Setiap pembacaan menghasilkan royalti &mdash; pendapatan bulanan berulang yang dapat diprediksi, tanpa biaya cetak, gudang, atau retur.
               </p>
@@ -170,9 +218,17 @@ export default function PublisherDaftarPage() {
               </ul>
             </div>
             <div className="vs-c b">
-              <div className="vs-ico">🛒</div>
-              <div className="vs-k">Aliran 02</div>
-              <h3>Corong ke penjualan fisik</h3>
+              <div className="vs-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 4h2.2l2.3 10.5a1.6 1.6 0 0 0 1.6 1.3h7.6a1.6 1.6 0 0 0 1.6-1.3L19 7H5.4" />
+                  <circle cx="9" cy="19.5" r="1.3" />
+                  <circle cx="16" cy="19.5" r="1.3" />
+                  <path d="M12 8.5s-2.4-1.6-3.1-3A1.7 1.7 0 0 1 12 4.2a1.7 1.7 0 0 1 3.1 1.3c-.7 1.4-3.1 3-3.1 3Z" />
+                </svg>
+              </div>
+              <h3>
+                <span className="vs-k">2.</span> Corong ke penjualan fisik
+              </h3>
               <p>
                 BUKOO jadi kanal penemuan yang mengarahkan pembaca ke pembelian fisik &mdash; &ldquo;coba dulu, baru beli&rdquo; pada skala jutaan pembaca.
               </p>
@@ -183,9 +239,16 @@ export default function PublisherDaftarPage() {
               </ul>
             </div>
             <div className="vs-c c">
-              <div className="vs-ico">📊</div>
-              <div className="vs-k">Aliran 03</div>
-              <h3>Data perilaku pembaca</h3>
+              <div className="vs-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 20V11" />
+                  <path d="M12 20V5" />
+                  <path d="M18 20v-6" />
+                </svg>
+              </div>
+              <h3>
+                <span className="vs-k">3.</span> Data perilaku pembaca
+              </h3>
               <p>
                 Untuk pertama kalinya, lihat bagaimana pembaca berinteraksi dengan buku Anda &mdash; bukan sekadar angka penjualan di titik akhir.
               </p>
@@ -202,47 +265,12 @@ export default function PublisherDaftarPage() {
       {/* Ajukan Kerjasama (Registration Section) */}
       <section className="pub-sec alt" id="daftar">
         <div className="pub-wrap">
-          <div className="pub-sec-head">
-            <span className="eyebrow">Ajukan Kerjasama</span>
-            <h2 className="pub-h2">
-              Mulai jadi <em>mitra penerbit</em> BUKOO
-            </h2>
-            <p className="pub-sec-desc">
-              Isi pengajuan singkat ini. Tim kemitraan kami akan menghubungi Anda dalam 3 hari kerja untuk diskusi awal &mdash; tanpa komitmen.
-            </p>
-          </div>
           <div className="form-wrap">
             <div className="form-side">
-              <h3>Yang terjadi setelah Anda mendaftar</h3>
-              <p>Prosesnya ringan dan dipandu penuh oleh tim kami. Anda tidak butuh tim teknis.</p>
-              <div className="form-check">
-                <span>✓</span>
-                <div>
-                  <b>Diskusi awal (3 hari kerja)</b>
-                  <p>Kami pelajari katalog &amp; tujuan bisnis Anda.</p>
-                </div>
-              </div>
-              <div className="form-check">
-                <span>✓</span>
-                <div>
-                  <b>Kesepakatan tier &amp; jendela rilis</b>
-                  <p>Kontrak transparan, Anda pilih judul yang masuk.</p>
-                </div>
-              </div>
-              <div className="form-check">
-                <span>✓</span>
-                <div>
-                  <b>Onboarding katalog oleh tim BUKOO</b>
-                  <p>Anda cukup menyediakan berkas &amp; metadata.</p>
-                </div>
-              </div>
-              <div className="form-check">
-                <span>✓</span>
-                <div>
-                  <b>Tayang &amp; pantau via dashboard</b>
-                  <p>Buku Anda tampil untuk jutaan pembaca.</p>
-                </div>
-              </div>
+              <h2 className="form-side-h">
+                Mulai jadi <em>Mitra Kami</em>
+              </h2>
+              <p>Isi pengajuan singkat ini. Tim kemitraan kami akan menghubungi Anda dalam 3 hari kerja untuk diskusi awal &mdash; tanpa komitmen.</p>
               <div className="disc">
                 <b>Catatan.</b> Pengajuan ini bersifat non-mengikat dan gratis. Data Anda hanya dipakai untuk keperluan komunikasi kemitraan.
               </div>
