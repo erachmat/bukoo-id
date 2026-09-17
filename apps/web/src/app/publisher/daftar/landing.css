@@ -592,6 +592,8 @@
   .bl-form-card { padding: 44px; }
 }
 .bl-field { display: flex; flex-direction: column; }
+/* Stacking margin — for standalone (full-width) fields only. Inside .bl-row the
+   fields are grid columns sitting side by side, so they must stay top-aligned. */
 .bl-field + .bl-field { margin-top: 20px; }
 .bl-row {
   display: grid;
@@ -601,6 +603,9 @@
 }
 @media (min-width: 640px) {
   .bl-row { grid-template-columns: repeat(2, 1fr); }
+  /* Side-by-side columns: cancel the stacking margin so the left and right
+     labels/inputs line up (e.g. "Nama" with "Jabatan"). */
+  .bl-row > .bl-field + .bl-field { margin-top: 0; }
 }
 .bl-label {
   margin-bottom: 8px;
