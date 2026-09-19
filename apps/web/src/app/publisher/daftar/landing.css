@@ -16,8 +16,8 @@
   --bl-forest-deep: #122A22;
   --bl-forest-card: #1d2f2a;
   --bl-field:       #121e1b;
-  --bl-cream:       #FAF7F2;
-  --bl-cream-2:     #fbf6ed;
+  --bl-cream:       #FFF9EB;
+  --bl-cream-2:     #FFF9EB;
   --bl-gold:        #B58418;
   --bl-gold-hover:  #A07015;
   --bl-gold-2:      #C9952A;
@@ -39,7 +39,9 @@
 
 .bl-container {
   width: 100%;
-  max-width: 1240px;
+  /* 1192 - 2*32px padding = 1128px content, matching the Figma frames
+     (1280px frame, 76px gutters). */
+  max-width: 1192px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -449,7 +451,7 @@
 
 /* ───────────────────── E — Tiga aliran nilai ───────────────────── */
 .bl-e {
-  background: #faf4ea;
+  background: var(--bl-cream);
   padding: 80px 0;
 }
 .bl-e-head {
@@ -718,7 +720,8 @@
 }
 .bl-footer-inner {
   width: 100%;
-  max-width: 1240px;
+  /* 1224 - 2*48px padding = 1128px content, same column as .bl-container. */
+  max-width: 1224px;
   margin: 0 auto;
   padding: 0 24px;
 }
