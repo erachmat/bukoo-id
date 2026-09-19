@@ -10,19 +10,19 @@
   --font-playfair: "Playfair Display";
   --font-pjs:      "Plus Jakarta Sans";
 
-  --bl-forest:      #14241d;
+  --bl-forest:      #1E4035;
   --bl-forest-2:    #183427;
   --bl-forest-3:    #1f352b;
-  --bl-forest-deep: #13221e;
+  --bl-forest-deep: #122A22;
   --bl-forest-card: #1d2f2a;
   --bl-field:       #121e1b;
-  --bl-cream:       #faf5ea;
+  --bl-cream:       #FAF7F2;
   --bl-cream-2:     #fbf6ed;
-  --bl-gold:        #ba8829;
-  --bl-gold-hover:  #a77922;
-  --bl-gold-2:      #c8923c;
-  --bl-gold-3:      #ce9638;
-  --bl-gold-4:      #c78829;
+  --bl-gold:        #B58418;
+  --bl-gold-hover:  #A07015;
+  --bl-gold-2:      #C9952A;
+  --bl-gold-3:      #D4A33E;
+  --bl-gold-4:      #C9952A;
   --bl-terracotta:  #b74822;
   --bl-ink:         #183b2b;
   --bl-ink-2:       #12271d;
@@ -39,7 +39,7 @@
 
 .bl-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
 }

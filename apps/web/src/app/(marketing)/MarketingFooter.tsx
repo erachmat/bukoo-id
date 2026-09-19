@@ -20,11 +20,13 @@ export default function MarketingFooter() {
               <p className="footer-description">Platform langganan buku digital Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
             </>
           ) : (
-            <p className="footer-tagline">Platform langganan buku digital #1 Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
+            <p className="footer-tagline">Platform langganan buku digital Indonesia. Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
           )}
           <div className="social-row">
             <a className="social-btn" href="https://www.instagram.com/bukooid" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-ig-icon.png" alt="Instagram" /></a>
             <a className="social-btn" href="https://www.linkedin.com/company/bukoo-indonesia/" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-linkedin-icon.png" alt="LinkedIn" /></a>
+            <a className="social-btn" href="https://www.tiktok.com/@bukooid" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-tiktok-icon.png" alt="TikTok" /></a>
+            <a className="social-btn" href="https://www.youtube.com/@bukooid" target="_blank" rel="noopener noreferrer"><img src="/homepage-assets/bukoo-youtube-icon.png" alt="YouTube" /></a>
           </div>
         </div>
 
@@ -32,11 +34,11 @@ export default function MarketingFooter() {
           <>
             <div>
               <div className="footer-col-title">Perusahaan</div>
-              <ul className="footer-links"><li><Link href="/tentang">Tentang BUKOO</Link></li><li><Link href="/newsroom">Newsroom</Link></li><li><Link href="/kontak">Kontak</Link></li></ul>
+              <ul className="footer-links"><li><Link href="/">Homepage Pembaca</Link></li><li><Link href="/tentang">Tentang BUKOO</Link></li><li><Link href="/newsroom">Newsroom</Link></li><li><Link href="/kontak">Kontak</Link></li></ul>
             </div>
             <div>
               <div className="footer-col-title">Penerbit</div>
-              <ul className="footer-links"><li><a href="https://publisher.bukoo.id/publisher/daftar">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul>
+              <ul className="footer-links"><li><a href="https://publisher.bukoo.id/publisher/daftar">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/dashboard">Dashboard</a></li><li><a href="https://publisher.bukoo.id/publisher/submit">Submit judul</a></li><li><a href="https://publisher.bukoo.id/publisher/royalti">Kebijakan Royalti</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul>
             </div>
           </>
         ) : (

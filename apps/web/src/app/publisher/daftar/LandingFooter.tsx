@@ -25,7 +25,7 @@ const PUBLISHER = [
 const LEGAL = [
   { href: "/syarat-ketentuan", label: "Syarat & Ketentuan" },
   { href: "/privasi", label: "Privasi" },
-  { href: "/privasi#aksesibilitas", label: "Aksesibilita" },
+  { href: "/privasi#aksesibilitas", label: "Aksesibilitas" },
   { href: "/privasi#cookie", label: "Cookie" },
 ];
 
