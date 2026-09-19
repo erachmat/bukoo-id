@@ -17,7 +17,7 @@ export function LandingNav({ currentTab }: { currentTab?: string }) {
   return (
     <header className="bl-nav">
       <div className="bl-nav-left">
-        <Link href="/publisher/daftar" className="bl-nav-logo">
+        <Link href="/" className="bl-nav-logo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/bukoo-logo.svg" alt="" className="bl-nav-logo-mark" />
           <span className="bl-nav-logo-word">BUKOO</span>

@@ -51,9 +51,16 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
       return NextResponse.redirect(new URL("/publisher/dashboard", req.url))
     }
 
-    // Redirect root / to /publisher/daftar
+    // Serve the landing page at the bare publisher domain while keeping the
+    // URL as "/" — a rewrite, not a redirect. The page lives at
+    // /publisher/daftar because one worker serves both bukoo.id and
+    // publisher.bukoo.id, so "/" is already taken by the reader homepage.
+    // Redirecting here would expose the internal path on a domain that is
+    // already publisher-scoped (and split the page's SEO signal across two
+    // URLs). The <link rel="canonical"> on the landing page names "/" as the
+    // real URL so the two paths don't compete.
     if (pathname === "/") {
-      return NextResponse.redirect(new URL("/publisher/daftar", req.url))
+      return NextResponse.rewrite(new URL("/publisher/daftar", req.url))
     }
 
     // Redirect short paths like /daftar, /royalti, /panduan, /dashboard to /publisher/*

@@ -8,14 +8,14 @@ import {
 } from "./icons";
 
 const COMPANY = [
-  { href: "/", label: "Homepage Pembaca" },
+  { href: "https://bukoo.id/", label: "Homepage Pembaca" },
   { href: "/tentang", label: "Tentang BUKOO" },
   { href: "/newsroom", label: "Newsroom" },
   { href: "/kontak", label: "Kontak" },
 ];
 
 const PUBLISHER = [
-  { href: "/publisher/daftar", label: "Daftar Penerbit" },
+  { href: "/", label: "Daftar Penerbit" },
   { href: "/publisher/dashboard", label: "Dashboard" },
   { href: "/publisher/submit", label: "Submit judul" },
   { href: "/publisher/royalti", label: "Kebijakan Royalti" },

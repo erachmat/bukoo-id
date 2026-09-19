@@ -61,14 +61,14 @@ export default function MarketingFooter() {
             </div>
             <div>
               <div className="footer-col-title">Penerbit</div>
-              <ul className="footer-links"><li><a href="https://publisher.bukoo.id/publisher/daftar">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/dashboard">Dashboard</a></li><li><a href="https://publisher.bukoo.id/publisher/submit">Submit judul</a></li><li><a href="https://publisher.bukoo.id/publisher/royalti">Kebijakan Royalti</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul>
+              <ul className="footer-links"><li><a href="https://publisher.bukoo.id/">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/dashboard">Dashboard</a></li><li><a href="https://publisher.bukoo.id/publisher/submit">Submit judul</a></li><li><a href="https://publisher.bukoo.id/publisher/royalti">Kebijakan Royalti</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul>
             </div>
           </>
         ) : (
           <>
             <div><div className="footer-col-title">Produk</div><ul className="footer-links"><li><Link href="/koleksi">Koleksi Buku</Link></li><li><Link href="/ai-companion">Bukoo Assistant</Link></li><li><Link href="/komunitas">Komunitas</Link></li><li><Link href="/audiobook">Audiobook</Link></li><li><Link href="/pricing">Harga &amp; Paket</Link></li></ul></div>
             <div><div className="footer-col-title">Perusahaan</div><ul className="footer-links"><li><Link href="/tentang">Tentang BUKOO</Link></li><li><Link href="/karir">Karir</Link></li><li><Link href="/newsroom">Newsroom</Link></li><li><Link href="/kontak">Kontak</Link></li></ul></div>
-            <div><div className="footer-col-title">Untuk Penerbit</div><ul className="footer-links"><li><a href="https://publisher.bukoo.id/publisher/daftar">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul></div>
+            <div><div className="footer-col-title">Untuk Penerbit</div><ul className="footer-links"><li><a href="https://publisher.bukoo.id/">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul></div>
           </>
         )}
       </div>

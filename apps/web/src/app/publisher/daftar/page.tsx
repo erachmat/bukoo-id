@@ -20,6 +20,12 @@ export const metadata = {
   title: "BUKOO — Daftar Penerbit",
   description:
     "BUKOO bukan pesaing rak buku Anda — kami etalase yang memperkenalkan katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan sumber data.",
+  // This page is the publisher homepage, served at the bare domain via a
+  // middleware rewrite (see src/middleware.ts). It is also reachable at
+  // /publisher/daftar and on the bukoo.id host, so name the one real URL.
+  alternates: {
+    canonical: "https://publisher.bukoo.id/",
+  },
 };
 
 const FLYWHEEL = [
