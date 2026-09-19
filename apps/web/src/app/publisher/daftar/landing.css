@@ -65,7 +65,15 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background-image: url("/homepage-assets/hero01.png");
+  /* Pre-encoded variants, not the 9.25MB source. A CSS url() bypasses the Next
+     image optimizer entirely, and that optimizer is a passthrough on this
+     OpenNext worker anyway (no `images` binding) — so the width here is the
+     only thing controlling transfer size. image-set() picks per DPR. */
+  background-image: url("/homepage-assets/hero01-2560.jpg");
+  background-image: image-set(
+    url("/homepage-assets/hero01-1280.webp") 1x,
+    url("/homepage-assets/hero01-2560.webp") 2x
+  );
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
