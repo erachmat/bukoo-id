@@ -8,10 +8,13 @@
   --forest-l: #2A5A48;
   --forest-ll: #34705A;
   --forest-lll: #4A907A;
-  --amber: #C9952A;
+  /* Single gold, matching the Figma frames and landing.css. #C9952A was a
+     production-only amber: it accounts for 4px of the publisher frame and 1px
+     of the reader frame — noise. See references/figma-design.md. */
+  --amber: #B58418;
   --amber-lt: #F0D080;
   --gold: #B58418;
-  --amber-glow: rgba(201, 149, 42, 0.15);
+  --amber-glow: rgba(181, 132, 24, 0.15);
   --teal: #00C9A7;
   --teal-d: #00957A;
   --coral: #FF6B4A;
@@ -19,8 +22,8 @@
   --text: #F0EDE6;
   --text-dim: rgba(240, 237, 230, 0.65);
   --text-muted: rgba(240, 237, 230, 0.35);
-  --border: rgba(201, 149, 42, 0.12);
-  --border-hi: rgba(201, 149, 42, 0.3);
+  --border: rgba(181, 132, 24, 0.12);
+  --border-hi: rgba(181, 132, 24, 0.3);
   --card-bg: rgba(255, 255, 255, 0.04);
   --card-bg-hi: rgba(255, 255, 255, 0.07);
 }
@@ -193,7 +196,7 @@ a {
   padding: 0 60px;
   background: linear-gradient(180deg, rgba(10, 26, 21, 0.95) 0%, transparent 100%);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(201, 149, 42, 0.08);
+  border-bottom: 1px solid rgba(181, 132, 24, 0.08);
   transition: background 0.3s, backdrop-filter 0.3s;
 }
 
@@ -240,7 +243,9 @@ a {
   font-weight: 600;
   letter-spacing: 0;
   min-height: 50px;
-  border-radius: 16px;
+  /* 12px matches the Figma header buttons on both frames (measured 12.5-13px)
+     and keeps the reader nav consistent with the publisher nav CTAs. */
+  border-radius: 12px;
   padding: 0 28px;
 }
 
@@ -258,8 +263,10 @@ a {
 
 .nav.minimal .btn-cta {
   color: #fff;
-  background: #D39A0A;
-  border: 2px solid #D39A0A;
+  /* #D39A0A was absent from both Figma frames (0px) and white on it is
+     2.50:1 — below AA. The frame's own header CTA is the canonical gold. */
+  background: var(--gold);
+  border: 2px solid var(--gold);
 }
 
 .nav.minimal .btn-cta:hover {
@@ -344,10 +351,10 @@ a {
   width: 240px;
   background: rgba(12, 30, 24, 0.98);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 149, 42, 0.2);
+  border: 1px solid rgba(181, 132, 24, 0.2);
   border-radius: 12px;
   padding: 8px 0;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(201, 149, 42, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(181, 132, 24, 0.08);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -377,7 +384,7 @@ a {
 
 .nav-dropdown-item:hover {
   color: var(--amber-lt);
-  background: rgba(201, 149, 42, 0.08);
+  background: rgba(181, 132, 24, 0.08);
   border-left-color: var(--amber);
   padding-left: 22px;
 }
@@ -398,8 +405,8 @@ a {
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--amber);
-  border: 1px solid rgba(201, 149, 42, 0.45);
-  background: rgba(201, 149, 42, 0.12);
+  border: 1px solid rgba(181, 132, 24, 0.45);
+  background: rgba(181, 132, 24, 0.12);
   border-radius: 999px;
   padding: 2px 8px;
   line-height: 1.4;
@@ -451,7 +458,7 @@ a {
 .btn-cta:hover {
   background: var(--amber-lt);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(201, 149, 42, 0.35);
+  box-shadow: 0 8px 24px rgba(181, 132, 24, 0.35);
 }
 
 /*──────────────────────────────────────────
@@ -475,7 +482,7 @@ a {
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(201, 149, 42, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 0%, rgba(181, 132, 24, 0.14) 0%, transparent 55%),
     radial-gradient(ellipse at 20% 60%, rgba(52, 112, 90, 0.4) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(42, 90, 72, 0.35) 0%, transparent 50%),
     linear-gradient(180deg, #0A1A15 0%, #122A22 40%, #0A1A15 100%);
@@ -487,8 +494,8 @@ a {
   inset: 0;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(201, 149, 42, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201, 149, 42, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(181, 132, 24, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(181, 132, 24, 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -511,7 +518,7 @@ a {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 149, 42, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(181, 132, 24, 0.08) 0%, transparent 70%);
   bottom: -100px;
   right: -100px;
   animation: drift2 10s ease-in-out infinite alternate;
@@ -671,7 +678,7 @@ a {
 
 .hero-btn:hover {
   background: var(--amber-lt);
-  box-shadow: 0 8px 30px rgba(201, 149, 42, 0.4);
+  box-shadow: 0 8px 30px rgba(181, 132, 24, 0.4);
 }
 
 .hero-fine {
@@ -832,7 +839,7 @@ a {
   text-transform: uppercase;
   color: var(--amber);
   padding: 3px 10px;
-  border: 1px solid rgba(201, 149, 42, 0.3);
+  border: 1px solid rgba(181, 132, 24, 0.3);
   border-radius: 3px;
 }
 
@@ -965,7 +972,7 @@ a {
   left: 50%;
   transform: translateX(-50%) translateY(8px);
   background: var(--forest-d);
-  border: 1px solid rgba(201, 149, 42, 0.25);
+  border: 1px solid rgba(181, 132, 24, 0.25);
   border-radius: 8px;
   padding: 12px 14px;
   width: 200px;
@@ -1253,7 +1260,7 @@ a {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.07),
     0 50px 100px rgba(0, 0, 0, 0.6),
-    0 0 80px rgba(201, 149, 42, 0.08);
+    0 0 80px rgba(181, 132, 24, 0.08);
 }
 
 .feat-phone-screen {
@@ -1268,7 +1275,7 @@ a {
 .feat-float {
   position: absolute;
   background: rgba(10, 26, 21, 0.92);
-  border: 1px solid rgba(201, 149, 42, 0.2);
+  border: 1px solid rgba(181, 132, 24, 0.2);
   border-radius: 10px;
   padding: 10px 14px;
   backdrop-filter: blur(10px);
@@ -1357,7 +1364,7 @@ a {
 }
 
 .price-card.featured {
-  background: linear-gradient(180deg, rgba(201, 149, 42, 0.08) 0%, rgba(0, 201, 167, 0.04) 100%);
+  background: linear-gradient(180deg, rgba(181, 132, 24, 0.08) 0%, rgba(0, 201, 167, 0.04) 100%);
   border-right-color: var(--border-hi);
 }
 
@@ -1485,7 +1492,7 @@ a {
 
 .price-cta-filled:hover {
   background: var(--amber-lt);
-  box-shadow: 0 6px 20px rgba(201, 149, 42, 0.4);
+  box-shadow: 0 6px 20px rgba(181, 132, 24, 0.4);
   transform: translateY(-1px);
 }
 
@@ -1530,7 +1537,7 @@ a {
 .testi-quote-icon {
   font-family: 'Playfair Display', serif;
   font-size: 60px;
-  color: rgba(201, 149, 42, 0.1);
+  color: rgba(181, 132, 24, 0.1);
   line-height: .8;
   position: absolute;
   top: 16px;
@@ -1652,7 +1659,7 @@ a {
 }
 
 .faq-item.open .faq-icon {
-  background: rgba(201, 149, 42, 0.1);
+  background: rgba(181, 132, 24, 0.1);
   color: var(--amber);
   transform: rotate(45deg);
 }
@@ -1717,7 +1724,7 @@ a {
   inset: 0;
   background:
     radial-gradient(ellipse at 50% 50%, rgba(0, 201, 167, 0.07) 0%, transparent 65%),
-    radial-gradient(ellipse at 20% 80%, rgba(201, 149, 42, 0.08) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 80%, rgba(181, 132, 24, 0.08) 0%, transparent 50%);
 }
 
 .cta-h2 {
@@ -1878,8 +1885,8 @@ a {
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--amber);
-  border: 1px solid rgba(201, 149, 42, 0.4);
-  background: rgba(201, 149, 42, 0.12);
+  border: 1px solid rgba(181, 132, 24, 0.4);
+  background: rgba(181, 132, 24, 0.12);
   border-radius: 999px;
   padding: 1px 7px;
   vertical-align: middle;
@@ -2042,12 +2049,12 @@ a {
 }
 
 .compare-table th:nth-child(4) {
-  background: rgba(201, 149, 42, 0.05);
+  background: rgba(181, 132, 24, 0.05);
   color: var(--amber);
 }
 
 .compare-table td:nth-child(4) {
-  background: rgba(201, 149, 42, 0.02);
+  background: rgba(181, 132, 24, 0.02);
   font-weight: 700;
 }
 
@@ -2221,7 +2228,7 @@ a {
     right: 0;
     background: rgba(10, 26, 21, 0.98);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(201, 149, 42, 0.15);
+    border-bottom: 1px solid rgba(181, 132, 24, 0.15);
     z-index: 99;
     padding: 20px;
     display: flex;
@@ -2285,7 +2292,7 @@ a {
     list-style: none;
     padding-left: 14px;
     margin-top: 10px;
-    border-left: 2px solid rgba(201, 149, 42, 0.25);
+    border-left: 2px solid rgba(181, 132, 24, 0.25);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -2305,8 +2312,8 @@ a {
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--amber);
-    border: 1px solid rgba(201, 149, 42, 0.4);
-    background: rgba(201, 149, 42, 0.12);
+    border: 1px solid rgba(181, 132, 24, 0.4);
+    background: rgba(181, 132, 24, 0.12);
     border-radius: 999px;
     padding: 1px 7px;
     vertical-align: middle;
@@ -2751,14 +2758,14 @@ a {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(ellipse at 15% 0%, rgba(201, 149, 42, 0.13) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(0, 201, 167, 0.08) 0%, transparent 55%), linear-gradient(180deg, #0A1A15 0%, #122A22 60%, #0A1A15 100%);
+  background: radial-gradient(ellipse at 15% 0%, rgba(181, 132, 24, 0.13) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(0, 201, 167, 0.08) 0%, transparent 55%), linear-gradient(180deg, #0A1A15 0%, #122A22 60%, #0A1A15 100%);
 }
 .phero-grid {
   position: absolute;
   inset: 0;
   z-index: 0;
   opacity: 0.6;
-  background-image: linear-gradient(rgba(201, 149, 42, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 149, 42, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(181, 132, 24, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(181, 132, 24, 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .eyebrow {
@@ -2882,8 +2889,8 @@ a {
   border-color: rgba(255, 107, 74, 0.3);
 }
 .disc {
-  background: rgba(201, 149, 42, 0.08);
-  border: 1px solid rgba(201, 149, 42, 0.24);
+  background: rgba(181, 132, 24, 0.08);
+  border: 1px solid rgba(181, 132, 24, 0.24);
   border-radius: 12px;
   padding: 16px 20px;
   font-size: 12.5px;
@@ -2965,8 +2972,8 @@ a {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  border-top: 1px solid rgba(201, 149, 42, 0.16);
-  border-bottom: 1px solid rgba(201, 149, 42, 0.16);
+  border-top: 1px solid rgba(181, 132, 24, 0.16);
+  border-bottom: 1px solid rgba(181, 132, 24, 0.16);
 }
 .statrow .st {
   padding: 26px 22px;
@@ -3185,8 +3192,8 @@ a {
 }
 .pcard.feat {
   border-color: var(--amber);
-  background: rgba(201, 149, 42, 0.06);
-  box-shadow: 0 12px 40px rgba(201, 149, 42, 0.12);
+  background: rgba(181, 132, 24, 0.06);
+  box-shadow: 0 12px 40px rgba(181, 132, 24, 0.12);
 }
 .pbadge {
   position: absolute;
