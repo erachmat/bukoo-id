@@ -12,6 +12,8 @@
      production-only amber: it accounts for 4px of the publisher frame and 1px
      of the reader frame — noise. See references/figma-design.md. */
   --amber: #B58418;
+  --amber-d: #A07015;
+  --amber-shadow: rgba(160, 112, 21, 0.32);
   --amber-lt: #F0D080;
   --gold: #B58418;
   --amber-glow: rgba(181, 132, 24, 0.15);
@@ -271,9 +273,11 @@ a {
 
 .nav.minimal .btn-cta:hover {
   color: #fff;
-  background: #E0AA19;
-  border-color: #E0AA19;
-  box-shadow: 0 8px 24px rgba(211, 154, 10, 0.32);
+  /* Figma's darker gold (#A07015, 1651px in the publisher frame) — the same
+     hover value landing.css uses. #E0AA19 appeared 0 times in both frames. */
+  background: var(--amber-d);
+  border-color: var(--amber-d);
+  box-shadow: 0 8px 24px var(--amber-shadow);
 }
 
 .nav-logo {
