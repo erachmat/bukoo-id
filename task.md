@@ -1,3 +1,13 @@
+# Figma Geometry + Cream Token Alignment — 2026-09-19
+
+- `[x]` 1. Deleted `apps/web/src/lib/design-tokens.ts` — dead code, zero importers (grep-verified). Its cream value `#F4F1E8` matched neither the Figma file nor either shipped stylesheet, so it was a third answer to a settled question.
+- `[x]` 2. Container column → Figma's measured 1128px. `max-width` is NOT the content column when padding is non-zero, so the values differ per element: `.bl-container` 1240→1192px (32px padding at ≥1024px), `.bl-footer-inner` 1240→1224px (48px padding), reader `.homepage-intro`/`.homepage-product`/`.homepage-publisher-band` 1160→1128px (incl. the 480px override). Verified by asserting computed `width − paddingLeft − paddingRight == 1128` in the browser.
+- `[x]` 3. Cream unified to `#FFF9EB` (measured: 2nd-most-common colour in `web-homepage-penerbit.png` at 16.7%) across `landing.css` (`--bl-cream`/`--bl-cream-2`), `publisher.css` and `redesign.css` (`--cream`), plus the stray hardcoded `#faf4ea` on `.bl-e`. Four values → one.
+- `[x]` 4. Verification: web typecheck ✅, lint 0 errors (28 warnings, down from 31) ✅, tests 86/86 ✅. Programmatic overflow sweep at 1440/1280/1024/768/390 on both surfaces — zero horizontal overflow. Contrast rechecked against every text colour: all ratios improve slightly vs `#FAF7F2` (e.g. forest-on-cream 14.24→14.49:1), no a11y tradeoff.
+- `[x]` 5. Committed `d41b4cf`, pushed to `main`; CI + Deploy Web + Deploy API green. Production verified in the served CSS chunks (publisher: `max-width:1192px`/`1224px`, 0 old cream values; reader: `width:min(1128px,…)`).
+- `[ ]` 6. P2 remaining: consolidate gold (4 live values → 2) and re-check the `#b74822` terracotta on the publisher `Masuk` CTA — not in the Figma palette, and it is a primary CTA, so it needs a user decision before changing.
+- `[ ]` 7. `references/figma-design.md` still carries the superseded geometry prose (the "1200 vs 1280" claim that was wrong in both directions). Needs a cleanup pass so the next session doesn't inherit it.
+
 # Publisher Homepage Redesign (publisher.bukoo.id) — 2026-09-17
 
 - `[x]` 1. SDD artifacts: spec `docs/superpowers/specs/2026-09-17-publisher-homepage-redesign-design.md`, plan `docs/superpowers/plans/2026-09-17-publisher-homepage-redesign.md`, ledger `.superpowers/sdd/publisher-homepage-redesign/progress.md`. User-approved ("Start implementation").
