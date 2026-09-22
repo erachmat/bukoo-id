@@ -29,6 +29,7 @@ import {
   INITIAL_PUBLISHER_LOGIN_STATE,
   type PublisherLoginState,
 } from '@/lib/publisher-login-state';
+import type { PublisherRegisterState } from '@/lib/publisher-register-state';
 
 // ---------------------------------------------------------------------------
 // Password hashing — SubtleCrypto PBKDF2
@@ -140,6 +141,7 @@ export async function signUp(formData: FormData) {
     }
     rethrowRedirect(error);
   }
+
 }
 
 export async function signIn(formData: FormData) {
@@ -194,6 +196,7 @@ export async function signIn(formData: FormData) {
     }
     rethrowRedirect(error);
   }
+
 }
 
 /**
@@ -252,6 +255,7 @@ export async function signInPublisher(
     }
     rethrowRedirect(error);
   }
+
 }
 
 export async function signInWithGoogle(formData: FormData) {
@@ -417,28 +421,40 @@ export async function verifyPasswordReset(formData: FormData) {
 // (user decision 2026-08-20). Same validation as customer signUp.
 // ---------------------------------------------------------------------------
 
-export async function signUpPublisher(formData: FormData) {
+export async function signUpPublisher(
+  _previousState: PublisherRegisterState,
+  formData: FormData,
+): Promise<PublisherRegisterState> {
   const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
   const password = (formData.get('password') as string) ?? '';
+  const confirmPassword = (formData.get('confirmPassword') as string) ?? '';
   const name = ((formData.get('name') as string) ?? '').trim();
   const callbackUrl = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_PUBLISHER_HOME);
+  const fieldErrors: PublisherRegisterState['fieldErrors'] = {};
 
-  const validationError = validateSignUp(name, email, password);
-  if (validationError) {
-    return redirect(`/publisher/register?error=${validationError}&email=${encodeURIComponent(email)}`);
-  }
+  if (!name) fieldErrors.name = 'Nama wajib diisi.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fieldErrors.email = 'Format email tidak valid.';
+  if (password.length < 6) fieldErrors.password = 'Password minimal 6 karakter.';
+  if (password !== confirmPassword) fieldErrors.confirmPassword = 'Konfirmasi password tidak cocok.';
+  if (Object.keys(fieldErrors).length > 0) return { fieldErrors, formError: null };
 
   // Same per-IP register throttle as customer signUp.
   const ip = await getRequestIp(await ipHeaders());
   const ipKey = rateLimitKey('registerIp', 'ip', ip);
   if (await isBlockedFor(ipKey)) {
-    return redirectRateLimited('/publisher/register');
+    return {
+      fieldErrors: {},
+      formError: 'Terlalu banyak percobaan. Silakan coba lagi nanti.',
+    };
   }
 
   const db = getDb();
   const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
   if (existing) {
-    return redirect(`/publisher/register?error=EMAIL_TAKEN&email=${encodeURIComponent(email)}`);
+    return {
+      fieldErrors: { email: 'Email sudah terdaftar. Silakan masuk menggunakan akun tersebut.' },
+      formError: null,
+    };
   }
 
   const hashedPassword = await hashPassword(password);
@@ -457,8 +473,13 @@ export async function signUpPublisher(formData: FormData) {
   } catch (error: unknown) {
     const err = error as { type?: string };
     if (err.type === 'CredentialsSignin') {
-      return redirect('/publisher/login?error=SIGNUP_SIGNIN_FAILED');
+      return {
+        fieldErrors: {},
+        formError: 'Akun berhasil dibuat. Silakan masuk menggunakan email dan password Anda.',
+      };
     }
     rethrowRedirect(error);
   }
+
+  return { fieldErrors: {}, formError: null };
 }

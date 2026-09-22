@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { signUpPublisher } from '@/app/(auth)/actions'
 import { safeCallbackUrl, defaultRedirectForRole } from '@/lib/auth-helpers'
-import { RegisterForm } from '@/components/auth/register-form'
+import { PublisherRegisterForm } from '@/components/publisher/publisher-register'
 
 export const metadata = {
   title: 'BUKOO Publisher — Daftar Akun Penerbit',
@@ -10,7 +9,7 @@ export const metadata = {
 }
 
 export default async function PublisherRegisterPage(props: {
-  searchParams: Promise<{ error?: string; success?: string; email?: string; callbackUrl?: string }>
+  searchParams: Promise<{ callbackUrl?: string }>
 }) {
   const params = await props.searchParams
   const session = await auth()
@@ -22,31 +21,8 @@ export default async function PublisherRegisterPage(props: {
   const callbackUrl = safeCallbackUrl(params.callbackUrl, '/publisher/dashboard')
 
   return (
-    <div className="pub-auth-dark">
-      <div className="pub-auth-dark-card">
-        <div className="pub-auth-dark-brand">
-          <div className="pub-auth-dark-logo">
-            <img src="/bukoo-logo.svg" alt="BUKOO" className="pub-auth-dark-logo-img" />
-            <span>BUKOO</span>
-          </div>
-          <div className="pub-auth-dark-sub">Publisher Portal</div>
-        </div>
-        <RegisterForm
-          action={signUpPublisher}
-          callbackUrl={callbackUrl}
-          error={params.error}
-          success={params.success}
-          email={params.email}
-          loginHref="/publisher/login"
-          variant="publisher"
-        />
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 10.5, color: 'rgba(255,255,255,0.3)' }}>
-          Sudah punya akun?{' '}
-          <a href="/publisher/login" style={{ color: '#00C9A7', textDecoration: 'none', fontWeight: 700 }}>
-            Masuk di sini &rarr;
-          </a>
-        </p>
-      </div>
-    </div>
+    <main className="publisher-register-standalone">
+      <PublisherRegisterForm callbackUrl={callbackUrl} />
+    </main>
   )
 }
