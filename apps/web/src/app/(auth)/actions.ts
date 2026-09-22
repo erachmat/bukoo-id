@@ -375,6 +375,102 @@ export async function requestPasswordReset(formData: FormData) {
   );
 }
 
+function publisherForgotPasswordUrl(params: Record<string, string>): string {
+  return `/publisher/forgot-password?${new URLSearchParams(params).toString()}`;
+}
+
+/** Request a reset OTP for publisher accounts without revealing account existence. */
+export async function requestPublisherPasswordReset(formData: FormData) {
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_PUBLISHER_HOME);
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(email)) {
+    return redirect(publisherForgotPasswordUrl({ error: 'EMAIL_INVALID', callbackUrl }));
+  }
+
+  const now = Date.now();
+  const ip = await getRequestIp(await ipHeaders());
+  const emailKey = rateLimitKey('otpRequestEmail', 'email', email);
+  const ipKey = rateLimitKey('otpRequestIp', 'ip', ip);
+  if (await isBlockedFor(emailKey) || await isBlockedFor(ipKey)) {
+    return redirect(publisherForgotPasswordUrl({ error: 'RATE_LIMITED', callbackUrl }));
+  }
+
+  // Count all requests, including unknown and non-publisher emails, to keep
+  // the response timing and message independent of account existence.
+  await recordFailure(limiter, now, RATE_LIMIT_POLICIES.otpRequestEmail, emailKey);
+  await recordFailure(limiter, now, RATE_LIMIT_POLICIES.otpRequestIp, ipKey);
+
+  const db = getDb();
+  const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
+  if (existing?.role === 'PUBLISHER' && existing.password) {
+    const code = generateOtpCode();
+    const expiresAt = otpExpiryMs(now);
+    await db.delete(otpTokens).where(eq(otpTokens.email, email));
+    await db.insert(otpTokens).values({ id: createId(), email, code, expiresAt });
+    sendOtpEmail(email, code).catch((err) =>
+      console.error('[requestPublisherPasswordReset] Email send failed:', err),
+    );
+  }
+
+  return redirect(publisherForgotPasswordUrl({
+    step: 'code',
+    email,
+    callbackUrl,
+    message: 'OTP_SENT',
+    sentAt: String(now),
+  }));
+}
+
+/** Verify a publisher reset OTP and replace the stored PBKDF2 password. */
+export async function verifyPublisherPasswordReset(formData: FormData) {
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const code = ((formData.get('code') as string) ?? '').trim();
+  const newPassword = (formData.get('password') as string) ?? '';
+  const confirmPassword = (formData.get('confirmPassword') as string) ?? '';
+  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl'), DEFAULT_PUBLISHER_HOME);
+  const stepParams = { step: 'code', email, callbackUrl };
+
+  if (newPassword.length < 6) {
+    return redirect(publisherForgotPasswordUrl({ ...stepParams, error: 'PASSWORD_TOO_SHORT' }));
+  }
+  if (newPassword !== confirmPassword) {
+    return redirect(publisherForgotPasswordUrl({ ...stepParams, error: 'PASSWORD_MISMATCH' }));
+  }
+
+  const now = Date.now();
+  const emailKey = rateLimitKey('otpVerifyEmail', 'email', email);
+  if (await isBlockedFor(emailKey)) {
+    return redirect(publisherForgotPasswordUrl({ ...stepParams, error: 'RATE_LIMITED' }));
+  }
+
+  const db = getDb();
+  const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+  const record = await db.query.otpTokens.findFirst({ where: eq(otpTokens.email, email) });
+
+  if (!user || user.role !== 'PUBLISHER' || !record || record.code !== code) {
+    await recordFailure(limiter, now, RATE_LIMIT_POLICIES.otpVerifyEmail, emailKey);
+    return redirect(publisherForgotPasswordUrl({ ...stepParams, error: 'OTP_INVALID' }));
+  }
+  if (isOtpExpired(record.expiresAt, now)) {
+    await db.delete(otpTokens).where(eq(otpTokens.id, record.id));
+    await recordFailure(limiter, now, RATE_LIMIT_POLICIES.otpVerifyEmail, emailKey);
+    return redirect(publisherForgotPasswordUrl({ ...stepParams, error: 'OTP_EXPIRED' }));
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await db.update(users).set({ password: hashedPassword }).where(eq(users.id, user.id));
+  await db.delete(otpTokens).where(eq(otpTokens.id, record.id));
+  await recordSuccess(limiter, now, emailKey);
+
+  const loginParams = new URLSearchParams({
+    message: 'RESET_DONE',
+    callbackUrl,
+  });
+  return redirect(`/publisher/login?${loginParams.toString()}`);
+}
+
 export async function verifyPasswordReset(formData: FormData) {
   const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
   const code = ((formData.get('code') as string) ?? '').trim();

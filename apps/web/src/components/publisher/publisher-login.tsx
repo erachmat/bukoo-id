@@ -10,14 +10,16 @@ import {
   INITIAL_PUBLISHER_LOGIN_STATE,
   type PublisherLoginState,
 } from '@/lib/publisher-login-state';
+import { mapError } from '@/app/(auth)/errors';
 
 type PublisherLoginFormProps = {
   callbackUrl: string;
+  message?: string;
   onClose?: () => void;
   standalone?: boolean;
 };
 
-export function PublisherLoginForm({ callbackUrl, onClose, standalone = false }: PublisherLoginFormProps) {
+export function PublisherLoginForm({ callbackUrl, message, onClose, standalone = false }: PublisherLoginFormProps) {
   const router = useRouter();
   const [state, action, pending] = useActionState<PublisherLoginState, FormData>(
     signInPublisher,
@@ -49,6 +51,8 @@ export function PublisherLoginForm({ callbackUrl, onClose, standalone = false }:
 
       <form action={action} noValidate={false}>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
+
+        {message && <p className="publisher-login-success" role="status">{mapError(message)}</p>}
 
         <div className="publisher-login-field">
           <label htmlFor="publisher-login-email">email<span aria-hidden="true">*</span></label>
@@ -88,6 +92,12 @@ export function PublisherLoginForm({ callbackUrl, onClose, standalone = false }:
             </button>
           </div>
           {state.passwordError && <p id="publisher-login-password-error" className="publisher-login-field-error">{state.passwordError}</p>}
+        </div>
+
+        <div className="publisher-login-forgot-row">
+          <a href={`/publisher/forgot-password?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
+            Lupa password?
+          </a>
         </div>
 
         {state.error && !state.emailError && (

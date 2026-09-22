@@ -20,6 +20,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   NAME_REQUIRED: 'Nama lengkap wajib diisi.',
   EMAIL_INVALID: 'Format email tidak valid.',
   PASSWORD_TOO_SHORT: 'Password minimal 6 karakter.',
+  PASSWORD_MISMATCH: 'Konfirmasi password tidak cocok.',
   EMAIL_TAKEN: 'Akun dengan email ini sudah terdaftar. Silakan masuk.',
   PASSWORDLESS: 'Akun ini terdaftar dengan Google. Silakan masuk menggunakan Google.',
   RESET_DONE: 'Kata sandi berhasil diperbarui. Silakan masuk.',

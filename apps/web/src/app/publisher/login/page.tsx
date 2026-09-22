@@ -9,7 +9,7 @@ export const metadata = {
 }
 
 export default async function PublisherLoginPage(props: {
-  searchParams: Promise<{ callbackUrl?: string }>
+  searchParams: Promise<{ callbackUrl?: string; message?: string }>
 }) {
   const params = await props.searchParams
 
@@ -23,6 +23,7 @@ export default async function PublisherLoginPage(props: {
     <main className="publisher-login-standalone">
       <PublisherLoginForm
         callbackUrl={safeCallbackUrl(params.callbackUrl, '/publisher/dashboard')}
+        message={params.message}
         standalone
       />
     </main>
