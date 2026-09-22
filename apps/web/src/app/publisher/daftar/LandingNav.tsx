@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 
 const LINKS = [
   { href: "/publisher/dashboard", label: "Dashboard" },
@@ -36,9 +37,9 @@ export function LandingNav({ currentTab }: { currentTab?: string }) {
         </ul>
       </div>
       <div className="bl-nav-right">
-        <Link href="/publisher/login?callbackUrl=/publisher/dashboard" className="bl-btn-login">
+        <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="bl-btn-login">
           Masuk
-        </Link>
+        </PublisherLoginTrigger>
         <a href="#daftar" className="bl-btn-gold">
           Daftar sebagai penerbit
         </a>

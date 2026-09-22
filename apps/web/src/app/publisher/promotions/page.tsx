@@ -13,7 +13,7 @@ export default async function PublisherPromotionsPage() {
   const session = await auth();
   const user = session?.user;
   if (!user || (user as { role?: string }).role !== "PUBLISHER") {
-    redirect("/login");
+    redirect("/publisher/login?callbackUrl=/publisher/promotions");
   }
 
   const db = getDb();

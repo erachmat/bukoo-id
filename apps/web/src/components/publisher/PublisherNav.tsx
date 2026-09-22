@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 
 interface PublisherNavProps {
   currentTab?: "daftar" | "dashboard" | "submit" | "royalti" | "panduan";
@@ -51,9 +52,9 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
         </li>
       </ul>
       <div className="pub-nav-right">
-        <Link href="/publisher/login?callbackUrl=/publisher/dashboard" className="btn-ghost">
+        <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="btn-ghost">
           Masuk
-        </Link>
+        </PublisherLoginTrigger>
         <Link href="/publisher/daftar#daftar" className="btn-cta">
           Coba Gratis
         </Link>

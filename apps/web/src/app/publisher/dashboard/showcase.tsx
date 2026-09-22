@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
+import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 
 export function PublisherDashboardShowcase() {
   return (
@@ -261,9 +262,9 @@ export function PublisherDashboardShowcase() {
               <Link href="/publisher/register" className="dash-cta-btn">
                 Daftar sebagai penerbit &rarr;
               </Link>
-              <Link href="/publisher/login?callbackUrl=/publisher/dashboard" className="btn-ghost btn-lg">
+              <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="btn-ghost btn-lg">
                 Masuk ke Dashboard
-              </Link>
+              </PublisherLoginTrigger>
               <Link href="/publisher/submit" className="btn-ghost btn-lg">
                 Submit Judul
               </Link>

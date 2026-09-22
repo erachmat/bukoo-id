@@ -18,7 +18,7 @@ export default async function EditPublisherBookPage({
   const session = await auth();
   const user = session?.user;
   if (!user || (user as { role?: string }).role !== "PUBLISHER") {
-    redirect("/login");
+    redirect(`/publisher/login?callbackUrl=${encodeURIComponent(`/publisher/books/${params.id}/edit`)}`);
   }
 
   const db = getDb();

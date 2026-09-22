@@ -15,7 +15,7 @@ export default async function PublisherProtectedLayout({
   const user = session?.user;
 
   if (!user || (user as { role?: string }).role !== "PUBLISHER") {
-    redirect("/login");
+    redirect("/publisher/login?callbackUrl=/publisher/books");
   }
 
   return (

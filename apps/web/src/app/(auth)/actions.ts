@@ -25,6 +25,10 @@ import {
 } from '@/lib/rate-limit';
 import { generateOtpCode, otpExpiryMs, isOtpExpired } from '@/lib/otp';
 import { sendOtpEmail } from '@/lib/mail';
+import {
+  INITIAL_PUBLISHER_LOGIN_STATE,
+  type PublisherLoginState,
+} from '@/lib/publisher-login-state';
 
 // ---------------------------------------------------------------------------
 // Password hashing — SubtleCrypto PBKDF2
@@ -187,6 +191,64 @@ export async function signIn(formData: FormData) {
         // fall through to the generic credentials error
       }
       return redirect('/login?error=CredentialsSignin');
+    }
+    rethrowRedirect(error);
+  }
+}
+
+/**
+ * Publisher-only credentials action used by the inline login modal.
+ * Unlike the shared customer action, failures return state so the modal stays
+ * open and can render the Figma invalid-field treatment.
+ */
+export async function signInPublisher(
+  _previousState: PublisherLoginState,
+  formData: FormData,
+): Promise<PublisherLoginState> {
+  const email = ((formData.get('email') as string) ?? '').toLowerCase().trim();
+  const password = (formData.get('password') as string) ?? '';
+  const now = Date.now();
+  const ip = await getRequestIp(await ipHeaders());
+  const emailKey = rateLimitKey('loginEmail', 'email', email);
+  const ipKey = rateLimitKey('loginIp', 'ip', ip);
+  const invalidState = (error = 'Email atau kata sandi salah.'): PublisherLoginState => ({
+    error,
+    emailError: 'Email atau kata sandi salah.',
+    passwordError: 'Email atau kata sandi salah.',
+    rateLimited: false,
+  });
+
+  if (await isBlockedFor(emailKey) || await isBlockedFor(ipKey)) {
+    return {
+      ...INITIAL_PUBLISHER_LOGIN_STATE,
+      error: 'Terlalu banyak percobaan. Silakan coba lagi nanti.',
+      rateLimited: true,
+    };
+  }
+
+  const db = getDb();
+  const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+  if (!user || user.role !== 'PUBLISHER' || !user.password) {
+    await recordFailure(limiter, now, RATE_LIMIT_POLICIES.loginEmail, emailKey);
+    await recordFailure(limiter, now, RATE_LIMIT_POLICIES.loginIp, ipKey);
+    return invalidState();
+  }
+
+  const callbackUrl = safeCallbackUrl(
+    formData.get('callbackUrl'),
+    DEFAULT_PUBLISHER_HOME,
+  );
+
+  try {
+    await nextAuthSignIn('credentials', { email, password, redirectTo: callbackUrl });
+    await recordSuccess(limiter, now, emailKey);
+    return INITIAL_PUBLISHER_LOGIN_STATE;
+  } catch (error: unknown) {
+    const err = error as { type?: string };
+    if (err.type === 'CredentialsSignin') {
+      await recordFailure(limiter, now, RATE_LIMIT_POLICIES.loginEmail, emailKey);
+      await recordFailure(limiter, now, RATE_LIMIT_POLICIES.loginIp, ipKey);
+      return invalidState();
     }
     rethrowRedirect(error);
   }

@@ -14,7 +14,7 @@ export default async function PublisherNotificationsPage() {
   try {
     user = await getPublisherUser();
   } catch {
-    redirect("/login");
+    redirect("/publisher/login?callbackUrl=/publisher/notifications");
   }
 
   const db = getDb();

@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
+import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 import { SubmitForm } from "./SubmitForm";
 
 export const metadata = {
@@ -25,9 +26,9 @@ function SubmitSignupBand() {
         <Link href="/publisher/register" className="dash-cta-btn">
           Daftar sebagai penerbit &rarr;
         </Link>
-        <Link href="/publisher/login?callbackUrl=/publisher/submit" className="btn-ghost btn-lg">
+        <PublisherLoginTrigger callbackUrl="/publisher/submit" className="btn-ghost btn-lg">
           Masuk
-        </Link>
+        </PublisherLoginTrigger>
       </div>
     </div>
   );

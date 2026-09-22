@@ -12,7 +12,7 @@ export default async function PublisherBooksPage() {
   const user = session?.user;
 
   if (!user || (user as { role?: string }).role !== "PUBLISHER") {
-    redirect("/login");
+    redirect("/publisher/login?callbackUrl=/publisher/books");
   }
 
   const books = await getPublisherCatalog(user.id ?? '');
