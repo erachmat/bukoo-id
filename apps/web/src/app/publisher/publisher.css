@@ -5201,24 +5201,21 @@ html:has(.pub-page-wrap) {
   }
 
   .publisher-login-backdrop {
-    align-items: stretch;
-    padding: 0;
-    background: #21342C;
-    backdrop-filter: none;
+    align-items: center;
+    padding: 16px;
   }
 
   .publisher-login-dialog {
-    width: 100%;
-    max-height: none;
+    width: min(392px, 100%);
+    max-height: calc(100vh - 32px);
     overflow-y: auto;
-    border-radius: 0;
-    box-shadow: none;
+    border-radius: 20px;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
   }
 
-  .publisher-login-form,
-  .publisher-login-form[data-standalone='true'] {
-    min-height: 100vh;
-    padding: 28px 24px 32px;
+  .publisher-login-form:not([data-standalone='true']) {
+    min-height: 0;
+    padding: 28px 24px 24px;
     border: 0;
     border-radius: 0;
   }
