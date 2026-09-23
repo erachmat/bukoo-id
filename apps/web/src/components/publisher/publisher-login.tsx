@@ -161,8 +161,17 @@ type PublisherLoginTriggerProps = {
 };
 
 export function PublisherLoginTrigger({ callbackUrl, children = 'Masuk', className }: PublisherLoginTriggerProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const openLogin = () => {
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      router.push(`/publisher/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      return;
+    }
+    setOpen(true);
+  };
 
   const close = () => {
     setOpen(false);
@@ -171,7 +180,7 @@ export function PublisherLoginTrigger({ callbackUrl, children = 'Masuk', classNa
 
   return (
     <>
-      <button ref={triggerRef} type="button" className={className} onClick={() => setOpen(true)}>
+      <button ref={triggerRef} type="button" className={className} onClick={openLogin}>
         {children}
       </button>
       {open && <PublisherLoginModal callbackUrl={callbackUrl} onClose={close} />}

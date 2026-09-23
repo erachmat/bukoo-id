@@ -4681,7 +4681,6 @@ html:has(.pub-page-wrap) {
 .publisher-login-form {
   box-sizing: border-box;
   width: 100%;
-  min-height: 705px;
   padding: 32px;
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 20px;
