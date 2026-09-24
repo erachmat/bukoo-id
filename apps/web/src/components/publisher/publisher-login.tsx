@@ -109,11 +109,15 @@ export function PublisherLoginForm({ callbackUrl, message, onClose, standalone =
         </button>
       </form>
 
-      <p className="publisher-login-terms">
-        Dengan melanjutkan, Anda menyetujui <a href="/syarat-ketentuan">syarat dan ketentuan</a> serta <a href="/privasi">kebijakan privasi</a> BUKOO.
-      </p>
+      <div className="publisher-login-divider" role="separator" aria-label="Atau">
+        <span>Atau</span>
+      </div>
+
       <p className="publisher-login-register-link">
         Belum punya akun? <a href={`/publisher/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}>Daftar di sini</a>
+      </p>
+      <p className="publisher-login-terms">
+        Dengan melanjutkan, Anda menyetujui <a href="/syarat-ketentuan">syarat dan ketentuan</a> serta <a href="/privasi">kebijakan privasi</a> BUKOO.
       </p>
       <p className="publisher-login-copyright">© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</p>
     </div>

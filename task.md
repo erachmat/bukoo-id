@@ -1,3 +1,9 @@
+# Publisher Login Content Layout — 2026-09-24
+
+- `[x]` 1. Added an “Atau” divider after the Masuk button and moved the sign-up prompt before the terms and copyright to match the supplied login reference.
+- `[x]` 2. Added divider styling consistent with the existing publisher login colors and typography.
+- `[x]` 3. Web typecheck passed; lint passed with 0 errors and 26 warnings. Tests were not run.
+
 # Reader + Publisher Hero Image Weight — 2026-09-19
 
 - `[x]` 1. Root cause: `public/homepage-assets/hero01.png` is **5120×2048, 9.25 MB** (RGBA, 10.5 MP) — a raw design-tool export. Both homepages loaded it: `Hero.tsx` via `next/image` and `publisher/daftar/landing.css` via a CSS `background-image` url().

@@ -4831,8 +4831,27 @@ html:has(.pub-page-wrap) {
   opacity: 0.7;
 }
 
+.publisher-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0 24px;
+  color: rgba(240, 237, 230, 0.82);
+  font-size: 18px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.publisher-login-divider::before,
+.publisher-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(240, 237, 230, 0.2);
+}
+
 .publisher-login-terms {
-  margin: 34px 0 0;
+  margin: 24px 0 0;
   color: rgba(240, 237, 230, 0.78);
   font: 400 12px/1.55 'Plus Jakarta Sans', sans-serif;
 }
@@ -4848,7 +4867,13 @@ html:has(.pub-page-wrap) {
   font: 400 10px/1.45 'Plus Jakarta Sans', sans-serif;
 }
 
-.publisher-login-register-link,
+.publisher-login-register-link {
+  margin: 0;
+  color: rgba(240, 237, 230, 0.72);
+  text-align: center;
+  font: 400 13px/1.5 'Plus Jakarta Sans', sans-serif;
+}
+
 .publisher-register-switch {
   margin: 20px 0 0;
   color: rgba(240, 237, 230, 0.72);
