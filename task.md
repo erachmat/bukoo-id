@@ -1,3 +1,12 @@
+# Publisher landing page audit fixes — 2026-09-25
+
+- `[x]` 1. Made the form's “Jabatan” field required in browser and server validation; added an announced success state and generic persistence failure response.
+- `[x]` 2. Added D1-backed IP throttling (5 valid requests/hour) for publisher partnership leads; IP identifiers are hashed by the existing rate-limit helper.
+- `[x]` 3. Kept publisher navigation visible on narrow screens, added a navigation landmark and consistent keyboard focus ring, and removed duplicated landing copy.
+- `[x]` 4. Removed stale September 3 launch-date language from the public dashboard showcase and royalty calculator disclaimer.
+- `[x]` 5. Web typecheck passed; lint passed with 0 errors (26 warnings, none in changed files).
+- `[ ]` 6. Automated test suite and mobile viewport visual QA remain; no production lead form submission.
+
 # Publisher Partnership vs Portal Account Copy — 2026-09-25
 
 - `[x]` 1. Renamed homepage, navigation, guide, and footer CTAs to describe partnership inquiry; lead form now submits a kemitraan request.

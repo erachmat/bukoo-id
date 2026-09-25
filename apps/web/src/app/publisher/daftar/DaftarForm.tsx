@@ -11,7 +11,7 @@ export function DaftarForm() {
 
   if (state.ok) {
     return (
-      <div className="bl-form-ok">
+      <div className="bl-form-ok" role="status" aria-live="polite">
         <h4>Pengajuan terkirim</h4>
         <p>
           {state.message} Untuk pertanyaan cepat:{" "}
@@ -60,6 +60,7 @@ export function DaftarForm() {
             className="bl-input"
             name="position"
             type="text"
+            required
             placeholder="Tulis Jabatan"
           />
         </div>

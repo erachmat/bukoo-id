@@ -13,7 +13,7 @@ export function PublisherDashboardShowcase() {
         <div className="phero-bg" />
         <div className="phero-grid" />
         <div className="pub-wrap">
-          <span className="dash-note">● Contoh tampilan · data ilustratif (platform rilis 3 Sep 2026)</span>
+          <span className="dash-note">● Contoh tampilan · data ilustratif</span>
           <br />
           <span className="eyebrow">Publisher Dashboard</span>
           <h1 className="ph-h1">
@@ -251,7 +251,7 @@ export function PublisherDashboardShowcase() {
 
           {/* Transparency Disclaimer */}
           <div className="dash-disc">
-            <b>Catatan transparansi.</b> Seluruh angka &amp; grafik di halaman ini adalah <b>contoh ilustratif</b> untuk menggambarkan struktur dashboard. Data pembaca aktual tersedia setelah peluncuran platform pada 3 September 2026.
+            <b>Catatan transparansi.</b> Seluruh angka &amp; grafik di halaman ini adalah <b>contoh ilustratif</b> untuk menggambarkan struktur dashboard. Data pembaca aktual tersedia di dashboard mitra setelah judul penerbit tayang di BUKOO.
           </div>
 
           {/* Call to Action Band */}

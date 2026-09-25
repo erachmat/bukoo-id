@@ -23,18 +23,20 @@ export function LandingNav({ currentTab }: { currentTab?: string }) {
           <img src="/bukoo-logo.svg" alt="" className="bl-nav-logo-mark" />
           <span className="bl-nav-logo-word">BUKOO</span>
         </Link>
-        <ul className="bl-nav-links">
-          {LINKS.map((link) => {
-            const tab = link.href.replace("/publisher/", "");
-            return (
-              <li key={link.href}>
-                <Link href={link.href} className={currentTab === tab ? "on" : ""}>
-                  {link.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <nav className="bl-nav-links" aria-label="Navigasi penerbit">
+          <ul>
+            {LINKS.map((link) => {
+              const tab = link.href.replace("/publisher/", "");
+              return (
+                <li key={link.href}>
+                  <Link href={link.href} className={currentTab === tab ? "on" : ""}>
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
       <div className="bl-nav-right">
         <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="bl-btn-login">

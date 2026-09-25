@@ -129,10 +129,9 @@ export default function PublisherDaftarPage() {
             </h2>
           </div>
           <p className="bl-b-body">
-            BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu
-            mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan
-            sumber data yang selama ini tidak Anda miliki; bukan menggantikan
-            rak buku, tapi mengisinya kembali.
+            Kami menambah kanal digital untuk membantu pembaca menjelajahi
+            katalog dan menemukan judul baru, sambil tetap mendukung peran
+            toko dan rak buku fisik.
           </p>
         </div>
       </section>
@@ -146,10 +145,9 @@ export default function PublisherDaftarPage() {
               Digital dan fisik <em>bukan lawan.</em>
             </h2>
             <p className="bl-c-sub">
-              BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu
-              mengubah mereka menjadi pembeli buku fisik, pelanggan berulang,
-              dan sumber data yang selama ini tidak Anda miliki; bukan
-              menggantikan rak buku, tapi mengisinya kembali.
+              Jelajahi bagaimana akses digital membantu pembaca menemukan judul
+              yang mereka sukai, lalu memilih buku tertentu untuk dimiliki dalam
+              bentuk fisik.
             </p>
           </div>
 
@@ -225,7 +223,7 @@ export default function PublisherDaftarPage() {
       <section className="bl-e">
         <div className="bl-container">
           <div className="bl-e-head">
-            <span className="bl-eyebrow">Mesin penemuan</span>
+            <span className="bl-eyebrow">Nilai kemitraan</span>
             <h2 className="bl-e-h">
               Tiga aliran nilai baru, <em>di luar penjualan fisik</em>
             </h2>

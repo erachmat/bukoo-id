@@ -121,7 +121,7 @@ export default function PublisherRoyaltiPage() {
           <RoyaltiCalculator />
 
           <div className="disc" style={{ marginTop: 28 }}>
-            <b>Catatan transparansi (Radikal Transparansi BUKOO).</b> Aplikasi rilis 3 September 2026 &mdash; angka di atas adalah <b>ilustrasi berbasis asumsi</b>, bukan jaminan pendapatan. Asumsi: ARPU campuran Rp 45.000/pelanggan berbayar/bulan; revenue pool 65% dari gross; royalti = pool &times; porsi pembacaan &times; tier. Angka nyata bergantung jumlah pelanggan aktual, perilaku baca, &amp; komposisi katalog.
+            <b>Catatan transparansi (Radikal Transparansi BUKOO).</b> Angka di atas adalah <b>ilustrasi berbasis asumsi</b>, bukan jaminan pendapatan. Asumsi: ARPU campuran Rp 45.000/pelanggan berbayar/bulan; revenue pool 65% dari gross; royalti = pool &times; porsi pembacaan &times; tier. Angka nyata bergantung jumlah pelanggan aktual, perilaku baca, &amp; komposisi katalog.
           </div>
         </div>
       </section>
@@ -142,4 +142,3 @@ export default function PublisherRoyaltiPage() {
     </div>
   );
 }
-

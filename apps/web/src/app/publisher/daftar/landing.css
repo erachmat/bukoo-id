@@ -134,15 +134,17 @@
   line-height: 1;
 }
 .bl-nav-links {
-  display: none;
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.bl-nav-links ul {
+  display: flex;
   align-items: center;
   gap: 28px;
   margin: 0;
   padding: 0;
   list-style: none;
-}
-@media (min-width: 1024px) {
-  .bl-nav-links { display: flex; }
 }
 .bl-nav-links a {
   font-size: 14.5px;
@@ -154,6 +156,22 @@
 }
 .bl-nav-links a:hover { color: #ffffff; }
 .bl-nav-links a.on { color: #ffffff; font-weight: 500; }
+
+/* Keep publisher destinations available near the top on narrow screens. */
+@media (max-width: 1023px) {
+  .bl-nav { flex-wrap: wrap; }
+  .bl-nav-left { display: contents; }
+  .bl-nav-logo { order: 1; }
+  .bl-nav-right { order: 2; margin-left: auto; }
+  .bl-nav-links {
+    order: 3;
+    flex-basis: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    margin-top: 8px;
+    padding-top: 12px;
+  }
+  .bl-nav-links ul { flex-wrap: wrap; gap: 10px 20px; }
+}
 
 .bl-nav-right {
   display: flex;
@@ -664,6 +682,11 @@
 .bl-input:focus,
 .bl-select:focus,
 .bl-textarea:focus { border-color: #746033; }
+
+.bl-root :focus-visible {
+  outline: 3px solid #f0d080;
+  outline-offset: 3px;
+}
 
 .bl-select {
   appearance: none;

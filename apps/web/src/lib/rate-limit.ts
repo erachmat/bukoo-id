@@ -1,5 +1,5 @@
 /**
- * D1-backed rate limiting + lockout for web auth actions.
+ * D1-backed rate limiting + lockout for web actions.
  *
  * Why D1 and not the Cloudflare Rate Limiting binding: the binding only exists
  * on deployed Workers, and this repo develops locally via `wrangler dev`
@@ -47,13 +47,14 @@ export interface RateLimitPolicy {
 }
 
 /**
- * All auth rate-limit policies in one place (tunable constants).
+ * All web-action rate-limit policies in one place (tunable constants).
  * Key format helpers: `rateLimitKey('loginEmail', 'email', 'a@b.c')`.
  */
 export const RATE_LIMIT_POLICIES = {
   loginEmail: { maxAttempts: 5, windowMs: 15 * 60_000, lockMs: 15 * 60_000 },
   loginIp: { maxAttempts: 10, windowMs: 15 * 60_000, lockMs: 60 * 60_000 },
   registerIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
+  publisherLeadIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
   otpRequestEmail: { maxAttempts: 3, windowMs: 15 * 60_000, lockMs: 15 * 60_000 },
   otpRequestIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
   otpVerifyEmail: { maxAttempts: 5, windowMs: 15 * 60_000, lockMs: 15 * 60_000 },
@@ -96,7 +97,7 @@ export async function isBlocked(storage: LimiterStorage, now: number, key: strin
   return !(await checkRateLimit(storage, now, key)).allowed;
 }
 
-/** Record a failed attempt, respecting the sliding window, and lock when exceeded. */
+/** Record a counted attempt, respecting the sliding window, and lock when exceeded. */
 export async function recordFailure(
   storage: LimiterStorage,
   now: number,
