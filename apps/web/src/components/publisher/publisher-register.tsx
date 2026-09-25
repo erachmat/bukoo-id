@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { signUpPublisher } from '@/app/(auth)/actions';
 import {
   INITIAL_PUBLISHER_REGISTER_STATE,
@@ -11,9 +11,12 @@ import {
 
 type PublisherRegisterFormProps = {
   callbackUrl: string;
+  modal?: boolean;
+  onClose?: () => void;
+  onLogin?: () => void;
 };
 
-export function PublisherRegisterForm({ callbackUrl }: PublisherRegisterFormProps) {
+export function PublisherRegisterForm({ callbackUrl, modal = false, onClose, onLogin }: PublisherRegisterFormProps) {
   const [state, action, pending] = useActionState<PublisherRegisterState, FormData>(
     signUpPublisher,
     INITIAL_PUBLISHER_REGISTER_STATE,
@@ -29,11 +32,18 @@ export function PublisherRegisterForm({ callbackUrl }: PublisherRegisterFormProp
   }, [state]);
 
   return (
-    <div className="publisher-register-form">
-      <div className="publisher-register-heading">
-        <span className="publisher-register-eyebrow">Publisher Portal</span>
-        <h1>Daftar sebagai penerbit</h1>
-        <p>Buat akun untuk mengelola katalog, memantau royalti, dan menjangkau lebih banyak pembaca.</p>
+    <div className="publisher-register-form" data-modal={modal ? 'true' : undefined}>
+      <div className="publisher-register-heading-row">
+        <div className="publisher-register-heading">
+          <span className="publisher-register-eyebrow">Publisher Portal</span>
+          <h1 id={modal ? 'publisher-register-dialog-title' : undefined}>Daftar sebagai penerbit</h1>
+          <p>Buat akun untuk mengelola katalog, memantau royalti, dan menjangkau lebih banyak pembaca.</p>
+        </div>
+        {onClose && (
+          <button type="button" className="publisher-login-close" onClick={onClose} aria-label="Tutup pendaftaran">
+            <X aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       <form action={action}>
@@ -133,7 +143,15 @@ export function PublisherRegisterForm({ callbackUrl }: PublisherRegisterFormProp
         Dengan mendaftar, Anda menyetujui <a href="/syarat-ketentuan">syarat dan ketentuan</a> serta <a href="/privasi">kebijakan privasi</a> BUKOO.
       </p>
       <p className="publisher-register-switch">
-        Sudah punya akun? <Link href={`/publisher/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}>Masuk di sini</Link>
+        Sudah punya akun? <Link
+          href={`/publisher/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+          onClick={(event) => {
+            if (onLogin) {
+              event.preventDefault();
+              onLogin();
+            }
+          }}
+        >Masuk di sini</Link>
       </p>
       <p className="publisher-login-copyright">© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</p>
     </div>

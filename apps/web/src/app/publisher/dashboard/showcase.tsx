@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
-import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
+import { PublisherLoginTrigger, PublisherRegisterTrigger } from "@/components/publisher/publisher-login";
 
 export function PublisherDashboardShowcase() {
   return (
@@ -259,9 +259,9 @@ export function PublisherDashboardShowcase() {
             <h3>Dashboard ini menanti katalog Anda</h3>
             <p>Setiap penerbit mitra mendapat akses dashboard real-time seperti ini sejak buku pertama tayang.</p>
             <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-              <Link href="/publisher/register" className="dash-cta-btn">
+              <PublisherRegisterTrigger callbackUrl="/publisher/dashboard" className="dash-cta-btn">
                 Daftar sebagai penerbit &rarr;
-              </Link>
+              </PublisherRegisterTrigger>
               <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="btn-ghost btn-lg">
                 Masuk ke Dashboard
               </PublisherLoginTrigger>

@@ -1,3 +1,9 @@
+# Publisher Registration Modal Behavior — 2026-09-25
+
+- `[x]` 1. Added a publisher registration modal on desktop and retained the dedicated registration page on mobile and for direct route visits.
+- `[x]` 2. Made login and registration switch between each other in the modal; dashboard and submit-page registration CTAs use the same responsive trigger.
+- `[x]` 3. Web typecheck passed; lint passed with 0 errors and 26 warnings. Manual browser QA remains.
+
 # Publisher Login Content Layout — 2026-09-24
 
 - `[x]` 1. Added an “Atau” divider after the Masuk button and moved the sign-up prompt before the terms and copyright to match the supplied login reference.

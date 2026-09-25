@@ -1,8 +1,7 @@
 import React from "react";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
-import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
+import { PublisherLoginTrigger, PublisherRegisterTrigger } from "@/components/publisher/publisher-login";
 import { SubmitForm } from "./SubmitForm";
 
 export const metadata = {
@@ -23,9 +22,9 @@ function SubmitSignupBand() {
         Daftar sebagai penerbit mitra BUKOO atau masuk ke akun penerbit Anda untuk membuka formulir pengajuan 4 langkah.
       </p>
       <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-        <Link href="/publisher/register" className="dash-cta-btn">
+        <PublisherRegisterTrigger callbackUrl="/publisher/submit" className="dash-cta-btn">
           Daftar sebagai penerbit &rarr;
-        </Link>
+        </PublisherRegisterTrigger>
         <PublisherLoginTrigger callbackUrl="/publisher/submit" className="btn-ghost btn-lg">
           Masuk
         </PublisherLoginTrigger>

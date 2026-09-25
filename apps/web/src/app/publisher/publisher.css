@@ -852,7 +852,7 @@ td.td-pct {
 .dash-cta h3 em { font-style: italic; color: var(--amber); }
 .dash-cta p { font-size: 14px; color: rgba(240,237,230,0.65); max-width: 52ch; margin: 0 auto 20px; }
 .dash-cta-btn {
-  display: inline-block; font-size: 15px; font-weight: 800; letter-spacing: 0.2px;
+  display: inline-block; font-family: inherit; font-size: 15px; font-weight: 800; letter-spacing: 0.2px;
   color: var(--forest-dd); background: var(--amber);
   padding: 14px 32px; border-radius: 6px; border: none; cursor: pointer;
   transition: all 0.2s; text-decoration: none;
@@ -5070,8 +5070,22 @@ html:has(.pub-page-wrap) {
   font-family: 'Playfair Display', serif;
 }
 
-.publisher-register-heading {
+.publisher-register-form[data-modal='true'] {
+  width: 100%;
+  padding: 32px;
+  box-shadow: none;
+}
+
+.publisher-register-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 28px;
+}
+
+.publisher-register-heading {
+  min-width: 0;
 }
 
 .publisher-register-eyebrow {
@@ -5210,6 +5224,11 @@ html:has(.pub-page-wrap) {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  .publisher-register-form[data-modal='true'] {
+    min-height: 0;
+    padding: 28px 24px 24px;
   }
 }
 

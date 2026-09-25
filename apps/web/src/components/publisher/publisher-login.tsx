@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, X } from 'lucide-react';
+import { PublisherRegisterForm } from '@/components/publisher/publisher-register';
 import {
   signInPublisher,
 } from '@/app/(auth)/actions';
@@ -16,10 +17,11 @@ type PublisherLoginFormProps = {
   callbackUrl: string;
   message?: string;
   onClose?: () => void;
+  onRegister?: () => void;
   standalone?: boolean;
 };
 
-export function PublisherLoginForm({ callbackUrl, message, onClose, standalone = false }: PublisherLoginFormProps) {
+export function PublisherLoginForm({ callbackUrl, message, onClose, onRegister, standalone = false }: PublisherLoginFormProps) {
   const router = useRouter();
   const [state, action, pending] = useActionState<PublisherLoginState, FormData>(
     signInPublisher,
@@ -114,7 +116,15 @@ export function PublisherLoginForm({ callbackUrl, message, onClose, standalone =
       </div>
 
       <p className="publisher-login-register-link">
-        Belum punya akun? <a href={`/publisher/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}>Daftar di sini</a>
+        Belum punya akun? <a
+          href={`/publisher/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+          onClick={(event) => {
+            if (onRegister) {
+              event.preventDefault();
+              onRegister();
+            }
+          }}
+        >Daftar di sini</a>
       </p>
       <p className="publisher-login-terms">
         Dengan melanjutkan, Anda menyetujui <a href="/syarat-ketentuan">syarat dan ketentuan</a> serta <a href="/privasi">kebijakan privasi</a> BUKOO.
@@ -127,9 +137,12 @@ export function PublisherLoginForm({ callbackUrl, message, onClose, standalone =
 type PublisherLoginModalProps = {
   callbackUrl: string;
   onClose: () => void;
+  initialView: 'login' | 'register';
 };
 
-function PublisherLoginModal({ callbackUrl, onClose }: PublisherLoginModalProps) {
+function PublisherLoginModal({ callbackUrl, onClose, initialView }: PublisherLoginModalProps) {
+  const [view, setView] = useState(initialView);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -149,10 +162,23 @@ function PublisherLoginModal({ callbackUrl, onClose }: PublisherLoginModalProps)
         className="publisher-login-dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="publisher-login-dialog-title"
+        aria-labelledby={view === 'login' ? 'publisher-login-dialog-title' : 'publisher-register-dialog-title'}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <PublisherLoginForm callbackUrl={callbackUrl} onClose={onClose} />
+        {view === 'login' ? (
+          <PublisherLoginForm
+            callbackUrl={callbackUrl}
+            onClose={onClose}
+            onRegister={() => setView('register')}
+          />
+        ) : (
+          <PublisherRegisterForm
+            callbackUrl={callbackUrl}
+            modal
+            onClose={onClose}
+            onLogin={() => setView('login')}
+          />
+        )}
       </div>
     </div>
   );
@@ -164,14 +190,19 @@ type PublisherLoginTriggerProps = {
   className?: string;
 };
 
-export function PublisherLoginTrigger({ callbackUrl, children = 'Masuk', className }: PublisherLoginTriggerProps) {
+type PublisherAuthTriggerProps = PublisherLoginTriggerProps & {
+  initialView: 'login' | 'register';
+};
+
+function PublisherAuthTrigger({ callbackUrl, children, className, initialView }: PublisherAuthTriggerProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const openLogin = () => {
     if (window.matchMedia('(max-width: 767px)').matches) {
-      router.push(`/publisher/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      const route = initialView === 'login' ? '/publisher/login' : '/publisher/register';
+      router.push(`${route}?callbackUrl=${encodeURIComponent(callbackUrl)}`);
       return;
     }
     setOpen(true);
@@ -185,9 +216,17 @@ export function PublisherLoginTrigger({ callbackUrl, children = 'Masuk', classNa
   return (
     <>
       <button ref={triggerRef} type="button" className={className} onClick={openLogin}>
-        {children}
+        {children ?? (initialView === 'login' ? 'Masuk' : 'Daftar')}
       </button>
-      {open && <PublisherLoginModal callbackUrl={callbackUrl} onClose={close} />}
+      {open && <PublisherLoginModal callbackUrl={callbackUrl} onClose={close} initialView={initialView} />}
     </>
   );
+}
+
+export function PublisherLoginTrigger(props: PublisherLoginTriggerProps) {
+  return <PublisherAuthTrigger {...props} initialView="login" />;
+}
+
+export function PublisherRegisterTrigger(props: PublisherLoginTriggerProps) {
+  return <PublisherAuthTrigger {...props} initialView="register" />;
 }
