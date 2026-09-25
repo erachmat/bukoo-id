@@ -27,7 +27,7 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
       <ul className="pub-nav-links">
         <li>
           <Link href="/publisher/daftar" className={getNavItemClass("daftar")}>
-            Daftar Penerbit
+            Kemitraan Penerbit
           </Link>
         </li>
         <li>
@@ -56,7 +56,7 @@ export function PublisherNav({ currentTab }: PublisherNavProps) {
           Masuk
         </PublisherLoginTrigger>
         <Link href="/publisher/daftar#daftar" className="btn-cta">
-          Coba Gratis
+          Ajukan kemitraan
         </Link>
       </div>
     </header>

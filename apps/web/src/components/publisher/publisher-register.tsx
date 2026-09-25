@@ -36,8 +36,8 @@ export function PublisherRegisterForm({ callbackUrl, modal = false, onClose, onL
       <div className="publisher-register-heading-row">
         <div className="publisher-register-heading">
           <span className="publisher-register-eyebrow">Publisher Portal</span>
-          <h1 id={modal ? 'publisher-register-dialog-title' : undefined}>Daftar sebagai penerbit</h1>
-          <p>Buat akun untuk mengelola katalog, memantau royalti, dan menjangkau lebih banyak pembaca.</p>
+          <h1 id={modal ? 'publisher-register-dialog-title' : undefined}>Buat akun portal penerbit</h1>
+          <p>Buat akun untuk mengakses portal dan mengajukan judul. Kerja sama dan publikasi judul tetap melalui proses peninjauan tim BUKOO.</p>
         </div>
         {onClose && (
           <button type="button" className="publisher-login-close" onClick={onClose} aria-label="Tutup pendaftaran">
@@ -135,7 +135,7 @@ export function PublisherRegisterForm({ callbackUrl, modal = false, onClose, onL
         {state.formError && <p className="publisher-register-alert" role="alert">{state.formError}</p>}
 
         <button type="submit" className="publisher-login-submit publisher-register-submit" disabled={pending}>
-          {pending ? 'Membuat akun...' : 'Daftar sebagai penerbit'}
+          {pending ? 'Membuat akun...' : 'Buat akun penerbit'}
         </button>
       </form>
 

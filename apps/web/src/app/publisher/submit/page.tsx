@@ -19,11 +19,11 @@ function SubmitSignupBand() {
     <div className="dash-cta">
       <h3>Siap mengajukan judul pertama Anda?</h3>
       <p>
-        Daftar sebagai penerbit mitra BUKOO atau masuk ke akun penerbit Anda untuk membuka formulir pengajuan 4 langkah.
+        Buat akun portal penerbit atau masuk ke akun Anda untuk membuka formulir pengajuan judul. Setiap judul tetap ditinjau tim BUKOO.
       </p>
       <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
         <PublisherRegisterTrigger callbackUrl="/publisher/submit" className="dash-cta-btn">
-          Daftar sebagai penerbit &rarr;
+          Buat akun penerbit &rarr;
         </PublisherRegisterTrigger>
         <PublisherLoginTrigger callbackUrl="/publisher/submit" className="btn-ghost btn-lg">
           Masuk

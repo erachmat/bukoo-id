@@ -15,7 +15,7 @@ const COMPANY = [
 ];
 
 const PUBLISHER = [
-  { href: "/", label: "Daftar Penerbit" },
+  { href: "/", label: "Ajukan kemitraan" },
   { href: "/publisher/dashboard", label: "Dashboard" },
   { href: "/publisher/submit", label: "Submit judul" },
   { href: "/publisher/royalti", label: "Kebijakan Royalti" },

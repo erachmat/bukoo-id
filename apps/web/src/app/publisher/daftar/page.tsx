@@ -17,7 +17,7 @@ import {
 import "./landing.css";
 
 export const metadata = {
-  title: "BUKOO — Daftar Penerbit",
+  title: "BUKOO — Kemitraan Penerbit",
   description:
     "BUKOO bukan pesaing rak buku Anda — kami etalase yang memperkenalkan katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan sumber data.",
   // This page is the publisher homepage, served at the bare domain via a
@@ -113,7 +113,7 @@ export default function PublisherDaftarPage() {
           </p>
           <div className="bl-hero-cta">
             <a href="#daftar" className="bl-btn-gold bl-lg">
-              Daftar sebagai penerbit
+              Ajukan kemitraan
             </a>
           </div>
         </div>

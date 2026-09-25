@@ -1,3 +1,9 @@
+# Publisher Partnership vs Portal Account Copy — 2026-09-25
+
+- `[x]` 1. Renamed homepage, navigation, guide, and footer CTAs to describe partnership inquiry; lead form now submits a kemitraan request.
+- `[x]` 2. Renamed the self-service account flow to portal account creation and clarified that partnership/book publication still requires review.
+- `[x]` 3. Web typecheck passed; lint passed with 0 errors and 26 warnings.
+
 # Publisher Registration Modal Behavior — 2026-09-25
 
 - `[x]` 1. Added a publisher registration modal on desktop and retained the dedicated registration page on mobile and for direct route visits.

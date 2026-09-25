@@ -124,7 +124,7 @@ export function PublisherLoginForm({ callbackUrl, message, onClose, onRegister, 
               onRegister();
             }
           }}
-        >Daftar di sini</a>
+        >Buat akun</a>
       </p>
       <p className="publisher-login-terms">
         Dengan melanjutkan, Anda menyetujui <a href="/syarat-ketentuan">syarat dan ketentuan</a> serta <a href="/privasi">kebijakan privasi</a> BUKOO.
@@ -216,7 +216,7 @@ function PublisherAuthTrigger({ callbackUrl, children, className, initialView }:
   return (
     <>
       <button ref={triggerRef} type="button" className={className} onClick={openLogin}>
-        {children ?? (initialView === 'login' ? 'Masuk' : 'Daftar')}
+        {children ?? (initialView === 'login' ? 'Masuk' : 'Buat akun')}
       </button>
       {open && <PublisherLoginModal callbackUrl={callbackUrl} onClose={close} initialView={initialView} />}
     </>

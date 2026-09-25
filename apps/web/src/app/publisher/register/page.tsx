@@ -4,8 +4,8 @@ import { safeCallbackUrl, defaultRedirectForRole } from '@/lib/auth-helpers'
 import { PublisherRegisterForm } from '@/components/publisher/publisher-register'
 
 export const metadata = {
-  title: 'BUKOO Publisher — Daftar Akun Penerbit',
-  description: 'Buat akun penerbit BUKOO dan mulai distribusikan karya Anda ke jutaan pembaca Indonesia.',
+  title: 'BUKOO Publisher — Buat Akun Portal Penerbit',
+  description: 'Buat akun portal penerbit BUKOO untuk mengajukan judul. Kerja sama dan publikasi buku tetap melalui proses peninjauan tim BUKOO.',
 }
 
 export default async function PublisherRegisterPage(props: {

@@ -135,7 +135,7 @@ export function DaftarForm() {
 
       <div className="bl-form-actions">
         <button type="submit" className="bl-form-btn" disabled={pending}>
-          {pending ? "Mengirim..." : "Daftar sebagai penerbit"}
+          {pending ? "Mengirim..." : "Kirim pengajuan kemitraan"}
         </button>
       </div>
 

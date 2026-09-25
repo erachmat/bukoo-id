@@ -41,7 +41,7 @@ export function LandingNav({ currentTab }: { currentTab?: string }) {
           Masuk
         </PublisherLoginTrigger>
         <a href="#daftar" className="bl-btn-gold">
-          Daftar sebagai penerbit
+          Ajukan kemitraan
         </a>
       </div>
     </header>

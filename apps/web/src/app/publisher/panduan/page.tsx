@@ -68,7 +68,7 @@ export default function PublisherPanduanPage() {
                 <p>Dari pengajuan hingga buku tayang, prosesnya dipandu penuh oleh tim kami:</p>
                 <ul>
                   <li>
-                    <b>Pengajuan.</b> Daftar lewat halaman Daftar Penerbit, tim kemitraan menghubungi dalam 3 hari kerja.
+                    <b>Pengajuan kemitraan.</b> Kirim pengajuan lewat halaman Kemitraan Penerbit. Tim kami menghubungi Anda dalam 3 hari kerja.
                   </li>
                   <li>
                     <b>Kesepakatan.</b> Sepakati judul, tier bagi hasil, dan jendela rilis. Kontrak transparan tanpa klausul tersembunyi.
@@ -209,7 +209,7 @@ export default function PublisherPanduanPage() {
                   <span className="mono">✉ penerbit@bukoo.id</span>
                 </div>
                 <Link href="/publisher/daftar#daftar" className="btn-cta btn-lg">
-                  Daftar sebagai penerbit &rarr;
+                  Ajukan kemitraan &rarr;
                 </Link>
               </div>
             </div>
@@ -219,4 +219,3 @@ export default function PublisherPanduanPage() {
     </div>
   );
 }
-

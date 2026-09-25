@@ -260,7 +260,7 @@ export function PublisherDashboardShowcase() {
             <p>Setiap penerbit mitra mendapat akses dashboard real-time seperti ini sejak buku pertama tayang.</p>
             <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
               <PublisherRegisterTrigger callbackUrl="/publisher/dashboard" className="dash-cta-btn">
-                Daftar sebagai penerbit &rarr;
+                Buat akun penerbit &rarr;
               </PublisherRegisterTrigger>
               <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="btn-ghost btn-lg">
                 Masuk ke Dashboard
