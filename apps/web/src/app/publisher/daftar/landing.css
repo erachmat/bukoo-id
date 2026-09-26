@@ -200,14 +200,28 @@
 
 /* The menu sits over the hero, so opening it never moves the page content. */
 @media (max-width: 899px) {
-  .bl-nav { min-height: 76px; }
+  .bl-nav {
+    height: 76px;
+    min-height: 76px;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px;
+  }
   .bl-nav-toggle { display: inline-flex; }
+  .bl-nav.menu-open {
+    background: var(--bl-forest-deep);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  }
   .bl-nav-panel {
     display: none;
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     flex-direction: column;
     align-items: stretch;
     gap: 18px;
@@ -232,7 +246,10 @@
     font-size: 15px;
   }
   .bl-nav-right {
+    width: 100%;
     align-items: center;
+    justify-content: center;
+    gap: 12px;
     flex-wrap: wrap;
     margin-left: 0;
   }
@@ -314,7 +331,7 @@
 
 /* Very narrow phones */
 @media (max-width: 400px) {
-  .bl-nav { padding: 16px 14px; gap: 10px; }
+  .bl-nav { padding: 0 14px; gap: 10px; }
   .bl-nav-right { gap: 8px; }
   .bl-nav-right .bl-btn-login,
   .bl-nav-right .bl-btn-gold { padding: 9px 12px; font-size: 13px; }
