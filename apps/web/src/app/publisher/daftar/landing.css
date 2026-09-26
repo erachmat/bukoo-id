@@ -372,7 +372,13 @@
 
 /* Exact 1280px desktop frame geometry from Figma. */
 @media (min-width: 1200px) {
-  .bl-hero { height: auto; min-height: 0; aspect-ratio: 2.5 / 1; }
+  .bl-hero {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 2.5 / 1;
+    container-type: inline-size;
+  }
   .bl-hero-bg {
     background-image: url("/publisher-assets/publisher-hero.jpg");
     background-size: 100% 100%;
@@ -386,24 +392,44 @@
   .bl-hero-body {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    width: 610px;
-    max-width: 610px;
-    height: 332px;
-    margin: 120px 0 0 76px;
+    gap: clamp(32px, 2.5cqi, 48px);
+    width: clamp(610px, 47.65625cqi, 915px);
+    max-width: clamp(610px, 47.65625cqi, 915px);
+    height: clamp(332px, 25.9375cqi, 498px);
+    margin: clamp(120px, 9.375cqi, 180px) 0 0 clamp(76px, 5.9375cqi, 114px);
     padding: 0;
   }
   .bl-hero-copy { display: contents; }
-  .bl-h1 { height: 130px; font-size: 48px; line-height: 48px; }
-  .bl-eyebrow-hero {
-    height: 27px;
-    margin-bottom: 0;
-    font-size: 20px;
+  .bl-h1 {
+    height: clamp(106px, 8.28125cqi, 159px);
+    font-size: clamp(48px, 3.75cqi, 72px);
+    line-height: clamp(48px, 3.75cqi, 72px);
   }
-  .bl-lead { width: 610px; height: 63px; max-width: 610px; }
+  .bl-eyebrow-hero {
+    height: clamp(27px, 2.109375cqi, 40.5px);
+    margin-bottom: 0;
+    font-size: clamp(20px, 1.5625cqi, 30px);
+    line-height: clamp(27px, 2.109375cqi, 40.5px);
+  }
+  .bl-lead {
+    width: clamp(610px, 47.65625cqi, 915px);
+    height: clamp(63px, 4.921875cqi, 94.5px);
+    max-width: clamp(610px, 47.65625cqi, 915px);
+    font-size: clamp(14px, 1.09375cqi, 21px);
+    line-height: clamp(21px, 1.640625cqi, 31.5px);
+  }
   .bl-hero-cta { margin: 0; }
-  .bl-nav-panel { margin-left: 40px; }
-  .bl-nav-links ul { gap: 44px; }
+  .bl-hero-cta .bl-btn-gold.bl-lg {
+    width: clamp(198px, 15.46875cqi, 297px);
+    height: clamp(40px, 3.125cqi, 60px);
+    font-size: clamp(14px, 1.09375cqi, 21px);
+  }
+  .bl-nav-panel { margin-left: clamp(40px, 3.125cqi, 60px); }
+  .bl-nav-links ul { gap: clamp(44px, 3.4375cqi, 66px); }
+  .bl-nav-links a {
+    font-size: clamp(12px, 0.9375cqi, 18px);
+    line-height: clamp(18px, 1.40625cqi, 27px);
+  }
   .bl-nav-right { gap: 16px; }
   .bl-nav-right .bl-btn-login { width: 104px; height: 38px; justify-content: center; padding: 0 12px; }
   .bl-nav-right .bl-btn-gold { width: 176px; height: 38px; justify-content: center; padding: 0 12px; font-size: 12px; }
