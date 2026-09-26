@@ -186,21 +186,23 @@
 .bl-nav-links a:hover { color: #ffffff; }
 .bl-nav-links a.on { color: #ffffff; font-weight: 500; }
 
-/* Keep the mobile header compact; reveal links and actions from one menu. */
-@media (max-width: 1023px) {
-  .bl-nav { flex-wrap: wrap; }
-  .bl-nav-logo { order: 1; }
-  .bl-nav-toggle { display: inline-flex; order: 2; }
+/* The menu sits over the hero, so opening it never moves the page content. */
+@media (max-width: 899px) {
+  .bl-nav { position: relative; z-index: 2; }
+  .bl-nav-toggle { display: inline-flex; }
   .bl-nav-panel {
     display: none;
-    order: 3;
-    flex-basis: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     flex-direction: column;
     align-items: stretch;
     gap: 18px;
     border-top: 1px solid rgba(255, 255, 255, 0.14);
-    margin-top: 4px;
-    padding-top: 16px;
+    padding: 8px 20px 20px;
+    background: var(--bl-forest-deep);
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.24);
   }
   .bl-nav.menu-open .bl-nav-panel { display: flex; }
   .bl-nav-links { width: 100%; }
@@ -219,6 +221,19 @@
     align-items: center;
     flex-wrap: wrap;
   }
+}
+
+/* Chrome's desktop-site viewport on phones is roughly 980px. Keep its nav inline. */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .bl-nav { gap: 12px; padding: 20px 24px; }
+  .bl-nav-logo { gap: 8px; font-size: 24px; }
+  .bl-nav-logo-mark { height: 22px; }
+  .bl-nav-panel { gap: 16px; }
+  .bl-nav-links ul { gap: 14px; }
+  .bl-nav-links a { font-size: 13px; }
+  .bl-nav .bl-nav-right { gap: 8px; }
+  .bl-nav-right .bl-btn-login,
+  .bl-nav-right .bl-btn-gold { padding: 9px 12px; font-size: 12.5px; }
 }
 
 .bl-nav-right {
