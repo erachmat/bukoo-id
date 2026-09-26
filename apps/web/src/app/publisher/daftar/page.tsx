@@ -143,10 +143,12 @@ export default function PublisherDaftarPage() {
       <section className="bl-c">
         <div className="bl-container">
           <div className="bl-c-head">
-            <span className="bl-eyebrow">Mengapa Bergabung?</span>
-            <h2 className="bl-c-h">
-              Digital dan fisik <em>bukan lawan.</em>
-            </h2>
+            <div className="bl-c-title-group">
+              <span className="bl-eyebrow">Mengapa Bergabung?</span>
+              <h2 className="bl-c-h">
+                Digital dan fisik <em>bukan lawan.</em>
+              </h2>
+            </div>
             <p className="bl-c-sub">
               BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu
               mengubah mereka menjadi pembeli buku fisik, pelanggan berulang,
@@ -183,11 +185,9 @@ export default function PublisherDaftarPage() {
               <p className="bl-card-p">
                 Pembaca berlangganan digital untuk menjelajah luas dan mencoba
                 banyak judul. Mereka membeli fisik untuk buku yang mereka
-                cintai; dikoleksi, dihadiahkan, dipajang.
-              </p>
-              <p className="bl-card-p">
-                BUKOO mengubah pembaca pasif menjadi pembeli yang tahu persis
-                buku mana yang layak mereka miliki.
+                cintai; dikoleksi, dihadiahkan, dipajang. BUKOO mengubah
+                pembaca pasif menjadi pembeli yang tahu persis buku mana yang
+                layak mereka miliki.
               </p>
             </div>
           </div>

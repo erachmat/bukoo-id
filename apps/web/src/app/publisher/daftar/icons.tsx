@@ -92,9 +92,9 @@ export function IconCheckBadge() {
 
 export function IconArrowRight() {
   return (
-    <svg viewBox="0 0 40 24" aria-hidden="true" {...base} strokeWidth={2.5}>
-      <path d="M4 12h30" />
-      <path d="M26 5l8 7-8 7" />
+    <svg viewBox="0 0 40 32" aria-hidden="true" {...base} strokeWidth={4}>
+      <path d="M4 16h30" />
+      <path d="M26 7l8 9-8 9" />
     </svg>
   );
 }

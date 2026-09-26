@@ -457,6 +457,15 @@
   .bl-c { height: 657px; padding: 64px 0 84px; }
   .bl-c .bl-compare { gap: 22px; }
   .bl-c .bl-arrow { width: 64px; }
+  .bl-c .bl-eyebrow {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #ffffff;
+  }
+  .bl-c .bl-c-sub { font-size: 16px; line-height: 1.5; }
+  .bl-c .bl-c-h { font-size: 48px; line-height: 1; letter-spacing: 0; }
   .bl-c .bl-card {
     display: flex;
     flex-direction: column;
@@ -467,10 +476,11 @@
     border-radius: 20px;
   }
   .bl-c .bl-card-fear { background: #3a2a0f; border-color: #ff9267; }
+  .bl-c .bl-card-fear .bl-card-eyebrow { color: #ff9267; }
   .bl-c .bl-card-truth { background: #173024; border-color: #63d08e; }
-  .bl-c .bl-card-eyebrow { font-size: 16px; }
-  .bl-c .bl-card-h { margin: 0; font-size: 20px; line-height: 1.3; }
-  .bl-c .bl-card-p { margin: 0; font-size: 14px; line-height: 1.35; }
+  .bl-c .bl-card-truth .bl-card-eyebrow { color: #b58418; }
+  .bl-c .bl-card-h { margin: 0; font-size: 20px; line-height: 1; letter-spacing: 0; }
+  .bl-c .bl-card-p { margin: 0; font-size: 16px; line-height: 1.5; letter-spacing: -0.011em; }
   .bl-c .bl-card-p + .bl-card-p { margin-top: 0; }
   .bl-d { height: 743px; padding: 64px 0 84px; }
   .bl-d .bl-d-head { max-width: none; }
@@ -574,9 +584,18 @@
   padding: 64px 0 84px;
 }
 .bl-c-head {
-  max-width: 880px;
+  max-width: 1128px;
   margin: 0 auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.bl-c-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 .bl-eyebrow {
   display: block;
@@ -587,21 +606,24 @@
   color: var(--bl-gold);
 }
 .bl-c-h {
-  margin: 16px 0 0;
+  margin: 0;
   font-family: var(--font-serif), "Noto Serif", Georgia, serif;
   font-size: clamp(30px, 4.2vw, 48px);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1;
+  letter-spacing: 0;
   color: #ffffff;
 }
 .bl-c-h em { font-style: italic; color: var(--bl-gold); }
 .bl-c-sub {
-  max-width: 880px;
-  margin: 20px auto 0;
-  font-size: 15.5px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: #bac7bf;
+  max-width: none;
+  margin: 0;
+  font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
+  color: #ffffff;
 }
 
 .bl-compare {
@@ -615,23 +637,25 @@
   .bl-compare { grid-template-columns: 1fr auto 1fr; align-items: stretch; }
 }
 .bl-card {
-  border-radius: 18px;
-  padding: 36px;
-  border: 1.5px solid;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid;
 }
 .bl-card-fear {
-  background: #241e1a;
-  border-color: #875531;
+  background: #3a2a0f;
+  border-color: #ff9267;
 }
 .bl-card-truth {
-  background: #162820;
-  border-color: #2c5542;
+  background: #173024;
+  border-color: #63d08e;
 }
+.bl-card-fear .bl-card-eyebrow { color: #ff9267; }
+.bl-card-truth .bl-card-eyebrow { color: #b58418; }
 .bl-card-eyebrow {
   font-family: var(--font-serif), "Noto Serif", Georgia, serif;
-  font-size: 19.5px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1;
   color: var(--bl-gold);
 }
 .bl-card-h {
@@ -639,24 +663,27 @@
   font-family: var(--font-serif), "Noto Serif", Georgia, serif;
   font-size: 20px;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1;
+  letter-spacing: 0;
   color: #ffffff;
 }
 .bl-card-p {
   margin: 22px 0 0;
-  font-size: 15px;
+  font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.6;
-  color: #bac7bf;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
+  color: #ffffff;
 }
-.bl-card-p + .bl-card-p { margin-top: 14px; }
+.bl-card-p + .bl-card-p { margin-top: 0; }
 .bl-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bl-gold);
 }
-.bl-arrow svg { width: 40px; height: 24px; }
+.bl-arrow svg { width: 37.33px; height: 32px; }
 
 /* ───────────────────── D — Mesin penemuan ───────────────────── */
 .bl-d {
