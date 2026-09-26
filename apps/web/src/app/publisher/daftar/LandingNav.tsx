@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 
@@ -18,9 +18,30 @@ const LINKS = [
  */
 export function LandingNav({ currentTab }: { currentTab?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const updateScrolledState = () => {
+      const hero = document.querySelector(".bl-hero");
+      const nav = document.querySelector(".bl-nav");
+      if (!hero || !nav) return;
+
+      const nextState = hero.getBoundingClientRect().bottom <= nav.getBoundingClientRect().height;
+      setIsScrolled((currentState) => (currentState === nextState ? currentState : nextState));
+    };
+
+    updateScrolledState();
+    window.addEventListener("scroll", updateScrolledState, { passive: true });
+    window.addEventListener("resize", updateScrolledState);
+
+    return () => {
+      window.removeEventListener("scroll", updateScrolledState);
+      window.removeEventListener("resize", updateScrolledState);
+    };
+  }, []);
 
   return (
-    <header className={`bl-nav${menuOpen ? " menu-open" : ""}`}>
+    <header className={`bl-nav${menuOpen ? " menu-open" : ""}${isScrolled ? " is-scrolled" : ""}`}>
       <Link href="/" className="bl-nav-logo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/bukoo-logo.svg" alt="" className="bl-nav-logo-mark" />

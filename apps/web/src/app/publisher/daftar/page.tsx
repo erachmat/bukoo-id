@@ -92,12 +92,12 @@ export default function PublisherDaftarPage() {
   return (
     <div className="bl-root">
       <LogoutMarkerCleanup />
+      <LandingNav currentTab="daftar" />
 
       {/* ───────────────────────── Hero ───────────────────────── */}
       <section className="bl-hero">
         <div className="bl-hero-bg" />
         <div className="bl-hero-scrim" />
-        <LandingNav currentTab="daftar" />
         <div className="bl-hero-body">
           <div className="bl-hero-copy">
             <span className="bl-eyebrow-hero">Undangan Kerjasama Mitra Penerbit</span>
