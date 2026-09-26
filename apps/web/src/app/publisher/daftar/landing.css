@@ -107,11 +107,40 @@
 @media (min-width: 1024px) {
   .bl-nav { padding: 24px 64px; }
 }
-.bl-nav-left {
+.bl-nav-panel {
   display: flex;
   align-items: center;
-  gap: 28px;
-  min-width: 0;
+  gap: 32px;
+}
+.bl-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(18, 42, 34, 0.72);
+  color: #ffffff;
+  cursor: pointer;
+}
+.bl-nav-toggle span {
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.bl-nav.menu-open .bl-nav-toggle span:first-child { transform: translateY(7px) rotate(45deg); }
+.bl-nav.menu-open .bl-nav-toggle span:nth-child(2) { opacity: 0; }
+.bl-nav.menu-open .bl-nav-toggle span:last-child { transform: translateY(-7px) rotate(-45deg); }
+.bl-nav-toggle:focus-visible,
+.bl-nav a:focus-visible {
+  outline: 2px solid #f0d080;
+  outline-offset: 3px;
 }
 .bl-nav-logo {
   display: inline-flex;
@@ -157,20 +186,39 @@
 .bl-nav-links a:hover { color: #ffffff; }
 .bl-nav-links a.on { color: #ffffff; font-weight: 500; }
 
-/* Keep publisher destinations available near the top on narrow screens. */
+/* Keep the mobile header compact; reveal links and actions from one menu. */
 @media (max-width: 1023px) {
   .bl-nav { flex-wrap: wrap; }
-  .bl-nav-left { display: contents; }
   .bl-nav-logo { order: 1; }
-  .bl-nav-right { order: 2; margin-left: auto; }
-  .bl-nav-links {
+  .bl-nav-toggle { display: inline-flex; order: 2; }
+  .bl-nav-panel {
+    display: none;
     order: 3;
     flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
     border-top: 1px solid rgba(255, 255, 255, 0.14);
-    margin-top: 8px;
-    padding-top: 12px;
+    margin-top: 4px;
+    padding-top: 16px;
   }
-  .bl-nav-links ul { flex-wrap: wrap; gap: 10px 20px; }
+  .bl-nav.menu-open .bl-nav-panel { display: flex; }
+  .bl-nav-links { width: 100%; }
+  .bl-nav-links ul {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+  }
+  .bl-nav-links li + li { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+  .bl-nav-links a {
+    display: block;
+    padding: 12px 0;
+    font-size: 15px;
+  }
+  .bl-nav-right {
+    align-items: center;
+    flex-wrap: wrap;
+  }
 }
 
 .bl-nav-right {
@@ -230,12 +278,12 @@
 }
 .bl-btn-gold:disabled { opacity: 0.65; cursor: not-allowed; }
 
-/* Very narrow phones: keep the nav CTA on-screen */
+/* Very narrow phones */
 @media (max-width: 400px) {
   .bl-nav { padding: 16px 14px; gap: 10px; }
   .bl-nav-right { gap: 8px; }
-  .bl-btn-login { padding: 9px 12px; font-size: 13px; }
-  .bl-nav-right .bl-btn-gold { padding: 9px 12px; font-size: 12.5px; }
+  .bl-nav-right .bl-btn-login,
+  .bl-nav-right .bl-btn-gold { padding: 9px 12px; font-size: 13px; }
   .bl-nav-logo { font-size: 20px; gap: 7px; }
   .bl-nav-logo-mark { height: 20px; }
 }
