@@ -13,7 +13,7 @@ const LINKS = [
 
 /**
  * Landing-page navigation. Rendered inline over the hero so it can use the
- * dark translucent treatment from the design; the shared <PublisherNav> is
+ * transparent overlay treatment from the design; the shared <PublisherNav> is
  * kept untouched for the other publisher pages.
  */
 export function LandingNav({ currentTab }: { currentTab?: string }) {
