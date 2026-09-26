@@ -1,3 +1,12 @@
+# Publisher Landing Figma Implementation — 2026-09-26
+
+- `[x]` Match desktop section geometry, hero art, copy, colors, CTA labels, navigation, and footer to the selected Figma frame.
+- `[x]` Add the measured 1001px intro content width and responsive spacing overrides; retain stacked mobile cards/form and vertical comparison flow.
+- `[x]` Verified 1280px content geometry: sections total 4279px; hero 512px; intro 1001px; footer 394px. Comparison group is 1128×283px, 22px outer gap; cards are 510×283px with 32px padding, 16px inner gap, 20px radius, and Figma fills/strokes.
+- `[x]` Matched discovery group to 1128×328px (22px grid gap; cards 265.5×328px, 32px padding, 16px inner gap) and value group to 1128×432px (32px grid gap; cards 354.67×432px, 32px padding, 16px inner gap, 4px accent border). Matched their header groups to Figma's 203px and 138px heights.
+- `[x]` Verified 390px/768px without overflow, mobile menu opens, and hero CTA reaches `#daftar`.
+- `[x]` Checked rendered header/footer destinations and form fields; web typecheck passed, lint passed with 26 existing warnings, and tests passed (91/91).
+
 # Publisher landing page audit fixes — 2026-09-25
 
 - `[x]` 1. Made the form's “Jabatan” field required in browser and server validation; added an announced success state and generic persistence failure response.

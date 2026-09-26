@@ -99,21 +99,23 @@ export default function PublisherDaftarPage() {
         <div className="bl-hero-scrim" />
         <LandingNav currentTab="daftar" />
         <div className="bl-hero-body">
-          <span className="bl-eyebrow-hero">Undangan Kerjasama Mitra Penerbit</span>
-          <h1 className="bl-h1">
-            Dari rak Penerbit,
-            <br />
-            <em>ke layar jutaan</em> Pembaca
-          </h1>
-          <p className="bl-lead">
-            BUKOO bukan pesaing rak buku Anda — kami etalase yang memperkenalkan
-            katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi
-            pembeli buku fisik, pelanggan berulang, dan sumber data yang selama
-            ini tidak Anda miliki.
-          </p>
+          <div className="bl-hero-copy">
+            <span className="bl-eyebrow-hero">Undangan Kerjasama Mitra Penerbit</span>
+            <h1 className="bl-h1">
+              Dari rak Penerbit,
+              <br />
+              <em>ke layar jutaan</em> Pembaca
+            </h1>
+            <p className="bl-lead">
+              BUKOO bukan pesaing rak buku Anda — kami etalase yang memperkenalkan
+              katalog Anda ke jutaan pembaca baru, lalu mengubah mereka menjadi
+              pembeli buku fisik, pelanggan berulang, dan sumber data yang selama
+              ini tidak Anda miliki.
+            </p>
+          </div>
           <div className="bl-hero-cta">
             <a href="#daftar" className="bl-btn-gold bl-lg">
-              Ajukan kemitraan
+              Daftar sebagai penerbit
             </a>
           </div>
         </div>
@@ -121,7 +123,7 @@ export default function PublisherDaftarPage() {
 
       {/* ───────────────────── B — brand stance ───────────────────── */}
       <section className="bl-b">
-        <div className="bl-container">
+        <div className="bl-b-inner">
           <div className="bl-b-head">
             <h2 className="bl-b-h">
               BUKOO bukan pesaing rak buku Penerbit
@@ -129,9 +131,10 @@ export default function PublisherDaftarPage() {
             </h2>
           </div>
           <p className="bl-b-body">
-            Kami menambah kanal digital untuk membantu pembaca menjelajahi
-            katalog dan menemukan judul baru, sambil tetap mendukung peran
-            toko dan rak buku fisik.
+            BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu
+            mengubah mereka menjadi pembeli buku fisik, pelanggan berulang, dan
+            sumber data yang selama ini tidak Anda miliki; bukan menggantikan
+            rak buku, tapi mengisinya kembali.
           </p>
         </div>
       </section>
@@ -145,9 +148,10 @@ export default function PublisherDaftarPage() {
               Digital dan fisik <em>bukan lawan.</em>
             </h2>
             <p className="bl-c-sub">
-              Jelajahi bagaimana akses digital membantu pembaca menemukan judul
-              yang mereka sukai, lalu memilih buku tertentu untuk dimiliki dalam
-              bentuk fisik.
+              BUKOO memperkenalkan katalog Anda ke jutaan pembaca baru, lalu
+              mengubah mereka menjadi pembeli buku fisik, pelanggan berulang,
+              dan sumber data yang selama ini tidak Anda miliki; bukan
+              menggantikan rak buku, tapi mengisinya kembali.
             </p>
           </div>
 
@@ -223,7 +227,7 @@ export default function PublisherDaftarPage() {
       <section className="bl-e">
         <div className="bl-container">
           <div className="bl-e-head">
-            <span className="bl-eyebrow">Nilai kemitraan</span>
+            <span className="bl-eyebrow">Mesin penemuan</span>
             <h2 className="bl-e-h">
               Tiga aliran nilai baru, <em>di luar penjualan fisik</em>
             </h2>
@@ -237,7 +241,7 @@ export default function PublisherDaftarPage() {
           <div className="bl-e-grid">
             {VALUE_STREAMS.map(({ accent, Icon, title, body, items, topAccent }) => (
               <div
-                className={`bl-e-card${topAccent ? " bl-top-accent" : ""}`}
+                className={`bl-e-card bl-e-card-${accent}${topAccent ? " bl-top-accent" : ""}`}
                 key={title}
               >
                 <div className={`bl-e-ico ${accent}`}>

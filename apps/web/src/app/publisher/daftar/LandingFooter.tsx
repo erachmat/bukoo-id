@@ -15,10 +15,10 @@ const COMPANY = [
 ];
 
 const PUBLISHER = [
-  { href: "/", label: "Ajukan kemitraan" },
+  { href: "/", label: "Daftar sebagai penerbit" },
   { href: "/publisher/dashboard", label: "Dashboard" },
   { href: "/publisher/submit", label: "Submit judul" },
-  { href: "/publisher/royalti", label: "Kebijakan Royalti" },
+  { href: "/publisher/royalti", label: "Royalty" },
   { href: "/publisher/panduan", label: "Panduan Penerbit" },
 ];
 

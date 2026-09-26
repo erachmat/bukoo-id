@@ -7,7 +7,7 @@ import { PublisherLoginTrigger } from "@/components/publisher/publisher-login";
 const LINKS = [
   { href: "/publisher/dashboard", label: "Dashboard" },
   { href: "/publisher/submit", label: "Submit judul" },
-  { href: "/publisher/royalti", label: "Royalti" },
+  { href: "/publisher/royalti", label: "Royalty" },
   { href: "/publisher/panduan", label: "Panduan Penerbit" },
 ];
 
@@ -62,7 +62,7 @@ export function LandingNav({ currentTab }: { currentTab?: string }) {
             Masuk
           </PublisherLoginTrigger>
           <a href="#daftar" className="bl-btn-gold" onClick={() => setMenuOpen(false)}>
-            Ajukan kemitraan
+            Daftar sebagai penerbit
           </a>
         </div>
       </div>
