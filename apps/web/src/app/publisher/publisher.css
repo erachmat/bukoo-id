@@ -5339,9 +5339,30 @@ html:has(.pub-page-wrap) {
     border-radius: 7px;
     background: rgba(255,255,255,0.04);
     color: var(--pds-text);
-    font-size: 20px;
-    line-height: 1;
     cursor: pointer;
+  }
+  .pub-dashboard-shell .pds-mobile-menu-icon {
+    display: flex;
+    width: 17px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pub-dashboard-shell .pds-mobile-menu-icon > span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+  .pub-dashboard-shell .pds-mobile-menu-btn.is-open .pds-mobile-menu-icon > span:first-child {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .pub-dashboard-shell .pds-mobile-menu-btn.is-open .pds-mobile-menu-icon > span:nth-child(2) {
+    opacity: 0;
+  }
+  .pub-dashboard-shell .pds-mobile-menu-btn.is-open .pds-mobile-menu-icon > span:last-child {
+    transform: translateY(-6px) rotate(-45deg);
   }
   .pub-dashboard-shell .pds-mobile-nav {
     position: absolute;

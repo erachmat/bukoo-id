@@ -117,13 +117,17 @@ export function PublisherTopbar({
         </nav>
         <button
           type="button"
-          className="pds-mobile-menu-btn"
-          aria-label="Buka navigasi penerbit"
+          className={`pds-mobile-menu-btn${mobileNavOpen ? " is-open" : ""}`}
+          aria-label={mobileNavOpen ? "Tutup navigasi penerbit" : "Buka navigasi penerbit"}
           aria-expanded={mobileNavOpen}
           aria-controls="publisher-mobile-nav"
           onClick={() => setMobileNavOpen((open) => !open)}
         >
-          {mobileNavOpen ? "Tutup" : "Menu"}
+          <span className="pds-mobile-menu-icon" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
         </button>
         {mobileNavOpen && (
           <nav id="publisher-mobile-nav" className="pds-mobile-nav" aria-label="Navigasi penerbit">

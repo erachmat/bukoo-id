@@ -1131,6 +1131,12 @@ Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/
 - `[x]` 5. Reviewed Katalog, Royalti, Performa Buku, Pembaca, Demografi, Sebaran Geografis, Waktu Baca, and Metadata against the adopted Figma design system, one page at a time. Verified mobile navigation fits its scroll container.
 - `[x]` 6. Final workspace checks passed. Reviewed/applied migration `0014_cute_tiger_shark.sql` through the manual workflow; merged PR #1; production Web/API deploys and smoke checks passed on 2026-09-27.
 
+# Publisher Dashboard Mobile Menu Icon — 2026-09-27
+
+- `[x]` Replaced visible “Menu”/“Tutup” text with a hamburger icon that animates to a close icon when open; retained state-aware screen-reader labels.
+- `[x]` Web typecheck passed; lint passed with 0 errors (26 existing warnings); tests passed (91/91).
+- `[ ]` Browser visual review remains; browser control failed to load its request-header policy, so production mobile rendering could not be rechecked here.
+
 # Publisher Demo Seed Reassignment — 2026-09-27
 
 - [x] Confirmed `marketing@bukoo.id` exists in production with role `PUBLISHER`.
