@@ -103,6 +103,11 @@ export interface MonthlyRoyaltyPoint {
   amount: number;
 }
 
+export interface MonthlyReadPoint {
+  bucket: string;
+  reads: number;
+}
+
 export interface KpiComparison {
   previous: number;
   /** null when the previous window has no data → render 'baru' instead of a misleading delta. */
@@ -144,6 +149,8 @@ export interface PublisherBookStat {
   isPublished: boolean;
   lifetimeReads: number;
   reads: number;
+  previousReads: number;
+  hasPreviousReads: boolean;
   seconds: number;
   completions: number;
   estimatedRoyalty: number;
@@ -156,6 +163,7 @@ export interface PublisherDashboardOverview {
   publishedBooks: number;
   inReviewBooks: number;
   totalDistinctReaders: number;
+  totalReadStarts: number;
   totalReadingSeconds: number;
   totalCompletions: number;
   totalLifetimeReads: number;
@@ -173,6 +181,7 @@ export interface PublisherDashboardOverview {
   }[];
   /** Per-KPI previous-window values for ▲/▼ delta chips. */
   comparison: {
+    reads: KpiComparison;
     readers: KpiComparison;
     seconds: KpiComparison;
     completions: KpiComparison;
@@ -180,6 +189,8 @@ export interface PublisherDashboardOverview {
   };
   /** In-period reading activity series (daily for months/quarters, monthly for YTD). */
   dailyTrend: TrendPoint[];
+  /** Read starts grouped by month from January through the selected month. */
+  monthlyReadTrend: MonthlyReadPoint[];
   /** Actual-data royalty estimates for the current month and preceding five months. */
   royaltyTrend: MonthlyRoyaltyPoint[];
   /** Readers-days split across each book's genres (a book with 2 genres contributes to both). */
@@ -224,6 +235,20 @@ function trendBucketKey(date: string, monthly: boolean): string {
   return monthly ? date.slice(0, 7) : date;
 }
 
+export function buildMonthlyReadTrend(
+  year: number,
+  selectedMonth: number,
+  rows: readonly { month: string; reads: number }[],
+): MonthlyReadPoint[] {
+  const lastMonth = Math.max(1, Math.min(12, Math.trunc(selectedMonth)));
+  const totals = new Map<string, number>();
+  for (const row of rows) totals.set(row.month, (totals.get(row.month) ?? 0) + Number(row.reads || 0));
+  return Array.from({ length: lastMonth }, (_, index) => {
+    const bucket = `${year}-${String(index + 1).padStart(2, '0')}`;
+    return { bucket, reads: totals.get(bucket) ?? 0 };
+  });
+}
+
 export async function getPublisherDashboardOverview(
   publisherUserId: string,
   publisherName?: string | null,
@@ -261,10 +286,12 @@ export async function getPublisherDashboardOverview(
   let totalDistinctReaders = 0;
   let totalReadingSeconds = 0;
   let totalCompletions = 0;
+  let totalReadStarts = 0;
   let readerLoyalty = bucketReaderLoyalty([]);
   let geo: { countryCode: string; readerDays: number }[] = [];
   const lifetimeMetrics = new Map<string, { readSeconds: number; completedReads: number }>();
   const comparison = {
+    reads: { previous: 0, hasData: false },
     readers: { previous: 0, hasData: false },
     seconds: { previous: 0, hasData: false },
     completions: { previous: 0, hasData: false },
@@ -278,6 +305,7 @@ export async function getPublisherDashboardOverview(
   let weekdayRhythm: RhythmPoint[] = [];
   let hourRhythm: RhythmPoint[] = [];
   const bookStatsMap = new Map<string, { reads: number; seconds: number; completions: number }>();
+  const previousBookReads = new Map<string, number>();
 
   const previousRange = getPreviousPeriodRange(period);
 
@@ -314,12 +342,14 @@ export async function getPublisherDashboardOverview(
     if (period.endExclusive) metricConditions.push(sql`${publisherBookDailyMetrics.metricDate} < ${period.endExclusive}`);
     const metricRows = await db
       .select({
+        readStarts: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
         readingSeconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
         completedReads: sql<number>`coalesce(sum(${publisherBookDailyMetrics.completedReads}), 0)`,
       })
       .from(publisherBookDailyMetrics)
       .where(and(...metricConditions));
 
+    totalReadStarts = Number(metricRows[0]?.readStarts ?? 0);
     totalReadingSeconds = Number(metricRows[0]?.readingSeconds ?? 0);
     totalCompletions = Number(metricRows[0]?.completedReads ?? 0);
 
@@ -448,6 +478,22 @@ export async function getPublisherDashboardOverview(
       comparison.seconds = { previous: prevSeconds, hasData: prevSeconds > 0 };
       comparison.completions = { previous: prevCompletions, hasData: prevCompletions > 0 };
       comparison.readers = { previous: prevReaderCount, hasData: prevReaderCount > 0 };
+      const prevStarts = Number(prevMetricRows[0]?.starts ?? 0);
+      comparison.reads = { previous: prevStarts, hasData: prevStarts > 0 };
+
+      const previousBookRows = await db
+        .select({
+          bookId: publisherBookDailyMetrics.bookId,
+          reads: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+        })
+        .from(publisherBookDailyMetrics)
+        .where(and(
+          inArray(publisherBookDailyMetrics.bookId, bookIds),
+          ...(previousRange.start ? [gte(publisherBookDailyMetrics.metricDate, previousRange.start)] : []),
+          ...(previousRange.endExclusive ? [sql`${publisherBookDailyMetrics.metricDate} < ${previousRange.endExclusive}`] : []),
+        ))
+        .groupBy(publisherBookDailyMetrics.bookId);
+      for (const row of previousBookRows) previousBookReads.set(row.bookId, Number(row.reads));
     }
 
     const lifetimeRows = await db
@@ -521,6 +567,35 @@ export async function getPublisherDashboardOverview(
       };
     }
   }
+
+  // Dashboard chart: actual read starts from January through the selected month.
+  const chartAnchor = period.endExclusive
+    ? new Date(`${period.endExclusive}T00:00:00.000Z`)
+    : new Date(`${period.start ?? new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
+  if (period.endExclusive) chartAnchor.setUTCDate(chartAnchor.getUTCDate() - 1);
+  const chartYear = chartAnchor.getUTCFullYear();
+  const selectedMonth = chartAnchor.getUTCMonth() + 1;
+  const monthlyStart = `${chartYear}-01-01`;
+  const monthlyEnd = selectedMonth === 12
+    ? `${chartYear + 1}-01-01`
+    : `${chartYear}-${String(selectedMonth + 1).padStart(2, '0')}-01`;
+  const monthlyReadRows = bookIds.length > 0 ? await db
+    .select({
+      month: sql<string>`substr(${publisherBookDailyMetrics.metricDate}, 1, 7)`,
+      reads: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readStarts}), 0)`,
+    })
+    .from(publisherBookDailyMetrics)
+    .where(and(
+      inArray(publisherBookDailyMetrics.bookId, bookIds),
+      gte(publisherBookDailyMetrics.metricDate, monthlyStart),
+      sql`${publisherBookDailyMetrics.metricDate} < ${monthlyEnd}`,
+    ))
+    .groupBy(sql`substr(${publisherBookDailyMetrics.metricDate}, 1, 7)`)
+    : [];
+  const monthlyReadTrend = buildMonthlyReadTrend(chartYear, selectedMonth, monthlyReadRows.map((row) => ({
+    month: row.month,
+    reads: Number(row.reads),
+  })));
 
   const [monthlyPoolSetting, rateBpsSetting] = await Promise.all([
     getPlatformSetting('royalty_monthly_pool'),
@@ -685,6 +760,7 @@ export async function getPublisherDashboardOverview(
     publishedBooks,
     inReviewBooks,
     totalDistinctReaders,
+    totalReadStarts,
     totalReadingSeconds,
     totalCompletions,
     totalLifetimeReads,
@@ -693,6 +769,7 @@ export async function getPublisherDashboardOverview(
     geo,
     topBooks,
     comparison,
+    monthlyReadTrend,
     dailyTrend: [...dailyTrendMap.entries()]
       .map(([bucket, agg]) => ({ bucket, ...agg }))
       .sort((a, b) => a.bucket.localeCompare(b.bucket)),
@@ -712,6 +789,8 @@ export async function getPublisherDashboardOverview(
       isPublished: b.isPublished,
       lifetimeReads: b.readCount,
       estimatedRoyalty: royaltyEstimate.byBook.get(b.id) ?? 0,
+      previousReads: previousBookReads.get(b.id) ?? 0,
+      hasPreviousReads: comparison.reads.hasData,
       ...(bookStatsMap.get(b.id) ?? { reads: 0, seconds: 0, completions: 0 }),
     })),
     recentNotifications: recentNotifications.map((n) => ({

@@ -2,103 +2,71 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PublisherTopbar } from "../topbar-client";
-import { IconInstagram, IconLinkedIn, IconTikTok, IconYouTube } from "../daftar/icons";
 import { useRouter } from "next/navigation";
+import { PublisherSidebar } from "../sidebar-client";
 
 interface DashboardShellProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-  };
+  user: { name?: string | null; email?: string | null };
   children: React.ReactNode;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
 }
 
-// Tab → route mapping for navigation tabs that have real pages
 const TAB_ROUTES: Record<string, string> = {
-  upload:       "/publisher/books/new",
-  notifikasi:   "/publisher/notifications",
-  pengaturan:   "/publisher/settings",
-  promosi:      "/publisher/promotions",
+  katalog: "/publisher/books",
+  upload: "/publisher/books/new",
+  promosi: "/publisher/promotions",
+  pengaturan: "/publisher/settings",
+  notifikasi: "/publisher/notifications",
 };
 
-const FOOTER_COMPANY = [
-  { href: "https://bukoo.id/", label: "Homepage Pembaca" },
-  { href: "/tentang", label: "Tentang BUKOO" },
-  { href: "/newsroom", label: "Newsroom" },
-  { href: "/kontak", label: "Kontak" },
-];
-const FOOTER_PUBLISHER = [
-  { href: "/", label: "Daftar sebagai penerbit" },
-  { href: "/publisher/dashboard", label: "Dashboard" },
-  { href: "/publisher/books/new", label: "Submit judul" },
-  { href: "/publisher/dashboard?tab=royalti", label: "Royalti" },
-  { href: "/publisher/panduan", label: "Panduan Penerbit" },
-];
-
-export function DashboardShell({
-  user,
-  children,
-  activeTab: controlledTab,
-  onTabChange: controlledChange,
-}: DashboardShellProps) {
+export function DashboardShell({ user, children, activeTab: controlledTab, onTabChange: controlledChange }: DashboardShellProps) {
   const router = useRouter();
   const [internalTab, setInternalTab] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const name = user.name || "Mitra Penerbit";
-
   const activeTab = controlledTab ?? internalTab;
 
   const handleTabChange = (tab: string) => {
-    if (TAB_ROUTES[tab]) {
-      router.push(TAB_ROUTES[tab]);
-    } else if (controlledChange) {
-      controlledChange(tab);
-    } else {
-      setInternalTab(tab);
-    }
+    setSidebarOpen(false);
+    if (TAB_ROUTES[tab]) router.push(TAB_ROUTES[tab]);
+    else if (controlledChange) controlledChange(tab);
+    else setInternalTab(tab);
   };
 
   return (
-    <div className="pub-dashboard-shell">
-      <div className="pds-app">
-        <div className="pds-frame">
-          <PublisherTopbar
-            publisherName={name}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
-          <div className="pds-body">
-            <div className="pds-main">
-              {children}
+    <div className={`pub-dashboard-shell pds-figma-shell${activeTab === "overview" ? " is-overview" : ""}`}>
+      <div className="pds-layout">
+        {sidebarOpen && <button type="button" className="pds-sidebar-scrim" aria-label="Tutup menu" onClick={() => setSidebarOpen(false)} />}
+        <PublisherSidebar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isOpen={sidebarOpen}
+          onNavigate={() => setSidebarOpen(false)}
+        />
+        <div className="pds-workspace">
+          <header className="pds-appbar">
+            <button
+              type="button"
+              className="pds-appbar-menu"
+              aria-label={sidebarOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+              aria-expanded={sidebarOpen}
+              onClick={() => setSidebarOpen((open) => !open)}
+            >
+              <span /><span /><span />
+            </button>
+            <Link href="/publisher/dashboard" className="pds-mobile-brand">BUKOO</Link>
+            <div className="pds-appbar-user">
+              <span>Hi, {name}</span>
+              <Link href="/publisher/settings" aria-label="Pengaturan" title="Pengaturan" className="pds-appbar-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19.1 13.6 1.1.9-1.3 2.3-1.4-.5a7.7 7.7 0 0 1-1.7 1l-.2 1.5h-2.7l-.3-1.5a7.7 7.7 0 0 1-1.7-1l-1.4.5-1.3-2.3 1.1-.9a7.8 7.8 0 0 1 0-2l-1.1-.9 1.3-2.3 1.4.5a7.7 7.7 0 0 1 1.7-1l.3-1.5h2.7l.2 1.5a7.7 7.7 0 0 1 1.7 1l1.4-.5 1.3 2.3-1.1.9a7.8 7.8 0 0 1 0 2Z"/></svg>
+              </Link>
+              <Link href="/publisher/notifications" aria-label="Notifikasi" title="Notifikasi" className="pds-appbar-icon pds-notification-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>
+              </Link>
             </div>
-          </div>
-          <div className="pds-foot">
-            <div className="pds-foot-inner">
-              <div className="pds-foot-main">
-                <div className="pds-foot-brand">
-                  <div className="pds-foot-logo"><img src="/bukoo-logo.svg" alt="" /><span>BUKOO</span></div>
-                  <p className="pds-foot-tagline">Pustaka Dalam Genggaman</p>
-                  <p className="pds-foot-desc">Platform langganan buku digital Indonesia.<br />Baca tanpa batas, mulai dari Rp 29.900/bulan.</p>
-                  <div className="pds-foot-socials">
-                    <a href="https://www.instagram.com/bukooid" aria-label="Instagram"><IconInstagram /></a>
-                    <a href="https://www.linkedin.com/company/bukoo-indonesia/" aria-label="LinkedIn"><IconLinkedIn /></a>
-                    <a href="https://www.tiktok.com/@bukooid" aria-label="TikTok"><IconTikTok /></a>
-                    <a href="https://www.youtube.com/@bukooid" aria-label="YouTube"><IconYouTube /></a>
-                  </div>
-                </div>
-                <nav className="pds-foot-links" aria-label="Tautan footer">
-                  <div><h2>Perusahaan</h2>{FOOTER_COMPANY.map((item) => <Link key={item.label} href={item.href}>{item.label}</Link>)}</div>
-                  <div><h2>Penerbit</h2>{FOOTER_PUBLISHER.map((item) => <Link key={item.label} href={item.href}>{item.label}</Link>)}</div>
-                </nav>
-              </div>
-              <div className="pds-foot-bottom">
-                <span>© 2026 PT BUKOO DIGITAL INDONESIA · Semua hak dilindungi</span>
-                <div><Link href="/syarat-ketentuan">Syarat & Ketentuan</Link><Link href="/privasi">Privasi</Link></div>
-              </div>
-            </div>
-          </div>
+          </header>
+          <main className="pds-main pds-figma-main">{children}</main>
         </div>
       </div>
     </div>

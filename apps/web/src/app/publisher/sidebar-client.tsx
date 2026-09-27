@@ -1,42 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { useTransition } from "react";
 
 interface SidebarProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-  };
   activeTab: string;
   onTabChange: (tab: string) => void;
+  isOpen?: boolean;
+  onNavigate?: () => void;
 }
 
 const analyticsNav = [
   { id: "overview",   label: "Overview" },
   { id: "performa",   label: "Performa Buku" },
-  { id: "royalti",    label: "Royalti" },
+  { id: "royalti-info", label: "Royalti", href: "/publisher/royalti" },
+  { id: "royalti",    label: "Royalti Per Judul" },
   { id: "pembaca",    label: "Pembaca" },
   { id: "waktu",      label: "Waktu Baca" },
   { id: "demografi",  label: "Demografi" },
-  { id: "geo",        label: "Sebaran Geografis" },
-  { id: "metadata",   label: "Metadata" },
+  { id: "geo",        label: "Sebaran Geo" },
 ];
 
 const contentNav = [
   { id: "katalog",   label: "Katalog", href: "/publisher/books" },
   { id: "upload",    label: "Upload Buku", href: "/publisher/books/new" },
   { id: "promosi",   label: "Promosi", href: "/publisher/promotions" },
+  { id: "metadata",  label: "Metadata" },
 ];
 
-const accountNav = [
-  { id: "pengaturan",  label: "Pengaturan", href: "/publisher/settings" },
-  { id: "notifikasi",  label: "Notifikasi", href: "/publisher/notifications" },
-];
-
-export function PublisherSidebar({ user: _user, activeTab, onTabChange }: SidebarProps) {
-  const pathname = usePathname();
+export function PublisherSidebar({ activeTab, onTabChange, isOpen = false, onNavigate }: SidebarProps) {
   const [isSigningOut, startSignOut] = useTransition();
 
   const handleSignOut = () => {
@@ -49,18 +42,20 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
   };
 
   const renderItem = (item: { id: string; label: string; href?: string; badge?: string }) => {
-    const isActive = item.href ? pathname === item.href : activeTab === item.id;
+    const isActive = !item.href && activeTab === item.id;
     const cls = `pds-side-item${isActive ? " active" : ""}`;
 
     if (item.href) {
       return (
-        <Link key={item.id} href={item.href} className={cls}>
+        <Link key={item.id} href={item.href} className={cls} onClick={onNavigate}>
+          <span className="pds-side-icon" aria-hidden="true">{item.id === "royalti-info" ? "◈" : "▤"}</span>
           {item.label}
         </Link>
       );
     }
     return (
-      <button key={item.id} className={cls} onClick={() => onTabChange(item.id)}>
+      <button key={item.id} className={cls} aria-current={isActive ? "page" : undefined} onClick={() => { onTabChange(item.id); onNavigate?.(); }}>
+        <span className="pds-side-icon" aria-hidden="true">{({ overview: "⌂", performa: "⌁", royalti: "▤", pembaca: "♙", waktu: "◷", demografi: "♧", geo: "◎", katalog: "▣", upload: "⇧", promosi: "◇", metadata: "▧" } as Record<string, string>)[item.id] ?? "•"}</span>
         {item.label}
         {item.badge && <span className="pds-side-badge">{item.badge}</span>}
       </button>
@@ -68,21 +63,17 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
   };
 
   return (
-    <aside className="pds-sidebar">
+    <aside className={`pds-sidebar${isOpen ? " is-open" : ""}`}>
+      <Link href="/publisher/dashboard" className="pds-side-brand" onClick={onNavigate}>
+        <Image src="/bukoo-logo.svg" alt="" width={25} height={25} />
+        <span>BUKOO</span>
+      </Link>
       <div className="pds-side-label">Menu</div>
       {analyticsNav.map(renderItem)}
 
       <div className="pds-side-label">Konten</div>
       {contentNav.map(renderItem)}
-
-      <div className="pds-side-label">Akun</div>
-      {accountNav.map(renderItem)}
-
       <div className="pds-side-foot">
-        <div className="up">
-          Royalti: estimasi berbasis data baca<br />
-          Payout final mengikuti settlement resmi
-        </div>
         <button
           type="button"
           onClick={handleSignOut}
@@ -111,4 +102,3 @@ export function PublisherSidebar({ user: _user, activeTab, onTabChange }: Sideba
     </aside>
   );
 }
-

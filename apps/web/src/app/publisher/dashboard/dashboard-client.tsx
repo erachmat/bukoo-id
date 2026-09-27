@@ -2,11 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview, RhythmPoint } from "./queries";
 import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
 import { countryLabel, getDominantAgeGroup, getPeakBucket } from "./metrics";
+import { getCoverUrl } from "@/lib/cover-url";
 
 interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
@@ -21,162 +23,150 @@ type Overview = PublisherDashboardOverview;
 const CHART_COLORS = ['var(--pds-teal)', 'var(--pds-sky)', 'var(--pds-amber)', 'var(--pds-coral)', 'var(--pds-lavender)', 'rgba(255,255,255,0.28)'];
 const fmtId = new Intl.NumberFormat('id-ID');
 
-/** CSS bar chart from trend points (daily or monthly buckets). */
-function RoyaltyTrendChart({ trend }: { trend: Overview['royaltyTrend'] }) {
-  if (trend.length === 0) {
-    return <div className="pds-empty">Estimasi historis belum tersedia. Pastikan pool royalti platform sudah diatur.</div>;
-  }
-  const max = Math.max(...trend.map((point) => point.amount), 1);
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-  const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
-  return (
-    <div className="pds-chart">
-      {trend.map((point) => {
-        const pct = point.amount > 0 ? Math.max(Math.round((point.amount / max) * 100), 4) : 0;
-        const month = Number(point.bucket.slice(5, 7)) - 1;
-        const label = monthNames[month] ?? point.bucket;
-        return (
-          <div className="pds-cbar-wrap" key={point.bucket} title={`${point.bucket}: ${fmtRp.format(point.amount)}`}>
-            {point.amount > 0 && <div className="pds-cbar" style={{ height: `${pct}%`, background: 'var(--pds-amber)' }} />}
-            <div className="pds-cmon">{label}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => void; overview?: Overview }) {
-  const totalReaders = overview?.totalDistinctReaders ?? 0;
-  const royalty = overview?.royaltyEstimate ?? 0;
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
-  const periodLabel = overview?.period.label ?? 'Bulan ini';
-  const periodReads = overview?.dailyTrend.reduce((sum, point) => sum + point.reads, 0) ?? 0;
-  const activeBooks = overview?.bookStats.filter((book) => book.reads > 0).length ?? 0;
-  const activePercent = overview?.totalBooks ? Math.round((activeBooks / overview.totalBooks) * 100) : 0;
-  const topBooks = (overview?.topBooks ?? []).slice(0, 5);
-  const maxReads = Math.max(...topBooks.map((book) => book.readCount), 1);
-  const genres = [...(overview?.genreSplit ?? [])].sort((a, b) => b.readerDays - a.readerDays).slice(0, 6);
-  const totalGenreDays = genres.reduce((sum, genre) => sum + genre.readerDays, 0);
-  const payouts = (overview?.payouts ?? []).slice(0, 4);
+  const period = overview?.period;
+  const currentReads = overview?.totalReadStarts ?? overview?.dailyTrend.reduce((sum, point) => sum + point.reads, 0) ?? 0;
+  const completionRate = currentReads > 0 ? (overview?.totalCompletions ?? 0) / currentReads * 100 : 0;
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+  const monthlyReads = overview?.monthlyReadTrend ?? [];
+  const monthValue = monthlyReads[monthlyReads.length - 1]?.bucket ?? period?.start?.slice(0, 7) ?? new Date().toISOString().slice(0, 7);
+  const currentDate = new Date();
+  const maxSelectableMonth = Number(monthValue.slice(0, 4)) === currentDate.getFullYear() ? currentDate.getMonth() + 1 : 12;
+  const maxMonthlyReads = Math.max(...monthlyReads.map((point) => point.reads), 1);
+  const bookStats = [...(overview?.bookStats ?? [])];
+  const topBooks = bookStats.filter((book) => book.isPublished).sort((a, b) => b.reads - a.reads).slice(0, 5);
+  const allGenres = [...(overview?.genreSplit ?? [])].sort((a, b) => b.readerDays - a.readerDays);
+  const genreCount = allGenres.length;
+  const genres = allGenres.length > 5
+    ? [...allGenres.slice(0, 4), { genre: 'Lainnya', readerDays: allGenres.slice(4).reduce((sum, item) => sum + item.readerDays, 0) }]
+    : allGenres;
+  const genreTotal = genres.reduce((sum, item) => sum + item.readerDays, 0);
+  const genreColors = ['#B58418', '#2F9F7B', '#173F32', '#6BA5DE', '#D2D0CA'];
+  const genreStops: string[] = [];
+  let genreOffset = 0;
+  genres.forEach((genre, index) => {
+    const end = genreOffset + (genreTotal ? genre.readerDays / genreTotal * 100 : 0);
+    genreStops.push(`${genreColors[index]} ${genreOffset}% ${end}%`);
+    genreOffset = end;
+  });
+  const ages = overview?.demographics?.ageGroups ?? [];
+  const known = overview?.demographics?.knownCount ?? 0;
+  const ageKnown = ages.reduce((sum, age) => sum + age.count, 0);
+  const femaleReaders = overview?.demographics?.gender.female ?? 0;
+  const maleReaders = overview?.demographics?.gender.male ?? 0;
+  const genderKnown = femaleReaders + maleReaders;
+  const cities = (overview?.cities ?? []).filter((city) => city.city !== 'Lainnya').slice(0, 6);
+  const maxCityReaders = Math.max(...cities.map((city) => city.readers), 1);
+  const royaltyBooks = bookStats.filter((book) => book.isPublished).sort((a, b) => b.estimatedRoyalty - a.estimatedRoyalty).slice(0, 8);
+
+  const comparisonLabel = (current: number, previous: number, hasData: boolean) => {
+    if (!hasData) return <span className="pds-delta is-new">Baru</span>;
+    if (previous === 0) return <span className="pds-delta is-new">Baru</span>;
+    const delta = ((current - previous) / previous) * 100;
+    return <span className={`pds-delta ${delta < 0 ? 'is-down' : 'is-up'}`}>{delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toLocaleString('id-ID', { maximumFractionDigits: 1 })}% vs bulan lalu</span>;
+  };
+  const selectMonth = (value: string) => {
+    const [year, month] = value.split('-').map(Number);
+    const end = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+    window.location.assign(`/publisher/dashboard?period=custom&from=${value}-01&to=${end}`);
+  };
+  const reportEnd = new Date(Date.UTC(Number(monthValue.slice(0, 4)), Number(monthValue.slice(5, 7)), 0)).toISOString().slice(0, 10);
+  const reportUrl = `/publisher/dashboard/export?kind=book-stats&period=custom&from=${monthValue}-01&to=${reportEnd}`;
 
   return (
-    <div className="pds-overview">
-      <section className="pds-overview-hero">
-        <div className="pds-overview-hero-head">
-          <div className="pds-overview-eyebrow">Publisher dashboard · {overview?.publisherName || 'Mitra Penerbit'}</div>
-          <label className="pds-overview-period">
-            <span>Periode</span>
-            <select
-              aria-label="Pilih periode dashboard"
-              value={overview?.period.key ?? 'this_month'}
-              onChange={(event) => window.location.assign(`/publisher/dashboard?period=${event.currentTarget.value}`)}
-            >
-              <option value="this_month">Bulan ini</option>
-              <option value="last_month">Bulan lalu</option>
-              <option value="this_quarter">Kuartal ini</option>
-              <option value="ytd">YTD</option>
-              <option value="all_time">Semua waktu</option>
-            </select>
-          </label>
+    <div className="pds-overview pds-figma-overview">
+      <section className="pds-overview-head">
+        <div className="pds-welcome">
+          <h1>Selamat datang, {overview?.publisherName || 'Mitra Penerbit'}</h1>
+          <p>Data terupdate: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })} · Periode {period?.label ?? 'bulan ini'}</p>
         </div>
-        <h1>Lihat <em>bagaimana</em><br />pembaca membaca Anda</h1>
-        <p>Penjualan fisik hanya memberi tahu apa yang terjual. Dashboard penerbit BUKOO memberi tahu apa yang benar-benar <strong>dibaca, dituntaskan, dan diminati</strong> — insight yang membantu Anda mengambil keputusan bisnis.</p>
-      </section>
-
-      <div className="pds-kpi-row">
-        <div className="pds-kpi amber">
-          <div className="pds-kpi-label">Estimasi royalti</div>
-          <div className="pds-kpi-num">{royalty > 0 ? fmtRp.format(royalty) : '—'}</div>
-          <div className="pds-kpi-chg pds-flat">periode {periodLabel.toLowerCase()}</div>
-        </div>
-        <div className="pds-kpi teal">
-          <div className="pds-kpi-label">Total sesi baca</div>
-          <div className="pds-kpi-num">{fmtId.format(periodReads)}<small> / {fmtId.format(overview?.totalLifetimeReads ?? 0)}</small></div>
-          <div className="pds-kpi-chg pds-flat">periode {periodLabel.toLowerCase()} / kumulatif</div>
-        </div>
-        <div className="pds-kpi sky">
-          <div className="pds-kpi-label">Judul aktif dibaca</div>
-          <div className="pds-kpi-num">{activeBooks}<small> / {overview?.totalBooks ?? 0}</small></div>
-          <div className="pds-kpi-chg pds-flat">{activePercent}% katalog aktif · {totalReaders.toLocaleString('id-ID')} pembaca</div>
-        </div>
-        <div className="pds-kpi coral">
-          <div className="pds-kpi-label">Transfer berikutnya</div>
-          <div className="pds-kpi-num">Tgl 5</div>
-          <div className="pds-kpi-chg pds-flat">Est. {fmtRp.format(royalty)} · tiap tgl 5</div>
-        </div>
-      </div>
-
-      <div className="pds-grid pds-mb14 pds-overview-split">
-        <div className="pds-panel">
-          <div className="pds-panel-title">Judul paling banyak dibaca<span className="tag">5 teratas · {periodLabel}</span></div>
-          {topBooks.length === 0 ? <div className="pds-empty">Belum ada data pembacaan pada katalog Anda.</div> : (
-            <div className="pds-overview-books">
-              {topBooks.map((book, index) => (
-                <div className="pds-overview-book" key={book.id}>
-                  <span className="pds-overview-book-title" title={book.title}>{book.title}</span>
-                  <span className="pds-overview-book-track"><span style={{ width: `${Math.max(3, (book.readCount / maxReads) * 100)}%`, background: CHART_COLORS[index % CHART_COLORS.length] }} /></span>
-                  <span className="pds-overview-book-count">{fmtId.format(book.readCount)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <button className="pds-overview-link" onClick={() => onTabChange('performa')}>Lihat semua performa</button>
-        </div>
-        <div className="pds-panel">
-          <div className="pds-panel-title">Genre yang diminati<span className="tag">minat pembaca</span></div>
-          {genres.length === 0 ? <div className="pds-empty">Belum ada data genre. Lengkapi metadata judul.</div> : (
-            <div className="pds-overview-genres">
-              {genres.map((genre, index) => {
-                const share = totalGenreDays > 0 ? (genre.readerDays / totalGenreDays) * 100 : 0;
-                return <div className="pds-overview-genre" key={genre.genre}>
-                  <span className="pds-overview-genre-name" title={genre.genre}>{genre.genre}</span>
-                  <span className="pds-overview-genre-share" style={{ color: CHART_COLORS[index % CHART_COLORS.length] }}>{fmtId.format(genre.readerDays)} hari · {Math.round(share)}%</span>
-                </div>;
+        <div className="pds-head-actions">
+          <label className="pds-month-picker">
+            <select aria-label="Pilih bulan laporan" value={monthValue} onChange={(event) => selectMonth(event.currentTarget.value)}>
+              {Array.from({ length: maxSelectableMonth }, (_, index) => {
+                const value = `${monthValue.slice(0, 4)}-${String(index + 1).padStart(2, '0')}`;
+                return <option value={value} key={value}>{monthNames[index]}</option>;
               })}
-            </div>
-          )}
-          <div className="pds-overview-insight">Gunakan minat pembaca untuk menentukan judul yang dipromosikan atau dicetak ulang.</div>
+            </select>
+            <span aria-hidden="true">⌄</span>
+          </label>
+          <Link href={reportUrl} className="pds-btn pds-report-btn"><span aria-hidden="true">▣</span> Unduh Laporan</Link>
+          <Link href="/publisher/books/new" className="pds-btn pds-upload-btn"><span aria-hidden="true">＋</span> Upload Buku</Link>
         </div>
-      </div>
-
-      <div className="pds-panel pds-overview-util pds-mb14">
-        <div className="pds-panel-title">Utilisasi koleksi — hidupkan backlist yang belum tersentuh<span className="tag">Peluang</span></div>
-        <div className="pds-overview-util-meta"><span>{overview?.totalBooks ?? 0} judul terdaftar</span><span>{activeBooks} judul aktif dibaca</span></div>
-        <div className="pds-overview-util-bar" role="img" aria-label={`${activePercent}% judul aktif dibaca, ${100 - activePercent}% belum dibaca`}>
-          <div className="active" style={{ width: `${activePercent}%` }}>{activePercent >= 18 ? `${activePercent}% Aktif Dibaca` : ''}</div>
-          <div className="idle" style={{ width: `${100 - activePercent}%` }}>{100 - activePercent >= 18 ? `${100 - activePercent}% Belum Dibaca` : ''}</div>
-        </div>
-        <p>Judul yang belum mendapat pembaca bisa diperkuat lewat promosi, Featured Book, atau pembaruan metadata katalog.</p>
-      </div>
-
-      <div className="pds-grid pds-mb14 pds-overview-split">
-        <div className="pds-panel pds-overview-trend">
-          <div className="pds-panel-title">Tren royalti 6 bulan<span className="tag">estimasi</span></div>
-          <RoyaltyTrendChart trend={overview?.royaltyTrend ?? []} />
-          <div className="pds-chart-legend"><div className="pds-leg"><span className="sw" style={{ background: 'var(--pds-amber)' }} />Estimasi royalti</div></div>
-        </div>
-        <div className="pds-panel">
-          <div className="pds-panel-title">Riwayat transfer<span className="tag">pembaruan rutin tanggal 5</span></div>
-          <div className="pds-overview-payout-head"><span>Periode</span><span>Status</span><span>Nilai</span></div>
-          {payouts.length === 0 ? <div className="pds-empty">Belum ada riwayat transfer.</div> : payouts.map((payout) => (
-            <div className="pds-overview-payout" key={payout.id}>
-              <span>{new Date(payout.createdAt).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
-              <span className="pds-overview-paid">{payout.status}</span>
-              <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</span>
-            </div>
-          ))}
-          <button className="pds-overview-link" onClick={() => onTabChange('royalti')}>Lihat detail royalti</button>
-        </div>
-      </div>
-
-      <div className="pds-overview-note"><strong>Catatan transparansi.</strong> Estimasi royalti dan seluruh metrik mengikuti data pembacaan yang tercatat. Nilai final mengikuti settlement resmi dan kontrak penerbit.</div>
-
-      <section className="pds-overview-cta">
-        <div><h2>Katalog Anda bisa menjangkau lebih banyak pembaca</h2><p>Lengkapi metadata dan unggah judul berikutnya untuk memperluas jangkauan katalog.</p></div>
-        <Link href="/publisher/books/new" className="pds-btn pds-btn-primary">+ Upload buku baru</Link>
-        <button className="pds-btn pds-btn-line" onClick={() => onTabChange('katalog')}>Buka katalog</button>
       </section>
+
+      <section className="pds-kpi-row pds-figma-kpis" aria-label="Ringkasan performa">
+        <article className="pds-kpi pds-kpi-white amber"><div className="pds-kpi-label">Total Pembaca Bulan ini</div><div className="pds-kpi-num">{fmtId.format(overview?.totalDistinctReaders ?? 0)}</div>{comparisonLabel(overview?.totalDistinctReaders ?? 0, overview?.comparison.readers.previous ?? 0, overview?.comparison.readers.hasData ?? false)}</article>
+        <article className="pds-kpi pds-kpi-white gold"><div className="pds-kpi-label">Pendapatan Royalti ({monthNames[Number(monthValue.slice(5, 7)) - 1]})</div><div className="pds-kpi-num">{overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : '—'}</div>{comparisonLabel(overview?.royaltyEstimate ?? 0, overview?.comparison.royalty.previous ?? 0, overview?.comparison.royalty.hasData ?? false)}</article>
+        <article className="pds-kpi pds-kpi-white coral"><div className="pds-kpi-label">Tingkat Selesai Baca</div><div className="pds-kpi-num">{completionRate.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</div>{comparisonLabel(completionRate, (overview?.comparison.reads.previous ?? 0) > 0 ? ((overview?.comparison.completions.previous ?? 0) / (overview?.comparison.reads.previous ?? 1)) * 100 : 0, (overview?.comparison.reads.hasData ?? false) && (overview?.comparison.completions.hasData ?? false))}</article>
+        <article className="pds-kpi pds-kpi-white blue"><div className="pds-kpi-label">Judul Aktif di platform</div><div className="pds-kpi-num">{fmtId.format(overview?.publishedBooks ?? 0)}</div><span className="pds-delta is-up">↑ Judul terbit</span></article>
+      </section>
+
+      <section className="pds-figma-grid pds-figma-row-main">
+        <article className="pds-panel pds-figma-card pds-month-chart">
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">▥</span> Tren Pembacaan Bulanan (Total Buku Dibaca)</h2><span>{monthlyReads[0]?.bucket.slice(0, 4) ?? monthValue.slice(0, 4)} – {monthNames[Number(monthValue.slice(5, 7)) - 1]} {monthValue.slice(0, 4)}</span></header>
+          {monthlyReads.length === 0 ? <div className="pds-empty">Belum ada data pembacaan.</div> : <div className="pds-month-bars">
+            {monthlyReads.map((point, index) => {
+              const month = Number(point.bucket.slice(5, 7)) - 1;
+              const height = point.reads > 0 ? Math.max(5, point.reads / maxMonthlyReads * 100) : 0;
+              return <div className="pds-month-bar-col" key={point.bucket} title={`${monthNames[month]} ${point.bucket.slice(0, 4)}: ${fmtId.format(point.reads)} dibaca`}>
+                <span className="pds-month-value">{point.reads > 999 ? `${Math.round(point.reads / 1000)}k` : fmtId.format(point.reads)}</span>
+                <div className="pds-month-bar-track"><span className={index === monthlyReads.length - 1 ? 'is-current' : ''} style={{ height: `${height}%` }} /></div>
+                <span className="pds-month-label">{monthNames[month]}</span>
+              </div>;
+            })}
+          </div>}
+          <footer className="pds-chart-legend"><span><i /> Total Pembaca Bulan ini</span><span>YTD: {fmtId.format(monthlyReads.reduce((sum, point) => sum + point.reads, 0))} pembacaan total</span></footer>
+        </article>
+        <article className="pds-panel pds-figma-card pds-top-books">
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♙</span> Top Buku Bulan Ini</h2><button type="button" onClick={() => onTabChange('performa')}>Detail</button></header>
+          {topBooks.length === 0 ? <div className="pds-empty">Belum ada data pembacaan.</div> : <ol className="pds-top-book-list">
+            {topBooks.map((book, index) => <li key={book.id}>
+              <span className="pds-top-book-rank">{index + 1}</span>
+              <span className="pds-book-cover" aria-hidden="true">{book.coverKey ? <Image src={getCoverUrl(book.coverKey)} alt="" width={30} height={38} unoptimized /> : <span>▤</span>}</span>
+              <span className="pds-top-book-info"><strong title={book.title}>{book.title}</strong><small>{book.author}</small></span>
+              <span className="pds-top-book-count"><strong>{fmtId.format(book.reads)}</strong><small>Pembacaan</small></span>
+            </li>)}
+          </ol>}
+        </article>
+      </section>
+
+      <section className="pds-figma-grid pds-figma-row-demographics">
+        <article className="pds-panel pds-figma-card pds-genre-card">
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">◇</span> Distribusi Genre</h2><button type="button" onClick={() => onTabChange('demografi')}>Detail</button></header>
+          {genres.length === 0 ? <div className="pds-empty">Belum ada data genre.</div> : <>
+            <div className="pds-donut" style={{ background: `conic-gradient(${genreStops.length ? genreStops.join(', ') : '#e5e5e5 0 100%'})` }}><span><strong>{fmtId.format(genreCount)}</strong><small>Genre</small></span></div>
+            <ul className="pds-genre-legend">{genres.map((genre, index) => <li key={genre.genre}><i style={{ background: genreColors[index] }} /><span>{genre.genre}</span><strong>{genreTotal ? Math.round(genre.readerDays / genreTotal * 100) : 0}%</strong></li>)}</ul>
+          </>}
+        </article>
+        <article className="pds-panel pds-figma-card pds-city-card">
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♧</span> Sebaran Pembaca (Kota)</h2><button type="button" onClick={() => onTabChange('geo')}>Detail</button></header>
+          {cities.length === 0 ? <div className="pds-empty">Belum ada data kota.</div> : <div className="pds-city-list">{cities.map((city, index) => <div className="pds-city-row" key={city.city}>
+            <span>{city.city}</span><div><i style={{ width: `${Math.max(4, city.readers / maxCityReaders * 100)}%`, background: genreColors[index % genreColors.length] }} /></div><strong>{city.readers.toLocaleString('id-ID', { notation: 'compact', maximumFractionDigits: 1 })}</strong>
+          </div>)}</div>}
+        </article>
+        <article className="pds-panel pds-figma-card pds-demographic-card">
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♧</span> Demografi Pembaca</h2><button type="button" onClick={() => onTabChange('demografi')}>Detail</button></header>
+          {known === 0 ? <div className="pds-empty">Belum ada data demografi.</div> : <>
+            <div className="pds-age-list">{ages.filter((age) => age.count > 0).map((age, index) => <div className="pds-age-row" key={age.label}>
+              <span>{age.label} th</span><div><i style={{ width: `${ageKnown ? age.count / ageKnown * 100 : 0}%`, background: genreColors[index % genreColors.length] }} /></div><strong>{Math.round(ageKnown ? age.count / ageKnown * 100 : 0)}%</strong>
+            </div>)}</div>
+            <div className="pds-gender-list"><span>Perempuan <strong>{genderKnown ? (femaleReaders / genderKnown * 100).toFixed(1) : '0.0'}%</strong></span><span>Laki-laki <strong>{genderKnown ? (maleReaders / genderKnown * 100).toFixed(1) : '0.0'}%</strong></span></div>
+          </>}
+        </article>
+      </section>
+
+      <article className="pds-panel pds-figma-card pds-royalty-table-card">
+        <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♧</span> Rincian Pendapatan Royalti — Top 8 Buku</h2><button type="button" onClick={() => onTabChange('royalti')}>Selengkapnya</button></header>
+        <div className="pds-figma-table-wrap"><table className="pds-figma-table"><thead><tr><th>No.</th><th>Judul</th><th className="align-right">Dibaca</th><th className="align-right">Royalti</th><th className="align-right">Tren</th></tr></thead><tbody>
+          {royaltyBooks.length === 0 ? <tr><td colSpan={5} className="pds-table-empty">Belum ada data royalti untuk periode ini.</td></tr> : royaltyBooks.map((book, index) => {
+            const hasTrend = book.hasPreviousReads && book.previousReads > 0;
+            const trend = hasTrend ? (book.reads - book.previousReads) / book.previousReads * 100 : 0;
+            return <tr key={book.id}><td>{index + 1}.</td><td><strong>{book.title}</strong><small>{book.author}</small></td><td className="align-right">{fmtId.format(book.reads)}</td><td className="align-right"><strong>{book.estimatedRoyalty > 0 ? fmtRp.format(book.estimatedRoyalty) : '—'}</strong></td><td className={`align-right ${!hasTrend ? '' : trend >= 0 ? 'trend-up' : 'trend-down'}`}>{hasTrend ? `${trend >= 0 ? '▲' : '▼'} ${Math.abs(trend).toFixed(1)}%` : '—'}</td></tr>;
+          })}
+        </tbody><tfoot><tr><th colSpan={2}>TOTAL ROYALTI BULAN INI</th><th className="align-right">{fmtId.format(currentReads)}<small>Total Pembacaan</small></th><th className="align-right">{overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : '—'}</th><th className="align-right">{overview?.comparison.royalty.hasData && overview.comparison.royalty.previous > 0 ? `▲ ${(((overview.royaltyEstimate - overview.comparison.royalty.previous) / overview.comparison.royalty.previous) * 100).toFixed(1)}% vs bulan lalu` : '—'}</th></tr></tfoot></table></div>
+      </article>
     </div>
   );
 }
@@ -534,7 +524,14 @@ export function DashboardClient({ user, overview, catalog = [], tab }: Dashboard
   const activeTab = tab;
   const onTabChange = (nextTab: string) => {
     const period = overview?.period.key ?? 'this_month';
-    router.push(`/publisher/dashboard?tab=${nextTab}&period=${period}`);
+    const params = new URLSearchParams({ tab: nextTab, period });
+    if (period === 'custom' && overview?.period.start && overview.period.endExclusive) {
+      const inclusiveEnd = new Date(`${overview.period.endExclusive}T00:00:00.000Z`);
+      inclusiveEnd.setUTCDate(inclusiveEnd.getUTCDate() - 1);
+      params.set('from', overview.period.start);
+      params.set('to', inclusiveEnd.toISOString().slice(0, 10));
+    }
+    router.push(`/publisher/dashboard?${params.toString()}`);
   };
 
   const renderPage = () => {

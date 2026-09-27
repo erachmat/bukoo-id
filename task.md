@@ -1,3 +1,12 @@
+# Publisher Dashboard Figma Refresh — 2026-09-27
+
+- `[x]` Replaced the signed-in dashboard shell with the supplied Figma structure: forest sidebar, white app bar, ivory workspace, responsive drawer navigation, greeting, month selector, report download, and upload action.
+- `[x]` Rebuilt Overview content using publisher data: four KPIs, year-to-selected-month read chart, top five books, genre distribution, city spread, demographics, and top-eight royalty table.
+- `[x]` Added monthly read aggregates, read KPI comparison, and per-book prior-period reads for the trend column; no API/schema migration or seeded example values.
+- `[x]` Web typecheck passed; lint passed with 0 errors (24 existing warnings); tests passed (93/93); production build passed.
+- `[ ]` Browser viewport review at 320/390/768/820/1024/1280px remains. The browser runner cannot connect to local preview; live dashboard needs an authenticated session.
+- `[ ]` Compare the rendered Overview against supplied screenshots. The provided Figma file link is still gated by Figma login, so only the screenshots are available as the reference.
+
 # Publisher Landing Figma Implementation — 2026-09-26
 
 - `[x]` Corrected hero/navbar against Figma: 1280×512 hero image/frame, 1280×76 transparent overlay nav, copy at x=76/y=120 in a 610×332 group, 32px vertical item gap, measured headline/eyebrow/body type, and Noto Serif + Inter across the landing.
