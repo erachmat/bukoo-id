@@ -5,6 +5,8 @@ import {
   bucketAgeGroups,
   bucketGenders,
   bucketReaderLoyalty,
+  estimatePooledRoyalty,
+  getDominantAgeGroup,
   dateInRange,
   getCurrentMonthStart,
   getPeakBucket,
@@ -141,6 +143,69 @@ describe('publisher dashboard metrics', () => {
     expect(bucketAgeGroups(['13-17', '18-24', '18-24', null, undefined, '99'])).toEqual({
       '13-17': 1, '18-24': 2, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0,
     });
+  });
+
+  it('chooses the age group with the largest population', () => {
+    expect(getDominantAgeGroup([
+      { label: '13-17', count: 1 },
+      { label: '18-24', count: 8 },
+      { label: '25-34', count: 3 },
+    ])).toBe('18-24');
+    expect(getDominantAgeGroup([{ label: '13-17', count: 0 }])).toBeUndefined();
+  });
+
+  it('estimates a publisher share from the monthly pool and platform reading time', () => {
+    const result = estimatePooledRoyalty({
+      range: { key: 'this_month', start: '2026-08-01', endExclusive: '2026-09-01', label: 'Bulan ini' },
+      monthlyPool: 100_000,
+      rateBps: 6_500,
+      platformSecondsByMonth: new Map([['2026-08', 100]]),
+      bookReadings: [{ month: '2026-08', bookId: 'book-a', readingSeconds: 60 }],
+    });
+
+    expect(result.total).toBe(39_000);
+    expect(result.byBook.get('book-a')).toBe(39_000);
+  });
+
+  it('sums monthly pool estimates and prorates partial calendar months', () => {
+    const result = estimatePooledRoyalty({
+      range: { key: 'custom', start: '2026-08-16', endExclusive: '2026-09-16', label: 'Kustom' },
+      monthlyPool: 31_000,
+      rateBps: 10_000,
+      platformSecondsByMonth: new Map([['2026-08', 100], ['2026-09', 100]]),
+      bookReadings: [
+        { month: '2026-08', bookId: 'book-a', readingSeconds: 100 },
+        { month: '2026-09', bookId: 'book-a', readingSeconds: 100 },
+      ],
+    });
+
+    expect(result.total).toBe(31_500);
+    expect(result.byBook.get('book-a')).toBe(31_500);
+  });
+
+  it('reconciles rounded per-book amounts to the displayed estimate', () => {
+    const result = estimatePooledRoyalty({
+      range: { key: 'this_month', start: '2026-08-01', endExclusive: '2026-09-01', label: 'Bulan ini' },
+      monthlyPool: 10_000,
+      rateBps: 10_000,
+      platformSecondsByMonth: new Map([['2026-08', 3]]),
+      bookReadings: ['book-a', 'book-b', 'book-c'].map((bookId) => ({ month: '2026-08', bookId, readingSeconds: 1 })),
+    });
+
+    expect(result.total).toBe(10_000);
+    expect([...result.byBook.values()].reduce((sum, amount) => sum + amount, 0)).toBe(result.total);
+    expect([...result.byBook.values()].every((amount) => amount % 100 === 0)).toBe(true);
+  });
+
+  it('returns no estimate when there is no eligible platform read time', () => {
+    const result = estimatePooledRoyalty({
+      range: { key: 'this_month', start: '2026-08-01', endExclusive: '2026-09-01', label: 'Bulan ini' },
+      monthlyPool: 100_000,
+      rateBps: 6_500,
+      platformSecondsByMonth: new Map([['2026-08', 0]]),
+      bookReadings: [{ month: '2026-08', bookId: 'book-a', readingSeconds: 60 }],
+    });
+    expect(result).toEqual({ total: 0, byBook: new Map() });
   });
 
   it('buckets genders with an unknown remainder', () => {

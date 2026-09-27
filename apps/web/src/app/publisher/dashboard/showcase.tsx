@@ -4,6 +4,12 @@ import { PublisherNav } from "@/components/publisher/PublisherNav";
 import { PublisherLoginTrigger, PublisherRegisterTrigger } from "@/components/publisher/publisher-login";
 
 export function PublisherDashboardShowcase() {
+  const now = new Date();
+  const trendMonths = Array.from({ length: 6 }, (_, index) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5 + index, 1)));
+  const transferMonths = Array.from({ length: 4 }, (_, index) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1 - index, 1)));
+  const formatMonth = (date: Date) => new Intl.DateTimeFormat("id-ID", { month: "short", year: "2-digit", timeZone: "UTC" }).format(date);
+  const trendPeriod = `${formatMonth(trendMonths[0])}–${formatMonth(trendMonths[trendMonths.length - 1])}`;
+  const nextTransferMonth = formatMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)));
   return (
     <div className="pub-page-wrap">
       <PublisherNav currentTab="dashboard" />
@@ -13,7 +19,7 @@ export function PublisherDashboardShowcase() {
         <div className="phero-bg" />
         <div className="phero-grid" />
         <div className="pub-wrap">
-          <span className="dash-note">● Contoh tampilan · data ilustratif</span>
+          <span className="dash-note">Contoh data · seluruh angka dan grafik di bawah ini ilustratif</span>
           <br />
           <span className="eyebrow">Publisher Dashboard</span>
           <h1 className="ph-h1">
@@ -22,6 +28,14 @@ export function PublisherDashboardShowcase() {
           <p className="ph-lead">
             Penjualan fisik hanya memberi tahu apa yang terjual. Dashboard penerbit BUKOO memberi tahu apa yang benar-benar <strong>dibaca, dituntaskan, dan diminati</strong> — insight yang mengubah cara Anda mengambil keputusan bisnis.
           </p>
+          <div className="dash-hero-actions">
+            <PublisherRegisterTrigger callbackUrl="/publisher/dashboard" className="dash-cta-btn">
+              Buat akun portal penerbit →
+            </PublisherRegisterTrigger>
+            <Link href="/publisher/daftar#daftar" className="btn-ghost btn-lg">
+              Ajukan kemitraan
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -31,11 +45,11 @@ export function PublisherDashboardShowcase() {
           {/* KPI Cards */}
           <div className="dash-kpi">
             <div className="dash-kpi-card dash-kpi-amber">
-              <div className="dash-kpi-label">Royalti bulan ini</div>
+              <div className="dash-kpi-label">Estimasi royalti · contoh</div>
               <div className="dash-kpi-value">
                 Rp 148<small> jt</small>
               </div>
-              <div className="dash-kpi-delta dash-kpi-up">▲ +12% vs bulan lalu</div>
+              <div className="dash-kpi-delta dash-kpi-up">▲ +12% · ilustrasi</div>
             </div>
             <div className="dash-kpi-card">
               <div className="dash-kpi-label">Total sesi baca</div>
@@ -45,19 +59,19 @@ export function PublisherDashboardShowcase() {
               <div className="dash-kpi-delta dash-kpi-up">▲ +9,4%</div>
             </div>
             <div className="dash-kpi-card">
-              <div className="dash-kpi-label">Judul aktif dibaca</div>
+              <div className="dash-kpi-label">Judul dibaca · 30 hari</div>
               <div className="dash-kpi-value">
                 142<small>/320</small>
               </div>
               <div className="dash-kpi-delta" style={{ color: "rgba(240,237,230,0.35)" }}>
-                44% katalog aktif
+                44% judul dibaca dalam periode
               </div>
             </div>
             <div className="dash-kpi-card">
               <div className="dash-kpi-label">Transfer berikutnya</div>
-              <div className="dash-kpi-value">Tgl 5</div>
+              <div className="dash-kpi-value">5 {nextTransferMonth}</div>
               <div className="dash-kpi-delta" style={{ color: "var(--amber)" }}>
-                Rp 148 jt terjadwal
+                Contoh jadwal · nilai mengikuti settlement
               </div>
             </div>
           </div>
@@ -68,7 +82,7 @@ export function PublisherDashboardShowcase() {
               <div className="dash-panel-head">
                 <div>
                   <div className="dash-panel-title">Judul paling banyak dibaca</div>
-                  <div className="dash-panel-sub">Periode contoh · 30 hari terakhir</div>
+                  <div className="dash-panel-sub">Contoh · 30 hari terakhir</div>
                 </div>
                 <span className="dash-pill">Top 5</span>
               </div>
@@ -117,7 +131,7 @@ export function PublisherDashboardShowcase() {
                   <div className="dash-panel-title">Genre yang sedang naik</div>
                   <div className="dash-panel-sub">Tren minat pembaca</div>
                 </div>
-                <span className="dash-pill dash-pill-teal">Live</span>
+                <span className="dash-pill dash-pill-teal">Contoh</span>
               </div>
               <div className="dash-genre">
                 <div className="dash-gchip">
@@ -156,15 +170,15 @@ export function PublisherDashboardShowcase() {
             <div className="dash-panel-head">
               <div>
                 <div className="dash-panel-title">Utilisasi koleksi — hidupkan backlist yang &ldquo;tidur&rdquo;</div>
-                <div className="dash-panel-sub">320 judul terdaftar · 142 aktif</div>
+                <div className="dash-panel-sub">320 judul terdaftar · 142 dibaca dalam 30 hari</div>
               </div>
               <span className="dash-pill dash-pill-coral">Peluang</span>
             </div>
             <div className="dash-util">
               <div className="dash-util-active" style={{ width: "44%" }}>
-                44% Aktif Dibaca
+                44% Dibaca
               </div>
-              <div className="dash-util-idle">56% Belum Tersentuh</div>
+              <div className="dash-util-idle">56% Tidak dibaca dalam 30 hari</div>
             </div>
             <div className="dash-insight">
               Sebagian besar katalog Anda punya potensi yang belum tergali. Lewat fitur <b>Featured Book</b>  dan rekomendasi AI BUKOO, judul yang &ldquo;tidur&rdquo; bisa diaktifkan kembali — menghidupkan pendapatan dari aset yang selama ini pasif, tanpa biaya cetak tambahan.
@@ -177,34 +191,16 @@ export function PublisherDashboardShowcase() {
               <div className="dash-panel-head">
                 <div>
                   <div className="dash-panel-title">Tren royalti 6 bulan</div>
-                  <div className="dash-panel-sub">Ilustrasi pertumbuhan (juta Rupiah)</div>
+                  <div className="dash-panel-sub">Contoh ilustratif · {trendPeriod} (juta Rupiah)</div>
                 </div>
               </div>
               <div className="dash-trend">
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "38%" }} />
-                  <span className="dash-tbar-label">Sep</span>
-                </div>
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "48%" }} />
-                  <span className="dash-tbar-label">Okt</span>
-                </div>
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "57%" }} />
-                  <span className="dash-tbar-label">Nov</span>
-                </div>
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "69%" }} />
-                  <span className="dash-tbar-label">Des</span>
-                </div>
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "84%" }} />
-                  <span className="dash-tbar-label">Jan</span>
-                </div>
-                <div className="dash-tbar">
-                  <div className="dash-tbar-fill" style={{ height: "100%" }} />
-                  <span className="dash-tbar-label">Feb</span>
-                </div>
+                {[38, 48, 57, 69, 84, 100].map((height, index) => (
+                  <div className="dash-tbar" key={trendMonths[index].toISOString()}>
+                    <div className="dash-tbar-fill" style={{ height: `${height}%` }} />
+                    <span className="dash-tbar-label">{formatMonth(trendMonths[index])}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -225,22 +221,22 @@ export function PublisherDashboardShowcase() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Januari 2026</td>
+                    <td>{formatMonth(transferMonths[0])}</td>
                     <td><span className="dash-badge-paid">Terbayar</span></td>
                     <td className="r">Rp 132 jt</td>
                   </tr>
                   <tr>
-                    <td>Desember 2025</td>
+                    <td>{formatMonth(transferMonths[1])}</td>
                     <td><span className="dash-badge-paid">Terbayar</span></td>
                     <td className="r">Rp 109 jt</td>
                   </tr>
                   <tr>
-                    <td>November 2025</td>
+                    <td>{formatMonth(transferMonths[2])}</td>
                     <td><span className="dash-badge-paid">Terbayar</span></td>
                     <td className="r">Rp 90 jt</td>
                   </tr>
                   <tr>
-                    <td>Oktober 2025</td>
+                    <td>{formatMonth(transferMonths[3])}</td>
                     <td><span className="dash-badge-paid">Terbayar</span></td>
                     <td className="r">Rp 76 jt</td>
                   </tr>
@@ -251,7 +247,7 @@ export function PublisherDashboardShowcase() {
 
           {/* Transparency Disclaimer */}
           <div className="dash-disc">
-            <b>Catatan transparansi.</b> Seluruh angka &amp; grafik di halaman ini adalah <b>contoh ilustratif</b> untuk menggambarkan struktur dashboard. Data pembaca aktual tersedia di dashboard mitra setelah judul penerbit tayang di BUKOO.
+            <b>Catatan transparansi.</b> Seluruh angka &amp; grafik di halaman ini adalah <b>contoh ilustratif</b> untuk menggambarkan struktur dashboard, bukan data atau janji pembayaran untuk penerbit tertentu. Data aktual tersedia di dashboard mitra setelah judul tayang di BUKOO; nilai final mengikuti settlement resmi &amp; perjanjian.
           </div>
 
           {/* Call to Action Band */}
@@ -260,7 +256,7 @@ export function PublisherDashboardShowcase() {
             <p>Setiap penerbit mitra mendapat akses dashboard real-time seperti ini sejak buku pertama tayang.</p>
             <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
               <PublisherRegisterTrigger callbackUrl="/publisher/dashboard" className="dash-cta-btn">
-                Buat akun penerbit &rarr;
+                Buat akun portal penerbit &rarr;
               </PublisherRegisterTrigger>
               <PublisherLoginTrigger callbackUrl="/publisher/dashboard" className="btn-ghost btn-lg">
                 Masuk ke Dashboard

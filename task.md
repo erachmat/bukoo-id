@@ -1,11 +1,25 @@
 # Publisher Landing Figma Implementation — 2026-09-26
 
+- `[x]` Corrected hero/navbar against Figma: 1280×512 hero image/frame, 1280×76 transparent overlay nav, copy at x=76/y=120 in a 610×332 group, 32px vertical item gap, measured headline/eyebrow/body type, and Noto Serif + Inter across the landing.
+- `[x]` Preserved the 2.5:1 hero art ratio on desktop by scaling the section with viewport width; responsive/tablet and mobile crops retain the image focal point and overlays.
+- `[x]` Matched the Figma hero auto-layout gap of 32px; made hero copy, CTA, and nav menu scale with wide desktop viewports while retaining exact 1280px frame sizing.
+- `[x]` Increased hero headline leading to 1.2 and made the navbar sticky on desktop/mobile; it stays transparent over the hero, then switches to forest after the hero scrolls away.
+
 - `[x]` Match desktop section geometry, hero art, copy, colors, CTA labels, navigation, and footer to the selected Figma frame.
 - `[x]` Add the measured 1001px intro content width and responsive spacing overrides; retain stacked mobile cards/form and vertical comparison flow.
 - `[x]` Verified 1280px content geometry: sections total 4279px; hero 512px; intro 1001px; footer 394px. Comparison group is 1128×283px, 22px outer gap; cards are 510×283px with 32px padding, 16px inner gap, 20px radius, and Figma fills/strokes.
 - `[x]` Matched discovery group to 1128×328px (22px grid gap; cards 265.5×328px, 32px padding, 16px inner gap) and value group to 1128×432px (32px grid gap; cards 354.67×432px, 32px padding, 16px inner gap, 4px accent border). Matched their header groups to Figma's 203px and 138px heights.
 - `[x]` Verified 390px/768px without overflow, mobile menu opens, and hero CTA reaches `#daftar`.
 - `[x]` Checked rendered header/footer destinations and form fields; web typecheck passed, lint passed with 26 existing warnings, and tests passed (91/91).
+
+# Publisher Dashboard Audit Fixes — 2026-09-25
+
+- `[x]` 1. Replace royalty estimate with monthly publisher share of the platform pool; prorate partial months, reconcile per-title rounding, and add a date index migration for the global aggregation.
+- `[x]` 2. Fix authenticated dashboard Geo bars, dominant age group, city label, and browser-history tab navigation.
+- `[x]` 3. Clarify illustrative showcase figures and timeline; add a top-level CTA and remove stale launch copy.
+- `[x]` 4. Add focused metric coverage and run web typecheck, lint, and test suite.
+- `[ ]` 5. Signed-in publisher smoke test and mobile viewport review remain for an authenticated staging environment.
+- `[ ]` 6. Review and apply the generated D1 index migration through the manual migration workflow before production deployment.
 
 # Publisher landing page audit fixes — 2026-09-25
 
@@ -1098,3 +1112,27 @@ Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/
 - [x] Live DOM verification of the built app: 6 sections in spec order, 4 flywheel cards, 3 value cards, 9 checks, both footer columns; computed styles match spec; no horizontal overflow at 320/390/768/1440
 - [x] All 78 spec strings present verbatim; zero stale copy
 - [ ] (user) Visual pass against the design screenshots before deploy
+
+# Publisher Landing Mobile Navigation Fix — 2026-09-26
+
+- [x] Replaced the narrow-screen multi-row/wrapping navigation with a compact menu toggle; menu contains publisher links, login, and partnership CTA.
+- [x] Added accessible expanded state, descriptive toggle labels, and focus-visible styling; desktop navigation remains inline.
+- [x] Corrected the follow-up layout: the mobile menu overlays the hero without shifting it; widths from 900px use compact inline navigation.
+- [x] Local browser review at 390px (closed/open), 900px, 980px, and 1440px showed no horizontal overflow. The hero position stayed fixed while opening the menu.
+- [x] Web typecheck, lint (0 errors, 26 existing warnings), and tests (91/91) passed.
+- [ ] Review on a physical phone remains.
+
+# Publisher Dashboard Figma Alignment — 2026-09-27
+
+- `[x]` 1. Logged in to the live publisher dashboard with the user-authorized demo account. Verified the PUBLISHER session and seeded data render; no password stored in repository notes.
+- `[x]` 2. Prevent duplicate search results from stale insert-only FTS rows; add API regression coverage.
+- `[x]` 3. Matched the Figma Dashboard composition: 1280×2129 frame, horizontal publisher navigation, centered 920px content, three-line hero, four KPI cards, split insight panels, collection utilization, six-month royalty trend, transfer history, transparency note, CTA, and branded footer. KPI values use actual period/cumulative reads, active catalog counts, current royalty estimate, and the routine transfer day.
+- `[x]` 4. Responsive QA across all reviewed pages at 320, 390, 768, 820, 1024, 1280, and 1440px. No page-level horizontal overflow or overlapping top-level panels. Royalti tables stay in their own horizontal scroll regions; the 24-hour chart compacts at phone widths.
+- `[x]` 5. Reviewed Katalog, Royalti, Performa Buku, Pembaca, Demografi, Sebaran Geografis, Waktu Baca, and Metadata against the adopted Figma design system, one page at a time. Verified mobile navigation fits its scroll container.
+- `[x]` 6. Final workspace checks passed. Local implementation is ready for review; production deployment and remote migrations remain separate actions and were not run.
+
+# Publisher Demo Seed Reassignment — 2026-09-27
+
+- [x] Confirmed `marketing@bukoo.id` exists in production with role `PUBLISHER`.
+- [x] Generate and review demo seed SQL targeted to the new publisher account.
+- [x] Apply seed to remote D1 and verify demo data ownership/counts: 6 books, 24 readers, 656 reader-days, 303 daily metrics, 419 geo rows, 75 reading-progress rows, 2 payouts, 4 notifications.
