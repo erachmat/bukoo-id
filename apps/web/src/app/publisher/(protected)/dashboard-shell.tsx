@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { PublisherSidebar } from "../sidebar-client";
 
 interface DashboardShellProps {
@@ -22,10 +22,12 @@ const TAB_ROUTES: Record<string, string> = {
 
 export function DashboardShell({ user, children, activeTab: controlledTab, onTabChange: controlledChange }: DashboardShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [internalTab, setInternalTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const name = user.name || "Mitra Penerbit";
-  const activeTab = controlledTab ?? internalTab;
+  const activeTab = controlledTab ?? (pathname.startsWith('/publisher/books/new') ? 'upload' : pathname.startsWith('/publisher/books') ? 'katalog' : internalTab);
+  const lightCatalog = pathname.startsWith('/publisher/books');
 
   const handleTabChange = (tab: string) => {
     setSidebarOpen(false);
@@ -35,7 +37,7 @@ export function DashboardShell({ user, children, activeTab: controlledTab, onTab
   };
 
   return (
-    <div className={`pub-dashboard-shell pds-figma-shell${activeTab === "overview" ? " is-overview" : ""}`}>
+    <div className={`pub-dashboard-shell pds-figma-shell${activeTab === "overview" || lightCatalog ? " is-overview" : ""}`}>
       <div className="pds-layout">
         {sidebarOpen && <button type="button" className="pds-sidebar-scrim" aria-label="Tutup menu" onClick={() => setSidebarOpen(false)} />}
         <PublisherSidebar

@@ -22,7 +22,7 @@ export default async function PublisherBooksPage() {
       <div className="pds-page-head">
         <div>
           <div className="pds-page-title">Koleksi Buku</div>
-          <div className="pds-page-sub">Kelola naskah digital dan publikasi Anda · {books.length} buku aktif</div>
+          <div className="pds-page-sub">Kelola draft, review, dan publikasi Anda · {books.filter((book) => book.isPublished && !book.archivedAt).length} buku aktif</div>
         </div>
         <div className="pds-head-actions">
           <Link href="/publisher/books/new" className="pds-btn pds-btn-primary">

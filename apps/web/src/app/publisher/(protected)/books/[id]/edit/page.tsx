@@ -6,24 +6,24 @@ import { books as booksTable } from "@bukoo/db";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { PublisherBookForm } from "../../_components/book-form";
-import { updatePublisherBook } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditPublisherBookPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
   const user = session?.user;
   if (!user || (user as { role?: string }).role !== "PUBLISHER") {
-    redirect(`/publisher/login?callbackUrl=${encodeURIComponent(`/publisher/books/${params.id}/edit`)}`);
+    redirect(`/publisher/login?callbackUrl=${encodeURIComponent(`/publisher/books/${id}/edit`)}`);
   }
 
   const db = getDb();
   const book = await db.query.books.findFirst({
-    where: and(eq(booksTable.id, params.id), eq(booksTable.publisherUserId, user.id ?? '')),
+    where: and(eq(booksTable.id, id), eq(booksTable.publisherUserId, user.id ?? '')),
   });
 
   if (!book) {
@@ -59,17 +59,21 @@ export default async function EditPublisherBookPage({
         </div>
       </div>
       <PublisherBookForm
-        action={(fd) => updatePublisherBook(book.id, fd)}
-        submitLabel="Simpan Perubahan →"
+        bookId={book.id}
         initial={{
           title: book.title,
           author: book.author,
+          isbn: book.isbn ?? '',
           description: book.description ?? '',
           genre,
           language: book.language,
           year: book.publishedYear ? String(book.publishedYear) : '',
           pageCount: book.totalPages ? String(book.totalPages) : '',
           subscriptionRequired: book.subscriptionRequired,
+          coverKey: book.coverKey,
+          epubKey: book.epubKey,
+          publicationStatus: book.publicationStatus,
+          archivedAt: book.archivedAt,
         }}
       />
     </>

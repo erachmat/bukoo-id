@@ -129,6 +129,8 @@ export const books = sqliteTable('books', {
   description:         text('description'),
   synopsis:            text('synopsis'),
   isbn:                text('isbn').unique(),
+  /** Normalized title + author for publisher books without an ISBN. */
+  catalogFingerprint:  text('catalog_fingerprint'),
   /**
    * R2 object key for the cover image (e.g. "covers/abc123.jpg").
    * Construct the full URL from the R2 public domain + this key.
@@ -159,6 +161,8 @@ export const books = sqliteTable('books', {
    * continue to require `is_published = 1` until all callers migrate.
    */
   publicationStatus:   text('publication_status').notNull().default('DRAFT'),
+  /** Reversible removal from publisher catalog and public discovery. */
+  archivedAt:          text('archived_at'),
   isAvailableOffline:  integer('is_available_offline', { mode: 'boolean' }).notNull().default(false),
   /**
    * Minimum subscription tier required to access this book.
@@ -171,7 +175,9 @@ export const books = sqliteTable('books', {
   featuredAt:          text('featured_at'),
   createdAt:           text('created_at').notNull().default(now()),
   updatedAt:           text('updated_at').notNull().default(now()),
-});
+}, (t) => [
+  uniqueIndex('books_publisher_catalog_fingerprint_idx').on(t.publisherUserId, t.catalogFingerprint),
+]);
 
 // ---------------------------------------------------------------------------
 // readingProgress
@@ -592,8 +598,8 @@ export const publisherSubmissions = sqliteTable(
     positioning:      text('positioning'),
     storeUrl:         text('store_url'),
     /**
-     * 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'CHANGES_REQUESTED' |
-     * 'APPROVED' | 'REJECTED' | 'PUBLISHED'
+   * 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'CHANGES_REQUESTED' |
+   * 'APPROVED' | 'REJECTED' | 'PUBLISHED' | 'WITHDRAWN'
      */
     status:           text('status').notNull().default('DRAFT'),
     reviewerUserId:   text('reviewer_user_id').references(() => users.id, { onDelete: 'set null' }),
@@ -606,6 +612,7 @@ export const publisherSubmissions = sqliteTable(
   (t) => [
     index('publisher_submissions_user_created_idx').on(t.publisherUserId, t.createdAt),
     index('publisher_submissions_status_updated_idx').on(t.status, t.updatedAt),
+    uniqueIndex('publisher_submissions_one_active_per_book_idx').on(t.bookId).where(sql`status IN ('SUBMITTED', 'IN_REVIEW') AND book_id IS NOT NULL`),
   ],
 );
 

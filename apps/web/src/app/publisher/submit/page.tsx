@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "@/lib/auth";
 import { PublisherNav } from "@/components/publisher/PublisherNav";
 import { PublisherLoginTrigger, PublisherRegisterTrigger } from "@/components/publisher/publisher-login";
-import { SubmitForm } from "./SubmitForm";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "BUKOO — Submit Judul",
@@ -37,6 +37,7 @@ export default async function PublisherSubmitPage() {
   const session = await auth();
   const userRole = (session?.user as { role?: string } | undefined)?.role;
   const isPublisher = userRole === "PUBLISHER";
+  if (isPublisher) redirect('/publisher/books/new');
   return (
     <div className="pub-page-wrap">
       <PublisherNav currentTab="submit" />
@@ -106,7 +107,7 @@ export default async function PublisherSubmitPage() {
               Ajukan judul dalam <em>4 langkah</em>
             </h2>
           </div>
-          {isPublisher ? <SubmitForm /> : <SubmitSignupBand />}
+          <SubmitSignupBand />
         </div>
       </section>
 

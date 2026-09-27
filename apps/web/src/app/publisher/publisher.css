@@ -5736,6 +5736,7 @@ html:has(.pub-page-wrap) {
   color: #26352e;
   font-family: var(--pds-sans);
 }
+.pds-figma-shell.is-overview .pds-page-title { color: #24352d; }
 .pds-figma-shell::before,
 .pds-figma-shell::after { display: none; }
 .pds-figma-shell .pds-layout {
