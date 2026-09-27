@@ -19,6 +19,7 @@ import {
   bucketGenders,
   bucketPremiumReaders,
   bucketReaderLoyalty,
+  estimatePooledRoyalty,
   getPeriodRange,
   getPreviousPeriodRange,
   rankTopBooks,
@@ -26,6 +27,7 @@ import {
   type AgeGroupLabel,
   type DateRange,
   type GenderCounts,
+  type MonthlyBookReading,
 } from './metrics';
 import { tierFromSubscription } from '@/lib/subscription';
 import type { PublisherCatalogBook } from '../catalog-table';
@@ -96,6 +98,11 @@ export interface TrendPoint {
   completions: number;
 }
 
+export interface MonthlyRoyaltyPoint {
+  bucket: string;
+  amount: number;
+}
+
 export interface KpiComparison {
   previous: number;
   /** null when the previous window has no data → render 'baru' instead of a misleading delta. */
@@ -139,6 +146,7 @@ export interface PublisherBookStat {
   reads: number;
   seconds: number;
   completions: number;
+  estimatedRoyalty: number;
 }
 
 export interface PublisherDashboardOverview {
@@ -151,7 +159,7 @@ export interface PublisherDashboardOverview {
   totalReadingSeconds: number;
   totalCompletions: number;
   totalLifetimeReads: number;
-  monthlyRoyaltyEstimate: number;
+  royaltyEstimate: number;
   readerLoyalty: ReturnType<typeof bucketReaderLoyalty>;
   geo: { countryCode: string; readerDays: number }[];
   topBooks: {
@@ -172,6 +180,8 @@ export interface PublisherDashboardOverview {
   };
   /** In-period reading activity series (daily for months/quarters, monthly for YTD). */
   dailyTrend: TrendPoint[];
+  /** Actual-data royalty estimates for the current month and preceding five months. */
+  royaltyTrend: MonthlyRoyaltyPoint[];
   /** Readers-days split across each book's genres (a book with 2 genres contributes to both). */
   genreSplit: { genre: string; readerDays: number }[];
   demographics: PublisherDemographics | null;
@@ -243,6 +253,7 @@ export async function getPublisherDashboardOverview(
   const totalLifetimeReads = publisherBooks.reduce((sum, book) => sum + book.readCount, 0);
 
   const bookIds = publisherBooks.map((b) => b.id);
+  const eligibleBookIds = publisherBooks.filter((book) => book.isPublished).map((book) => book.id);
   const period = periodInput
     ? resolveDashboardPeriod(periodInput)
     : getPeriodRange('this_month', new Date());
@@ -518,24 +529,95 @@ export async function getPublisherDashboardOverview(
   const monthlyPool = Number(monthlyPoolSetting ?? ROYALTY_CONFIG.monthlyPool);
   const rateBps = Number(rateBpsSetting ?? ROYALTY_CONFIG.rateBps);
 
-  // Estimated royalty from the selected period's reading seconds across the pool.
-  const monthlyRoyaltyEstimate =
-    monthlyPool > 0
-      ? Math.round(
-          (totalReadingSeconds / 3600) *
-            10 *
-            (rateBps / 10000),
-        ) * 100
-      : 0;
+  // Read only the month buckets needed by the selected and comparison windows.
+  // The denominator includes all published books on the platform; each publisher
+  // numerator includes only their own published titles.
+  let royaltyEstimate = { total: 0, byBook: new Map<string, number>() };
+  let previousRoyaltyEstimate: { total: number; byBook: Map<string, number> } | null = null;
+  if (monthlyPool > 0 && rateBps > 0 && eligibleBookIds.length > 0) {
+    const loadRoyaltyEstimate = async (range: DateRange) => {
+      const dateConditions = [
+        ...(range.start ? [gte(publisherBookDailyMetrics.metricDate, range.start)] : []),
+        ...(range.endExclusive ? [sql`${publisherBookDailyMetrics.metricDate} < ${range.endExclusive}`] : []),
+      ];
+      const monthBucket = sql<string>`substr(${publisherBookDailyMetrics.metricDate}, 1, 7)`;
+      const [platformRows, publisherRows] = await Promise.all([
+        db.select({
+          month: monthBucket,
+          readingSeconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
+        })
+          .from(publisherBookDailyMetrics)
+          .innerJoin(booksTable, eq(publisherBookDailyMetrics.bookId, booksTable.id))
+          .where(and(eq(booksTable.isPublished, true), ...dateConditions))
+          .groupBy(monthBucket),
+        db.select({
+          month: monthBucket,
+          bookId: publisherBookDailyMetrics.bookId,
+          readingSeconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)`,
+        })
+          .from(publisherBookDailyMetrics)
+          .where(and(inArray(publisherBookDailyMetrics.bookId, eligibleBookIds), ...dateConditions))
+          .groupBy(monthBucket, publisherBookDailyMetrics.bookId),
+      ]);
+      const platformSecondsByMonth = new Map(platformRows.map((row) => [row.month, Number(row.readingSeconds)]));
+      const bookReadings: MonthlyBookReading[] = publisherRows.map((row) => ({
+        month: row.month,
+        bookId: row.bookId,
+        readingSeconds: Number(row.readingSeconds),
+      }));
+      return estimatePooledRoyalty({ range, monthlyPool, rateBps, platformSecondsByMonth, bookReadings });
+    };
+    [royaltyEstimate, previousRoyaltyEstimate] = await Promise.all([
+      loadRoyaltyEstimate(period),
+      previousRange ? loadRoyaltyEstimate(previousRange) : Promise.resolve(null),
+    ]);
+  }
 
-  // Same formula applied to the previous window (pool/rate treated as constant).
-  comparison.royalty =
-    monthlyPool > 0 && previousRange
-      ? {
-          previous: Math.round((comparison.seconds.previous / 3600) * 10 * (rateBps / 10000)) * 100,
-          hasData: comparison.seconds.hasData,
-        }
-      : { previous: 0, hasData: false };
+  comparison.royalty = previousRoyaltyEstimate
+    ? { previous: previousRoyaltyEstimate.total, hasData: previousRoyaltyEstimate.total > 0 }
+    : { previous: 0, hasData: false };
+
+  const royaltyTrend: MonthlyRoyaltyPoint[] = [];
+  const trendNow = periodInput?.now ?? new Date();
+  const trendRanges = Array.from({ length: 6 }, (_, index): DateRange => {
+    const monthStart = new Date(Date.UTC(trendNow.getUTCFullYear(), trendNow.getUTCMonth() - 5 + index, 1));
+    const nextMonthStart = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 1));
+    return {
+      key: 'custom',
+      start: monthStart.toISOString().slice(0, 10),
+      endExclusive: nextMonthStart.toISOString().slice(0, 10),
+      label: monthStart.toISOString().slice(0, 7),
+    };
+  });
+  if (monthlyPool > 0 && rateBps > 0 && eligibleBookIds.length > 0) {
+    const trendStart = trendRanges[0].start!;
+    const trendEnd = trendRanges[trendRanges.length - 1].endExclusive!;
+    const monthBucket = sql<string>`substr(${publisherBookDailyMetrics.metricDate}, 1, 7)`;
+    const [platformRows, publisherRows] = await Promise.all([
+      db.select({ month: monthBucket, readingSeconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)` })
+        .from(publisherBookDailyMetrics)
+        .innerJoin(booksTable, eq(publisherBookDailyMetrics.bookId, booksTable.id))
+        .where(and(eq(booksTable.isPublished, true), gte(publisherBookDailyMetrics.metricDate, trendStart), sql`${publisherBookDailyMetrics.metricDate} < ${trendEnd}`))
+        .groupBy(monthBucket),
+      db.select({ month: monthBucket, bookId: publisherBookDailyMetrics.bookId, readingSeconds: sql<number>`coalesce(sum(${publisherBookDailyMetrics.readingSeconds}), 0)` })
+        .from(publisherBookDailyMetrics)
+        .where(and(inArray(publisherBookDailyMetrics.bookId, eligibleBookIds), gte(publisherBookDailyMetrics.metricDate, trendStart), sql`${publisherBookDailyMetrics.metricDate} < ${trendEnd}`))
+        .groupBy(monthBucket, publisherBookDailyMetrics.bookId),
+    ]);
+    const platformSecondsByMonth = new Map(platformRows.map((row) => [row.month, Number(row.readingSeconds)]));
+    for (const range of trendRanges) {
+      const month = range.start!.slice(0, 7);
+      const bookReadings: MonthlyBookReading[] = publisherRows.filter((row) => row.month === month).map((row) => ({
+        month: row.month,
+        bookId: row.bookId,
+        readingSeconds: Number(row.readingSeconds),
+      }));
+      royaltyTrend.push({
+        bucket: month,
+        amount: estimatePooledRoyalty({ range, monthlyPool, rateBps, platformSecondsByMonth, bookReadings }).total,
+      });
+    }
+  }
 
   const topBooks = rankTopBooks(publisherBooks, lifetimeMetrics)
     .map((b) => {
@@ -606,7 +688,7 @@ export async function getPublisherDashboardOverview(
     totalReadingSeconds,
     totalCompletions,
     totalLifetimeReads,
-    monthlyRoyaltyEstimate,
+    royaltyEstimate: royaltyEstimate.total,
     readerLoyalty,
     geo,
     topBooks,
@@ -614,6 +696,7 @@ export async function getPublisherDashboardOverview(
     dailyTrend: [...dailyTrendMap.entries()]
       .map(([bucket, agg]) => ({ bucket, ...agg }))
       .sort((a, b) => a.bucket.localeCompare(b.bucket)),
+    royaltyTrend,
     genreSplit,
     demographics,
     funnel,
@@ -628,6 +711,7 @@ export async function getPublisherDashboardOverview(
       subscriptionRequired: b.subscriptionRequired,
       isPublished: b.isPublished,
       lifetimeReads: b.readCount,
+      estimatedRoyalty: royaltyEstimate.byBook.get(b.id) ?? 0,
       ...(bookStatsMap.get(b.id) ?? { reads: 0, seconds: 0, completions: 0 }),
     })),
     recentNotifications: recentNotifications.map((n) => ({

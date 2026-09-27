@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview, RhythmPoint } from "./queries";
 import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
-import { getCoverUrl } from "@/lib/cover-url";
-import { countryLabel, getPeakBucket } from "./metrics";
+import { countryLabel, getDominantAgeGroup, getPeakBucket } from "./metrics";
 
 interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
@@ -22,42 +21,24 @@ type Overview = PublisherDashboardOverview;
 const CHART_COLORS = ['var(--pds-teal)', 'var(--pds-sky)', 'var(--pds-amber)', 'var(--pds-coral)', 'var(--pds-lavender)', 'rgba(255,255,255,0.28)'];
 const fmtId = new Intl.NumberFormat('id-ID');
 
-function deltaClass(current: number, previous: number): { cls: string; sign: string; pct: string } {
-  if (previous <= 0) return { cls: 'pds-flat', sign: '●', pct: 'baru' };
-  const change = ((current - previous) / previous) * 100;
-  if (Math.abs(change) < 0.05) return { cls: 'pds-flat', sign: '=', pct: 'stabil' };
-  const rounded = Math.abs(change).toLocaleString('id-ID', { maximumFractionDigits: 1 });
-  return change > 0
-    ? { cls: 'pds-up', sign: '▲', pct: `${rounded}%` }
-    : { cls: 'pds-down', sign: '▼', pct: `${rounded}%` };
-}
-
 /** CSS bar chart from trend points (daily or monthly buckets). */
-function TrendChart({ trend }: { trend: Overview['dailyTrend'] }) {
+function RoyaltyTrendChart({ trend }: { trend: Overview['royaltyTrend'] }) {
   if (trend.length === 0) {
-    return <div className="pds-empty">Belum ada aktivitas baca pada periode ini.</div>;
+    return <div className="pds-empty">Estimasi historis belum tersedia. Pastikan pool royalti platform sudah diatur.</div>;
   }
-  const max = Math.max(...trend.map((p) => p.reads), 1);
-  const monthly = trend[0].bucket.length === 7; // 'YYYY-MM'
+  const max = Math.max(...trend.map((point) => point.amount), 1);
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+  const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
   return (
     <div className="pds-chart">
       {trend.map((point) => {
-        const pct = Math.max(Math.round((point.reads / max) * 100), 4);
-        const isMax = point.reads === max;
-        const label = monthly
-          ? monthNames[Number(point.bucket.slice(5, 7)) - 1] ?? point.bucket
-          : point.bucket.slice(8, 10);
+        const pct = point.amount > 0 ? Math.max(Math.round((point.amount / max) * 100), 4) : 0;
+        const month = Number(point.bucket.slice(5, 7)) - 1;
+        const label = monthNames[month] ?? point.bucket;
         return (
-          <div className="pds-cbar-wrap" key={point.bucket} title={`${point.bucket}: ${point.reads.toLocaleString('id-ID')} baca`}>
-            <div className="pds-cval" style={isMax ? { color: 'var(--pds-teal)' } : undefined}>
-              {point.reads >= 1000 ? `${(point.reads / 1000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}k` : point.reads}
-            </div>
-            <div className="pds-cbar" style={{
-              height: `${pct}%`,
-              background: isMax ? 'var(--pds-teal)' : 'rgba(0,201,167,0.35)',
-            }} />
-            <div className="pds-cmon" style={isMax ? { color: 'var(--pds-teal)', fontWeight: 700 } : undefined}>{label}</div>
+          <div className="pds-cbar-wrap" key={point.bucket} title={`${point.bucket}: ${fmtRp.format(point.amount)}`}>
+            {point.amount > 0 && <div className="pds-cbar" style={{ height: `${pct}%`, background: 'var(--pds-amber)' }} />}
+            <div className="pds-cmon">{label}</div>
           </div>
         );
       })}
@@ -67,313 +48,135 @@ function TrendChart({ trend }: { trend: Overview['dailyTrend'] }) {
 
 function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => void; overview?: Overview }) {
   const totalReaders = overview?.totalDistinctReaders ?? 0;
-  const totalMinutes = Math.round((overview?.totalReadingSeconds ?? 0) / 60);
-  const royalty = overview?.monthlyRoyaltyEstimate ?? 0;
+  const royalty = overview?.royaltyEstimate ?? 0;
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
-  const cmp = overview?.comparison;
   const periodLabel = overview?.period.label ?? 'Bulan ini';
-
-  const readerDelta = deltaClass(totalReaders, cmp?.readers.previous ?? 0);
-  const minuteDelta = deltaClass(totalMinutes, Math.round((cmp?.seconds.previous ?? 0) / 60));
-  const completionDelta = deltaClass(overview?.totalCompletions ?? 0, cmp?.completions.previous ?? 0);
-  const royaltyDelta = deltaClass(royalty, cmp?.royalty.previous ?? 0);
+  const periodReads = overview?.dailyTrend.reduce((sum, point) => sum + point.reads, 0) ?? 0;
+  const activeBooks = overview?.bookStats.filter((book) => book.reads > 0).length ?? 0;
+  const activePercent = overview?.totalBooks ? Math.round((activeBooks / overview.totalBooks) * 100) : 0;
+  const topBooks = (overview?.topBooks ?? []).slice(0, 5);
+  const maxReads = Math.max(...topBooks.map((book) => book.readCount), 1);
+  const genres = [...(overview?.genreSplit ?? [])].sort((a, b) => b.readerDays - a.readerDays).slice(0, 6);
+  const totalGenreDays = genres.reduce((sum, genre) => sum + genre.readerDays, 0);
+  const payouts = (overview?.payouts ?? []).slice(0, 4);
 
   return (
-    <>
-      <div className="pds-page-head">
-        <div>
-          <div className="pds-page-title">Selamat datang, {overview?.publisherName || 'Mitra Penerbit'}</div>
-          <div className="pds-page-sub">Data real-time · Periode {periodLabel}</div>
+    <div className="pds-overview">
+      <section className="pds-overview-hero">
+        <div className="pds-overview-hero-head">
+          <div className="pds-overview-eyebrow">Publisher dashboard · {overview?.publisherName || 'Mitra Penerbit'}</div>
+          <label className="pds-overview-period">
+            <span>Periode</span>
+            <select
+              aria-label="Pilih periode dashboard"
+              value={overview?.period.key ?? 'this_month'}
+              onChange={(event) => window.location.assign(`/publisher/dashboard?period=${event.currentTarget.value}`)}
+            >
+              <option value="this_month">Bulan ini</option>
+              <option value="last_month">Bulan lalu</option>
+              <option value="this_quarter">Kuartal ini</option>
+              <option value="ytd">YTD</option>
+              <option value="all_time">Semua waktu</option>
+            </select>
+          </label>
         </div>
-        <div className="pds-head-actions">
-          <button className="pds-btn pds-btn-primary" onClick={() => window.location.href = "/publisher/books/new"}>+ Upload Buku Baru</button>
-        </div>
-      </div>
-      <PeriodChips period={overview?.period.key ?? 'this_month'} />
+        <h1>Lihat <em>bagaimana</em><br />pembaca membaca Anda</h1>
+        <p>Penjualan fisik hanya memberi tahu apa yang terjual. Dashboard penerbit BUKOO memberi tahu apa yang benar-benar <strong>dibaca, dituntaskan, dan diminati</strong> — insight yang membantu Anda mengambil keputusan bisnis.</p>
+      </section>
 
       <div className="pds-kpi-row">
-        <div className="pds-kpi teal">
-          <div className="pds-kpi-label">Pembaca ({periodLabel})</div>
-          <div className="pds-kpi-num">{totalReaders.toLocaleString('id-ID')}</div>
-          <div className={`pds-kpi-chg ${readerDelta.cls}`}>{readerDelta.sign} {readerDelta.pct} vs periode lalu</div>
-        </div>
         <div className="pds-kpi amber">
-          <div className="pds-kpi-label">Estimasi Royalti</div>
+          <div className="pds-kpi-label">Estimasi royalti</div>
           <div className="pds-kpi-num">{royalty > 0 ? fmtRp.format(royalty) : '—'}</div>
-          <div className={`pds-kpi-chg ${royalty > 0 && cmp?.royalty.hasData ? royaltyDelta.cls : 'pds-flat'}`}>{royalty > 0 && cmp?.royalty.hasData ? `${royaltyDelta.sign} ${royaltyDelta.pct} vs periode lalu` : 'estimasi · pool diatur admin'}</div>
+          <div className="pds-kpi-chg pds-flat">periode {periodLabel.toLowerCase()}</div>
         </div>
-        <div className="pds-kpi coral">
-          <div className="pds-kpi-label">Total Waktu Baca</div>
-          <div className="pds-kpi-num">{totalMinutes.toLocaleString('id-ID')} mnt</div>
-          <div className={`pds-kpi-chg ${minuteDelta.cls}`}>{minuteDelta.sign} {minuteDelta.pct} vs periode lalu</div>
+        <div className="pds-kpi teal">
+          <div className="pds-kpi-label">Total sesi baca</div>
+          <div className="pds-kpi-num">{fmtId.format(periodReads)}<small> / {fmtId.format(overview?.totalLifetimeReads ?? 0)}</small></div>
+          <div className="pds-kpi-chg pds-flat">periode {periodLabel.toLowerCase()} / kumulatif</div>
         </div>
         <div className="pds-kpi sky">
-          <div className="pds-kpi-label">Baca Selesai</div>
-          <div className="pds-kpi-num">{(overview?.totalCompletions ?? 0).toLocaleString('id-ID')}</div>
-          <div className={`pds-kpi-chg ${completionDelta.cls}`}>{completionDelta.sign} {completionDelta.pct} vs periode lalu</div>
+          <div className="pds-kpi-label">Judul aktif dibaca</div>
+          <div className="pds-kpi-num">{activeBooks}<small> / {overview?.totalBooks ?? 0}</small></div>
+          <div className="pds-kpi-chg pds-flat">{activePercent}% katalog aktif · {totalReaders.toLocaleString('id-ID')} pembaca</div>
+        </div>
+        <div className="pds-kpi coral">
+          <div className="pds-kpi-label">Transfer berikutnya</div>
+          <div className="pds-kpi-num">Tgl 5</div>
+          <div className="pds-kpi-chg pds-flat">Est. {fmtRp.format(royalty)} · tiap tgl 5</div>
         </div>
       </div>
 
-      {/* Trend + top books */}
-      <div className="pds-grid pds-mb14" style={{ gridTemplateColumns: "1.6fr 1fr", alignItems: "start" }}>
+      <div className="pds-grid pds-mb14 pds-overview-split">
         <div className="pds-panel">
-          <div className="pds-panel-title">Tren Pembacaan<span className="tag">{periodLabel}</span></div>
-          <TrendChart trend={overview?.dailyTrend ?? []} />
-          <div className="pds-chart-legend">
-            <div className="pds-leg"><span className="sw" style={{ background: 'var(--pds-teal)' }} />Pembacaan (read starts)</div>
-          </div>
-        </div>
-        <div className="pds-panel">
-          <div className="pds-panel-title">Top Buku Anda<button className="more" onClick={() => onTabChange("performa")}>Lihat semua</button></div>
-          <div className="pds-tbl-scroll">
-            <table className="pds-tbl">
-              <tbody>
-                {(overview?.topBooks ?? []).length === 0 ? (
-                  <tr><td style={{ padding: "40px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: 12 }}>
-                    Belum ada data pembacaan. Unggah buku untuk mulai melihat performa.
-                  </td></tr>
-                ) : (
-                  overview!.topBooks.map((b, i) => (
-                    <tr key={b.id}>
-                      <td style={{ width: 24 }}><div className={`pds-rank ${i === 0 ? 'gold' : i < 3 ? 'silver' : 'bronze'}`}>{i + 1}</div></td>
-                      <td style={{ width: 34 }}><div className="pds-thumb">{b.coverKey ? <img src={getCoverUrl(b.coverKey)} alt="" /> : ''}</div></td>
-                      <td><div className="t-main">{b.title}</div><div className="t-sub">{b.author}</div></td>
-                      <td className="r"><div className="t-main num" style={{ color: "var(--pds-teal)" }}>{b.readCount.toLocaleString('id-ID')}</div><div className="t-sub">pembacaan</div></td>
-                      <td className="r"><div className="t-main num">{Math.round(b.readSeconds / 60).toLocaleString('id-ID')} mnt</div><div className="t-sub">waktu baca</div></td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Genre donut + demographics + geo */}
-      <div className="pds-grid pds-mb14 pds-grid-3">
-        <GenrePanel overview={overview} />
-        <DemographicsPanel overview={overview} />
-        <GeoPanelCompact overview={overview} onTabChange={onTabChange} />
-      </div>
-
-      <FunnelPanelFourStep overview={overview} periodLabel={periodLabel} />
-
-      <PremiumInsightsPanel insights={overview?.premiumInsights} />
-
-      {/* Notifications */}
-      <div className="pds-panel">
-        <div className="pds-panel-title">Notifikasi Terbaru<button className="more" onClick={() => onTabChange("notifikasi")}>Semua</button></div>
-        <div className="pds-tbl-scroll">
-          {(overview?.recentNotifications ?? []).length === 0 ? (
-            <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--pds-muted)", fontSize: 12 }}>
-              Belum ada notifikasi.
-            </div>
-          ) : (
-            overview!.recentNotifications.map((n) => (
-              <div className={`pds-notif-item${n.read ? '' : ' unread'}`} key={n.id} style={{ cursor: 'default' }}>
-                                <div className="pds-notif-body">
-                  <div className="pds-notif-t">{n.title}</div>
-                  <div className="pds-notif-d">{n.body}</div>
-                  <div className="pds-notif-time">{new Date(n.createdAt).toLocaleString('id-ID')}</div>
+          <div className="pds-panel-title">Judul paling banyak dibaca<span className="tag">5 teratas · {periodLabel}</span></div>
+          {topBooks.length === 0 ? <div className="pds-empty">Belum ada data pembacaan pada katalog Anda.</div> : (
+            <div className="pds-overview-books">
+              {topBooks.map((book, index) => (
+                <div className="pds-overview-book" key={book.id}>
+                  <span className="pds-overview-book-title" title={book.title}>{book.title}</span>
+                  <span className="pds-overview-book-track"><span style={{ width: `${Math.max(3, (book.readCount / maxReads) * 100)}%`, background: CHART_COLORS[index % CHART_COLORS.length] }} /></span>
+                  <span className="pds-overview-book-count">{fmtId.format(book.readCount)}</span>
                 </div>
-                {!n.read && <div className="pds-notif-dot" />}
-              </div>
-            ))
+              ))}
+            </div>
           )}
+          <button className="pds-overview-link" onClick={() => onTabChange('performa')}>Lihat semua performa</button>
+        </div>
+        <div className="pds-panel">
+          <div className="pds-panel-title">Genre yang diminati<span className="tag">minat pembaca</span></div>
+          {genres.length === 0 ? <div className="pds-empty">Belum ada data genre. Lengkapi metadata judul.</div> : (
+            <div className="pds-overview-genres">
+              {genres.map((genre, index) => {
+                const share = totalGenreDays > 0 ? (genre.readerDays / totalGenreDays) * 100 : 0;
+                return <div className="pds-overview-genre" key={genre.genre}>
+                  <span className="pds-overview-genre-name" title={genre.genre}>{genre.genre}</span>
+                  <span className="pds-overview-genre-share" style={{ color: CHART_COLORS[index % CHART_COLORS.length] }}>{fmtId.format(genre.readerDays)} hari · {Math.round(share)}%</span>
+                </div>;
+              })}
+            </div>
+          )}
+          <div className="pds-overview-insight">Gunakan minat pembaca untuk menentukan judul yang dipromosikan atau dicetak ulang.</div>
         </div>
       </div>
-      <div className="pds-panel" style={{ marginTop: 14 }}>
-        <div className="pds-panel-title">Riwayat settlement <span className="tag">ledger manual · bukan transfer langsung</span></div>
-        <div className="pds-tbl-scroll"><table className="pds-tbl"><thead><tr><th>Tanggal</th><th>Status</th><th className="r">Jumlah</th><th>Referensi</th></tr></thead><tbody>{(overview?.payouts ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 36, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada settlement.</td></tr> : overview!.payouts.map((payout) => <tr key={payout.id}><td>{new Date(payout.createdAt).toLocaleDateString('id-ID')}</td><td>{payout.status}</td><td className="r num">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</td><td>{payout.externalRef || '—'}</td></tr>)}</tbody></table></div>
-      </div>
-    </>
-  );
-}
 
-function GenrePanel({ overview }: { overview?: Overview }) {
-  const split = overview?.genreSplit ?? [];
-  const total = split.reduce((s, g) => s + g.readerDays, 0);
-  const top = split.slice(0, 5);
-  const segments = top.reduce<Array<{ color: string; from: number; to: number; pct: number; genre: string }>>((list, g, i) => {
-    const pct = total > 0 ? (g.readerDays / total) * 100 : 0;
-    const from = list.length > 0 ? list[list.length - 1].to : 0;
-    list.push({ color: CHART_COLORS[i % CHART_COLORS.length], from, to: from + pct, pct, genre: g.genre });
-    return list;
-  }, []);
-  const gradient = segments.map((s) => `${s.color} ${s.from.toFixed(1)}% ${s.to.toFixed(1)}%`).join(', ');
-  return (
-    <div className="pds-panel">
-      <div className="pds-panel-title">Distribusi Genre<span className="tag">reader-days</span></div>
-      {top.length === 0 ? (
-        <div className="pds-empty">Belum ada data — lengkapi genre pada metadata judul.</div>
-      ) : (
-        <div className="pds-donut-wrap">
-          <div className="pds-donut" style={{ background: gradient || 'rgba(255,255,255,0.08)' }}>
-            <div className="dctr"><b>{segments[0] ? `${Math.round(segments[0].pct)}%` : '—'}</b><span>{segments[0]?.genre ?? ''}</span></div>
-          </div>
-          <div className="pds-dleg">
-            {segments.map((s) => (
-              <div className="li" key={s.genre}>
-                <span className="sw" style={{ background: s.color }} />
-                <span className="nm">{s.genre}</span>
-                <span className="pc">{Math.round(s.pct)}%</span>
-              </div>
-            ))}
-          </div>
+      <div className="pds-panel pds-overview-util pds-mb14">
+        <div className="pds-panel-title">Utilisasi koleksi — hidupkan backlist yang belum tersentuh<span className="tag">Peluang</span></div>
+        <div className="pds-overview-util-meta"><span>{overview?.totalBooks ?? 0} judul terdaftar</span><span>{activeBooks} judul aktif dibaca</span></div>
+        <div className="pds-overview-util-bar" role="img" aria-label={`${activePercent}% judul aktif dibaca, ${100 - activePercent}% belum dibaca`}>
+          <div className="active" style={{ width: `${activePercent}%` }}>{activePercent >= 18 ? `${activePercent}% Aktif Dibaca` : ''}</div>
+          <div className="idle" style={{ width: `${100 - activePercent}%` }}>{100 - activePercent >= 18 ? `${100 - activePercent}% Belum Dibaca` : ''}</div>
         </div>
-      )}
-    </div>
-  );
-}
+        <p>Judul yang belum mendapat pembaca bisa diperkuat lewat promosi, Featured Book, atau pembaruan metadata katalog.</p>
+      </div>
 
-function DemographicsPanel({ overview }: { overview?: Overview }) {
-  const demo = overview?.demographics;
-  const known = demo?.knownCount ?? 0;
-  return (
-    <div className="pds-panel">
-      <div className="pds-panel-title">Demografi<span className="tag">agregat anonim</span></div>
-      {!demo || known === 0 ? (
-        <div className="pds-empty">Belum ada data demografi pembaca.</div>
-      ) : (
-        <>
-          {demo.ageGroups.filter((a) => a.count > 0).map((a, i) => {
-            const pct = (a.count / known) * 100;
-            const color = CHART_COLORS[i % CHART_COLORS.length];
-            return (
-              <div className="pds-demo-row" key={a.label}>
-                <div className="pds-demo-lab">{a.label} th</div>
-                <div className="pds-track" style={{ flex: 1 }}><div className="fill" style={{ width: `${Math.max(pct, 3)}%`, background: color }} /></div>
-                <div className="pds-demo-pc" style={{ color }}>{Math.round(pct)}%</div>
-              </div>
-            );
-          })}
-          <div style={{ borderTop: '1px solid var(--pds-border-soft)', marginTop: 10, paddingTop: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-              <span style={{ fontSize: 9.5, color: 'var(--pds-dim)' }}>Perempuan</span>
-              <span style={{ fontSize: 9.5, fontWeight: 700, color: '#fff' }}>{Math.round((demo.gender.female / known) * 100)}%</span>
-            </div>
-            <div className="pds-track">
-              <div className="fill" style={{ width: `${(demo.gender.female / known) * 100}%`, background: 'linear-gradient(90deg, var(--pds-teal), var(--pds-sky))' }} />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function GeoPanelCompact({ overview, onTabChange }: { overview?: Overview; onTabChange: (t: string) => void }) {
-  const geo = overview?.geo ?? [];
-  const total = geo.reduce((s, g) => s + g.readerDays, 0) || 1;
-  const top = geo.slice(0, 5);
-  return (
-    <div className="pds-panel">
-      <div className="pds-panel-title">Sebaran<button className="more" onClick={() => onTabChange('geo')}>Detail</button></div>
-      {top.length === 0 ? (
-        <div className="pds-empty">Belum ada data geografis.</div>
-      ) : (
-        top.map((row) => {
-          const pct = (row.readerDays / total) * 100;
-          return (
-            <div className="pds-geo-row" key={row.countryCode}>
-              <div className="pds-geo-label">{countryLabel(row.countryCode)}</div>
-              <div className="pds-track" style={{ flex: 1 }}><div className="fill" style={{ width: `${Math.max(pct, 3)}%`, background: 'var(--pds-teal)' }} /></div>
-              <div className="pds-geo-val">{Math.round(pct)}%</div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
-}
-
-function FunnelPanelFourStep({ overview, periodLabel }: { overview?: Overview; periodLabel: string }) {
-  const funnel = overview?.funnel;
-  const opened = funnel?.opened ?? 0;
-  const completed = funnel?.completed ?? 0;
-  const steps = [
-    { label: 'Buka buku (read starts)', value: opened, pct: opened > 0 ? 100 : 0, color: 'var(--pds-teal)' },
-    ...(funnel?.hasProgressData ? [
-      { label: 'Baca ≥ 10%', value: funnel.tenPlus ?? 0, pct: opened > 0 && opened > 0 ? ((funnel.tenPlus ?? 0) / Math.max(opened, 1)) * 100 : 0, color: 'rgba(0,201,167,0.65)' },
-      { label: 'Baca ≥ 50%', value: funnel.fiftyPlus ?? 0, pct: opened > 0 ? ((funnel.fiftyPlus ?? 0) / Math.max(opened, 1)) * 100 : 0, color: 'rgba(201,149,42,0.65)' },
-    ] : []),
-    { label: 'Selesai baca', value: completed, pct: opened > 0 ? (completed / opened) * 100 : 0, color: 'var(--pds-amber)' },
-  ];
-  return (
-    <div className="pds-panel pds-mb14">
-      <div className="pds-panel-title">Corong Keterlibatan<span className="tag">{periodLabel}{funnel?.hasProgressData ? ' · estimasi dari progres baca' : ''}</span></div>
-      {opened === 0 ? (
-        <div className="pds-empty">Belum ada aktivitas baca pada periode ini.</div>
-      ) : (
-        <div>
-          {steps.map((step) => (
-            <div key={step.label}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                <span style={{ fontSize: 10, color: 'var(--pds-dim2)' }}>{step.label}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{step.value.toLocaleString('id-ID')} · {Math.round(step.pct)}%</span>
-              </div>
-              <div className="pds-track pds-mb14" style={{ height: 14 }}>
-                <div className="fill" style={{ width: `${Math.max(step.pct, 2)}%`, background: step.color }} />
-              </div>
+      <div className="pds-grid pds-mb14 pds-overview-split">
+        <div className="pds-panel pds-overview-trend">
+          <div className="pds-panel-title">Tren royalti 6 bulan<span className="tag">estimasi</span></div>
+          <RoyaltyTrendChart trend={overview?.royaltyTrend ?? []} />
+          <div className="pds-chart-legend"><div className="pds-leg"><span className="sw" style={{ background: 'var(--pds-amber)' }} />Estimasi royalti</div></div>
+        </div>
+        <div className="pds-panel">
+          <div className="pds-panel-title">Riwayat transfer<span className="tag">pembaruan rutin tanggal 5</span></div>
+          <div className="pds-overview-payout-head"><span>Periode</span><span>Status</span><span>Nilai</span></div>
+          {payouts.length === 0 ? <div className="pds-empty">Belum ada riwayat transfer.</div> : payouts.map((payout) => (
+            <div className="pds-overview-payout" key={payout.id}>
+              <span>{new Date(payout.createdAt).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
+              <span className="pds-overview-paid">{payout.status}</span>
+              <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: payout.currency, maximumFractionDigits: 0 }).format(payout.amount)}</span>
             </div>
           ))}
+          <button className="pds-overview-link" onClick={() => onTabChange('royalti')}>Lihat detail royalti</button>
         </div>
-      )}
-    </div>
-  );
-}
+      </div>
 
-function PremiumInsightsPanel({ insights }: { insights?: PublisherDashboardOverview['premiumInsights'] }) {
-  const data = insights ?? { premiumBookCount: 0, books: [] };
-  return (
-    <div className="pds-panel pds-mb14">
-      <div className="pds-panel-title">Potensi Premium <span className="tag">agregat · tanpa identitas pembaca</span></div>
-      {data.premiumBookCount === 0 ? (
-        <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--pds-muted)', fontSize: 12 }}>
-          Belum ada buku premium. Tetapkan tier akses premium pada judul untuk melihat potensi konversi.
-        </div>
-      ) : (
-        <div className="pds-tbl-scroll">
-          <table className="pds-tbl">
-            <thead><tr><th>Judul</th><th>Tier wajib</th><th className="r">Pembaca</th><th className="r">Berpotensi upgrade</th><th className="r">Sudah memenuhi</th></tr></thead>
-            <tbody>
-              {data.books.map((book) => (
-                <tr key={book.id}>
-                  <td className="t-main">{book.title}</td>
-                  <td>{book.requiredTier}</td>
-                  <td className="r num">{book.distinctReaders.toLocaleString('id-ID')}</td>
-                  <td className="r num" style={{ color: 'var(--pds-coral)' }}>{book.belowTierReaders.toLocaleString('id-ID')}</td>
-                  <td className="r num" style={{ color: 'var(--pds-teal)' }}>{book.eligibleReaders.toLocaleString('id-ID')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
+      <div className="pds-overview-note"><strong>Catatan transparansi.</strong> Estimasi royalti dan seluruh metrik mengikuti data pembacaan yang tercatat. Nilai final mengikuti settlement resmi dan kontrak penerbit.</div>
 
-function PeriodChips({ period }: { period: PublisherDashboardOverview['period']['key'] }) {
-  const options = [
-    { key: 'this_month' as const, label: 'Bulan ini' },
-    { key: 'last_month' as const, label: 'Bulan lalu' },
-    { key: 'this_quarter' as const, label: 'Kuartal ini' },
-    { key: 'ytd' as const, label: 'YTD' },
-    { key: 'all_time' as const, label: 'Semua waktu' },
-  ];
-  return (
-    <div className="pds-period-chips" aria-label="Periode data">
-      {options.map((option) => (
-        <Link
-          href={`/publisher/dashboard?period=${option.key}`}
-          key={option.key}
-          className={`pds-period-chip${period === option.key ? ' active' : ''}`}
-          aria-current={period === option.key ? 'page' : undefined}
-        >
-          {option.label}
-        </Link>
-      ))}
+      <section className="pds-overview-cta">
+        <div><h2>Katalog Anda bisa menjangkau lebih banyak pembaca</h2><p>Lengkapi metadata dan unggah judul berikutnya untuk memperluas jangkauan katalog.</p></div>
+        <Link href="/publisher/books/new" className="pds-btn pds-btn-primary">+ Upload buku baru</Link>
+        <button className="pds-btn pds-btn-line" onClick={() => onTabChange('katalog')}>Buka katalog</button>
+      </section>
     </div>
   );
 }
@@ -411,9 +214,8 @@ function PageKatalog({ catalog }: { catalog: PublisherCatalogBook[] }) {
 // ── page: royalti ─────────────────────────────────────────────
 function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
-  const estimate = overview?.monthlyRoyaltyEstimate ?? 0;
-  const stats = (overview?.bookStats ?? []).filter((b) => b.seconds > 0).sort((a, b) => b.seconds - a.seconds);
-  const totalPeriodSeconds = overview?.totalReadingSeconds ?? 0;
+  const estimate = overview?.royaltyEstimate ?? 0;
+  const stats = (overview?.bookStats ?? []).filter((b) => b.isPublished && b.seconds > 0).sort((a, b) => b.seconds - a.seconds);
 
   return (
     <>
@@ -423,12 +225,12 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
           <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>Unduh CSV</a>
         </div>
       </div>
-      <div className="pds-kpi-row">
+      <div className="pds-kpi-row pds-royalty-kpis">
         <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti ({overview?.period.label ?? 'Periode'})</div><div className="pds-kpi-num">{estimate > 0 ? fmtRp.format(estimate) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · pool diatur admin</div></div>
         <div className="pds-kpi teal"><div className="pds-kpi-label">Total Pembacaan</div><div className="pds-kpi-num">{(overview?.totalLifetimeReads ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">pembacaan kumulatif</div></div>
         <div className="pds-kpi sky"><div className="pds-kpi-label">Total Waktu Baca</div><div className="pds-kpi-num">{Math.round((overview?.totalReadingSeconds ?? 0) / 3600).toLocaleString('id-ID')} jam</div><div className="pds-kpi-chg pds-flat">periode terpilih</div></div>
       </div>
-      <div className="pds-grid pds-mb14" style={{ gridTemplateColumns: '1.5fr 1fr', alignItems: 'start' }}>
+      <div className="pds-grid pds-mb14 pds-royalty-grid">
         <div className="pds-panel">
           <div className="pds-panel-title">Estimasi Royalti per Judul<span className="tag">proporsional dari waktu baca</span></div>
           <div className="pds-tbl-scroll">
@@ -440,8 +242,7 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
                     Belum ada data pembacaan untuk diestimasi.
                   </td></tr>
                 ) : stats.map((b) => {
-                  const share = totalPeriodSeconds > 0 ? b.seconds / totalPeriodSeconds : 0;
-                  const amount = Math.round((estimate * share) / 100) * 100;
+                  const amount = b.estimatedRoyalty;
                   return (
                     <tr key={b.id}>
                       <td className="t-main">{b.title}</td>
@@ -459,9 +260,9 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
         <div className="pds-panel">
           <div className="pds-panel-title">Cara Estimasi Dihitung</div>
           <div style={{ background: 'rgba(201,149,42,0.05)', border: '1px solid rgba(201,149,42,0.16)', borderRadius: 10, padding: 14, fontSize: 10.5, color: 'var(--pds-dim2)', lineHeight: 1.8 }}>
-            <div><b style={{ color: '#fff' }}>Royalti estimasi</b> = waktu baca periode × Rp 10/jam × rate penerbit</div>
+            <div><b style={{ color: '#fff' }}>Royalti estimasi</b> = bagian waktu baca judul dari total waktu baca bulanan platform × pool bulanan × rate penerbit</div>
             <div style={{ borderTop: '1px solid var(--pds-border-soft)', margin: '8px 0', paddingTop: 8, color: 'var(--pds-muted)' }}>
-              Pool royalti bulanan & rate (bps) diatur admin platform. Total periode dibagi ke tiap judul <b>proporsional dari waktu bacanya</b>. Perhitungan final mengikuti settlement resmi & kontrak — bukan angka pencairan.
+              Estimasi dihitung per bulan; rentang parsial menggunakan prorata hari. Judul yang belum tayang tidak ikut dihitung. Pool royalti & rate (bps) diatur admin platform. Perhitungan final mengikuti settlement resmi & kontrak — bukan angka pencairan.
             </div>
           </div>
         </div>
@@ -521,7 +322,7 @@ function PageGeo({ overview }: { overview?: Overview }) {
         {geo.length === 0 ? <div className="pds-empty">Belum ada data geografis.</div> : geo.slice(0, 10).map((row, i) => (
           <div className="pds-geo-row" key={row.countryCode}>
             <div className="pds-geo-label">{countryLabel(row.countryCode)}</div>
-            <div className="pds-track" style={{ flex: 1 }}><div className="fill" style={{ width: `${Math.max((row.readerDays / totalGeo) * 100 * 2, 3)}%`, background: CHART_COLORS[i % CHART_COLORS.length] }} /></div>
+            <div className="pds-track" style={{ flex: 1 }}><div className="fill" style={{ width: `${Math.min(100, Math.max((row.readerDays / totalGeo) * 100, 3))}%`, background: CHART_COLORS[i % CHART_COLORS.length] }} /></div>
             <div className="pds-geo-val">{Math.round((row.readerDays / totalGeo) * 100)}%</div>
           </div>
         ))}
@@ -627,19 +428,15 @@ function PageDemografi({ overview }: { overview?: Overview }) {
   const known = demo?.knownCount ?? 0;
   const gender = demo?.gender ?? { female: 0, male: 0, unknown: 0 };
   const knownGender = gender.female + gender.male;
-  const medianLabel = demo?.ageGroups.reduce<{ label: string; sum: number; running: number } | null>((acc, a, i) => {
-    void i;
-    if (!acc && a.count > 0) return { label: a.label, sum: a.count, running: a.count };
-    return acc;
-  }, null);
+  const dominantAgeGroup = getDominantAgeGroup(demo?.ageGroups ?? []);
   return (
     <>
       <div className="pds-page-head"><div><div className="pds-page-title">Demografi Pembaca</div><div className="pds-page-sub">Profil agregat & anonim · {overview?.period.label ?? 'periode terpilih'} · {known} pembaca dengan data</div></div></div>
       <div className="pds-kpi-row">
         <div className="pds-kpi teal"><div className="pds-kpi-label">Pembaca Teridentifikasi</div><div className="pds-kpi-num">{known.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">dari {(overview?.totalDistinctReaders ?? 0).toLocaleString('id-ID')} pembaca</div></div>
-        <div className="pds-kpi amber"><div className="pds-kpi-label">Grup Usia Dominan</div><div className="pds-kpi-num" style={{ fontSize: 22 }}>{medianLabel?.label ?? '—'}</div><div className="pds-kpi-chg pds-flat">tahun</div></div>
+        <div className="pds-kpi amber"><div className="pds-kpi-label">Grup Usia Dominan</div><div className="pds-kpi-num" style={{ fontSize: 22 }}>{dominantAgeGroup ?? '—'}</div><div className="pds-kpi-chg pds-flat">tahun</div></div>
         <div className="pds-kpi sky"><div className="pds-kpi-label">Perempuan</div><div className="pds-kpi-num">{knownGender > 0 ? `${Math.round((gender.female / knownGender) * 100)}%` : '—'}</div><div className="pds-kpi-chg pds-flat">{knownGender > 0 ? `Laki-laki ${Math.round((gender.male / knownGender) * 100)}%` : 'belum ada data'}</div></div>
-        <div className="pds-kpi mint"><div className="pds-kpi-label">Kota Terpencil Teratas</div><div className="pds-kpi-num" style={{ fontSize: 22 }}>{cities[0]?.city ?? '—'}</div><div className="pds-kpi-chg pds-flat">{cities[0] ? `${cities[0].readers.toLocaleString('id-ID')} pembaca` : 'belum ada data'}</div></div>
+        <div className="pds-kpi mint"><div className="pds-kpi-label">Kota dengan pembaca terbanyak</div><div className="pds-kpi-num" style={{ fontSize: 22 }}>{cities[0]?.city ?? '—'}</div><div className="pds-kpi-chg pds-flat">{cities[0] ? `${cities[0].readers.toLocaleString('id-ID')} pembaca` : 'belum ada data'}</div></div>
       </div>
       <div className="pds-grid pds-mb14 pds-grid-2col">
         <div className="pds-panel">
@@ -737,7 +534,7 @@ export function DashboardClient({ user, overview, catalog = [], tab }: Dashboard
   const activeTab = tab;
   const onTabChange = (nextTab: string) => {
     const period = overview?.period.key ?? 'this_month';
-    router.replace(`/publisher/dashboard?tab=${nextTab}&period=${period}`);
+    router.push(`/publisher/dashboard?tab=${nextTab}&period=${period}`);
   };
 
   const renderPage = () => {

@@ -10,18 +10,22 @@ interface TopbarProps {
 }
 
 const topNavItems = [
-  { id: "overview", label: "Overview" },
-  { id: "katalog", label: "Katalog", href: "/publisher/books" },
+  { id: "overview", label: "Dashboard" },
+  { id: "upload", label: "Submit judul", href: "/publisher/books/new" },
   { id: "royalti", label: "Royalti" },
   { id: "pembaca", label: "Pembaca" },
 ];
 
-const mobileRouteItems = [
+const extraNavItems = [
+  { id: "performa", label: "Performa buku" },
+  { id: "waktu", label: "Waktu baca" },
+  { id: "demografi", label: "Demografi" },
+  { id: "geo", label: "Sebaran geografis" },
+  { id: "metadata", label: "Metadata" },
   { id: "katalog", label: "Katalog", href: "/publisher/books" },
-  { id: "upload", label: "Upload Buku", href: "/publisher/books/new" },
-  { id: "notifikasi", label: "Notifikasi", href: "/publisher/notifications" },
-  { id: "pengaturan", label: "Pengaturan", href: "/publisher/settings" },
   { id: "promosi", label: "Promosi", href: "/publisher/promotions" },
+  { id: "pengaturan", label: "Pengaturan", href: "/publisher/settings" },
+  { id: "notifikasi", label: "Notifikasi", href: "/publisher/notifications" },
 ];
 
 export function PublisherTopbar({
@@ -31,33 +35,36 @@ export function PublisherTopbar({
 }: TopbarProps) {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [extraNavOpen, setExtraNavOpen] = useState(false);
   const [isSigningOut, startSignOut] = useTransition();
   const avatarWrapRef = useRef<HTMLDivElement>(null);
   const avatarMenuRef = useRef<HTMLDivElement>(null);
   const initial = publisherName.charAt(0).toUpperCase();
 
   useEffect(() => {
-    if (!avatarOpen) return;
+    if (!avatarOpen && !extraNavOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!avatarWrapRef.current?.contains(event.target as Node)) {
         setAvatarOpen(false);
       }
+      if (!(event.target as Element).closest(".pds-more-wrap")) setExtraNavOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setAvatarOpen(false);
+        setExtraNavOpen(false);
       }
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
-    avatarMenuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    if (avatarOpen) avatarMenuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [avatarOpen]);
+  }, [avatarOpen, extraNavOpen]);
 
   return (
     <div className="pds-topbar">
@@ -87,6 +94,26 @@ export function PublisherTopbar({
               </button>
             )
           )}
+          <div className="pds-more-wrap">
+            <button
+              type="button"
+              className={`pds-tn${extraNavItems.some((item) => item.id === activeTab) ? " active" : ""}`}
+              aria-haspopup="menu"
+              aria-expanded={extraNavOpen}
+              onClick={() => setExtraNavOpen((open) => !open)}
+            >
+              Lainnya <span aria-hidden="true">⌄</span>
+            </button>
+            {extraNavOpen && (
+              <div className="pds-more-menu" role="menu" aria-label="Navigasi lainnya">
+                {extraNavItems.map((item) => item.href ? (
+                  <Link key={item.id} role="menuitem" href={item.href} className="pds-more-item" onClick={() => setExtraNavOpen(false)}>{item.label}</Link>
+                ) : (
+                  <button key={item.id} type="button" role="menuitem" className="pds-more-item" onClick={() => { setExtraNavOpen(false); onTabChange(item.id); }}>{item.label}</button>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
         <button
           type="button"
@@ -101,15 +128,17 @@ export function PublisherTopbar({
         {mobileNavOpen && (
           <nav id="publisher-mobile-nav" className="pds-mobile-nav" aria-label="Navigasi penerbit">
             <button type="button" className="pds-mobile-nav-item" onClick={() => { setMobileNavOpen(false); onTabChange("overview"); }}>
-              Overview
+              Dashboard
             </button>
             <button type="button" className="pds-mobile-nav-item" onClick={() => { setMobileNavOpen(false); onTabChange("royalti"); }}>
               Royalti
             </button>
-            {mobileRouteItems.map((item) => (
-              <Link key={item.id} href={item.href} className="pds-mobile-nav-item" onClick={() => setMobileNavOpen(false)}>
-                {item.label}
-              </Link>
+            <button type="button" className="pds-mobile-nav-item" onClick={() => { setMobileNavOpen(false); onTabChange("pembaca"); }}>Pembaca</button>
+            {topNavItems.filter((item) => item.id === "upload").map((item) => <Link key={item.id} href={item.href!} className="pds-mobile-nav-item" onClick={() => setMobileNavOpen(false)}>{item.label}</Link>)}
+            {extraNavItems.map((item) => item.href ? (
+              <Link key={item.id} href={item.href} className="pds-mobile-nav-item" onClick={() => setMobileNavOpen(false)}>{item.label}</Link>
+            ) : (
+              <button key={item.id} type="button" className="pds-mobile-nav-item" onClick={() => { setMobileNavOpen(false); onTabChange(item.id); }}>{item.label}</button>
             ))}
           </nav>
         )}

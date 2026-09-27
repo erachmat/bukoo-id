@@ -22,6 +22,85 @@ export interface DateRange {
   label: string;
 }
 
+export interface MonthlyBookReading {
+  month: string;
+  bookId: string;
+  readingSeconds: number;
+}
+
+/** Allocate a month's estimated pool by each eligible publisher book's reading share. */
+export function estimatePooledRoyalty(options: {
+  range: DateRange;
+  monthlyPool: number;
+  rateBps: number;
+  platformSecondsByMonth: ReadonlyMap<string, number>;
+  bookReadings: readonly MonthlyBookReading[];
+}): { total: number; byBook: Map<string, number> } {
+  const { range, platformSecondsByMonth, bookReadings } = options;
+  const monthlyPool = Number.isFinite(options.monthlyPool) ? Math.max(0, options.monthlyPool) : 0;
+  const rateBps = Number.isFinite(options.rateBps) ? Math.max(0, options.rateBps) : 0;
+  const secondsByMonthAndBook = new Map<string, Map<string, number>>();
+
+  for (const reading of bookReadings) {
+    if (!/^\d{4}-\d{2}$/.test(reading.month) || !Number.isFinite(reading.readingSeconds)) continue;
+    const seconds = Math.max(0, reading.readingSeconds);
+    const books = secondsByMonthAndBook.get(reading.month) ?? new Map<string, number>();
+    books.set(reading.bookId, (books.get(reading.bookId) ?? 0) + seconds);
+    secondsByMonthAndBook.set(reading.month, books);
+  }
+
+  const byBook = new Map<string, number>();
+  const roundingUnit = 100;
+
+  for (const [month, books] of secondsByMonthAndBook) {
+    const platformSeconds = Math.max(0, platformSecondsByMonth.get(month) ?? 0);
+    if (monthlyPool === 0 || rateBps === 0 || platformSeconds === 0) continue;
+
+    const [year, monthNumber] = month.split('-').map(Number);
+    const monthStart = Date.UTC(year, monthNumber - 1, 1);
+    const monthEnd = Date.UTC(year, monthNumber, 1);
+    const rangeStart = range.start ? Date.parse(`${range.start}T00:00:00.000Z`) : monthStart;
+    const rangeEnd = range.endExclusive ? Date.parse(`${range.endExclusive}T00:00:00.000Z`) : monthEnd;
+    const selectedStart = Math.max(monthStart, rangeStart);
+    const selectedEnd = Math.min(monthEnd, rangeEnd);
+    const selectedDays = Math.max(0, (selectedEnd - selectedStart) / 86_400_000);
+    const monthDays = (monthEnd - monthStart) / 86_400_000;
+    if (selectedDays === 0) continue;
+
+    const rawAmounts = [...books.entries()]
+      .map(([bookId, seconds]) => ({
+        bookId,
+        amount: (seconds / platformSeconds) * monthlyPool * (rateBps / 10_000) * (selectedDays / monthDays),
+      }))
+      .filter((entry) => Number.isFinite(entry.amount) && entry.amount > 0);
+    const totalUnits = Math.round(rawAmounts.reduce((sum, entry) => sum + entry.amount, 0) / roundingUnit);
+    const allocated = rawAmounts.map((entry) => ({
+      ...entry,
+      units: Math.floor(entry.amount / roundingUnit),
+      remainder: (entry.amount / roundingUnit) % 1,
+    }));
+    let unitsLeft = Math.max(0, totalUnits - allocated.reduce((sum, entry) => sum + entry.units, 0));
+    allocated.sort((a, b) => b.remainder - a.remainder || a.bookId.localeCompare(b.bookId));
+    for (const entry of allocated) {
+      const extraUnit = unitsLeft > 0 ? 1 : 0;
+      if (extraUnit) unitsLeft -= 1;
+      byBook.set(entry.bookId, (byBook.get(entry.bookId) ?? 0) + (entry.units + extraUnit) * roundingUnit);
+    }
+  }
+
+  return {
+    total: [...byBook.values()].reduce((sum, amount) => sum + amount, 0),
+    byBook,
+  };
+}
+
+export function getDominantAgeGroup(ageGroups: readonly { label: AgeGroupLabel; count: number }[]): AgeGroupLabel | undefined {
+  return ageGroups.reduce<{ label: AgeGroupLabel; count: number } | undefined>((dominant, group) => {
+    if (group.count <= 0) return dominant;
+    return !dominant || group.count > dominant.count ? group : dominant;
+  }, undefined)?.label;
+}
+
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function isStrictIsoDate(value: string): boolean {

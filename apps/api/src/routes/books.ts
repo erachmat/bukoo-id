@@ -229,6 +229,16 @@ function buildFtsQuery(raw: string): string {
   return tokens.join(' AND ');
 }
 
+/** Keep one result per book when D1's insert-only FTS index has orphan duplicate rows. */
+export function uniqueBookRows<T extends { id: string }>(rows: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return true;
+  });
+}
+
 booksRouter.get('/search', zValidator('query', z.object({ q: z.string().min(2) })), async (c) => {
   const userId = c.get('userId');
   const db = createDb(c.env.DB);
@@ -239,14 +249,14 @@ booksRouter.get('/search', zValidator('query', z.object({ q: z.string().min(2) }
   if (!matchQuery) return c.json([]);
 
   const results = await c.env.DB.prepare(
-    `SELECT ${bookColumns} FROM books b
+    `SELECT DISTINCT ${bookColumns} FROM books b
      INNER JOIN books_fts f ON b.id = f.id
      WHERE books_fts MATCH ? AND b.is_published = 1
      ORDER BY rank
      LIMIT 20`
   ).bind(matchQuery).all<typeof books.$inferSelect>();
 
-  return c.json((results.results ?? []).map((b) => formatBook(b, userTier)));
+  return c.json(uniqueBookRows(results.results ?? []).map((b) => formatBook(b, userTier)));
 });
 
 // ---------------------------------------------------------------------------

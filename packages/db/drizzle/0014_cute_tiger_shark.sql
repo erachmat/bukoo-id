@@ -1,0 +1,1 @@
+CREATE INDEX `publisher_book_daily_metrics_date_idx` ON `publisher_book_daily_metrics` (`metric_date`);

@@ -642,6 +642,7 @@ export const publisherBookDailyMetrics = sqliteTable(
   },
   (t) => [
     uniqueIndex('publisher_book_daily_metrics_book_date_idx').on(t.bookId, t.metricDate),
+    index('publisher_book_daily_metrics_date_idx').on(t.metricDate),
   ],
 );
 
