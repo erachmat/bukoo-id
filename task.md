@@ -1,11 +1,15 @@
 # Publisher Dashboard Figma Refresh — 2026-09-27
 
+- `[x]` Production screenshot follow-up: found Figma styles accidentally nested inside the 820px media query; detached them and removed legacy Overview selectors from the new page.
+- `[x]` Browser-rendered CSS fixture at 320/390/768/820/1024/1280px: desktop four KPI, mobile 2×2, visible labels, no viewport overflow; drawer opens at normal width. Fixed a separate cover-class collision found during this review.
+- `[x]` Web typecheck, lint (0 errors, 24 existing warnings), tests (93/93), and production build passed.
+- `[ ]` Authenticated live visual check after deployment; browser runner cannot access the local authenticated dashboard.
 - `[x]` Replaced the signed-in dashboard shell with the supplied Figma structure: forest sidebar, white app bar, ivory workspace, responsive drawer navigation, greeting, month selector, report download, and upload action.
 - `[x]` Rebuilt Overview content using publisher data: four KPIs, year-to-selected-month read chart, top five books, genre distribution, city spread, demographics, and top-eight royalty table.
 - `[x]` Added monthly read aggregates, read KPI comparison, and per-book prior-period reads for the trend column; no API/schema migration or seeded example values.
 - `[x]` Web typecheck passed; lint passed with 0 errors (24 existing warnings); tests passed (93/93); production build passed.
-- `[ ]` Browser viewport review at 320/390/768/820/1024/1280px remains. The browser runner cannot connect to local preview; live dashboard needs an authenticated session.
-- `[ ]` Compare the rendered Overview against supplied screenshots. The provided Figma file link is still gated by Figma login, so only the screenshots are available as the reference.
+- `[x]` Compared browser-rendered CSS fixture with the supplied dashboard screenshots at 320/390/768/820/1024/1280px. Live authenticated viewport review remains.
+- `[x]` Compared the rendered Overview structure, palette, card density, and spacing against supplied screenshots. The Figma file link remains gated by Figma login; screenshots are the available reference.
 
 # Publisher Landing Figma Implementation — 2026-09-26
 

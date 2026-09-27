@@ -5715,6 +5715,7 @@ html:has(.pub-page-wrap) {
 @media (max-width: 820px) {
   .pub-dashboard-shell .pds-settings-grid,
 .pub-dashboard-shell .pds-campaign-layout { grid-template-columns: 1fr; }
+}
 
 /* Publisher dashboard Overview — match supplied Figma dashboard frame. */
 .pds-figma-shell.is-overview {
@@ -5825,7 +5826,7 @@ html:has(.pub-page-wrap) {
   background: #f2efe8;
 }
 .pds-figma-shell:not(.is-overview) .pds-main { background: var(--pds-page-bg); }
-.pds-figma-overview { display: grid; gap: 18px; width: 100%; min-width: 0; }
+.pds-figma-overview { display: grid; gap: 18px; width: 100%; min-width: 0; margin: 0; }
 .pds-overview-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-width: 0; }
 .pds-welcome { min-width: 0; }
 .pds-welcome h1 { margin: 0 0 3px; color: #2d3932; font: 700 clamp(20px, 2vw, 25px)/1.25 var(--pds-serif); letter-spacing: -.25px; }
@@ -5839,13 +5840,14 @@ html:has(.pub-page-wrap) {
 .pds-upload-btn { color: #fff; background: #b58418; }
 .pds-report-btn:hover { background: #0f3526; }
 .pds-upload-btn:hover { background: #9c7114; }
-.pds-figma-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.pds-figma-shell .pds-figma-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0; }
 .pds-figma-shell .pds-kpi-white { min-width: 0; box-sizing: border-box; padding: 13px 14px 11px; border: 1px solid #e7e5df; border-top: 2px solid #8fb8a6; border-radius: 7px; background: #fff; box-shadow: 0 2px 5px rgba(40,55,47,.04); }
+.pds-figma-shell .pds-kpi-white::before { display: none; }
 .pds-figma-shell .pds-kpi-white.gold { border-top-color: #b58418; }
 .pds-figma-shell .pds-kpi-white.coral { border-top-color: #d17a65; }
 .pds-figma-shell .pds-kpi-white.blue { border-top-color: #7da7dd; }
 .pds-figma-shell .pds-kpi-label { min-height: auto; margin: 0 0 3px; color: #758078; font: 400 10px/1.45 var(--pds-sans); letter-spacing: 0; text-transform: none; }
-.pds-figma-shell .pds-kpi-num { color: #35433b; font: 600 clamp(20px, 2vw, 25px)/1.35 var(--pds-serif); font-variant-numeric: tabular-nums; }
+.pds-figma-shell .pds-kpi-num { color: #35433b; font: 600 clamp(20px, 2vw, 25px)/1.35 var(--pds-serif); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .pds-delta { display: block; margin-top: 2px; font: 500 9px/1.4 var(--pds-sans); }
 .pds-delta.is-up { color: #52ae7d; }
 .pds-delta.is-down { color: #d57965; }
@@ -5873,8 +5875,8 @@ html:has(.pub-page-wrap) {
 .pds-top-book-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
 .pds-top-book-list li { display: grid; grid-template-columns: 13px 34px minmax(0,1fr) auto; align-items: center; gap: 9px; min-width: 0; min-height: 44px; }
 .pds-top-book-rank { color: #bdc2bd; font-size: 9px; text-align: center; }
-.pds-book-cover { display: flex; align-items: center; justify-content: center; overflow: hidden; width: 30px; height: 38px; border-radius: 3px; background: #e9eee9; color: #90a99a; }
-.pds-book-cover img { width: 100%; height: 100%; object-fit: cover; }
+.pds-top-book-cover { display: flex; align-items: center; justify-content: center; overflow: hidden; width: 30px; height: 38px; border-radius: 3px; background: #e9eee9; color: #90a99a; }
+.pds-top-book-cover img { width: 100%; height: 100%; object-fit: cover; }
 .pds-top-book-info { display: grid; min-width: 0; gap: 2px; }
 .pds-top-book-info strong { overflow: hidden; color: #48524c; font-size: 10px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
 .pds-top-book-info small { overflow: hidden; color: #8b938e; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
@@ -5932,8 +5934,8 @@ html:has(.pub-page-wrap) {
 }
 @media (max-width: 820px) {
   .pds-figma-shell .pds-layout { display: block; }
-  .pds-figma-shell .pds-sidebar { position: fixed; inset: 0 auto 0 0; width: min(280px, calc(100vw - 54px)); height: 100dvh; transform: translateX(-102%); transition: transform .2s ease; box-shadow: 14px 0 35px rgba(8,28,19,.2); }
-  .pds-figma-shell .pds-sidebar.is-open { transform: translateX(0); }
+  .pds-figma-shell .pds-sidebar { display: flex; visibility: hidden; position: fixed; inset: 0 auto 0 0; width: min(280px, calc(100vw - 54px)); height: 100dvh; transform: translateX(-102%); transition: transform .2s ease, visibility .2s; box-shadow: 14px 0 35px rgba(8,28,19,.2); }
+  .pds-figma-shell .pds-sidebar.is-open { visibility: visible; transform: translateX(0); }
   .pds-sidebar-scrim { display: block; position: fixed; inset: 0; z-index: 50; width: 100%; height: 100%; border: 0; background: rgba(7,21,15,.48); }
   .pds-figma-shell .pds-appbar { justify-content: space-between; height: 58px; flex-basis: 58px; padding: 0 17px; }
   .pds-mobile-brand { display: inline-flex; position: absolute; left: 50%; transform: translateX(-50%); color: #354239; font: 600 17px var(--pds-sans); text-decoration: none; }
@@ -5944,7 +5946,7 @@ html:has(.pub-page-wrap) {
   .pds-figma-shell .pds-main { padding: 18px 16px 28px; }
   .pds-overview-head { align-items: flex-start; flex-direction: column; }
   .pds-figma-shell .pds-head-actions { justify-content: flex-start; }
-  .pds-figma-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .pds-figma-shell .pds-figma-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
   .pds-figma-row-main { grid-template-columns: minmax(0,1fr); }
   .pds-figma-row-demographics { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .pds-month-chart,.pds-top-books { min-height: 0; }
@@ -5957,7 +5959,7 @@ html:has(.pub-page-wrap) {
   .pds-figma-shell .pds-head-actions { width: 100%; gap: 7px; }
   .pds-month-picker { flex: 1; justify-content: center; }
   .pds-figma-shell .pds-btn { padding: 0 10px; font-size: 9px; }
-  .pds-figma-kpis { gap: 8px; }
+  .pds-figma-shell .pds-figma-kpis { gap: 8px; }
   .pds-figma-shell .pds-kpi-white { padding: 10px; }
   .pds-figma-shell .pds-kpi-label { font-size: 9px; }
   .pds-figma-shell .pds-kpi-num { font-size: 18px; }
@@ -5974,5 +5976,4 @@ html:has(.pub-page-wrap) {
 }
 @media (prefers-reduced-motion: reduce) {
   .pds-figma-shell .pds-sidebar { transition: none; }
-}
 }

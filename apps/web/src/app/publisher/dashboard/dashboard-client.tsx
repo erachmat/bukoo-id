@@ -25,6 +25,7 @@ const fmtId = new Intl.NumberFormat('id-ID');
 
 function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => void; overview?: Overview }) {
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+  const fmtRpCompact = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', notation: 'compact', maximumFractionDigits: 1 });
   const period = overview?.period;
   const currentReads = overview?.totalReadStarts ?? overview?.dailyTrend.reduce((sum, point) => sum + point.reads, 0) ?? 0;
   const completionRate = currentReads > 0 ? (overview?.totalCompletions ?? 0) / currentReads * 100 : 0;
@@ -75,7 +76,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
   const reportUrl = `/publisher/dashboard/export?kind=book-stats&period=custom&from=${monthValue}-01&to=${reportEnd}`;
 
   return (
-    <div className="pds-overview pds-figma-overview">
+    <div className="pds-figma-overview">
       <section className="pds-overview-head">
         <div className="pds-welcome">
           <h1>Selamat datang, {overview?.publisherName || 'Mitra Penerbit'}</h1>
@@ -98,7 +99,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
 
       <section className="pds-kpi-row pds-figma-kpis" aria-label="Ringkasan performa">
         <article className="pds-kpi pds-kpi-white amber"><div className="pds-kpi-label">Total Pembaca Bulan ini</div><div className="pds-kpi-num">{fmtId.format(overview?.totalDistinctReaders ?? 0)}</div>{comparisonLabel(overview?.totalDistinctReaders ?? 0, overview?.comparison.readers.previous ?? 0, overview?.comparison.readers.hasData ?? false)}</article>
-        <article className="pds-kpi pds-kpi-white gold"><div className="pds-kpi-label">Pendapatan Royalti ({monthNames[Number(monthValue.slice(5, 7)) - 1]})</div><div className="pds-kpi-num">{overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : '—'}</div>{comparisonLabel(overview?.royaltyEstimate ?? 0, overview?.comparison.royalty.previous ?? 0, overview?.comparison.royalty.hasData ?? false)}</article>
+        <article className="pds-kpi pds-kpi-white gold"><div className="pds-kpi-label">Pendapatan Royalti ({monthNames[Number(monthValue.slice(5, 7)) - 1]})</div><div className="pds-kpi-num" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</div>{comparisonLabel(overview?.royaltyEstimate ?? 0, overview?.comparison.royalty.previous ?? 0, overview?.comparison.royalty.hasData ?? false)}</article>
         <article className="pds-kpi pds-kpi-white coral"><div className="pds-kpi-label">Tingkat Selesai Baca</div><div className="pds-kpi-num">{completionRate.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</div>{comparisonLabel(completionRate, (overview?.comparison.reads.previous ?? 0) > 0 ? ((overview?.comparison.completions.previous ?? 0) / (overview?.comparison.reads.previous ?? 1)) * 100 : 0, (overview?.comparison.reads.hasData ?? false) && (overview?.comparison.completions.hasData ?? false))}</article>
         <article className="pds-kpi pds-kpi-white blue"><div className="pds-kpi-label">Judul Aktif di platform</div><div className="pds-kpi-num">{fmtId.format(overview?.publishedBooks ?? 0)}</div><span className="pds-delta is-up">↑ Judul terbit</span></article>
       </section>
@@ -124,7 +125,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
           {topBooks.length === 0 ? <div className="pds-empty">Belum ada data pembacaan.</div> : <ol className="pds-top-book-list">
             {topBooks.map((book, index) => <li key={book.id}>
               <span className="pds-top-book-rank">{index + 1}</span>
-              <span className="pds-book-cover" aria-hidden="true">{book.coverKey ? <Image src={getCoverUrl(book.coverKey)} alt="" width={30} height={38} unoptimized /> : <span>▤</span>}</span>
+              <span className="pds-top-book-cover" aria-hidden="true">{book.coverKey ? <Image src={getCoverUrl(book.coverKey)} alt="" width={30} height={38} unoptimized /> : <span>▤</span>}</span>
               <span className="pds-top-book-info"><strong title={book.title}>{book.title}</strong><small>{book.author}</small></span>
               <span className="pds-top-book-count"><strong>{fmtId.format(book.reads)}</strong><small>Pembacaan</small></span>
             </li>)}
@@ -163,9 +164,9 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
           {royaltyBooks.length === 0 ? <tr><td colSpan={5} className="pds-table-empty">Belum ada data royalti untuk periode ini.</td></tr> : royaltyBooks.map((book, index) => {
             const hasTrend = book.hasPreviousReads && book.previousReads > 0;
             const trend = hasTrend ? (book.reads - book.previousReads) / book.previousReads * 100 : 0;
-            return <tr key={book.id}><td>{index + 1}.</td><td><strong>{book.title}</strong><small>{book.author}</small></td><td className="align-right">{fmtId.format(book.reads)}</td><td className="align-right"><strong>{book.estimatedRoyalty > 0 ? fmtRp.format(book.estimatedRoyalty) : '—'}</strong></td><td className={`align-right ${!hasTrend ? '' : trend >= 0 ? 'trend-up' : 'trend-down'}`}>{hasTrend ? `${trend >= 0 ? '▲' : '▼'} ${Math.abs(trend).toFixed(1)}%` : '—'}</td></tr>;
+            return <tr key={book.id}><td>{index + 1}.</td><td><strong>{book.title}</strong><small>{book.author}</small></td><td className="align-right">{fmtId.format(book.reads)}</td><td className="align-right"><strong title={book.estimatedRoyalty > 0 ? fmtRp.format(book.estimatedRoyalty) : undefined}>{book.estimatedRoyalty > 0 ? fmtRpCompact.format(book.estimatedRoyalty) : '—'}</strong></td><td className={`align-right ${!hasTrend ? '' : trend >= 0 ? 'trend-up' : 'trend-down'}`}>{hasTrend ? `${trend >= 0 ? '▲' : '▼'} ${Math.abs(trend).toFixed(1)}%` : '—'}</td></tr>;
           })}
-        </tbody><tfoot><tr><th colSpan={2}>TOTAL ROYALTI BULAN INI</th><th className="align-right">{fmtId.format(currentReads)}<small>Total Pembacaan</small></th><th className="align-right">{overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : '—'}</th><th className="align-right">{overview?.comparison.royalty.hasData && overview.comparison.royalty.previous > 0 ? `▲ ${(((overview.royaltyEstimate - overview.comparison.royalty.previous) / overview.comparison.royalty.previous) * 100).toFixed(1)}% vs bulan lalu` : '—'}</th></tr></tfoot></table></div>
+        </tbody><tfoot><tr><th colSpan={2}>TOTAL ROYALTI BULAN INI</th><th className="align-right">{fmtId.format(currentReads)}<small>Total Pembacaan</small></th><th className="align-right" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</th><th className="align-right">{overview?.comparison.royalty.hasData && overview.comparison.royalty.previous > 0 ? `▲ ${(((overview.royaltyEstimate - overview.comparison.royalty.previous) / overview.comparison.royalty.previous) * 100).toFixed(1)}% vs bulan lalu` : '—'}</th></tr></tfoot></table></div>
       </article>
     </div>
   );
