@@ -1137,6 +1137,12 @@ Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/
 - `[x]` Web typecheck passed; lint passed with 0 errors (26 existing warnings); tests passed (91/91).
 - `[ ]` Browser visual review remains; browser control failed to load its request-header policy, so production mobile rendering could not be rechecked here.
 
+# Publisher Dashboard Desktop Navigation Breakpoint — 2026-09-27
+
+- `[x]` Narrowed mobile hamburger breakpoint from 1100px to 820px so tablet/desktop widths retain horizontal navigation.
+- `[x]` Web typecheck passed; lint passed with 0 errors (26 existing warnings); tests passed (91/91).
+- `[ ]` Deploy and verify layout around breakpoint; browser inspection tool was unavailable during the previous check.
+
 # Publisher Demo Seed Reassignment — 2026-09-27
 
 - [x] Confirmed `marketing@bukoo.id` exists in production with role `PUBLISHER`.
