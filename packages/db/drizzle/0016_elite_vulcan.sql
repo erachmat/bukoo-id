@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `publisher_submissions_one_active_per_book_idx` ON `publisher_submissions` (`book_id`) WHERE status IN ('SUBMITTED', 'IN_REVIEW') AND book_id IS NOT NULL;

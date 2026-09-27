@@ -6,7 +6,8 @@ import { getCoverUrl } from "@/lib/cover-url";
 import { filterAndSortBooks, paginateBooks, CATALOG_PAGE_SIZE, type CatalogSort, type CatalogStatus } from "@/lib/catalog-filter";
 import { DeletePublisherBookButton } from "./(protected)/books/delete-button";
 import { PublishToggleButton } from "./(protected)/books/publish-toggle-button";
-import { bulkDeleteBooks, bulkSetBookPublication } from "./(protected)/books/actions";
+import { bulkArchivePublisherBooks, bulkSetBookPublication, restorePublisherBook } from "./(protected)/books/actions";
+import './catalog-table.css';
 
 export interface PublisherCatalogBook {
   id: string;
@@ -24,6 +25,9 @@ export interface PublisherCatalogBook {
   featured: boolean;
   isPublished: boolean;
   publicationStatus: string;
+  archivedAt: string | null;
+  isbn: string | null;
+  reviewNote: string | null;
 }
 
 function firstGenre(genre: PublisherCatalogBook['genre']): string {
@@ -46,6 +50,7 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [bulkMessage, setBulkMessage] = useState<string | null>(null);
   const filteredBooks = useMemo(() => filterAndSortBooks(books, { q: query, status, access, language, sort }), [books, query, status, access, language, sort]);
   const paginated = useMemo(() => paginateBooks(filteredBooks, page), [filteredBooks, page]);
   const languages = useMemo(() => [...new Set(books.map((book) => book.language).filter(Boolean))].sort(), [books]);
@@ -64,20 +69,25 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
     return next;
   });
   const changePage = (nextPage: number) => { setSelected(new Set()); setPage(nextPage); };
-  const runBulk = (action: 'publish' | 'unpublish' | 'delete') => {
-    if (action === 'delete' && !window.confirm(`Hapus ${selected.size} buku terpilih? Tindakan ini tidak dapat dibatalkan.`)) return;
+  const runBulk = (action: 'publish' | 'unpublish' | 'archive') => {
+    if (action === 'archive' && !window.confirm(`Arsipkan ${selected.size} buku terpilih? Data pembaca dan royalti tetap tersimpan.`)) return;
     if (action === 'unpublish' && !window.confirm(`Tarik ${selected.size} buku terpilih dari toko?`)) return;
     setBulkError(null);
+    setBulkMessage(null);
     startTransition(async () => {
       try {
-        if (action === 'delete') await bulkDeleteBooks([...selected]);
-        else await bulkSetBookPublication([...selected], action);
+        const result = action === 'archive' ? await bulkArchivePublisherBooks([...selected]) : await bulkSetBookPublication([...selected], action);
+        setBulkMessage(`${result.processed} buku diproses${result.skipped ? `, ${result.skipped} dilewati karena statusnya tidak memenuhi syarat` : ''}.`);
         setSelected(new Set());
       } catch (caught) {
         setBulkError(caught instanceof Error ? caught.message : 'Gagal memproses buku terpilih.');
       }
     });
   };
+  const restore = (id: string) => startTransition(async () => {
+    try { await restorePublisherBook(id); setBulkMessage('Buku dipulihkan. Terbitkan kembali bila sudah siap.'); }
+    catch (cause) { setBulkError(cause instanceof Error ? cause.message : 'Gagal memulihkan buku.'); }
+  });
 
   return (
     <div className="pds-panel">
@@ -88,7 +98,7 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
       <div className="pds-catalog-toolbar">
         <input className="pds-search" value={query} onChange={(event) => updateFilter(setQuery, event.target.value)} placeholder="Cari judul atau penulis" aria-label="Cari judul atau penulis" />
         <select value={status} onChange={(event) => updateFilter(setStatus, event.target.value as CatalogStatus)} aria-label="Filter status">
-          <option value="all">Semua status</option><option value="published">Aktif</option><option value="in_review">Review</option><option value="unpublished">Nonaktif</option><option value="rejected">Ditolak</option><option value="draft">Draft</option>
+          <option value="all">Semua status</option><option value="published">Aktif</option><option value="in_review">Review</option><option value="unpublished">Nonaktif</option><option value="rejected">Ditolak</option><option value="draft">Draft</option><option value="archived">Arsip</option>
         </select>
         <select value={access} onChange={(event) => updateFilter(setAccess, event.target.value)} aria-label="Filter akses">
           <option value="all">Semua akses</option>{accesses.map((value) => <option key={value} value={value}>{value}</option>)}
@@ -100,7 +110,9 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
           <option value="updated">Terbaru</option><option value="title">Judul A-Z</option><option value="author">Penulis A-Z</option><option value="reads">Pembacaan terbanyak</option>
         </select>
       </div>
-      {selected.size > 0 && <div className="pds-catalog-bulkbar"><strong>{selected.size} buku dipilih</strong><button type="button" onClick={() => runBulk('publish')} disabled={pending}>Terbitkan</button><button type="button" onClick={() => runBulk('unpublish')} disabled={pending}>Nonaktifkan</button><button type="button" onClick={() => runBulk('delete')} disabled={pending}>Hapus</button>{bulkError && <span role="alert">{bulkError}</span>}</div>}
+      {selected.size > 0 && <div className="pds-catalog-bulkbar"><strong>{selected.size} buku dipilih</strong><button type="button" onClick={() => runBulk('publish')} disabled={pending}>Terbitkan</button><button type="button" onClick={() => runBulk('unpublish')} disabled={pending}>Nonaktifkan</button><button type="button" onClick={() => runBulk('archive')} disabled={pending}>Arsipkan</button></div>}
+      {bulkError && <p role="alert" className="pct-feedback error">{bulkError}</p>}{bulkMessage && <p role="status" className="pct-feedback">{bulkMessage}</p>}
+      <p className="pct-scroll-hint">Geser tabel ke kanan untuk melihat semua aksi →</p>
       <div className="pds-tbl-scroll">
         <table className="pds-tbl">
           <thead><tr><th><input type="checkbox" checked={allVisibleSelected} onChange={togglePage} aria-label="Pilih semua buku di halaman ini" /></th><th>Judul & Penulis</th><th>Genre / Kategori</th><th>Status</th><th>Bahasa</th><th>Akses Konten</th><th>Format</th><th className="r">Pembacaan</th><th className="c">Aksi</th></tr></thead>
@@ -115,20 +127,21 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
                 <td><input type="checkbox" checked={selected.has(book.id)} onChange={() => toggleSelected(book.id)} aria-label={`Pilih ${book.title}`} /></td>
                 <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {book.coverKey ? <img src={getCoverUrl(book.coverKey)} alt={book.title} className="pds-thumb" style={{ objectFit: 'cover' }} /> : <div className="pds-thumb"></div>}
-                  <div><div className="t-main">{book.title}</div><div className="t-sub">{book.author}</div></div>
+                  <div><div className="t-main">{book.title}</div><div className="t-sub">{book.author}</div>{book.reviewNote && ['DRAFT', 'REJECTED'].includes(book.publicationStatus) && <div className="pct-review-note">Catatan kurasi: {book.reviewNote}</div>}</div>
                 </div></td>
                 <td><span className="pds-chip pds-chip-draft">{firstGenre(book.genre)}</span>{book.featured && <span className="pds-chip pds-chip-live" style={{ marginLeft: 5 }}>Unggulan</span>}</td>
-                <td><span className={`pds-chip ${book.isPublished ? 'pds-chip-live' : 'pds-chip-review'}`}><span className="pds-dotk" />{book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></td>
+                <td><span className={`pds-chip ${book.isPublished ? 'pds-chip-live' : 'pds-chip-review'}`}><span className="pds-dotk" />{book.archivedAt ? 'Arsip' : book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></td>
                 <td>{book.language}</td>
                 <td>{book.subscriptionRequired !== 'FREE' ? <span className="pds-chip pds-chip-review">{book.subscriptionRequired}</span> : <span className="pds-chip pds-chip-live">GRATIS</span>}</td>
                 <td className="num">{book.epubKey ? 'EPUB' : '—'}</td>
                 <td className="r num">{book.readCount.toLocaleString('id-ID')} kali</td>
-                <td className="c pds-catalog-actions"><Link href={`/publisher/books/${book.id}/analytics`} className="pds-catalog-action">Analitik</Link>{book.isPublished && <Link href={`/book/${book.id}`} target="_blank" rel="noreferrer" className="pds-catalog-action">Lihat di toko</Link>}<Link href={`/publisher/books/${book.id}/edit`} className="pds-catalog-action">Edit</Link><PublishToggleButton bookId={book.id} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></td>
+                <td className="c pds-catalog-actions"><Link href={`/publisher/books/${book.id}/analytics`} className="pds-catalog-action">Analitik</Link>{book.isPublished && <Link href={`/book/${book.id}`} target="_blank" rel="noreferrer" className="pds-catalog-action">Lihat di toko</Link>}<Link href={`/publisher/books/${book.id}/edit`} className="pds-catalog-action">Edit</Link>{book.archivedAt ? <button type="button" onClick={() => restore(book.id)} disabled={pending} className="pds-catalog-action">Pulihkan</button> : <><PublishToggleButton bookId={book.id} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></>}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <div className="pct-mobile-list">{paginated.items.length === 0 && <div className="pct-mobile-card pct-empty">{books.length === 0 ? <>Belum ada buku. <Link href="/publisher/books/new">Upload buku pertama</Link></> : 'Tidak ada buku yang cocok dengan filter.'}</div>}{paginated.items.map((book) => <article className="pct-mobile-card" key={book.id}><div className="pct-mobile-head">{book.coverKey ? <img src={getCoverUrl(book.coverKey)} alt="" /> : <span className="pct-no-cover">BUKOO</span>}<div><strong>{book.title}</strong><small>{book.author}</small><span className="pds-chip pds-chip-review">{book.archivedAt ? 'Arsip' : book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></div></div>{book.reviewNote && ['DRAFT', 'REJECTED'].includes(book.publicationStatus) && <p className="pct-review-note">Catatan kurasi: {book.reviewNote}</p>}<div className="pct-mobile-meta"><span>{firstGenre(book.genre)}</span><span>{book.readCount.toLocaleString('id-ID')} pembacaan</span></div><div className="pct-mobile-actions"><Link href={`/publisher/books/${book.id}/edit`}>Edit</Link><Link href={`/publisher/books/${book.id}/analytics`}>Analitik</Link>{book.archivedAt ? <button type="button" onClick={() => restore(book.id)} disabled={pending}>Pulihkan</button> : <><PublishToggleButton bookId={book.id} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></>}</div></article>)}</div>
       <div className="pds-catalog-pagination">
         <span>Menampilkan {filteredBooks.length === 0 ? 0 : (paginated.page - 1) * CATALOG_PAGE_SIZE + 1}–{Math.min(paginated.page * CATALOG_PAGE_SIZE, filteredBooks.length)} dari {filteredBooks.length}</span>
         <div><button type="button" disabled={paginated.page === 1} onClick={() => changePage(paginated.page - 1)}>Sebelumnya</button><span>Halaman {paginated.page} / {paginated.totalPages}</span><button type="button" disabled={paginated.page === paginated.totalPages} onClick={() => changePage(paginated.page + 1)}>Berikutnya</button></div>

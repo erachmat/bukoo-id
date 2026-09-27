@@ -291,6 +291,11 @@ function q(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
 }
 
+function catalogFingerprint(title: string, author: string): string {
+  const normalize = (value: string) => value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('id-ID');
+  return JSON.stringify([normalize(title), normalize(author)]);
+}
+
 function nullableOr(value: string | null, fallback = 'NULL'): string {
   return value === null ? fallback : q(value);
 }
@@ -348,9 +353,9 @@ export function buildDemoSeedSql(now: Date = new Date()): string {
     const readMinutes = Math.floor(totalSeconds / 60);
     const createdAt = `${isoDay(winStart)}T00:00:00.000Z`;
     stmts.push(
-      `INSERT INTO books (id, title, author, publisher, synopsis, genre, tags, language, total_pages, read_count, read_time_minutes, is_published, publication_status, subscription_required, publisher_user_id, cover_key, epub_key, featured, created_at, updated_at) ` +
-        `VALUES (${q(b.id)}, ${q(b.title)}, 'BUKOO Demo', 'BUKOO Demo Press', ${q(b.synopsis)}, ${q(JSON.stringify(b.genres))}, ${q(JSON.stringify(b.tags))}, '${b.language}', ${b.totalPages}, ${readCount}, ${readMinutes}, 1, 'PUBLISHED', '${b.subscriptionRequired}', ${publisherIdExpr}, ${q(b.coverKey)}, ${q(b.epubKey)}, 0, ${q(createdAt)}, ${q(`${isoDay(now)}T00:00:00.000Z`)}) ` +
-        `ON CONFLICT(id) DO UPDATE SET title = excluded.title, author = excluded.author, publisher = excluded.publisher, synopsis = excluded.synopsis, genre = excluded.genre, tags = excluded.tags, language = excluded.language, total_pages = excluded.total_pages, read_count = excluded.read_count, read_time_minutes = excluded.read_time_minutes, is_published = 1, publication_status = 'PUBLISHED', subscription_required = excluded.subscription_required, publisher_user_id = excluded.publisher_user_id, cover_key = excluded.cover_key, epub_key = excluded.epub_key, updated_at = excluded.updated_at;`,
+      `INSERT INTO books (id, title, author, catalog_fingerprint, publisher, synopsis, genre, tags, language, total_pages, read_count, read_time_minutes, is_published, publication_status, subscription_required, publisher_user_id, cover_key, epub_key, featured, created_at, updated_at) ` +
+        `VALUES (${q(b.id)}, ${q(b.title)}, 'BUKOO Demo', ${q(catalogFingerprint(b.title, 'BUKOO Demo'))}, 'BUKOO Demo Press', ${q(b.synopsis)}, ${q(JSON.stringify(b.genres))}, ${q(JSON.stringify(b.tags))}, '${b.language}', ${b.totalPages}, ${readCount}, ${readMinutes}, 1, 'PUBLISHED', '${b.subscriptionRequired}', ${publisherIdExpr}, ${q(b.coverKey)}, ${q(b.epubKey)}, 0, ${q(createdAt)}, ${q(`${isoDay(now)}T00:00:00.000Z`)}) ` +
+        `ON CONFLICT(id) DO UPDATE SET title = excluded.title, author = excluded.author, catalog_fingerprint = excluded.catalog_fingerprint, publisher = excluded.publisher, synopsis = excluded.synopsis, genre = excluded.genre, tags = excluded.tags, language = excluded.language, total_pages = excluded.total_pages, read_count = excluded.read_count, read_time_minutes = excluded.read_time_minutes, is_published = 1, publication_status = 'PUBLISHED', subscription_required = excluded.subscription_required, publisher_user_id = excluded.publisher_user_id, cover_key = excluded.cover_key, epub_key = excluded.epub_key, updated_at = excluded.updated_at;`,
     );
   }
 

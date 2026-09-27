@@ -1,18 +1,18 @@
 'use client'
 
 import { useTransition } from 'react'
-import { deletePublisherBook } from './actions'
+import { archivePublisherBook } from './actions'
 
 export function DeletePublisherBookButton({ bookId, bookTitle }: { bookId: string; bookTitle: string }) {
   const [isPending, startTransition] = useTransition()
 
   function handleDelete() {
-    if (!confirm(`Hapus buku "${bookTitle}"? Tindakan ini tidak dapat dibatalkan.`)) return
+    if (!confirm(`Arsipkan buku "${bookTitle}"? Buku tidak tampil di toko, tetapi data pembaca dan royalti tetap tersimpan. Buku dapat dipulihkan.`)) return
     startTransition(async () => {
       try {
-        await deletePublisherBook(bookId)
+        await archivePublisherBook(bookId)
       } catch (err: unknown) {
-        alert((err as Error).message || 'Gagal menghapus buku.')
+        alert((err as Error).message || 'Gagal mengarsipkan buku.')
       }
     })
   }
@@ -24,17 +24,17 @@ export function DeletePublisherBookButton({ bookId, bookTitle }: { bookId: strin
       style={{
         fontSize: 12,
         fontWeight: 600,
-        color: '#E05A3A',
+        color: '#70571c',
         cursor: isPending ? 'wait' : 'pointer',
         padding: '5px 12px',
         borderRadius: 8,
-        border: '1px solid rgba(224,90,58,0.3)',
-        background: 'rgba(224,90,58,0.06)',
+        border: '1px solid #decfa8',
+        background: '#fffaf0',
         opacity: isPending ? 0.6 : 1,
         fontFamily: 'inherit',
       }}
     >
-      {isPending ? '...' : 'Hapus'}
+      {isPending ? '...' : 'Arsipkan'}
     </button>
   )
 }

@@ -19,6 +19,12 @@ describe('catalog filtering', () => {
     expect(filterAndSortBooks(books, { access: 'FREE', language: 'ID' }).map((book) => book.title)).toEqual(['Beta']);
   });
 
+  it('hides archived books by default and shows them only in archive filter', () => {
+    const archived = { ...books[0], title: 'Arsip', isPublished: false, archivedAt: '2026-09-27' };
+    expect(filterAndSortBooks([...books, archived], { status: 'all' }).map((book) => book.title)).not.toContain('Arsip');
+    expect(filterAndSortBooks([...books, archived], { status: 'archived' }).map((book) => book.title)).toEqual(['Arsip']);
+  });
+
   it('sorts by title, reads, and most recently updated', () => {
     expect(filterAndSortBooks(books, { sort: 'title' }).map((book) => book.title)).toEqual(['Alpha', 'Beta', 'Zeta']);
     expect(filterAndSortBooks(books, { sort: 'reads' }).map((book) => book.title)).toEqual(['Alpha', 'Beta', 'Zeta']);

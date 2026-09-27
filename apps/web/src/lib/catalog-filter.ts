@@ -1,4 +1,4 @@
-export type CatalogStatus = 'all' | 'published' | 'in_review' | 'draft' | 'rejected' | 'unpublished';
+export type CatalogStatus = 'all' | 'published' | 'in_review' | 'draft' | 'rejected' | 'unpublished' | 'archived';
 export type CatalogSort = 'title' | 'author' | 'reads' | 'updated';
 
 export interface CatalogFilterBook {
@@ -10,6 +10,7 @@ export interface CatalogFilterBook {
   updatedAt: string | null;
   isPublished: boolean;
   publicationStatus: string;
+  archivedAt?: string | null;
 }
 
 export interface CatalogFilters {
@@ -23,6 +24,8 @@ export interface CatalogFilters {
 export const CATALOG_PAGE_SIZE = 10;
 
 function matchesStatus(book: CatalogFilterBook, status: CatalogStatus): boolean {
+  if (status === 'archived') return !!book.archivedAt;
+  if (book.archivedAt) return false;
   switch (status) {
     case 'published': return book.isPublished;
     case 'in_review': return book.publicationStatus === 'IN_REVIEW';

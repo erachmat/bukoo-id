@@ -111,9 +111,8 @@ export default auth((req: NextRequest & { auth?: { user?: AuthUser } }) => {
     }
   }
 
-  // NOTE: /publisher/submit is intentionally public (marketing page — same pattern as
-  // /publisher/dashboard). Actual submissions stay guard-walled server-side by
-  // getPublisherUser() in publisher/submit/actions.ts.
+  // /publisher/submit is a public explainer. Signed-in publishers are sent to
+  // the protected /publisher/books/new upload and review workflow.
 
   return NextResponse.next()
 })

@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { PublisherBookForm } from "../_components/book-form";
-import { createPublisherBook } from "../actions";
 
 export default function NewPublisherBookPage() {
   return (
@@ -17,13 +16,13 @@ export default function NewPublisherBookPage() {
             </Link>
           </div>
           <div className="pds-page-title">Upload Buku Baru</div>
-          <div className="pds-page-sub">Unggah file EPUB, tentukan harga, dan publikasikan ke lebih dari 2 juta pembaca BUKOO</div>
+          <div className="pds-page-sub">Lengkapi metadata dan berkas, simpan draft, lalu kirim untuk review kurasi.</div>
         </div>
         <div className="pds-head-actions">
           <Link href="/publisher/books" className="pds-btn pds-btn-line">Batal</Link>
         </div>
       </div>
-      <PublisherBookForm action={createPublisherBook} submitLabel="Terbitkan Buku Baru →" />
+      <PublisherBookForm />
     </>
   );
 }

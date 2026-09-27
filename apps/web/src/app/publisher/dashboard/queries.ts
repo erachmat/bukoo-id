@@ -8,6 +8,7 @@ import {
   publisherProfiles,
   notifications as notificationsTable,
   publisherPayouts,
+  publisherSubmissions,
   readingProgress as readingProgressTable,
   subscriptions,
   users as usersTable,
@@ -34,12 +35,17 @@ import type { PublisherCatalogBook } from '../catalog-table';
 
 export async function getPublisherCatalog(publisherUserId: string): Promise<PublisherCatalogBook[]> {
   const db = getDb();
-  return db.select({
+  const catalog = await db.select({
     id: booksTable.id, title: booksTable.title, author: booksTable.author, synopsis: booksTable.synopsis, totalPages: booksTable.totalPages, genre: booksTable.genre,
     language: booksTable.language, subscriptionRequired: booksTable.subscriptionRequired,
     epubKey: booksTable.epubKey, coverKey: booksTable.coverKey, readCount: booksTable.readCount,
-    isPublished: booksTable.isPublished, publicationStatus: booksTable.publicationStatus, updatedAt: booksTable.updatedAt, featured: booksTable.featured,
+    isPublished: booksTable.isPublished, publicationStatus: booksTable.publicationStatus, archivedAt: booksTable.archivedAt, isbn: booksTable.isbn, updatedAt: booksTable.updatedAt, featured: booksTable.featured,
   }).from(booksTable).where(eq(booksTable.publisherUserId, publisherUserId)).orderBy(desc(booksTable.createdAt));
+  const reviews = await db.select({ bookId: publisherSubmissions.bookId, reviewNote: publisherSubmissions.reviewNote, status: publisherSubmissions.status })
+    .from(publisherSubmissions).where(eq(publisherSubmissions.publisherUserId, publisherUserId)).orderBy(desc(publisherSubmissions.updatedAt));
+  const latest = new Map<string, { reviewNote: string | null; status: string }>();
+  for (const review of reviews) if (review.bookId && !latest.has(review.bookId)) latest.set(review.bookId, review);
+  return catalog.map((book) => ({ ...book, reviewNote: latest.get(book.id)?.reviewNote ?? null }));
 }
 
 export interface PublisherBookAnalytics {
