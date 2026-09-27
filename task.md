@@ -1141,7 +1141,8 @@ Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/
 
 - `[x]` Narrowed mobile hamburger breakpoint from 1100px to 820px so tablet/desktop widths retain horizontal navigation.
 - `[x]` Web typecheck passed; lint passed with 0 errors (26 existing warnings); tests passed (91/91).
-- `[ ]` Deploy and verify layout around breakpoint; browser inspection tool was unavailable during the previous check.
+- `[x]` Merged PR #3 and deployed to production; web smoke check passed and publisher dashboard route returns HTTP 200.
+- `[ ]` Visual check around 820px remains; browser inspection tool was unavailable, so device review is still needed.
 
 # Publisher Demo Seed Reassignment — 2026-09-27
 
