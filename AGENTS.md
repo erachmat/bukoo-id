@@ -39,7 +39,7 @@ in the web worker (`drizzle-orm/d1`). Drizzle migrations live in `packages/db/dr
 1. Never run migrations against the production D1 database directly — use `wrangler d1
 execute` with `--create-only` style review first, and validate generated SQL. The only
    sanctioned path to apply a migration remotely is the manual `migrate-d1.yml` GitHub
-   Actions workflow (generate → `--remote --dry-run` review → apply only when confirmed).
+   Actions workflow (generate → list remote pending migrations and review their SQL → apply only when confirmed). Wrangler D1 migrations do not offer a `--dry-run` flag.
 2. **FTS5 gotcha (critical):** Cloudflare D1 does NOT support FTS5 `DELETE`/`UPDATE`
    operations on virtual tables AT ALL — not just the special `'delete'` command, but
    also plain `DELETE FROM ..._fts WHERE ...` (both throw `SQLITE_ERROR 7500`). Only
@@ -123,7 +123,7 @@ All pipelines live in `.github/workflows/`:
 - **`deploy-api.yml`** — deploys `bukoo-api` on push to `main` (`wrangler deploy`), then
   smoke-tests `https://api.bukoo.id/health`.
 - **`migrate-d1.yml`** — MANUAL (`workflow_dispatch`): generates pending Drizzle migrations,
-  prints a `--remote --dry-run` diff for review, and applies only when `apply_remote=true`.
+  lists remote pending files and prints each SQL file for review, then applies only when `apply_remote=true`.
   This is the ONLY sanctioned path for applying D1 migrations (see Database hard rules).
 - Required GitHub repo secrets: `CLOUDFLARE_API_TOKEN` (scoped to Workers Scripts/Routes Edit,
   D1 Edit, R2 Edit, Account Settings Read) and `CLOUDFLARE_ACCOUNT_ID`.
