@@ -42,7 +42,7 @@ export function PublisherSidebar({ activeTab, onTabChange, isOpen = false, onNav
   };
 
   const renderItem = (item: { id: string; label: string; href?: string; badge?: string }) => {
-    const isActive = !item.href && activeTab === item.id;
+    const isActive = activeTab === item.id;
     const cls = `pds-side-item${isActive ? " active" : ""}`;
 
     if (item.href) {
