@@ -5,7 +5,7 @@
 - `[x]` Align catalog and upload UI with the light Overview theme; inspect 320px, 390px, and 1280px local browser layouts without document overflow.
 - `[x]` Consolidate signed-in Submit Judul with catalog upload and retain the public explanation page.
 - `[x]` Validate local migrations, run the demo seed twice with identical counts, and pass web typecheck/lint/tests/build plus DB typecheck/check.
-- `[ ]` Apply production D1 migrations through `migrate-d1.yml` after explicit SQL review and confirmation; then deploy code and inspect the authenticated live flow.
+- `[x]` Reviewed SQL, got confirmation, and applied production D1 migrations 0015–0016 through `migrate-d1.yml`; deployed the code and verified the authenticated live catalog/upload layouts plus active catalog navigation.
 
 # Publisher Dashboard Figma Refresh — 2026-09-27
 
