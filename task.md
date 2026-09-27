@@ -1129,7 +1129,7 @@ Spec: design screenshots (hero 1280x512 + long-page) transcribed to `/root/work/
 - `[x]` 3. Matched the Figma Dashboard composition: 1280×2129 frame, horizontal publisher navigation, centered 920px content, three-line hero, four KPI cards, split insight panels, collection utilization, six-month royalty trend, transfer history, transparency note, CTA, and branded footer. KPI values use actual period/cumulative reads, active catalog counts, current royalty estimate, and the routine transfer day.
 - `[x]` 4. Responsive QA across all reviewed pages at 320, 390, 768, 820, 1024, 1280, and 1440px. No page-level horizontal overflow or overlapping top-level panels. Royalti tables stay in their own horizontal scroll regions; the 24-hour chart compacts at phone widths.
 - `[x]` 5. Reviewed Katalog, Royalti, Performa Buku, Pembaca, Demografi, Sebaran Geografis, Waktu Baca, and Metadata against the adopted Figma design system, one page at a time. Verified mobile navigation fits its scroll container.
-- `[x]` 6. Final workspace checks passed. Local implementation is ready for review; production deployment and remote migrations remain separate actions and were not run.
+- `[x]` 6. Final workspace checks passed. Reviewed/applied migration `0014_cute_tiger_shark.sql` through the manual workflow; merged PR #1; production Web/API deploys and smoke checks passed on 2026-09-27.
 
 # Publisher Demo Seed Reassignment — 2026-09-27
 
