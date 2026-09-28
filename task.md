@@ -1,3 +1,14 @@
+# Publisher Dashboard Cross-Surface Roadmap — 2026-09-28
+
+- `[x]` Save the agreed product decisions, current foundation, and ordered roadmap in `docs/publisher-dashboard-roadmap.md` as the source of truth for future Codex tasks.
+- `[x]` Record the 2026-09-27 operational book lifecycle as shipped; its authenticated live visual/smoke check remains in the existing `Publisher Dashboard Figma Refresh — 2026-09-27` section below.
+- `[ ]` Phase 2 — Add retry-safe mobile reading progress sync with stable `syncBatchId`; preserve existing aggregate definitions.
+- `[ ]` Phase 3 — Track web book-detail views and app-CTA clicks; implement same-account, same-book, last-click attribution within seven days while keeping anonymous activity unlinked.
+- `[ ]` Phase 4 — Deliver publisher funnel and analytics UX with clear definitions, coverage, freshness, privacy, and responsive states.
+- `[ ]` Phase 5 — Align publisher campaign requests, internal review outcomes, and measured campaign results.
+- `[ ]` Phase 6 — Clarify estimate, closed royalty period, and payout states across dashboard, notifications, and exports.
+- `[ ]` Update this checklist and the roadmap only as each phase is implemented and verified; follow the repository D1 migration workflow for any production schema change.
+
 # Publisher Catalog and Upload Workflow — 2026-09-27
 
 - `[x]` Add reversible archive and duplicate identity schema, two reviewed migrations, and deterministic demo seed updates.

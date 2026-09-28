@@ -1,220 +1,122 @@
 # Publisher Dashboard Roadmap
 
-**Last Updated:** 2026-09-12  
-**Owner:** Product (Eko Rahmat)  
-**Status:** Living document — updated per sprint
+**Last updated:** 2026-09-28
+
+**Owner:** Product (Eko Rahmat)
+
+**Status:** Living roadmap; operational book workflow is shipped, cross-surface measurement is next.
+
+## Purpose and handoff
+
+This is the source of truth for continued publisher-dashboard product work. A new Codex task should read this roadmap and the current publisher entries in the repository-root `task.md` before proposing or implementing the next phase. Update both documents as phases move forward; do not rely on chat history for product decisions.
+
+The roadmap prioritizes publisher workflows, metric integrity, and useful UX across the production Bukoo web and mobile reading experience. It does not set delivery dates.
+
+## Current foundation
+
+- **Publisher web:** Publisher registration/login, public showcase, authenticated dashboard, overview and book analytics, catalog/upload workflow, CSV exports, settings, promotion requests, and royalty estimates/history are in place.
+- **Book lifecycle:** Draft, submission, internal review, revision, approval/rejection, archive/restore, and bulk catalog operations were implemented and deployed in the 2026-09-27 catalog workflow. The remaining authenticated live visual/smoke check is listed under `Publisher Dashboard Figma Refresh — 2026-09-27` in `task.md`.
+- **Team operations:** Catalog review, campaign review, royalty period close, and payout operations belong in Bukoo's internal workspace. Publishers use the publisher portal to submit work and see their own status and outcomes.
+- **Mobile reading data:** The mobile app is the source of reader progress. Progress sync reaches the API and feeds aggregate publisher metrics. Offline retries can resend reading-time deltas; the sync contract needs a stable idempotency key before these metrics can be treated as retry-safe.
+- **Web discovery:** Web book details already link readers to the mobile app. Page views and app-CTA clicks are not yet recorded as a publisher-facing discovery funnel.
+- **Metric semantics:** Existing reader-day/read-start aggregates represent distinct reader/book/day activity, not reading sessions. Preserve their historical meaning; label them accurately and do not infer session counts from them.
+
+## Product and data decisions
+
+| Area | Decision |
+|---|---|
+| Product surfaces | Publisher operations stay on the web portal. The mobile app remains a reader app and a source of reading activity; there is no publisher-facing mobile portal in this roadmap. |
+| Workspaces | Publisher workflows and Bukoo team workflows remain separate. Internal review and finance actions stay in the team workspace; the publisher sees relevant status, feedback, and next steps in the publisher portal. |
+| Publisher accounts | One account per publisher. Member seats and publisher-team roles are out of scope. |
+| Privacy | Publisher analytics expose aggregates only. Never return or display individual reader identities or reader-level event histories. |
+| Web-to-mobile attribution | Attribute reading activity only when the same signed-in account and same book match, using the most recent eligible web app-CTA click within the prior seven days. Anonymous web activity stays unlinked to reader accounts. |
+| Mobile metric integrity | Add a stable `syncBatchId` to the mobile progress-sync contract and deduplicate retries server-side before applying reading-time deltas or aggregate updates. Preserve existing metric history and definitions. |
+| Historical data | Do not fabricate or backfill web page-view or CTA events for periods before tracking exists. Clearly show the start of trustworthy web-event coverage. |
+| Royalty language | Keep estimates distinct from closed-period settlement and payout status. Never present an estimate as a finalized amount or a payout as paid before its recorded status supports that claim. |
+| Production database | Web and API share the production D1 database `bukoo-db`. Any schema change must follow the repository's manual migration workflow; never apply a production migration directly. |
+
+## Ordered roadmap
+
+### Phase 1 — Operational book lifecycle: shipped baseline
+
+The 2026-09-27 catalog/upload work established the first priority: a publisher can draft, submit, respond to revision requests, see a decision, and manage archived books through a coherent workflow.
+
+**Completion state:** Implementation and production deployment are complete. The authenticated live dashboard/catalog visual check remains open in `task.md`. Address any defects found there before expanding the workflow.
+
+**Acceptance:** Each transition keeps the book and submission state consistent; ownership is checked on every publisher action; decision and revision feedback tells the publisher what to do next; upload and catalog navigation work at desktop and mobile widths.
+
+### Phase 2 — Production reading-data contract and retry safety
+
+- Write a shared metric glossary for the mobile progress event, API handling, aggregate tables, and publisher dashboard labels.
+- Add a stable `syncBatchId` to progress-sync requests and persist/detect processed batches server-side so offline retries do not increment reading time or reader-day aggregates twice.
+- Preserve the current meaning of existing totals; define how duplicate, stale, malformed, and partially retried batches behave before implementation.
+- Add coverage for first delivery, duplicate retry, retry after partial failure, and two distinct batches for the same reader/book.
+
+**Exit criteria:** A replayed batch has no second effect; a new batch still contributes normally; the same definitions appear in API, stored aggregates, exports, and dashboard labels.
+
+### Phase 3 — Web discovery and mobile-CTA measurement
+
+- Record web book-detail views and app-CTA clicks with book and event time; capture account linkage only when the visitor is signed in.
+- Attribute a later mobile reading event only to the same account and same book, using the most recent qualifying CTA click within seven days.
+- Keep anonymous page views and clicks anonymous. Do not join them to a reader account or treat them as attributed reading activity.
+- Keep the event-coverage start date visible to downstream analytics; do not synthesize earlier events.
+
+**Exit criteria:** Tests cover same-account/same-book attribution, last-click precedence, the seven-day boundary, expired clicks, different books/accounts, anonymous activity, and missing event history.
+
+### Phase 4 — Publisher insight and action UX
+
+- Present the discovery-to-reading funnel with separate web discovery, CTA, and mobile reading measures; distinguish attributed, anonymous, and unattributed totals.
+- Make metric definitions, selected time range, data freshness, and incomplete-coverage states visible wherever a publisher interprets a number.
+- Keep publisher navigation focused on overview, catalog, analytics, royalties, promotions, and account/notifications; link each insight to the next useful publisher action.
+- Provide consistent loading, empty, error, and narrow-screen states. Preserve aggregate-only output and existing period semantics.
+
+**Exit criteria:** A publisher can explain what each metric counts, its coverage period, and what action to take; browser QA covers desktop and narrow mobile layouts; response data contains no reader identity fields.
+
+### Phase 5 — Campaign request, review, and outcome loop
+
+- Align publisher campaign requests with the internal review workflow and one visible status lifecycle.
+- Show actionable review feedback and next steps to the publisher; make approved, rejected, and completed states clear in the portal.
+- Define campaign outcome measures from trustworthy events before presenting performance. Use the Phase 3 attribution rules where a campaign outcome depends on web-to-mobile reading.
+
+**Exit criteria:** Publisher and team views agree on request status; unauthorized publishers cannot view or change another publisher's campaign; outcome reports distinguish measured results from unavailable data.
+
+### Phase 6 — Royalty estimate, settlement, and payout transparency
+
+- Present estimates, closed-period amounts, and payout execution as separate states with a plain-language methodology and relevant dates.
+- Ensure publishers can identify which amounts are provisional, finalized, payable, paid, or failed, using the authoritative finance status.
+- Keep finance actions and sensitive payout details in the internal workflow; expose only the publisher's own appropriate status and masked account details.
+
+**Exit criteria:** A publisher can reconcile an estimate with a closed period and its payout status; status changes and notifications agree; exports use the same definitions as the dashboard.
+
+## Cross-phase acceptance checks
+
+- Enforce publisher ownership and role checks on every read and mutation; add isolation coverage for two publishers.
+- Never expose reader IDs, account IDs, or row-level reading events in publisher responses, pages, or exports.
+- Test aggregate accuracy for duplicate mobile sync, attribution-window boundaries, period boundaries, and empty/no-coverage states.
+- Review responsive layouts and keyboard/accessibility behavior for each changed workflow.
+- When a phase changes D1 schema, generate and review migration SQL, validate locally, and use only the manual `migrate-d1.yml` workflow for production application.
+- Update this roadmap and `task.md` with verified completion evidence; do not mark a phase done based only on implementation or a local build.
+
+## Explicitly out of scope
+
+- A publisher-facing mobile dashboard or mobile publisher operations.
+- Multiple user seats or role management within one publisher account.
+- Reader-level identity, contact data, or individual reading histories in publisher analytics.
+- Historical web-event reconstruction or fabricated analytics.
+- Calling daily reader aggregates “sessions” without a real session definition and source.
+- New delivery dates until product planning assigns them.
+
+## Decision log
+
+| Date | Decision | Reason |
+|---|---|---|
+| 2026-09-28 | Prioritize the book publication lifecycle first; continue with data correctness, web discovery attribution, dashboard insight UX, campaigns, then royalties. | Establish a dependable operational foundation, then build publisher-facing insight on trustworthy data. |
+| 2026-09-28 | Mobile is the reader activity source, not a publisher portal. | Keep publisher operations in the web workspace while integrating real mobile reading activity. |
+| 2026-09-28 | Publisher and Bukoo team workspaces stay separate; one account per publisher. | Keep publisher actions simple and internal review/finance controls in team tools. |
+| 2026-09-28 | Publisher-facing metrics are aggregate-only; anonymous web traffic stays unlinked. | Protect reader privacy and avoid unsupported identity joins. |
+| 2026-09-28 | Use same-account, same-book, last web CTA within seven days for attribution. | Define a bounded, explainable cross-surface funnel. |
+| 2026-09-28 | Keep existing reader-day semantics and add idempotency to mobile progress sync before expanding analytics. | Avoid double-counting retries and misleading “session” claims. |
 
 ---
 
-## Executive Summary
-
-The Bukoo Publisher Dashboard is the operational console for publishers to upload, manage, and analyze their ebook catalog on the Bukoo platform. As more publishers join, the dashboard must scale from a single-publisher MVP to a multi-tenant SaaS-grade product with honest analytics, reliable payouts, and self-serve growth tooling.
-
-**Current maturity:** Core MVP shipped (overview, catalog, royalti, performa, pembaca, demografi, geo, waktu, metadata, settings, promotions). Demo data seeds 6 books / 24 readers for `demo-publisher@bukoo.id`. All data is real (D1 via Drizzle); demographics are fabricated only for the demo account.
-
----
-
-## 1. Current Feature Map (as of 2026-09-12)
-
-| Area | Route | Status | Key Capabilities |
-|------|-------|--------|------------------|
-| **Public Showcase** | `/publisher/dashboard` (unauth) | ✅ Shipped | Illustrative KPIs, charts, CTA band → register/login/submit |
-| **Overview** | `/publisher/dashboard?tab=overview` | ✅ Shipped | 4 KPI cards (readers, royalty est., minutes, completions) with period-over-period deltas; CSS trend bar chart (daily/monthly); Top 5 books; Genre donut; 4-step funnel; Demographics; Geo compact; Premium insights; Notifications; Payout ledger |
-| **Katalog** | `/publisher/dashboard?tab=katalog` | ✅ Shipped | Shared `CatalogTable` with `/publisher/books`; status chips (Published/Review/Draft); edit links; search/filter/pagination |
-| **Royalti** | `/publisher/dashboard?tab=royalti` | ✅ Shipped | Estimate per title (prop. reading seconds); CSV export button; settlement history table; methodology panel |
-| **Performa** | `/publisher/dashboard?tab=performa` | ✅ Shipped | All books ranked by period reads; lifetime reads; completion %; tier badge; status; analytics deep-link |
-| **Pembaca** | `/publisher/dashboard?tab=pembaca` | ✅ Shipped | Unique readers KPI; engagement funnel; loyalty buckets (1-day / 2–4 / 5+ days) |
-| **Demografi** | `/publisher/dashboard?tab=demografi` | ✅ Shipped | Age groups (13–17 … 55+), gender split, top city, top countries — anonymous aggregates; empty state for real readers (no demo data) |
-| **Geo** | `/publisher/dashboard?tab=geo` | ✅ Shipped | Country reader-days (top 10); self-declared city readers (top 10) |
-| **Waktu** | `/publisher/dashboard?tab=waktu` | ✅ Shipped | Hour-of-day rhythm (0–23); Day-of-week rhythm; peak hour KPI; avg session minutes |
-| **Metadata** | `/publisher/dashboard?tab=metadata` | ✅ Shipped | Completeness scorecard per book (title, language, genre, cover, synopsis, pages) |
-| **Settings** | `/publisher/settings` | ✅ Shipped | Profile (display/legal/contact/website); Payout account (masked storage, blank preserves existing); rendered in `DashboardShell` |
-| **Promosi** | `/publisher/promotions` | ✅ Shipped | Campaign request form (book picker → published books only; name/dates/goal/notes/budget); list with status chips (SUBMITTED…); no admin review UI yet |
-| **Submit (Public)** | `/publisher/submit` | ✅ Shipped | Unauth showcase + CTA; PUBLISHER sees real upload form (server-action guarded) |
-
-**Infra:** Next.js App Router on Cloudflare Workers; D1 via Drizzle; R2 for EPUBs/covers; NextAuth v5 (JWT, role `PUBLISHER`); middleware gates `/publisher/books/*`, `/publisher/submit`; `/publisher/dashboard` is public showcase + client guard.
-
----
-
-## 2. Non-Goals (Explicitly Out of Scope)
-
-- **Admin campaign review UI** — reserved for a separate admin workflow
-- **Finalized royalty settlement engine** — estimates only; ledger rows are manual admin entries
-- **Payout execution / bank integration** — manual finance ops
-- **City/province geo analytics** — no schema source (self-declared city only)
-- **Ratings/ulasan funnel** — no ratings fact tied to publisher metrics
-- **Chart libraries** — pure CSS/SVG only (bundle size discipline)
-- **Print/PDF export** — CSV only
-- **Multi-currency** — IDR only
-- **White-label / multi-brand** — single Bukoo brand
-
----
-
-## 3. Roadmap Phases
-
-### Phase 1 — Data Export & Per-Book Depth (Q3 2026, ~2 sprints)
-
-| ID | Item | Description | Acceptance |
-|----|------|-------------|------------|
-| 1.1 | **CSV Export** | `GET /publisher/dashboard/export?kind=book-stats\|payouts&period=…` — streams UTF-8 BOM CSV; guarded by `getPublisherUser()` | Buttons on Royalti & Performa headers download valid CSV; period re-parsed server-side |
-| 1.2 | **Per-Book Analytics Page** | `/publisher/books/[id]/analytics` — daily trend, reader loyalty, completion funnel, geo, demographics for a single title | Deep-link from Performa “Analitik →” works; data scoped to publisher-owned book |
-| 1.3 | **Period Presets on Export** | Export respects the same `this_month`, `last_month`, `this_quarter`, `ytd`, `all_time`, custom range as the dashboard | URL period param mirrors dashboard chips |
-
-**Dependencies:** `src/lib/csv.ts` utility; `export/route.ts` (already scaffolded in cross-dashboard plan).
-
----
-
-### Phase 2 — Royalty & Payout Maturity (Q4 2026, ~3 sprints)
-
-| ID | Item | Description | Acceptance |
-|----|------|-------------|------------|
-| 2.1 | **Royalty Period Closure** | Admin action to “close month”: snapshots pool, rate, per-book shares → writes immutable `publisherRoyaltyPeriods` + `publisherRoyaltyLines` | Closed period is read-only; dashboard royalty tab shows finalized vs. estimate toggle |
-| 2.2 | **Payout Ledger → Execution Bridge** | `publisherPayouts` status flow: `PENDING → PROCESSING → PAID/FAILED`; admin records external ref (bank transfer ID) | Dashboard shows real settlement status; “Terbayar” badge only on `PAID` rows |
-| 2.3 | **Publisher Payout Notifications** | Email (MailChannels) + in-app notification when a payout row moves to `PAID` | Publisher sees notification; email delivered (dev: log only) |
-| 2.4 | **Tax/Withholding Metadata** | Add `taxWithheld`, `taxRateBps`, `taxJurisdiction` to `publisherRoyaltyLines` (Indonesia PPh 23 default) | Export includes tax columns; admin can override per publisher |
-
-**Dependencies:** `publisherRoyaltyPeriods`, `publisherRoyaltyLines` tables (already in schema); admin workflow (separate track).
-
----
-
-### Phase 3 — Growth & Discovery Tooling (Q4 2026 – Q1 2027, ~4 sprints)
-
-| ID | Item | Description | Acceptance |
-|----|------|-------------|------------|
-| 3.1 | **Featured Book / Homepage Slot** | Publisher self-selects one published book → appears in “Featured” carousel on bukoo.id homepage (admin approval queue) | Book shows on homepage; analytics track referral clicks from homepage |
-| 3.2 | **Promotion Campaign Activation** | Admin approves `publisherCampaignRequests` → status `APPROVED` → triggers homepage banner / push notification / discount code | Campaign moves through `SUBMITTED → IN_REVIEW → APPROVED → COMPLETED`; publisher sees status |
-| 3.3 | **Bulk Catalog Operations** | Multi-select in Katalog: publish/unpublish, change tier, delete (soft), export selected | Checkbox column; bulk action bar; confirm modal; server action with transaction |
-| 3.4 | **Reader Cohort Retention** | Dashboard tab “Retensi Kohor”: weekly/monthly cohorts (readers who started in week N → % still reading in week N+1…N+12) | Heatmap table; CSV export; empty state for new publishers |
-| 3.5 | **Revenue Forecasting** | Simple linear projection from last 3 closed periods → next period estimate with confidence band | Shows on Royalti tab as “Proyeksi bulan depan”; documented as heuristic |
-
-**Dependencies:** Admin review UI for campaigns/featured (Phase 2.1 parallel).
-
----
-
-### Phase 4 — Platform Scale & Internationalization (Q1 2027, ~3 sprints)
-
-| ID | Item | Description | Acceptance |
-|----|------|-------------|------------|
-| 4.1 | **English Localization** | All publisher-facing strings extracted to `i18n` (next-intl or lightweight dict); `Accept-Language` + manual toggle | `en` locale complete; Indonesian remains default; no hardcoded strings in dashboard components |
-| 4.2 | **Mobile Web PWA Polish** | Dashboard responsive ≤390px; installable PWA; offline KPI cache (service worker) | Lighthouse PWA ≥90; dashboard usable on phone without horizontal scroll |
-| 4.3 | **API for Mobile App Publisher View** | `apps/api` endpoints: `GET /v1/publisher/dashboard/overview`, `/catalog`, `/royalti`, `/analytics/:bookId` (JWT auth, role PUBLISHER) | Mobile app can render publisher dashboard screens; same data as web |
-| 4.4 | **Publisher Onboarding Wizard** | Post-signup flow: profile → payout → first upload → submit → dashboard tour (skipable) | New publisher completes wizard in <5 min; analytics event per step |
-
----
-
-### Phase 5 — Quality & Observability (Continuous, per sprint)
-
-| ID | Item | Description | Acceptance |
-|----|------|-------------|------------|
-| 5.1 | **Automated Dashboard Tests** | Vitest + MSW for `queries.ts` pure functions; Playwright E2E for critical flows (login → dashboard → upload → settings) | CI runs tests on every PR; coverage ≥80% for `queries.ts` |
-| 5.2 | **Accessibility Audit (WCAG 2.1 AA)** | Focus order, ARIA labels, color contrast, keyboard navigation, screen-reader labels on all charts/tables | `axe-core` CI gate; manual NVDA/VoiceOver pass documented |
-| 5.3 | **Performance Budgets** | Dashboard LCP ≤2.5s, TBT ≤150ms, CLS ≤0.1 on 3G throttle (wrangler dev + Lighthouse CI) | Budget enforced in `deploy-web.yml` preview job |
-| 5.4 | **Cross-Publisher Isolation Tests** | Automated test: two publishers, separate books/metrics → each sees only own data | CI runs isolation matrix; zero leakage |
-| 5.5 | **Error Tracking & Alerting** | Sentry (or self-hosted) on web worker; alert on 5xx rate >1% / 5min; dashboard error boundary logs to Sentry | On-call gets alert; dashboard shows friendly error with ref ID |
-
----
-
-## 4. Technical Debt & Refactors (Backlog)
-
-| Area | Item | Priority | Notes |
-|------|------|----------|-------|
-| **Queries** | Extract pure aggregation helpers from `queries.ts` into `metrics.ts` for unit testability | High | Currently 642 lines; hard to test D1-bound code |
-| **Dashboard Client** | Split `dashboard-client.tsx` (47k) into per-tab components + dynamic imports | Medium | Reduces initial JS bundle; tabs load on demand |
-| **Period Engine** | Centralize `resolveDashboardPeriod` / `getPreviousPeriodRange` with property-based tests | High | Edge cases: month boundaries, leap years, DST (UTC only) |
-| **Demo Data** | Make demo seed idempotent across schema migrations; add `unseed` verification | Medium | Currently manual verification step |
-| **Type Safety** | Replace `any` in `queries.ts` (e.g., `sql<number>` casts) with branded types | Low | Drizzle inference gaps |
-
----
-
-## 5. Metrics & Success Criteria
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Publisher Activation** | ≥60% of registered publishers upload ≥1 book within 14 days | `books` table `createdAt` vs `users` `createdAt` (role=PUBLISHER) |
-| **Dashboard Engagement** | ≥40% MAU of active publishers visit dashboard monthly | Plausible/GA event `publisher_dashboard_view` |
-| **Data Trust** | <2% support tickets about “wrong numbers” | Support tag `publisher-dashboard-data` |
-| **Export Usage** | ≥20% of active publishers download CSV monthly | `export` route hits / active publishers |
-| **Campaign Adoption** | ≥15% of publishers with ≥3 published books submit ≥1 campaign/quarter | `publisherCampaignRequests` count / eligible publishers |
-| **Payout Accuracy** | 0 discrepancies between ledger and bank transfer | Finance reconciliation spreadsheet |
-
----
-
-## 6. Risks & Mitigations
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| **D1 FTS5 delete limitation** blocks catalog cleanup | Medium | High | Soft-delete (`isPublished=0`); never hard-delete books with metrics; document in AGENTS.md |
-| **Royalty estimate ≠ settlement** causes publisher disputes | High | High | Clear UI labeling (“estimasi · pool diatur admin”); methodology panel; finalized period toggle (Phase 2.1) |
-| **Demo data drift** after schema migrations | Medium | Medium | CI job: `db:seed:demo:sql:check` + re-seed on preview deploy |
-| **Middleware auth bypass** on publisher routes | Low | Critical | Integration test: unauthed → 307; non-PUBLISHER → 307; PUBLISHER → 200 |
-| **R2 cost growth** from EPUB storage | Medium | Medium | Lifecycle rule: delete EPUBs for books `isPublished=0` >90 days; monitor bucket size |
-
----
-
-## 7. Decision Log (Key Decisions)
-
-| Date | Decision | Rationale | Revisit Trigger |
-|------|----------|-----------|-----------------|
-| 2026-08-27 | `/publisher/dashboard` remains public showcase | Marketing value; low risk (no PII); authenticated data client-guarded | If PII ever rendered in showcase |
-| 2026-08-27 | Royalty estimates only; no fabricated settlement | Legal/finance compliance; transparency | When admin settlement workflow ships |
-| 2026-08-30 | Demographics fabricated only for demo account | Privacy; real readers have no demographic fields | If platform adds optional demographic onboarding |
-| 2026-08-30 | CSS-only charts (no chart.js/recharts) | Bundle size; Workers compatibility | If chart complexity exceeds CSS feasibility |
-| 2026-09-12 | CSV export over PDF/Excel | Universal, streaming, no deps | If publisher demands formatted reports |
-
----
-
-## 8. Immediate Next Steps (Sprint-Ready)
-
-1. ~~**Implement CSV Export** (Phase 1.1)~~ ✅ **DONE** — `src/lib/csv.ts` + `export/route.ts` (kinds: `book-stats|payouts|top-books`) + buttons on Royalti & Performa; covered by `src/lib/csv.test.ts`
-2. ~~**Build Per-Book Analytics Page** (Phase 1.2)~~ ✅ **DONE** — `publisher/(protected)/books/[id]/analytics/page.tsx` (period chips, KPIs, daily table, loyalty); deep-linked from Performa "Analitik →"
-3. ~~**Write Vitest unit tests for `metrics.ts` helpers** (Phase 5.1)~~ ✅ **DONE** — `metrics.test.ts` (20 tests: period engine, bucketing, deltas, loyalty, premium) + `csv.test.ts` (3 tests) + `queries.test.ts`; 71 tests green
-4. **Run accessibility audit** on current dashboard (Phase 5.2) — `@axe-core/playwright` (not yet installed)
-5. ~~**Document demo seed re-run procedure** in `AGENTS.md`~~ ✅ **DONE** — "Demo publisher seed" section added (local + remote procedure, FTS5 safety rules, idempotency)
-
----
-
-## 9. Appendix: File Map (Dashboard-Relevant)
-
-```
-apps/web/src/app/publisher/
-├── dashboard/
-│   ├── page.tsx                 # Server: auth, fetch overview+catalog, render DashboardClient
-│   ├── dashboard-client.tsx     # Client: all tab components (47k lines — split candidate)
-│   ├── queries.ts               # Server: getPublisherDashboardOverview (642 lines)
-│   ├── metrics.ts               # Pure: period ranges, bucketing, rankings, loyalty, demographics
-│   ├── metrics.test.ts          # Vitest: period engine, bucketing (extend for new periods)
-│   ├── showcase.tsx             # Public illustrative dashboard (276 lines)
-│   └── export/
-│       └── route.ts             # CSV export (Phase 1.1)
-├── (protected)/
-│   ├── dashboard-shell.tsx      # Client shell: sidebar, topbar, tab routing
-│   ├── layout.tsx               # Server: auth guard for protected pages
-│   └── books/                   # Catalog CRUD (shared with dashboard Katalog tab)
-├── settings/
-│   ├── page.tsx                 # Server: fetch profile/payout, render DashboardShell + SettingsForm
-│   ├── SettingsForm.tsx         # Client: profile + payout forms
-│   └── actions.ts               # Server actions: saveProfile, savePayoutAccount
-├── promotions/
-│   ├── page.tsx                 # Server: fetch eligible books + campaigns, render DashboardShell + CampaignsClient
-│   ├── CampaignsClient.tsx      # Client: list + form (useTransition)
-│   └── actions.ts               # Server action: createCampaignRequest
-├── submit/
-│   └── page.tsx                 # Public showcase + PUBLISHER form branch
-├── sidebar-client.tsx           # Sidebar nav (promosi href, logout)
-├── topbar-client.tsx            # Avatar menu (logout)
-├── publisher.css                # All `--pds-*` tokens, responsive rules
-└── catalog-table.tsx            # Shared table component (dashboard + /publisher/books)
-```
-
----
-
-## 10. Changelog
-
-| Date | Version | Author | Summary |
-|------|---------|--------|---------|
-| 2026-09-12 | 1.0 | Eko Rahmat | Initial roadmap from current codebase audit |
-| 2026-09-13 | 1.1 | Hermes Agent | Sprint 1 verification: Phase 1.1/1.2 confirmed shipped (CSV export + per-book analytics); added csv.test.ts + queries.test.ts (71 tests green); demo seed procedure documented in AGENTS.md; only remaining immediate item: accessibility audit (5.2) |
-
----
-
-*This roadmap is a planning artifact. It does not represent committed delivery dates. Priorities shift with business needs — review at sprint planning.*
+*This document records product direction and implementation order. It is not a delivery-date commitment. Revisit it when product decisions change or a phase is completed.*
