@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function TentangPage() {
   return (
     <>
@@ -116,16 +114,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* CTA Band */}
-      <section className="sec">
-        <div className="wrap">
-          <div className="cband">
-            <h3>Ingin tumbuh bersama kami?</h3>
-            <p>Lihat peluang berkarier, atau hubungi tim kami langsung.</p>
-            <Link href="/karir" className="btn-cta btn-lg">Lihat karir →</Link>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
