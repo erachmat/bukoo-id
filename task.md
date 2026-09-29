@@ -1,3 +1,7 @@
+# About Page Launch Year Label — 2026-09-29
+
+- `[x]` Remove the specific September 3 launch date from the About page; keep the label “Tahun peluncuran”.
+
 # Publisher Dashboard Cross-Surface Roadmap — 2026-09-28
 
 - `[x]` Save the agreed product decisions, current foundation, and ordered roadmap in `docs/publisher-dashboard-roadmap.md` as the source of truth for future Codex tasks.

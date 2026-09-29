@@ -43,7 +43,7 @@ export default function TentangPage() {
           <div className="statrow">
             <div className="st">
               <div className="st-n">2026</div>
-              <div className="st-l">Tahun peluncuran (3 September)</div>
+              <div className="st-l">Tahun peluncuran</div>
             </div>
             <div className="st">
               <div className="st-n">1<small>Jt</small></div>
