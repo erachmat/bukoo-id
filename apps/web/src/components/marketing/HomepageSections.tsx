@@ -21,14 +21,21 @@ const communityBullets = [
   'Profil pembaca dengan streak, badge, dan statistik personal',
 ];
 
+const productArtDimensions = {
+  'Group01.png': { width: 1916, height: 2192 },
+  'Group03.png': { width: 1986, height: 2500 },
+} as const;
+
 function ProductSection({ eyebrow, title, text, bullets, image, reverse = false }: {
   eyebrow: React.ReactNode;
   title: React.ReactNode;
   text: string;
   bullets: string[];
-  image: string;
+  image: keyof typeof productArtDimensions;
   reverse?: boolean;
 }) {
+  const imageDimensions = productArtDimensions[image];
+
   return (
     <section className={`homepage-product ${reverse ? 'homepage-product-reverse' : ''}`}>
       <div className="homepage-product-copy">
@@ -38,7 +45,7 @@ function ProductSection({ eyebrow, title, text, bullets, image, reverse = false 
         <ul>{bullets.map((bullet) => <li key={bullet}><Image src="/homepage-assets/green-checklist-icon.png" alt="" width={21} height={21} />{bullet}</li>)}</ul>
       </div>
       <div className="homepage-product-art">
-        <Image src={`/homepage-assets/${image}`} alt="" width={960} height={1100} />
+        <Image src={`/homepage-assets/${image}`} alt="" {...imageDimensions} />
       </div>
     </section>
   );

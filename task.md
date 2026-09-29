@@ -1,3 +1,11 @@
+# Landing Page Mockup Figma Alignment — 2026-09-29
+
+- `[x]` Compare the Assistant and Komunitas artwork with the Figma `Homepage pembaca` frames; confirm existing PNGs contain the correct full compositions.
+- `[x]` Trace missing CTA/card content to fixed image heights, incorrect Komunitas intrinsic dimensions, and clipping overflow in the product-art CSS.
+- `[x]` Match desktop section height and artwork scale to the 1280×720 Figma frames; use each PNG's natural ratio (Assistant 490×561px, Komunitas 490×617px).
+- `[x]` Keep both complete mockups visible in tablet and mobile stacked layouts; verify 390px and 768px viewports with no horizontal overflow.
+- `[x]` Verify local rendering at 1280×720, 768×900, and 390×844; web typecheck passed, lint passed with 0 errors (25 warnings elsewhere), and tests passed (97/97).
+
 # About Page Launch Year Label — 2026-09-29
 
 - `[x]` Remove the specific September 3 launch date from the About page; keep the label “Tahun peluncuran”.
