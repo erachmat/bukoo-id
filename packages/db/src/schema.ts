@@ -203,6 +203,76 @@ export const readingProgress = sqliteTable(
   ],
 );
 
+// Internal idempotency receipts for mobile progress batches. Retain receipts so
+// delayed offline retries remain deduplicated; publishers never query this table.
+export const readingSyncBatches = sqliteTable(
+  'reading_sync_batches',
+  {
+    syncBatchId: text('sync_batch_id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookId: text('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    payloadHash: text('payload_hash').notNull(),
+    attemptId: text('attempt_id').notNull(),
+    metricDate: text('metric_date').notNull(),
+    isStart: integer('is_start', { mode: 'boolean' }).notNull().default(false),
+    isCompletion: integer('is_completion', { mode: 'boolean' })
+      .notNull()
+      .default(false),
+    isNewReaderDay: integer('is_new_reader_day', { mode: 'boolean' })
+      .notNull()
+      .default(false),
+    // V1 attribution uses the first server receipt time because clients send no read timestamp.
+    isDiscoveryAttributed: integer('is_discovery_attributed', { mode: 'boolean' })
+      .notNull()
+      .default(false),
+    createdAt: text('created_at').notNull().default(now()),
+  },
+  (t) => [index('reading_sync_batches_user_book_idx').on(t.userId, t.bookId)],
+);
+
+// Publisher-safe daily funnel counters. No reader or visitor identifiers live here.
+export const bookDiscoveryDailyMetrics = sqliteTable(
+  'book_discovery_daily_metrics',
+  {
+    bookId: text('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    metricDate: text('metric_date').notNull(),
+    anonymousDetailViews: integer('anonymous_detail_views').notNull().default(0),
+    anonymousAppCtaClicks: integer('anonymous_app_cta_clicks').notNull().default(0),
+    signedInDetailViews: integer('signed_in_detail_views').notNull().default(0),
+    signedInAppCtaClicks: integer('signed_in_app_cta_clicks').notNull().default(0),
+    attributedReaderDays: integer('attributed_reader_days').notNull().default(0),
+    unattributedReaderDays: integer('unattributed_reader_days').notNull().default(0),
+    createdAt: text('created_at').notNull().default(now()),
+    updatedAt: text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.metricDate] }),
+    index('book_discovery_daily_metrics_date_idx').on(t.metricDate),
+  ],
+);
+
+// Only the newest eligible CTA timestamp is needed per signed-in account/book.
+// Anonymous events never enter this table; publishers never query it.
+export const bookDiscoveryCtaLastClicks = sqliteTable(
+  'book_discovery_cta_last_clicks',
+  {
+    accountId: text('account_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookId: text('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    lastClickedAt: text('last_clicked_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.bookId] })],
+);
+
 // ---------------------------------------------------------------------------
 // highlights
 // ---------------------------------------------------------------------------
