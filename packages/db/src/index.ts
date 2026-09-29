@@ -7,3 +7,4 @@
  */
 export * from './schema.js';
 export * from './publisher-metrics.js';
+export * from './book-discovery.js';

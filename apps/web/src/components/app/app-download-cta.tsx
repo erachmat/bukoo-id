@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { Smartphone } from 'lucide-react'
 import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/app-links'
+import { BookDiscoveryLink } from './book-discovery-link'
 
 function PlayStoreBadge() {
   return (
@@ -27,7 +29,34 @@ function AppStoreBadge() {
   )
 }
 
+function StoreLink({
+  bookId,
+  href,
+  ariaLabel,
+  children,
+}: {
+  bookId?: string
+  href: string
+  ariaLabel: string
+  children: ReactNode
+}) {
+  if (bookId) {
+    return (
+      <BookDiscoveryLink href={href} bookId={bookId} target="_blank" rel="noopener noreferrer" ariaLabel={ariaLabel}>
+        {children}
+      </BookDiscoveryLink>
+    )
+  }
+  return (
+    <Link href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel}>
+      {children}
+    </Link>
+  )
+}
+
 interface AppDownloadCtaProps {
+  /** Set on a book detail page to record which book's app CTA was chosen. */
+  bookId?: string
   /** `inline` = book-detail CTA block; `strip` = full-width banner (library/account). */
   variant?: 'inline' | 'strip'
   /** Optional headline override (strip variant). */
@@ -41,6 +70,7 @@ interface AppDownloadCtaProps {
  * Web shows the catalog; the CTA funnels users to the mobile app.
  */
 export function AppDownloadCta({
+  bookId,
   variant = 'inline',
   title = 'Baca di Aplikasi BUKOO',
   subtitle = 'Pembacaan buku tersedia di aplikasi BUKOO untuk iOS & Android. Progres, bookmark, dan sorotan Anda tersinkron otomatis.',
@@ -80,12 +110,12 @@ export function AppDownloadCta({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Link href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Dapatkan di Google Play">
+          <StoreLink bookId={bookId} href={PLAY_STORE_URL} ariaLabel="Dapatkan di Google Play">
             <PlayStoreBadge />
-          </Link>
-          <Link href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Unduh di App Store">
+          </StoreLink>
+          <StoreLink bookId={bookId} href={APP_STORE_URL} ariaLabel="Unduh di App Store">
             <AppStoreBadge />
-          </Link>
+          </StoreLink>
         </div>
       </div>
     )
@@ -96,12 +126,12 @@ export function AppDownloadCta({
       <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#111827' }}>{title}</p>
       <p style={{ margin: 0, fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>{subtitle}</p>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Link href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Dapatkan di Google Play">
+        <StoreLink bookId={bookId} href={PLAY_STORE_URL} ariaLabel="Dapatkan di Google Play">
           <PlayStoreBadge />
-        </Link>
-        <Link href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Unduh di App Store">
+        </StoreLink>
+        <StoreLink bookId={bookId} href={APP_STORE_URL} ariaLabel="Unduh di App Store">
           <AppStoreBadge />
-        </Link>
+        </StoreLink>
       </div>
     </div>
   )

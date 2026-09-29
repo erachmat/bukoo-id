@@ -12,6 +12,8 @@ import { Star, BookOpen, Globe, ArrowLeft, Lock, Smartphone } from 'lucide-react
 import { auth } from '@/lib/auth'
 import { isBookAccessible } from '@bukoo/shared-types'
 import { AppDownloadCta } from '@/components/app/app-download-cta'
+import { BookDetailViewTracker } from '@/components/app/book-detail-view-tracker'
+import { BookDiscoveryLink } from '@/components/app/book-discovery-link'
 import { bookDeepLink } from '@/lib/app-links'
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -52,6 +54,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div style={{ width: '100%', maxWidth: '1152px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box' }}>
+      <BookDetailViewTracker bookId={book.id} />
       <Link
         href="/library"
         style={{ display: 'inline-flex', alignItems: 'center', fontSize: '14px', fontWeight: '500', color: '#6B7280', textDecoration: 'none', marginBottom: '32px' }}
@@ -122,12 +125,13 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
                   <div style={{ height: '100%', width: `${Math.round(userProgress.progressPercent)}%`, backgroundColor: '#00C9A7' }}></div>
                 </div>
               </div>
-              <Link
-                href={bookDeepLink(resolvedParams.id)}
+              <BookDiscoveryLink
+                href={bookDeepLink(book.id)}
+                bookId={book.id}
                 style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '9999px', border: '1px solid #00181A', padding: '8px 20px', fontSize: '13px', fontWeight: '700', color: '#00181A', textDecoration: 'none', whiteSpace: 'nowrap' }}
               >
                 Buka di App
-              </Link>
+              </BookDiscoveryLink>
             </div>
           )}
 
@@ -151,7 +155,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
                 <p style={{ fontSize: '13px', color: '#EF4444', fontWeight: '500', margin: 0 }}>Berlangganan PRO untuk membuka buku ini.</p>
               </div>
             ) : (
-              <AppDownloadCta />
+              <AppDownloadCta bookId={book.id} />
             )}
           </div>
         </div>

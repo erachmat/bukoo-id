@@ -15,6 +15,7 @@
 
 import { eq, sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import type { D1Database } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
 import { authAttempts } from '@bukoo/db';
 
@@ -55,6 +56,7 @@ export const RATE_LIMIT_POLICIES = {
   loginIp: { maxAttempts: 10, windowMs: 15 * 60_000, lockMs: 60 * 60_000 },
   registerIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
   publisherLeadIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
+  bookDiscoveryEventIp: { maxAttempts: 120, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
   otpRequestEmail: { maxAttempts: 3, windowMs: 15 * 60_000, lockMs: 15 * 60_000 },
   otpRequestIp: { maxAttempts: 5, windowMs: 60 * 60_000, lockMs: 60 * 60_000 },
   otpVerifyEmail: { maxAttempts: 5, windowMs: 15 * 60_000, lockMs: 15 * 60_000 },
@@ -75,6 +77,65 @@ export interface RateLimitResult {
   allowed: boolean;
   /** 0 when allowed; ms until the lock lifts when blocked. */
   retryAfterMs: number;
+}
+
+/** Atomically count a request in D1, so concurrent requests cannot share a stale counter. */
+export async function consumeD1RateLimit(
+  database: D1Database,
+  now: number,
+  policy: RateLimitPolicy,
+  key: string,
+): Promise<RateLimitResult> {
+  const row = await database
+    .prepare(
+      `INSERT INTO auth_attempts (id, key, attempts, window_start, locked_until)
+       VALUES (?, ?, 1, ?, NULL)
+       ON CONFLICT(key) DO UPDATE SET
+         attempts = CASE
+           WHEN auth_attempts.locked_until > ? THEN auth_attempts.attempts
+           WHEN ? >= auth_attempts.window_start + ? THEN 1
+           ELSE auth_attempts.attempts + 1
+         END,
+         window_start = CASE
+           WHEN auth_attempts.locked_until > ? THEN auth_attempts.window_start
+           WHEN ? >= auth_attempts.window_start + ? THEN ?
+           ELSE auth_attempts.window_start
+         END,
+         locked_until = CASE
+           WHEN auth_attempts.locked_until > ? THEN auth_attempts.locked_until
+           WHEN ? >= auth_attempts.window_start + ? THEN NULL
+           WHEN auth_attempts.attempts + 1 > ? THEN ? + ?
+           ELSE NULL
+         END,
+         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       RETURNING attempts, locked_until`,
+    )
+    .bind(
+      createId(),
+      key,
+      now,
+      now,
+      now,
+      policy.windowMs,
+      now,
+      now,
+      policy.windowMs,
+      now,
+      now,
+      now,
+      policy.windowMs,
+      policy.maxAttempts,
+      now,
+      policy.lockMs,
+    )
+    .first<{ attempts: number; locked_until: number | null }>();
+
+  if (!row) throw new Error('Rate limit counter write returned no row');
+  const retryAfterMs = row.locked_until === null ? 0 : Math.max(0, row.locked_until - now);
+  return {
+    allowed: row.attempts <= policy.maxAttempts && retryAfterMs === 0,
+    retryAfterMs,
+  };
 }
 
 /** Read-only check — does NOT mutate counters. Used pre-action and by authorize(). */
