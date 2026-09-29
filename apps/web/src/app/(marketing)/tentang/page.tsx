@@ -35,30 +35,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* Statrow */}
-      <section className="sec">
-        <div className="wrap">
-          <div className="statrow">
-            <div className="st">
-              <div className="st-n">2026</div>
-              <div className="st-l">Tahun peluncuran</div>
-            </div>
-            <div className="st">
-              <div className="st-n">1<small>Jt</small></div>
-              <div className="st-l">Target subscriber 36 bulan</div>
-            </div>
-            <div className="st">
-              <div className="st-n">50</div>
-              <div className="st-l">Target penerbit mitra</div>
-            </div>
-            <div className="st">
-              <div className="st-n">2.000<small>+</small></div>
-              <div className="st-l">Target judul kurasi</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Values */}
       <section className="sec alt">
         <div className="wrap">

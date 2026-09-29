@@ -1,3 +1,9 @@
+# About Page and YouTube Footer Cleanup — 2026-09-29
+
+- `[x]` Remove the statistics section shown in the About page screenshot; retain shared styles used on other pages.
+- `[x]` Remove YouTube icon and link from reader and publisher website footers; delete the unused icon component.
+- `[x]` Confirm no live YouTube references remain in the web app and inspect the final diff.
+
 # Landing Page Mockup Figma Alignment — 2026-09-29
 
 - `[x]` Compare the Assistant and Komunitas artwork with the Figma `Homepage pembaca` frames; confirm existing PNGs contain the correct full compositions.

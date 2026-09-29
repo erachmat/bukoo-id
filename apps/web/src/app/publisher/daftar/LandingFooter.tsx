@@ -4,7 +4,6 @@ import {
   IconInstagram,
   IconLinkedIn,
   IconTikTok,
-  IconYouTube,
 } from "./icons";
 
 const COMPANY = [
@@ -73,15 +72,6 @@ export function LandingFooter() {
                 aria-label="TikTok"
               >
                 <IconTikTok />
-              </a>
-              <a
-                className="bl-social"
-                href="https://www.youtube.com/@bukooid"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-              >
-                <IconYouTube />
               </a>
             </div>
           </div>

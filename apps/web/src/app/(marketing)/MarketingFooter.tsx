@@ -44,12 +44,6 @@ export default function MarketingFooter() {
                 <path d="M14.5 6.5c.8 1.6 2.2 2.6 4 2.8" />
               </svg>
             </a>
-            <a className="social-btn" href="https://www.youtube.com/@bukooid" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
-                <path d="M10.5 9.5l5 2.5-5 2.5v-5z" fill="currentColor" stroke="none" />
-              </svg>
-            </a>
           </div>
         </div>
 
