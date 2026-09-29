@@ -4,11 +4,17 @@
  */
 export function csvEscape(value: unknown): string {
   const raw = value === null || value === undefined ? '' : String(value);
+  const spreadsheetSafe =
+    typeof value !== 'number' &&
+    typeof value !== 'bigint' &&
+    /^[\s\u0000-\u001f\uFEFF]*[=+\-@＝＋－＠]/u.test(raw)
+      ? `'${raw}`
+      : raw;
   // Quote when the value contains a delimiter, quote, newline, or leading/trailing space.
-  if (/[",\n\r]/.test(raw) || raw !== raw.trim()) {
-    return `"${raw.replace(/"/g, '""')}"`;
+  if (/[",\n\r]/.test(spreadsheetSafe) || spreadsheetSafe !== spreadsheetSafe.trim()) {
+    return `"${spreadsheetSafe.replace(/"/g, '""')}"`;
   }
-  return raw;
+  return spreadsheetSafe;
 }
 
 export function toCsv(headers: string[], rows: unknown[][]): string {
