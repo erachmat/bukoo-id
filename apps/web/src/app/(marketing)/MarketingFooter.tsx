@@ -67,7 +67,7 @@ export default function MarketingFooter() {
         ) : (
           <>
             <div><div className="footer-col-title">Produk</div><ul className="footer-links"><li><Link href="/koleksi">Koleksi Buku</Link></li><li><Link href="/ai-companion">Bukoo Assistant</Link></li><li><Link href="/komunitas">Komunitas</Link></li><li><Link href="/audiobook">Audiobook</Link></li><li><Link href="/pricing">Harga &amp; Paket</Link></li></ul></div>
-            <div><div className="footer-col-title">Perusahaan</div><ul className="footer-links"><li><Link href="/tentang">Tentang BUKOO</Link></li><li><Link href="/karir">Karir</Link></li><li><Link href="/newsroom">Newsroom</Link></li><li><Link href="/kontak">Kontak</Link></li></ul></div>
+            <div><div className="footer-col-title">Perusahaan</div><ul className="footer-links"><li><Link href="/tentang">Tentang BUKOO</Link></li><li><Link href="/newsroom">Newsroom</Link></li><li><Link href="/kontak">Kontak</Link></li></ul></div>
             <div><div className="footer-col-title">Untuk Penerbit</div><ul className="footer-links"><li><a href="https://publisher.bukoo.id/">Daftar Penerbit</a></li><li><a href="https://publisher.bukoo.id/publisher/panduan">Panduan Penerbit</a></li></ul></div>
           </>
         )}

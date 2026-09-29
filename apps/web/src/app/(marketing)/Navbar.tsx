@@ -147,7 +147,6 @@ export default function Navbar() {
             </span>
             <div className="nav-dropdown">
               <Link href="/tentang" className="nav-dropdown-item">Tentang Kami</Link>
-              <Link href="/karir" className="nav-dropdown-item">Karir</Link>
               <Link href="/newsroom" className="nav-dropdown-item">Newsroom</Link>
               <Link href="/investor-relations" className="nav-dropdown-item">Investor Relations</Link>
               <Link href="/blog" className="nav-dropdown-item">Blog</Link>
@@ -249,7 +248,6 @@ export default function Navbar() {
               {activeMobileSub === 'perusahaan' && (
                 <ul className="mobile-nav-sub">
                   <li><Link href="/tentang" onClick={closeMobileMenu}>Tentang Kami</Link></li>
-                  <li><Link href="/karir" onClick={closeMobileMenu}>Karir</Link></li>
                   <li><Link href="/newsroom" onClick={closeMobileMenu}>Newsroom</Link></li>
                   <li><Link href="/investor-relations" onClick={closeMobileMenu}>Investor Relations</Link></li>
                   <li><Link href="/blog" onClick={closeMobileMenu}>Blog</Link></li>
