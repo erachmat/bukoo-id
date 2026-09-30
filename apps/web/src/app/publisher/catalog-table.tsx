@@ -112,9 +112,9 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
       </div>
       {selected.size > 0 && <div className="pds-catalog-bulkbar"><strong>{selected.size} buku dipilih</strong><button type="button" onClick={() => runBulk('publish')} disabled={pending}>Terbitkan</button><button type="button" onClick={() => runBulk('unpublish')} disabled={pending}>Nonaktifkan</button><button type="button" onClick={() => runBulk('archive')} disabled={pending}>Arsipkan</button></div>}
       {bulkError && <p role="alert" className="pct-feedback error">{bulkError}</p>}{bulkMessage && <p role="status" className="pct-feedback">{bulkMessage}</p>}
-      <p className="pct-scroll-hint">Geser tabel ke kanan untuk melihat semua aksi →</p>
+      <p className="pct-scroll-hint">Aksi utama ada di kolom kanan. Geser tabel jika ada kolom data yang belum terlihat.</p>
       <div className="pds-tbl-scroll">
-        <table className="pds-tbl">
+        <table className="pds-tbl pct-table">
           <thead><tr><th><input type="checkbox" checked={allVisibleSelected} onChange={togglePage} aria-label="Pilih semua buku di halaman ini" /></th><th>Judul & Penulis</th><th>Genre / Kategori</th><th>Status</th><th>Bahasa</th><th>Akses Konten</th><th>Format</th><th className="r">Pembacaan</th><th className="c">Aksi</th></tr></thead>
           <tbody>
             {books.length === 0 ? (
@@ -135,13 +135,29 @@ export function CatalogTable({ books }: { books: PublisherCatalogBook[] }) {
                 <td>{book.subscriptionRequired !== 'FREE' ? <span className="pds-chip pds-chip-review">{book.subscriptionRequired}</span> : <span className="pds-chip pds-chip-live">GRATIS</span>}</td>
                 <td className="num">{book.epubKey ? 'EPUB' : '—'}</td>
                 <td className="r num">{book.readCount.toLocaleString('id-ID')} kali</td>
-                <td className="c pds-catalog-actions"><Link href={`/publisher/books/${book.id}/analytics`} className="pds-catalog-action">Analitik</Link>{book.isPublished && <Link href={`/book/${book.id}`} target="_blank" rel="noreferrer" className="pds-catalog-action">Lihat di toko</Link>}<Link href={`/publisher/books/${book.id}/edit`} className="pds-catalog-action">Edit</Link>{book.archivedAt ? <button type="button" onClick={() => restore(book.id)} disabled={pending} className="pds-catalog-action">Pulihkan</button> : <><PublishToggleButton bookId={book.id} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></>}</td>
+                <td className="c pds-catalog-actions"><div className="pct-actions">
+                  {book.archivedAt ? <>
+                    <button type="button" onClick={() => restore(book.id)} disabled={pending} className="pct-action-button pct-restore-button" aria-label={`Pulihkan buku ${book.title}`}>Pulihkan</button>
+                    <Link href={`/publisher/books/${book.id}/edit`} className="pds-catalog-action" aria-label={`Edit ${book.title}`}>Edit</Link>
+                  </> : <>
+                    <PublishToggleButton bookId={book.id} bookTitle={book.title} isPublished={book.isPublished} publicationStatus={book.publicationStatus} />
+                    <Link href={`/publisher/books/${book.id}/edit`} className="pds-catalog-action" aria-label={`Edit ${book.title}`}>Edit</Link>
+                    <DeletePublisherBookButton bookId={book.id} bookTitle={book.title} />
+                  </>}
+                  <details className="pct-more">
+                    <summary className="pct-action-button">Lainnya</summary>
+                    <div className="pct-more-links">
+                      <Link href={`/publisher/books/${book.id}/analytics`} className="pds-catalog-action" aria-label={`Analitik: ${book.title}`}>Analitik</Link>
+                      {book.isPublished && !book.archivedAt && <Link href={`/book/${book.id}`} target="_blank" rel="noreferrer" className="pds-catalog-action" aria-label={`Lihat ${book.title} di toko`}>Lihat di toko</Link>}
+                    </div>
+                  </details>
+                </div></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="pct-mobile-list">{paginated.items.length === 0 && <div className="pct-mobile-card pct-empty">{books.length === 0 ? <>Belum ada buku. <Link href="/publisher/books/new">Upload buku pertama</Link></> : 'Tidak ada buku yang cocok dengan filter.'}</div>}{paginated.items.map((book) => <article className="pct-mobile-card" key={book.id}><div className="pct-mobile-head">{book.coverKey ? <img src={getCoverUrl(book.coverKey)} alt="" /> : <span className="pct-no-cover">BUKOO</span>}<div><strong>{book.title}</strong><small>{book.author}</small><span className="pds-chip pds-chip-review">{book.archivedAt ? 'Arsip' : book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></div></div>{book.reviewNote && ['DRAFT', 'REJECTED'].includes(book.publicationStatus) && <p className="pct-review-note">Catatan kurasi: {book.reviewNote}</p>}<div className="pct-mobile-meta"><span>{firstGenre(book.genre)}</span><span>{book.readCount.toLocaleString('id-ID')} pembacaan</span></div><div className="pct-mobile-actions"><Link href={`/publisher/books/${book.id}/edit`}>Edit</Link><Link href={`/publisher/books/${book.id}/analytics`}>Analitik</Link>{book.archivedAt ? <button type="button" onClick={() => restore(book.id)} disabled={pending}>Pulihkan</button> : <><PublishToggleButton bookId={book.id} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></>}</div></article>)}</div>
+      <div className="pct-mobile-list">{paginated.items.length === 0 && <div className="pct-mobile-card pct-empty">{books.length === 0 ? <>Belum ada buku. <Link href="/publisher/books/new">Upload buku pertama</Link></> : 'Tidak ada buku yang cocok dengan filter.'}</div>}{paginated.items.map((book) => <article className="pct-mobile-card" key={book.id}><div className="pct-mobile-head">{book.coverKey ? <img src={getCoverUrl(book.coverKey)} alt="" /> : <span className="pct-no-cover">BUKOO</span>}<div><strong>{book.title}</strong><small>{book.author}</small><span className="pds-chip pds-chip-review">{book.archivedAt ? 'Arsip' : book.publicationStatus === 'PUBLISHED' ? 'Aktif' : book.publicationStatus === 'IN_REVIEW' ? 'Review' : book.publicationStatus === 'DRAFT' ? 'Draft' : book.publicationStatus === 'REJECTED' ? 'Ditolak' : 'Nonaktif'}</span></div></div>{book.reviewNote && ['DRAFT', 'REJECTED'].includes(book.publicationStatus) && <p className="pct-review-note">Catatan kurasi: {book.reviewNote}</p>}<div className="pct-mobile-meta"><span>{firstGenre(book.genre)}</span><span>{book.readCount.toLocaleString('id-ID')} pembacaan</span></div><div className="pct-mobile-actions"><Link href={`/publisher/books/${book.id}/edit`} aria-label={`Edit ${book.title}`}>Edit</Link><Link href={`/publisher/books/${book.id}/analytics`} aria-label={`Analitik: ${book.title}`}>Analitik</Link>{book.archivedAt ? <button type="button" onClick={() => restore(book.id)} disabled={pending} className="pct-action-button pct-restore-button" aria-label={`Pulihkan buku ${book.title}`}>Pulihkan</button> : <><PublishToggleButton bookId={book.id} bookTitle={book.title} isPublished={book.isPublished} publicationStatus={book.publicationStatus} /><DeletePublisherBookButton bookId={book.id} bookTitle={book.title} /></>}</div></article>)}</div>
       <div className="pds-catalog-pagination">
         <span>Menampilkan {filteredBooks.length === 0 ? 0 : (paginated.page - 1) * CATALOG_PAGE_SIZE + 1}–{Math.min(paginated.page * CATALOG_PAGE_SIZE, filteredBooks.length)} dari {filteredBooks.length}</span>
         <div><button type="button" disabled={paginated.page === 1} onClick={() => changePage(paginated.page - 1)}>Sebelumnya</button><span>Halaman {paginated.page} / {paginated.totalPages}</span><button type="button" disabled={paginated.page === paginated.totalPages} onClick={() => changePage(paginated.page + 1)}>Berikutnya</button></div>

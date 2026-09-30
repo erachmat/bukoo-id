@@ -43,6 +43,12 @@
 - `[x]` Consolidate signed-in Submit Judul with catalog upload and retain the public explanation page.
 - `[x]` Validate local migrations, run the demo seed twice with identical counts, and pass web typecheck/lint/tests/build plus DB typecheck/check.
 - `[x]` Reviewed SQL, got confirmation, and applied production D1 migrations 0015–0016 through `migrate-d1.yml`; deployed the code and verified the authenticated live catalog/upload layouts plus active catalog navigation.
+- `[x]` Reproduced the desktop row-action clipping in the authenticated live catalog at a 1265px viewport.
+- `[x]` Keep status actions, edit, archive, and restore available in a sticky compact column; put analytics and storefront links in an inline keyboard-accessible disclosure.
+- `[x]` Make publication and archive failures visible with their full messages, and keep restore inactive.
+- `[x]` Test draft → review → archive withdrawal → restore with mocked D1 action tests; verify ownership and rights-confirmation rejection.
+- `[x]` Verify 320px/390px mobile, 768px tablet, and 1024px/1280px desktop layouts; actions remain reachable and no page overflow occurs. Keyboard opens the row disclosure.
+- `[x]` Web typecheck passed; lint passed with 0 errors and 25 existing warnings; tests passed (136/136). No database migration required.
 
 # Publisher Dashboard Figma Refresh — 2026-09-27
 

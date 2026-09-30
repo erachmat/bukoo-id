@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { setBookPublication } from './actions';
 
-export function PublishToggleButton({ bookId, isPublished, publicationStatus }: { bookId: string; isPublished: boolean; publicationStatus: string }) {
+export function PublishToggleButton({ bookId, bookTitle, isPublished, publicationStatus }: { bookId: string; bookTitle: string; isPublished: boolean; publicationStatus: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const canPublish = !isPublished && publicationStatus === 'UNPUBLISHED';
@@ -22,10 +22,10 @@ export function PublishToggleButton({ bookId, isPublished, publicationStatus }: 
     });
   };
 
-  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-    <button type="button" onClick={handleClick} disabled={pending} style={{ fontSize: 12, fontWeight: 600, color: 'var(--pds-teal)', background: 'none', border: 0, cursor: pending ? 'wait' : 'pointer', padding: 0 }}>
+  return <span className="pct-action-control">
+    <button type="button" className="pct-action-button pct-publication-button" onClick={handleClick} disabled={pending} aria-label={`${canUnpublish ? 'Tarik dari toko' : 'Terbitkan lagi'}: ${bookTitle}`}>
       {pending ? 'Memproses...' : canUnpublish ? 'Tarik dari toko' : 'Terbitkan lagi'}
     </button>
-    {error && <span role="alert" title={error} style={{ color: 'var(--pds-coral)', fontSize: 11 }}>Gagal</span>}
+    {error && <span role="alert" className="pct-action-error">{error}</span>}
   </span>;
 }

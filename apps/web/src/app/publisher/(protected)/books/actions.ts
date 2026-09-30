@@ -7,7 +7,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { getPublisherUser } from '@/lib/publisher-auth';
-import { canPublish, canUnpublish, shouldReReview } from '@/lib/book-publication';
+import { archivedPublicationStatus, canPublish, canSubmitForReview, canUnpublish, restoredPublicationState, shouldReReview } from '@/lib/book-publication';
 import { catalogFingerprint, MAX_PUBLISHER_FILE_BYTES, normalizeBookIsbn, parsePublisherBookFields, reviewRequirements } from '@/lib/publisher-book-input';
 
 type PublisherBook = typeof books.$inferSelect;
@@ -158,7 +158,7 @@ export async function submitPublisherBookForReview(bookId: string, rightsConfirm
   const db = getDb();
   const book = await ownedBook(bookId, user.id);
   if (book.archivedAt) throw new Error('Pulihkan buku dari arsip sebelum dikirim untuk review.');
-  if (!['DRAFT', 'REJECTED'].includes(book.publicationStatus)) throw new Error('Buku ini sudah pernah dikirim untuk review.');
+  if (!canSubmitForReview(book.publicationStatus, book.archivedAt)) throw new Error('Buku ini sudah pernah dikirim untuk review.');
   const missing = reviewRequirements(book);
   if (missing.length) throw new Error(`Lengkapi ${missing.join(', ')} sebelum mengirim untuk review.`);
   const active = await db.query.publisherSubmissions.findFirst({ where: and(eq(publisherSubmissions.bookId, book.id), inArray(publisherSubmissions.status, ['SUBMITTED', 'IN_REVIEW'])) });
@@ -204,7 +204,7 @@ export async function bulkArchivePublisherBooks(bookIds: string[]) {
   const now = new Date().toISOString();
   if (eligible.length) {
     const statements = eligible.flatMap((book) => [
-      db.update(books).set({ archivedAt: now, isPublished: false, publicationStatus: book.publicationStatus === 'IN_REVIEW' ? 'DRAFT' : book.publicationStatus === 'PUBLISHED' ? 'UNPUBLISHED' : book.publicationStatus, updatedAt: now }).where(and(eq(books.id, book.id), eq(books.publisherUserId, user.id))),
+      db.update(books).set({ archivedAt: now, isPublished: false, publicationStatus: archivedPublicationStatus(book.publicationStatus), updatedAt: now }).where(and(eq(books.id, book.id), eq(books.publisherUserId, user.id))),
       db.update(publisherSubmissions).set({ status: 'WITHDRAWN', updatedAt: now }).where(and(eq(publisherSubmissions.bookId, book.id), inArray(publisherSubmissions.status, ['SUBMITTED', 'IN_REVIEW']))),
     ]);
     await db.batch(statements as [typeof statements[number], ...typeof statements]);
@@ -219,6 +219,6 @@ export async function restorePublisherBook(id: string) {
   const user = await getPublisherUser();
   const book = await ownedBook(id, user.id);
   if (!book.archivedAt) throw new Error('Buku ini tidak ada di arsip.');
-  await getDb().update(books).set({ archivedAt: null, isPublished: false, updatedAt: new Date().toISOString() }).where(and(eq(books.id, id), eq(books.publisherUserId, user.id)));
+  await getDb().update(books).set({ archivedAt: null, ...restoredPublicationState(book.publicationStatus), updatedAt: new Date().toISOString() }).where(and(eq(books.id, id), eq(books.publisherUserId, user.id)));
   refreshCatalog();
 }
