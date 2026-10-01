@@ -1,0 +1,1 @@
+ALTER TABLE `reading_progress` ADD `content_version` text DEFAULT '' NOT NULL;

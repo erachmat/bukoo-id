@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 import { readingGoalService } from '../../../services/readingGoalService';
+import { useAuthStore } from '../../../stores/authStore';
 
 interface ReadingAnalyticsModalProps {
   visible: boolean;
@@ -11,28 +12,29 @@ interface ReadingAnalyticsModalProps {
 }
 
 export function ReadingAnalyticsModal({ visible, onClose }: ReadingAnalyticsModalProps) {
+  const userId = useAuthStore((state) => state.user?.id ?? null);
   const [targetMinutes, setTargetMinutes] = useState(15);
   const [streakDays, setStreakDays] = useState(0);
   const [weekData, setWeekData] = useState<{ dayLabel: string; minutes: number; isCompleted: boolean }[]>([]);
 
-  useEffect(() => {
-    if (visible) {
-      loadAnalytics();
-    }
-  }, [visible]);
-
-  const loadAnalytics = async () => {
-    const state = await readingGoalService.getGoalsState();
+  const loadAnalytics = useCallback(async () => {
+    const state = await readingGoalService.getGoalsState(userId);
     setTargetMinutes(state.targetMinutes);
     setStreakDays(state.streakDays ?? 0);
-    const logs = await readingGoalService.getWeekLogs();
+    const logs = await readingGoalService.getWeekLogs(userId);
     setWeekData(logs);
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (visible) {
+      void loadAnalytics();
+    }
+  }, [visible, loadAnalytics]);
 
   const handleSelectTarget = async (min: number) => {
     setTargetMinutes(min);
-    await readingGoalService.setTargetMinutes(min);
-    const logs = await readingGoalService.getWeekLogs();
+    await readingGoalService.setTargetMinutes(userId, min);
+    const logs = await readingGoalService.getWeekLogs(userId);
     setWeekData(logs);
   };
 

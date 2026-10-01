@@ -1,34 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../constants/COLORS';
 import { FONTS } from '../../../constants/FONTS';
 import { readingGoalService } from '../../../services/readingGoalService';
+import { useAuthStore } from '../../../stores/authStore';
 
 interface ReadingGoalCardProps {
   onOpenAnalytics?: () => void;
 }
 
 export function ReadingGoalCard({ onOpenAnalytics }: ReadingGoalCardProps) {
+  const userId = useAuthStore((state) => state.user?.id ?? null);
   const [targetMinutes, setTargetMinutes] = useState(15);
   const [todayMinutes, setTodayMinutes] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
   const [weekLogs, setWeekLogs] = useState<{ dayLabel: string; isCompleted: boolean }[]>([]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    const state = await readingGoalService.getGoalsState();
+  const loadData = useCallback(async () => {
+    const state = await readingGoalService.getGoalsState(userId);
     setTargetMinutes(state.targetMinutes);
-    const todaySec = await readingGoalService.getTodayReadingSeconds();
+    const todaySec = await readingGoalService.getTodayReadingSeconds(userId);
     setTodayMinutes(Math.round(todaySec / 60));
     setStreakDays(state.streakDays ?? 0);
 
-    const logs = await readingGoalService.getWeekLogs();
+    const logs = await readingGoalService.getWeekLogs(userId);
     setWeekLogs(logs);
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const progressPercent = Math.min(100, Math.round((todayMinutes / targetMinutes) * 100));
 

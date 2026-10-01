@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { readingSync } from '../services/readingSync';
+import { useAuthStore } from './authStore';
 
 interface NetworkState {
   isOffline: boolean;
@@ -27,7 +28,7 @@ let listenerStarted = false;
 async function refreshPendingSyncCount(): Promise<void> {
   try {
     // Count both queued syncs AND dirty-but-unqueued progress rows.
-    const count = await readingSync.getUnsyncedCount();
+    const count = await readingSync.getUnsyncedCount(useAuthStore.getState().user?.id ?? null);
     useNetworkStore.setState({ pendingSyncCount: count });
   } catch {
     useNetworkStore.setState({ pendingSyncCount: 0 });
@@ -59,7 +60,7 @@ export function initNetworkListener(): () => void {
         useNetworkStore.setState({ justReconnected: true });
 
         // Retry the pending queue once, then refresh the banner count.
-        readingSync.retryPendingSyncs().then(refreshPendingSyncCount).catch(() => {});
+        readingSync.retryPendingSyncs(useAuthStore.getState().user?.id ?? null).then(refreshPendingSyncCount).catch(() => {});
 
         if (reconnectTimer) clearTimeout(reconnectTimer);
         reconnectTimer = setTimeout(() => {
@@ -72,8 +73,17 @@ export function initNetworkListener(): () => void {
   // Seed the initial pending count.
   refreshPendingSyncCount();
 
+  const unsubscribeAuth = useAuthStore.subscribe((state, previous) => {
+    if (state.user?.id === previous.user?.id) return;
+    refreshPendingSyncCount();
+    if (!useNetworkStore.getState().isOffline) {
+      readingSync.retryPendingSyncs(state.user?.id ?? null).then(refreshPendingSyncCount).catch(() => {});
+    }
+  });
+
   return () => {
     unsubscribe();
+    unsubscribeAuth();
     if (reconnectTimer) clearTimeout(reconnectTimer);
     listenerStarted = false;
   };

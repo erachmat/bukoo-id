@@ -3,182 +3,127 @@ import { AppState, AppStateStatus } from 'react-native';
 import { readingSync } from '../services/readingSync';
 import { readingGoalService } from '../services/readingGoalService';
 import { notificationService } from '../services/notificationService';
+import type { VisibleWordRange } from '../services/readingCoverage';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface UseReadingSessionReturn {
-  /** The current page number (0-indexed or as sent by epubjs) */
-  currentPage: number;
-  /** Reading progress percentage (0–100) */
-  progressPercent: number;
-  /** Total seconds spent reading this session */
-  readingTimeSeconds: number;
-  /** True when the daily reading goal has been achieved during this session */
-  isGoalAchieved: boolean;
-  /** Dismiss celebration banner */
-  dismissGoalBanner: () => void;
-  /**
-   * The CFI position where the user left off, loaded from local SQLite on mount.
-   * Empty string when there is no saved position (first open).
-   */
-  initialCfi: string;
-  /**
-   * Call this every time the reader reports a new page / CFI position.
-   * Updates local SQLite immediately and accumulates the sync queue.
-   */
-  updateProgress: (page: number, cfi: string, percent?: number) => void;
+export interface ReadingManifest {
+  contentVersion: string;
+  totalWords: number;
+  wordsPerBlock: number;
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+export interface UseReadingSessionReturn {
+  currentPage: number;
+  progressPercent: number;
+  readingTimeSeconds: number;
+  isGoalAchieved: boolean;
+  dismissGoalBanner: () => void;
+  initialCfi: string;
+  updateProgress: (page: number, cfi: string) => void;
+  updateVisibleCoverage: (ranges: readonly VisibleWordRange[], elapsedMilliseconds: number, visibleWordCount: number) => void;
+}
 
-export function useReadingSession(bookId: string, isReady: boolean = true): UseReadingSessionReturn {
+export function useReadingSession(
+  bookId: string,
+  isReady = true,
+  userId: string | null,
+  manifest: ReadingManifest | null,
+): UseReadingSessionReturn {
   const [currentPage, setCurrentPage] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
   const [readingTimeSeconds, setReadingTimeSeconds] = useState(0);
   const [initialCfi, setInitialCfi] = useState('');
   const [isGoalAchieved, setIsGoalAchieved] = useState(false);
-
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
-  // ── Bootstrap / teardown ────────────────────────────────────────────────────
+  const refreshLocalProgress = useCallback(async () => {
+    if (!userId || !manifest) return;
+    const saved = await readingSync.getLocalProgress(bookId, userId, manifest.contentVersion);
+    if (saved) {
+      setCurrentPage(saved.currentPage);
+      setProgressPercent(saved.progressPercent);
+      setReadingTimeSeconds(saved.readingTimeSeconds);
+      setInitialCfi(saved.cfiPosition || '');
+    }
+  }, [bookId, userId, manifest]);
 
   useEffect(() => {
-    if (!bookId) return;
-
-    // Load existing local progress to seed initial state
-    readingSync.getLocalProgress(bookId).then((saved) => {
-      if (saved) {
-        setCurrentPage(saved.currentPage);
-        setProgressPercent(saved.progressPercent);
-        setReadingTimeSeconds(saved.readingTimeSeconds);
-        if (saved.cfiPosition) setInitialCfi(saved.cfiPosition);
-      }
+    setCurrentPage(0);
+    setProgressPercent(0);
+    setReadingTimeSeconds(0);
+    setInitialCfi('');
+    if (!bookId || !userId || !manifest || !isReady) return;
+    let cancelled = false;
+    readingSync.startSession(userId, bookId, manifest.contentVersion, manifest.totalWords);
+    readingSync.getLocalProgress(bookId, userId, manifest.contentVersion).then((saved) => {
+      if (cancelled || !saved) return;
+      setCurrentPage(saved.currentPage);
+      setProgressPercent(saved.progressPercent);
+      setReadingTimeSeconds(saved.readingTimeSeconds);
+      setInitialCfi(saved.cfiPosition || '');
     });
-
-    // Start the 30s sync interval
-    readingSync.startSession(bookId);
-
     return () => {
-      // Teardown: flush immediately (stopSession handles interval clearing)
-      readingSync.stopSession().catch((err) => {
-        if ((err as { response?: { status?: number } })?.response?.status !== 404) {
-          console.warn('[useReadingSession] stopSession on unmount failed:', err);
+      cancelled = true;
+      readingSync.stopSession(userId).catch((error) => {
+        if ((error as { response?: { status?: number } })?.response?.status !== 404) {
+          console.warn('[useReadingSession] stopSession on teardown failed:', error);
         }
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookId]);
-
-  // ── AppState (background / foreground) ──────────────────────────────────────
+  }, [bookId, userId, manifest, isReady]);
 
   useEffect(() => {
-    const handleAppStateChange = (nextState: AppStateStatus) => {
-      const prevState = appStateRef.current;
+    if (!bookId || !userId || !manifest || !isReady) return;
+    const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      const previous = appStateRef.current;
       appStateRef.current = nextState;
-
-      const isGoingToBackground =
-        prevState === 'active' && (nextState === 'background' || nextState === 'inactive');
-      const isComingToForeground =
-        (prevState === 'background' || prevState === 'inactive') && nextState === 'active';
-
-      if (isGoingToBackground) {
-        // Pause time accumulation and force-flush to server
+      if (previous === 'active' && (nextState === 'background' || nextState === 'inactive')) {
         readingSync.pauseTimeTracking();
-        readingSync.stopSession().catch((err) => {
-          if ((err as { response?: { status?: number } })?.response?.status !== 404) {
-            console.warn('[useReadingSession] stopSession on background failed:', err);
-          }
-        });
-      } else if (isComingToForeground) {
-        // Re-start the session (restores 30s interval and time tracking)
-        readingSync.startSession(bookId);
+        readingSync.syncToServer().catch(() => {});
+      } else if ((previous === 'background' || previous === 'inactive') && nextState === 'active') {
         readingSync.resumeTimeTracking();
       }
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    });
     return () => subscription.remove();
-  }, [bookId]);
-
-  // ── Network recovery ────────────────────────────────────────────────────────
-  //
-  // Reconnect retries are handled centrally by the app-wide network store
-  // (stores/networkStore.ts) — no per-session NetInfo listener here.
-
-  // ── Reading time ticker ─────────────────────────────────────────────────────
+  }, [bookId, userId, manifest, isReady]);
 
   useEffect(() => {
-    // Only count time while the reader is actually ready (book loaded) AND the
-    // app is in the foreground. Loading, location generation, load failures, and
-    // backgrounding must not inflate the displayed reading time.
-    let intervalHandle: ReturnType<typeof setInterval> | null = null;
-
-    const startTicker = () => {
-      if (intervalHandle) return;
-      intervalHandle = setInterval(() => {
-        setReadingTimeSeconds((prev) => prev + 1);
-        readingGoalService.recordReadingTime(1).then(({ isGoalAchievedNow }) => {
-          if (isGoalAchievedNow) {
-            setIsGoalAchieved(true);
-            // Feed the in-app notification center with a real event.
-            notificationService
-              .addNotification({
-                title: '🎯 Target Membaca Tercapai!',
-                body: 'Kamu mencapai target membaca harian hari ini. Pertahankan streak-mu!',
-                type: 'streak',
-              })
-              .catch(() => {});
-          }
-        });
-      }, 1_000);
-    };
-
-    const stopTicker = () => {
-      if (intervalHandle) {
-        clearInterval(intervalHandle);
-        intervalHandle = null;
-      }
-    };
-
-    if (isReady && appStateRef.current === 'active') {
-      startTicker();
-    }
-
-    const handleAppStateForTicker = (nextState: AppStateStatus) => {
-      if (nextState === 'active') {
-        if (isReady) startTicker();
-      } else {
-        stopTicker();
-      }
-    };
-
-    const sub = AppState.addEventListener('change', handleAppStateForTicker);
-
+    if (!isReady || appStateRef.current !== 'active') return;
+    const interval = setInterval(() => {
+      setReadingTimeSeconds((previous) => previous + 1);
+      if (!userId) return;
+      readingGoalService.recordReadingTime(userId, 1).then(({ isGoalAchievedNow }) => {
+        if (!isGoalAchievedNow) return;
+        setIsGoalAchieved(true);
+        notificationService.addNotification({
+          title: '🎯 Target Membaca Tercapai!',
+          body: 'Kamu mencapai target membaca harian hari ini. Pertahankan streak-mu!',
+          type: 'streak',
+        }).catch(() => {});
+      });
+    }, 1_000);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      appStateRef.current = nextState;
+    });
     return () => {
-      stopTicker();
-      sub.remove();
+      clearInterval(interval);
+      subscription.remove();
     };
-  }, [isReady]);
+  }, [isReady, userId]);
 
-  // ── updateProgress (exposed to consumer) ────────────────────────────────────
+  const updateProgress = useCallback((page: number, cfi: string) => {
+    setCurrentPage(page);
+    void readingSync.updateLocalProgress(page, cfi).then(refreshLocalProgress).catch((error) => {
+      console.warn('[useReadingSession] updateLocalProgress failed:', error);
+    });
+  }, [refreshLocalProgress]);
 
-  const updateProgress = useCallback(
-    (page: number, cfi: string, percent?: number) => {
-      setCurrentPage(page);
-      if (percent !== undefined) {
-        setProgressPercent(percent);
-      }
+  const updateVisibleCoverage = useCallback((ranges: readonly VisibleWordRange[], elapsedMilliseconds: number, visibleWordCount: number) => {
+    void readingSync.updateVisibleCoverage(ranges, elapsedMilliseconds, visibleWordCount).then(refreshLocalProgress).catch((error) => {
+      console.warn('[useReadingSession] updateVisibleCoverage failed:', error);
+    });
+  }, [refreshLocalProgress]);
 
-      readingSync.updateLocalProgress(page, cfi, percent).catch((err) =>
-        console.warn('[useReadingSession] updateLocalProgress failed:', err)
-      );
-    },
-    []
-  );
-
-  const dismissGoalBanner = useCallback(() => {
-    setIsGoalAchieved(false);
-  }, []);
+  const dismissGoalBanner = useCallback(() => setIsGoalAchieved(false), []);
 
   return {
     currentPage,
@@ -188,5 +133,6 @@ export function useReadingSession(bookId: string, isReady: boolean = true): UseR
     dismissGoalBanner,
     initialCfi,
     updateProgress,
+    updateVisibleCoverage,
   };
 }

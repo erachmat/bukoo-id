@@ -22,6 +22,18 @@ export interface DateRange {
   label: string;
 }
 
+export type DiscoveryCoverageState = 'none' | 'not-covered' | 'partial' | 'available';
+
+export function getDiscoveryCoverageState(
+  period: DateRange,
+  coverageStart: string | null,
+): DiscoveryCoverageState {
+  if (!coverageStart) return 'none';
+  if (period.endExclusive && coverageStart >= period.endExclusive) return 'not-covered';
+  if (period.start === null || period.start < coverageStart) return 'partial';
+  return 'available';
+}
+
 export interface MonthlyBookReading {
   month: string;
   bookId: string;

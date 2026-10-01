@@ -141,6 +141,8 @@ export const books = sqliteTable('books', {
    * Used by GET /v1/books/:id/download to stream from BUKOO_STORAGE binding.
    */
   epubKey:             text('epub_key'),
+  /** Canonical whitespace-delimited word count of EPUB linear-spine text. */
+  totalWords:          integer('total_words').notNull().default(0),
   /** JSON-serialized string[] — parse with JSON.parse() */
   genre:               text('genre').notNull().default('[]'),
   /** JSON-serialized string[] */
@@ -190,6 +192,10 @@ export const readingProgress = sqliteTable(
     userId:             text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     bookId:             text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
     progressPercent:    real('progress_percent').notNull().default(0),
+    contentVersion:     text('content_version').notNull().default(''),
+    revision:           integer('revision').notNull().default(0),
+    /** 1 is legacy position-based progress; 2 is verified visible-text coverage. */
+    progressEpoch:      integer('progress_epoch').notNull().default(1),
     currentPage:        integer('current_page').notNull().default(0),
     totalPages:         integer('total_pages').notNull().default(0),
     cfiPosition:        text('cfi_position'),
@@ -200,6 +206,23 @@ export const readingProgress = sqliteTable(
   },
   (t) => [
     uniqueIndex('reading_progress_user_book_idx').on(t.userId, t.bookId),
+  ],
+);
+
+/** Per-account, per-device cumulative EPUB coverage snapshots. */
+export const readingCoverageBlocks = sqliteTable(
+  'reading_coverage_blocks',
+  {
+    userId:        text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    bookId:        text('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+    contentVersion:text('content_version').notNull(),
+    blockIndex:    integer('block_index').notNull(),
+    exposureMicros:integer('exposure_micros').notNull().default(0),
+    updatedAt:     text('updated_at').notNull().default(now()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.bookId, t.contentVersion, t.blockIndex] }),
+    index('reading_coverage_blocks_user_book_idx').on(t.userId, t.bookId),
   ],
 );
 

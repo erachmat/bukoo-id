@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GOALS_STORAGE_KEY = '@bukoo_reading_goals';
 
+function goalsStorageKey(userId: string | null): string | null {
+  return userId ? `${GOALS_STORAGE_KEY}:${userId}` : null;
+}
+
 export interface DayReadingLog {
   dateStr: string; // YYYY-MM-DD
   seconds: number;
@@ -27,9 +31,11 @@ function getTodayStr(): string {
 }
 
 export const readingGoalService = {
-  getGoalsState: async (): Promise<ReadingGoalsState> => {
+  getGoalsState: async (userId: string | null): Promise<ReadingGoalsState> => {
     try {
-      const data = await AsyncStorage.getItem(GOALS_STORAGE_KEY);
+      const key = goalsStorageKey(userId);
+      if (!key) return { ...DEFAULT_STATE, dailyLogs: {} };
+      const data = await AsyncStorage.getItem(key);
       if (!data) return DEFAULT_STATE;
       const parsed = JSON.parse(data);
       return {
@@ -42,24 +48,26 @@ export const readingGoalService = {
     }
   },
 
-  setTargetMinutes: async (minutes: number): Promise<void> => {
+  setTargetMinutes: async (userId: string | null, minutes: number): Promise<void> => {
     try {
-      const state = await readingGoalService.getGoalsState();
+      const state = await readingGoalService.getGoalsState(userId);
       state.targetMinutes = minutes;
-      await AsyncStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(state));
+      const key = goalsStorageKey(userId);
+      if (key) await AsyncStorage.setItem(key, JSON.stringify(state));
     } catch (e) {
       console.error('[readingGoalService] Error setting target minutes:', e);
     }
   },
 
-  getTodayReadingSeconds: async (): Promise<number> => {
-    const state = await readingGoalService.getGoalsState();
+  getTodayReadingSeconds: async (userId: string | null): Promise<number> => {
+    const state = await readingGoalService.getGoalsState(userId);
     const today = getTodayStr();
     return state.dailyLogs[today] || 0;
   },
 
-  recordReadingTime: async (additionalSeconds: number): Promise<{ isGoalAchievedNow: boolean; state: ReadingGoalsState }> => {
-    const state = await readingGoalService.getGoalsState();
+  recordReadingTime: async (userId: string | null, additionalSeconds: number): Promise<{ isGoalAchievedNow: boolean; state: ReadingGoalsState }> => {
+    if (!userId) return { isGoalAchievedNow: false, state: { ...DEFAULT_STATE, dailyLogs: {} } };
+    const state = await readingGoalService.getGoalsState(userId);
     const today = getTodayStr();
     const prevTodaySeconds = state.dailyLogs[today] || 0;
     const newTodaySeconds = prevTodaySeconds + additionalSeconds;
@@ -85,7 +93,8 @@ export const readingGoalService = {
     const isGoalAchievedNow = !wasAchievedBefore && newTodaySeconds >= targetSeconds;
 
     try {
-      await AsyncStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(state));
+      const key = goalsStorageKey(userId);
+      if (key) await AsyncStorage.setItem(key, JSON.stringify(state));
     } catch (e) {
       console.error('[readingGoalService] Error saving goals state:', e);
     }
@@ -93,8 +102,8 @@ export const readingGoalService = {
     return { isGoalAchievedNow, state };
   },
 
-  getWeekLogs: async (): Promise<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]> => {
-    const state = await readingGoalService.getGoalsState();
+  getWeekLogs: async (userId: string | null): Promise<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]> => {
+    const state = await readingGoalService.getGoalsState(userId);
     const result = [];
     const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
@@ -118,10 +127,11 @@ export const readingGoalService = {
   },
 
   getMonthLogs: async (
+    userId: string | null,
     year: number,
     month: number,
   ): Promise<{ dayLabel: string; dateStr: string; minutes: number; isCompleted: boolean }[]> => {
-    const state = await readingGoalService.getGoalsState();
+    const state = await readingGoalService.getGoalsState(userId);
     const result = [];
     const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     const daysInMonth = new Date(year, month + 1, 0).getDate();

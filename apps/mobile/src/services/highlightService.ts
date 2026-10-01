@@ -2,6 +2,7 @@ import { getSharedDb } from './annotationDb';
 
 export interface Highlight {
   id: number;
+  userId: string;
   bookId: string;
   cfiRange: string;
   text: string;
@@ -11,73 +12,61 @@ export interface Highlight {
 }
 
 class HighlightService {
-  async addHighlight(
-    bookId: string, 
-    cfiRange: string, 
-    text: string, 
-    color: string, 
-    note?: string
-  ): Promise<void> {
+  async addHighlight(userId: string, bookId: string, cfiRange: string, text: string, color: string, note?: string): Promise<void> {
+    if (!userId) return;
     try {
       const db = await getSharedDb();
       await db.runAsync(
-        'DELETE FROM deleted_annotations WHERE bookId = ? AND type = "highlight" AND targetCfi = ?',
-        bookId, cfiRange
+        'DELETE FROM deleted_annotations WHERE userId = ? AND bookId = ? AND type = ? AND targetCfi = ?',
+        [userId, bookId, 'highlight', cfiRange],
       );
       await db.runAsync(
-        'INSERT INTO highlights (bookId, cfiRange, text, color, note, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
-        bookId, cfiRange, text, color, note || null, Date.now()
+        'INSERT INTO highlights (userId, bookId, cfiRange, text, color, note, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [userId, bookId, cfiRange, text, color, note || null, Date.now()],
       );
-    } catch (e) {
-      console.error('[HighlightService] Error adding highlight', e);
+    } catch (error) {
+      console.error('[HighlightService] Error adding highlight', error);
     }
   }
 
-  async removeHighlight(id: number): Promise<void> {
+  async removeHighlight(userId: string, id: number): Promise<void> {
+    if (!userId) return;
     try {
       const db = await getSharedDb();
-      const item = await db.getFirstAsync<Highlight>(
-        'SELECT * FROM highlights WHERE id = ?',
-        id
-      );
+      const item = await db.getFirstAsync<Highlight>('SELECT * FROM highlights WHERE userId = ? AND id = ?', [userId, id]);
       if (item) {
         await db.runAsync(
-          'INSERT INTO deleted_annotations (bookId, type, targetCfi, createdAt) VALUES (?, "highlight", ?, ?)',
-          item.bookId, item.cfiRange, Date.now()
+          'INSERT INTO deleted_annotations (userId, bookId, type, targetCfi, createdAt) VALUES (?, ?, ?, ?, ?)',
+          [userId, item.bookId, 'highlight', item.cfiRange, Date.now()],
         );
       }
-      await db.runAsync(
-        'DELETE FROM highlights WHERE id = ?',
-        id
-      );
-    } catch (e) {
-      console.error('[HighlightService] Error removing highlight', e);
+      await db.runAsync('DELETE FROM highlights WHERE userId = ? AND id = ?', [userId, id]);
+    } catch (error) {
+      console.error('[HighlightService] Error removing highlight', error);
     }
   }
 
-  async getHighlights(bookId: string): Promise<Highlight[]> {
+  async getHighlights(userId: string, bookId: string): Promise<Highlight[]> {
+    if (!userId) return [];
     try {
       const db = await getSharedDb();
-      const results = await db.getAllAsync<Highlight>(
-        'SELECT * FROM highlights WHERE bookId = ? ORDER BY createdAt DESC',
-        [bookId]
+      return await db.getAllAsync<Highlight>(
+        'SELECT * FROM highlights WHERE userId = ? AND bookId = ? ORDER BY createdAt DESC',
+        [userId, bookId],
       );
-      return results;
-    } catch (e) {
-      console.error('[HighlightService] Error getting highlights', e);
+    } catch (error) {
+      console.error('[HighlightService] Error getting highlights', error);
       return [];
     }
   }
 
-  async updateNote(id: number, note: string): Promise<void> {
+  async updateNote(userId: string, id: number, note: string): Promise<void> {
+    if (!userId) return;
     try {
       const db = await getSharedDb();
-      await db.runAsync(
-        'UPDATE highlights SET note = ? WHERE id = ?',
-        [note, id]
-      );
-    } catch (e) {
-      console.error('[HighlightService] Error updating note', e);
+      await db.runAsync('UPDATE highlights SET note = ? WHERE userId = ? AND id = ?', [note, userId, id]);
+    } catch (error) {
+      console.error('[HighlightService] Error updating note', error);
     }
   }
 }

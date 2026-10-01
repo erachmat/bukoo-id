@@ -6,6 +6,7 @@ import { readingGoals, readingStreaks, readingProgress } from '@bukoo/db';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { createId } from '../lib/cuid.js';
+import { READING_PROGRESS_EPOCH } from '../lib/reading-coverage.js';
 import { computeCurrentStreak } from '../lib/streak.js';
 import type { Env } from '../types/env.js';
 
@@ -162,6 +163,7 @@ goals.get('/books-this-year', async (c) => {
     .where(
       and(
         eq(readingProgress.userId, userId),
+        eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH),
         sql`${readingProgress.progressPercent} = 100`,
         gte(readingProgress.updatedAt, startOfYear),
         lte(readingProgress.updatedAt, endOfYear),

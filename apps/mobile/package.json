@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\"",
-    "test": "echo 'No tests specified for mobile yet'",
+    "test": "vitest run",
     "apk:release": "cd android && ./gradlew assembleRelease",
     "deploy:firebase": "npm run apk:release && npm run distribute:firebase",
     "distribute:firebase": "npx firebase-tools appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk --app 1:576187863248:android:319b30d64afedc461fced5 --groups \"mvp-testers\" --release-notes \"BUKOO MVP — Firebase App Distribution build\""
@@ -36,6 +36,7 @@
     "expo": "~56.0.20",
     "expo-apple-authentication": "^56.0.4",
     "expo-asset": "~56.0.22",
+    "expo-crypto": "~56.0.5",
     "expo-file-system": "~56.0.9",
     "expo-font": "~56.0.7",
     "expo-local-authentication": "~56.0.5",
@@ -61,6 +62,7 @@
     "@react-native/metro-config": "0.85.3",
     "@types/react": "~19.2.14",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.7"
   }
 }

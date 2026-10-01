@@ -2,6 +2,7 @@ import { getSharedDb } from './annotationDb';
 
 export interface Bookmark {
   id: number;
+  userId: string;
   bookId: string;
   cfi: string;
   chapterTitle: string;
@@ -9,62 +10,62 @@ export interface Bookmark {
 }
 
 class BookmarkService {
-  async addBookmark(bookId: string, cfi: string, chapterTitle: string = 'Unknown'): Promise<void> {
+  async addBookmark(userId: string, bookId: string, cfi: string, chapterTitle = 'Unknown'): Promise<void> {
+    if (!userId) return;
     try {
       const db = await getSharedDb();
       await db.runAsync(
-        'DELETE FROM deleted_annotations WHERE bookId = ? AND type = "bookmark" AND targetCfi = ?',
-        bookId, cfi
+        'DELETE FROM deleted_annotations WHERE userId = ? AND bookId = ? AND type = ? AND targetCfi = ?',
+        [userId, bookId, 'bookmark', cfi],
       );
       await db.runAsync(
-        'INSERT INTO bookmarks (bookId, cfi, chapterTitle, createdAt) VALUES (?, ?, ?, ?)',
-        bookId, cfi, chapterTitle, Date.now()
+        'INSERT INTO bookmarks (userId, bookId, cfi, chapterTitle, createdAt) VALUES (?, ?, ?, ?, ?)',
+        [userId, bookId, cfi, chapterTitle, Date.now()],
       );
-    } catch (e) {
-      console.error('[BookmarkService] Error adding bookmark', e);
+    } catch (error) {
+      console.error('[BookmarkService] Error adding bookmark', error);
     }
   }
 
-  async removeBookmark(bookId: string, cfi: string): Promise<void> {
+  async removeBookmark(userId: string, bookId: string, cfi: string): Promise<void> {
+    if (!userId) return;
     try {
       const db = await getSharedDb();
       await db.runAsync(
-        'INSERT INTO deleted_annotations (bookId, type, targetCfi, createdAt) VALUES (?, "bookmark", ?, ?)',
-        bookId, cfi, Date.now()
+        'INSERT INTO deleted_annotations (userId, bookId, type, targetCfi, createdAt) VALUES (?, ?, ?, ?, ?)',
+        [userId, bookId, 'bookmark', cfi, Date.now()],
       );
-      await db.runAsync(
-        'DELETE FROM bookmarks WHERE bookId = ? AND cfi = ?',
-        bookId, cfi
-      );
-    } catch (e) {
-      console.error('[BookmarkService] Error removing bookmark', e);
+      await db.runAsync('DELETE FROM bookmarks WHERE userId = ? AND bookId = ? AND cfi = ?', [userId, bookId, cfi]);
+    } catch (error) {
+      console.error('[BookmarkService] Error removing bookmark', error);
     }
   }
 
-  async getBookmarks(bookId: string): Promise<Bookmark[]> {
+  async getBookmarks(userId: string, bookId: string): Promise<Bookmark[]> {
+    if (!userId) return [];
     try {
       const db = await getSharedDb();
-      const results = await db.getAllAsync<Bookmark>(
-        'SELECT * FROM bookmarks WHERE bookId = ? ORDER BY createdAt DESC',
-        [bookId]
+      return await db.getAllAsync<Bookmark>(
+        'SELECT * FROM bookmarks WHERE userId = ? AND bookId = ? ORDER BY createdAt DESC',
+        [userId, bookId],
       );
-      return results;
-    } catch (e) {
-      console.error('[BookmarkService] Error getting bookmarks', e);
+    } catch (error) {
+      console.error('[BookmarkService] Error getting bookmarks', error);
       return [];
     }
   }
 
-  async isBookmarked(bookId: string, cfi: string): Promise<boolean> {
+  async isBookmarked(userId: string, bookId: string, cfi: string): Promise<boolean> {
+    if (!userId) return false;
     try {
       const db = await getSharedDb();
       const result = await db.getFirstAsync<{ count: number }>(
-        'SELECT COUNT(*) as count FROM bookmarks WHERE bookId = ? AND cfi = ?',
-        bookId, cfi
+        'SELECT COUNT(*) AS count FROM bookmarks WHERE userId = ? AND bookId = ? AND cfi = ?',
+        [userId, bookId, cfi],
       );
-      return result ? result.count > 0 : false;
-    } catch (e) {
-      console.error('[BookmarkService] Error checking bookmark', e);
+      return (result?.count ?? 0) > 0;
+    } catch (error) {
+      console.error('[BookmarkService] Error checking bookmark', error);
       return false;
     }
   }

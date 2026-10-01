@@ -7,6 +7,7 @@ import { isBookAccessible, type BookDto, type SubscriptionTier } from '@bukoo/sh
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { getUserTier } from '../lib/tier.js';
+import { READING_PROGRESS_EPOCH } from '../lib/reading-coverage.js';
 import type { Env } from '../types/env.js';
 
 const booksRouter = new Hono<{ Bindings: Env }>();
@@ -34,6 +35,7 @@ function formatBook(book: typeof books.$inferSelect, userTier: string, progress?
     synopsis: book.synopsis ?? '',
     coverKey: book.coverKey,
     epubKey: book.epubKey,
+    totalWords: book.totalWords,
     genre: parseJsonArray(book.genre),
     tags: parseJsonArray(book.tags),
     language: book.language,
@@ -63,6 +65,7 @@ function formatBook(book: typeof books.$inferSelect, userTier: string, progress?
 const bookColumns = `
        b.id, b.title, b.author, b.publisher, b.description, b.synopsis, b.isbn,
        b.cover_key AS coverKey, b.epub_key AS epubKey,
+       b.total_words AS totalWords,
        b.genre, b.tags, b.language,
        b.published_year AS publishedYear, b.total_pages AS totalPages,
        b.read_count AS readCount, b.rating_average AS ratingAverage,
@@ -164,7 +167,7 @@ booksRouter.get('/featured', async (c) => {
       .select({ book: books })
       .from(readingProgress)
       .innerJoin(books, eq(readingProgress.bookId, books.id))
-      .where(and(eq(readingProgress.userId, userId), sql`${readingProgress.progressPercent} < 100`))
+      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH), sql`${readingProgress.progressPercent} < 100`))
       .orderBy(desc(readingProgress.lastReadAt))
       .limit(10);
 
@@ -184,7 +187,7 @@ booksRouter.get('/featured', async (c) => {
       .select({ book: books })
       .from(readingProgress)
       .innerJoin(books, eq(readingProgress.bookId, books.id))
-      .where(and(eq(readingProgress.userId, userId), sql`${readingProgress.progressPercent} < 100`))
+      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH), sql`${readingProgress.progressPercent} < 100`))
       .orderBy(desc(readingProgress.lastReadAt))
       .limit(10),
   ]);
@@ -369,7 +372,11 @@ booksRouter.get('/:id', async (c) => {
   const [userTier, progress, shelfBook] = await Promise.all([
     getUserTier(userId, db),
     db.query.readingProgress.findFirst({
-      where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, bookId)),
+      where: and(
+        eq(readingProgress.userId, userId),
+        eq(readingProgress.bookId, bookId),
+        eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH),
+      ),
     }),
     db
       .select({ slug: libraryShelves.slug })

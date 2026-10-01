@@ -15,6 +15,7 @@ import { wishlistService } from '../../services/wishlistService';
 import { getCoverUrl } from '../../services/coverUrl';
 import { bookDownloadService } from '../../services/bookDownload';
 import { readingSync, ReadingProgress } from '../../services/readingSync';
+import { useAuthStore } from '../../stores/authStore';
 import { AiBookInsightCard } from './components/AiBookInsightCard';
 import { BookReviewsSection, UserReview } from './components/BookReviewsSection';
 import { WriteReviewModal } from './components/WriteReviewModal';
@@ -29,6 +30,7 @@ export default function BookDetailScreen() {
   const route = useRoute<DetailRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { bookId } = route.params;
+  const userId = useAuthStore((state) => state.user?.id ?? null);
 
   const { download, remove, isDownloading, downloadProgress, localUri, isDownloaded } = useBookDownload(bookId);
 
@@ -43,11 +45,11 @@ export default function BookDetailScreen() {
 
   // Load Wishlist status
   useEffect(() => {
-    wishlistService.isWishlisted(bookId).then(setIsSavedWishlist);
-  }, [bookId]);
+    wishlistService.isWishlisted(userId, bookId).then(setIsSavedWishlist);
+  }, [userId, bookId]);
 
   const handleToggleWishlist = async () => {
-    const isAdded = await wishlistService.toggleWishlist(bookId);
+    const isAdded = await wishlistService.toggleWishlist(userId, bookId);
     setIsSavedWishlist(isAdded);
   };
 
@@ -76,7 +78,7 @@ export default function BookDetailScreen() {
   });
 
   const { data: readingProgress, isLoading: isLoadingProgress } = useQuery({
-    queryKey: ['reading', bookId],
+    queryKey: ['reading', userId, bookId],
     queryFn: async () => {
       try {
         const response = await api.get(`/reading/${bookId}/progress`);
@@ -94,9 +96,9 @@ export default function BookDetailScreen() {
 
   useEffect(() => {
     if (bookId) {
-      readingSync.getLocalProgress(bookId).then(setLocalProgress);
+      readingSync.getLocalProgress(bookId, userId, book?.epubKey).then(setLocalProgress);
     }
-  }, [bookId]);
+  }, [bookId, userId, book?.epubKey]);
 
   const resolveEpubUrl = (url?: string) => {
     if (!url) return undefined;
@@ -205,6 +207,8 @@ export default function BookDetailScreen() {
         title: displayBook.title,
         localEpubUri: localUri ?? undefined,
         epubUrl: displayBook.epubUrl ?? undefined,
+        contentVersion: displayBook.epubKey ?? undefined,
+        totalWords: displayBook.totalWords ?? undefined,
         isSample: isSampleMode,
       },
     });

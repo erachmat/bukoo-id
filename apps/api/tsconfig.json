@@ -7,13 +7,13 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"],
     "paths": {
       "@bukoo/db": ["../../packages/db/src/index.ts"],
       "@bukoo/db/*": ["../../packages/db/src/*.ts"],
       "@bukoo/shared-types": ["../../packages/shared-types/src/index.ts"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "integration/**/*", "vitest.reading-sync.config.ts"],
   "exclude": ["node_modules"]
 }

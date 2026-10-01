@@ -23,11 +23,13 @@ import { OfflineSyncBanner } from '../../components/OfflineSyncBanner';
 import ResponsiveContainer from '../../components/ResponsiveContainer';
 import { readingSync } from '../../services/readingSync';
 import { readingGoalService } from '../../services/readingGoalService';
+import { useAuthStore } from '../../stores/authStore';
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp<MainTabParamList, 'Library'>>();
   const isFocused = useIsFocused();
+  const userId = useAuthStore((state) => state.user?.id ?? null);
   const [refreshing, setRefreshing] = useState(false);
   const [downloadedBookIds, setDownloadedBookIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<LibraryTab>('semua');
@@ -53,11 +55,11 @@ export default function LibraryScreen() {
         .getDownloadedBooks()
         .then(setDownloadedBookIds)
         .catch((err) => console.error('Failed to load downloaded books:', err));
-      readingSync.getFinishedBooksCount().then((c) => setStats((s) => ({ ...s, finishedBooks: c })));
-      readingSync.getTotalReadingMinutes().then((m) => setStats((s) => ({ ...s, totalMinutes: m })));
-      readingGoalService.getGoalsState().then((g) => setStats((s) => ({ ...s, streakDays: g.streakDays ?? 0 })));
+      readingSync.getFinishedBooksCount(userId).then((c) => setStats((s) => ({ ...s, finishedBooks: c })));
+      readingSync.getTotalReadingMinutes(userId).then((m) => setStats((s) => ({ ...s, totalMinutes: m })));
+      readingGoalService.getGoalsState(userId).then((g) => setStats((s) => ({ ...s, streakDays: g.streakDays ?? 0 })));
     }
-  }, [isFocused]);
+  }, [isFocused, userId]);
 
   const { data: books, refetch: refetchBooks } = useQuery({
     queryKey: ['books', 'library'],
