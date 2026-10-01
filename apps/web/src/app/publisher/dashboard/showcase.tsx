@@ -52,7 +52,7 @@ export function PublisherDashboardShowcase() {
               <div className="dash-kpi-delta dash-kpi-up">▲ +12% · ilustrasi</div>
             </div>
             <div className="dash-kpi-card">
-              <div className="dash-kpi-label">Total sesi baca</div>
+              <div className="dash-kpi-label">Mulai baca · ilustrasi</div>
               <div className="dash-kpi-value">
                 86<small>.240</small>
               </div>

@@ -51,10 +51,10 @@ export default function ProfileScreen() {
     let mounted = true;
     (async () => {
       const [finishedBooks, totalMinutes, goals, week] = await Promise.all([
-        readingSync.getFinishedBooksCount(),
-        readingSync.getTotalReadingMinutes(),
-        readingGoalService.getGoalsState(),
-        readingGoalService.getWeekLogs(),
+        readingSync.getFinishedBooksCount(user?.id ?? null),
+        readingSync.getTotalReadingMinutes(user?.id ?? null),
+        readingGoalService.getGoalsState(user?.id ?? null),
+        readingGoalService.getWeekLogs(user?.id ?? null),
       ]);
       if (!mounted) return;
       setStats({ finishedBooks, totalMinutes, streakDays: goals.streakDays ?? 0 });
@@ -63,17 +63,17 @@ export default function ProfileScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     let mounted = true;
-    readingGoalService.getMonthLogs(viewYear, viewMonth).then((logs) => {
+    readingGoalService.getMonthLogs(user?.id ?? null, viewYear, viewMonth).then((logs) => {
       if (mounted) setMonthLogs(logs);
     });
     return () => {
       mounted = false;
     };
-  }, [viewYear, viewMonth]);
+  }, [user?.id, viewYear, viewMonth]);
 
   const { data: goalsData } = useQuery({
     queryKey: ['reading', 'goals'],

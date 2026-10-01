@@ -18,7 +18,7 @@ export type MainTabParamList = {
 
 export type ReadingStackParamList = {
   BookDetail: { bookId: string };
-  Reading: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; isSample?: boolean };
+  Reading: { bookId: string; localEpubUri?: string | null; title?: string; epubUrl?: string | null; contentVersion?: string; totalWords?: number; isSample?: boolean };
 };
 
 export type RootStackParamList = {
@@ -36,4 +36,3 @@ export type RootStackParamList = {
 declare module '@react-navigation/native' {
   interface RootParamList extends RootStackParamList {}
 }
-

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { books, notifications, publisherSubmissions } from '@bukoo/db';
+import { countEpubWords } from '@bukoo/db/reading-manifest';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
@@ -98,9 +99,16 @@ export async function savePublisherBook(bookId: string | null, formData: FormDat
   for (const file of [cover, content]) if (file?.size && file.size > MAX_PUBLISHER_FILE_BYTES) throw new Error('Ukuran setiap file maksimal 50 MB.');
   let newCover: string | null = null;
   let newContent: string | null = null;
+  let uploadedWordCount: number | null = null;
   try {
     newCover = await fileUpload(cover, 'covers');
     newContent = await fileUpload(content, 'epubs');
+    if (content?.size && content.name.toLowerCase().endsWith('.epub')) {
+      uploadedWordCount = await countEpubWords(await content.arrayBuffer());
+      if (uploadedWordCount > 20_000_000) throw new Error('Jumlah kata EPUB melebihi batas yang didukung.');
+    } else if (newContent && content?.size) {
+      uploadedWordCount = 0;
+    }
     const now = new Date().toISOString();
     const nextBook: PublisherBook = {
       ...(oldBook ?? { id: createId(), createdAt: now, updatedAt: now, readCount: 0, ratingAverage: 0, ratingCount: 0, readTimeMinutes: 0, tags: '[]', featured: false, featuredAt: null, isAvailableOffline: false, synopsis: null, publisher: user.name || 'Mitra Penerbit', publisherUserId: user.id, isPublished: false, publicationStatus: 'DRAFT', archivedAt: null }),
@@ -109,6 +117,7 @@ export async function savePublisherBook(bookId: string | null, formData: FormDat
       language: input.language, subscriptionRequired: input.subscriptionRequired,
       publishedYear: input.year, totalPages: input.pageCount,
       coverKey: newCover ?? oldBook?.coverKey ?? null, epubKey: newContent ?? oldBook?.epubKey ?? null,
+      totalWords: uploadedWordCount ?? oldBook?.totalWords ?? 0,
       updatedAt: now,
     };
     const reReview = !!oldBook && !oldBook.archivedAt && shouldReReview(oldBook.publicationStatus, !!newContent);
@@ -124,7 +133,7 @@ export async function savePublisherBook(bookId: string | null, formData: FormDat
         title: nextBook.title, author: nextBook.author, isbn: nextBook.isbn, catalogFingerprint: nextBook.catalogFingerprint,
         description: nextBook.description, genre: nextBook.genre, language: nextBook.language,
         subscriptionRequired: nextBook.subscriptionRequired, publishedYear: nextBook.publishedYear,
-        totalPages: nextBook.totalPages, coverKey: nextBook.coverKey, epubKey: nextBook.epubKey,
+        totalPages: nextBook.totalPages, coverKey: nextBook.coverKey, epubKey: nextBook.epubKey, totalWords: nextBook.totalWords,
         publicationStatus: nextBook.publicationStatus, isPublished: nextBook.isPublished, updatedAt: now,
       };
       if (reReview) {

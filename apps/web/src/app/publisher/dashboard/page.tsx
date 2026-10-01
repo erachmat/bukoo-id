@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "@/lib/auth";
 import { DashboardClient } from "./dashboard-client";
 import { PublisherDashboardShowcase } from "./showcase";
-import { getPublisherCatalog, getPublisherDashboardOverview } from "./queries";
+import { getPublisherCatalog, getPublisherDashboardOverview, getPublisherDiscoveryFunnelExport } from "./queries";
 
 export const metadata = {
   title: "BUKOO — Publisher Dashboard",
@@ -26,15 +26,30 @@ export default async function PublisherDashboardPage({
       const entry = params[key];
       return Array.isArray(entry) ? entry[0] : entry;
     };
-    const overview = await getPublisherDashboardOverview(user.id ?? '', user.name, {
+    const periodInput = {
       period: value('period'),
       from: value('from'),
       to: value('to'),
-    });
-    const catalog = await getPublisherCatalog(user.id ?? '');
+      now: new Date(),
+    };
+    const [overview, catalog, discoveryReport] = await Promise.all([
+      getPublisherDashboardOverview(user.id ?? '', user.name, periodInput),
+      getPublisherCatalog(user.id ?? ''),
+      getPublisherDiscoveryFunnelExport(user.id ?? '', periodInput).catch(() => null),
+    ]);
     const tabs = ['overview', 'katalog', 'royalti', 'performa', 'pembaca', 'demografi', 'geo', 'waktu', 'metadata'];
     const tab = tabs.includes(value('tab') ?? '') ? value('tab')! : 'overview';
-    return <DashboardClient user={user} overview={overview} catalog={catalog} tab={tab} />;
+    return <DashboardClient
+      user={user}
+      overview={overview}
+      catalog={catalog}
+      tab={tab}
+      discoveryFunnel={{
+        status: discoveryReport ? 'ready' : 'error',
+        period: overview.period,
+        rows: discoveryReport?.rows ?? [],
+      }}
+    />;
   }
 
   return <PublisherDashboardShowcase />;

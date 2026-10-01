@@ -30,6 +30,7 @@ export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS highlights (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId TEXT,
           bookId TEXT NOT NULL,
           cfiRange TEXT NOT NULL,
           text TEXT NOT NULL,
@@ -40,6 +41,7 @@ export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
 
         CREATE TABLE IF NOT EXISTS bookmarks (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId TEXT,
           bookId TEXT NOT NULL,
           cfi TEXT NOT NULL,
           chapterTitle TEXT,
@@ -48,11 +50,20 @@ export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
 
         CREATE TABLE IF NOT EXISTS deleted_annotations (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId TEXT,
           bookId TEXT NOT NULL,
           type TEXT NOT NULL,
           targetCfi TEXT NOT NULL,
           createdAt INTEGER NOT NULL
         );
+      `);
+      await ensureColumn(db, 'highlights', 'userId', 'TEXT');
+      await ensureColumn(db, 'bookmarks', 'userId', 'TEXT');
+      await ensureColumn(db, 'deleted_annotations', 'userId', 'TEXT');
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS highlights_user_book_idx ON highlights (userId, bookId);
+        CREATE INDEX IF NOT EXISTS bookmarks_user_book_idx ON bookmarks (userId, bookId);
+        CREATE INDEX IF NOT EXISTS deleted_annotations_user_book_idx ON deleted_annotations (userId, bookId);
       `);
       _db = db;
       return db;
@@ -63,4 +74,11 @@ export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
     });
   }
   return _initPromise;
+}
+
+async function ensureColumn(db: SQLite.SQLiteDatabase, table: string, column: string, definition: string): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+  if (!columns.some((item) => item.name === column)) {
+    await db.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }

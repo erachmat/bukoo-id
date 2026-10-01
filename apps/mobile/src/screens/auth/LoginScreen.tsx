@@ -22,6 +22,7 @@ import { AuthStackParamList } from '../../navigation/types';
 import {
   REFRESH_TOKEN_KEY,
   ACCESS_TOKEN_KEY,
+  AUTH_TOKEN_USER_ID_KEY,
   BIOMETRIC_ENABLED_KEY,
   authApi,
 } from '../../services/api';
@@ -163,6 +164,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         if (refreshToken) {
           // Perform silent refresh session
           const data = await authApi.refresh(refreshToken);
+          await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, data.user.id);
           await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
           if (data.refreshToken) {
             await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);

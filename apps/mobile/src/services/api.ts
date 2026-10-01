@@ -15,6 +15,13 @@ import type {
 } from '@bukoo/shared-types';
 import { useAuthStore, toUserDto } from '../stores/authStore';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** Account whose offline reader data owns this request. */
+    expectedUserId?: string;
+  }
+}
+
 // Shared DTOs — single source of truth: @bukoo/shared-types (mirrors apps/api).
 export type BookItemDto = BookDto;
 export type FeaturedBooksResponseDto = BookFeaturedResponse;
@@ -42,6 +49,7 @@ export const api = axios.create({
 // Storage keys
 export const ACCESS_TOKEN_KEY = 'access_token';
 export const REFRESH_TOKEN_KEY = 'refresh_token';
+export const AUTH_TOKEN_USER_ID_KEY = 'access_token_user_id';
 export const BIOMETRIC_ENABLED_KEY = 'biometric_enabled';
 export const DEVICE_ID_KEY = 'device_id';
 
@@ -137,6 +145,13 @@ const processQueue = (error: unknown, token: string | null = null) => {
 // Request Interceptor: Attach token
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    if (config.expectedUserId) {
+      const activeUserId = useAuthStore.getState().user?.id;
+      const tokenUserId = await SecureStore.getItemAsync(AUTH_TOKEN_USER_ID_KEY);
+      if (activeUserId !== config.expectedUserId || tokenUserId !== config.expectedUserId) {
+        throw new Error('Reader account changed before this request could be sent');
+      }
+    }
     const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -151,6 +166,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const expectedUserId = originalRequest?.expectedUserId as string | undefined;
 
     // Avoid infinite loop if refresh request itself fails, or if it is a login/register/social authentication request
     if (
@@ -182,6 +198,13 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        if (expectedUserId) {
+          const activeUserId = useAuthStore.getState().user?.id;
+          const tokenUserId = await SecureStore.getItemAsync(AUTH_TOKEN_USER_ID_KEY);
+          if (activeUserId !== expectedUserId || tokenUserId !== expectedUserId) {
+            throw new Error('Reader account changed before token refresh');
+          }
+        }
         const storedRefreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
         if (!storedRefreshToken) {
           throw new Error('No refresh token found');
@@ -194,7 +217,12 @@ api.interceptors.response.use(
 
         const { accessToken, refreshToken, user } = response.data;
 
+        if (expectedUserId && user?.id !== expectedUserId) {
+          throw new Error('Token refresh returned a different reader account');
+        }
+
         // Save new tokens
+        if (user?.id) await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, user.id);
         await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
         if (refreshToken) {
           await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
@@ -217,10 +245,13 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue(refreshError, null);
 
-        // Clear local tokens and state on failure
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-        useAuthStore.getState().clearUser();
+        // A stale reader request must never clear a newer account's session.
+        if (!expectedUserId || useAuthStore.getState().user?.id === expectedUserId) {
+          await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+          await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+          await SecureStore.deleteItemAsync(AUTH_TOKEN_USER_ID_KEY);
+          useAuthStore.getState().clearUser();
+        }
 
         return Promise.reject(refreshError);
       }

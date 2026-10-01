@@ -46,6 +46,7 @@ export interface BookDto {
   /** R2 object key — the public URL is built client-side via getCoverUrl(). */
   coverKey: string | null;
   epubKey: string | null;
+  totalWords: number;
   genre: string[];
   tags: string[];
   language: string;
@@ -110,6 +111,50 @@ export interface UserDto extends AuthUserDto {
 }
 
 // ── Reading ───────────────────────────────────────────────────────────────
+
+/**
+ * Mobile progress contract for the visible-text coverage reader. Legacy
+ * position-only requests are rejected with 426. `syncBatchId` identifies one
+ * immutable outbox batch; its coverage and reading-time deltas are applied
+ * atomically with its receipt.
+ *
+ * Metric glossary: a reader-day is one (book, reader, UTC date), not a reading
+ * session. A read start increments for a new progress row or a new reader-day
+ * (once when both are true). Reading seconds add the accepted batch delta;
+ * book lifetime reading minutes keep the existing per-batch floor(delta/60).
+ * Completion means every canonical five-word block of the current EPUB has at
+ * least 240,000 microseconds of exposure per word (250 words/minute). The API
+ * derives the percentage; page/chapter position never completes a book. A
+ * progress epoch hides old position-only completion and resets reader progress
+ * on the first v2 sync. Coverage, position, and offline retries are scoped by
+ * account and content version. Country metrics count reader-days by normalized
+ * ISO alpha-2 country or XX. Publisher-facing output stays
+ * aggregate-only and contains no reader identity or row-level event history.
+ */
+export interface ReadingProgressSyncRequestDto {
+  syncBatchId: string;
+  coverageVersion: 2;
+  contentVersion: string;
+  revision: number;
+  currentPage?: number;
+  cfiPosition?: string;
+  coverageDeltas: ReadingCoverageDeltaDto[];
+  /** Seconds accumulated since the prior logical sync snapshot. */
+  reading_time_delta: number;
+}
+
+export interface ReadingCoverageDeltaDto {
+  /** Five-word block index in the manifest's linear EPUB text. */
+  blockIndex: number;
+  /** New microseconds of exposure per word for this logical batch. */
+  exposureMicros: number;
+}
+
+export interface ReadingCoverageManifestDto {
+  contentVersion: string;
+  totalWords: number;
+  wordsPerBlock: number;
+}
 
 /** Flat recent-progress item from GET /v1/reading/recent (+ GET /v1/reading/progress). */
 export interface ReadingProgressRecentDto {

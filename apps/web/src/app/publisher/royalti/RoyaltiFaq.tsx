@@ -11,7 +11,7 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Bagaimana \"porsi pembacaan\" dihitung?",
     answer:
-      "Porsi pembacaan adalah proporsi total sesi baca yang tuntas dari katalog Anda dibanding seluruh pembacaan di platform pada periode itu. Semakin banyak & semakin dalam buku Anda dibaca, semakin besar porsi Anda dari revenue pool.",
+      "Porsi pembacaan membandingkan aktivitas membaca yang tercatat di katalog Anda dengan seluruh aktivitas membaca di platform pada periode itu. Jumlah dan kedalaman baca yang lebih tinggi dapat meningkatkan porsi dari revenue pool.",
   },
   {
     question: "Kapan dan bagaimana royalti dibayarkan?",

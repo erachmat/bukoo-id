@@ -1,14 +1,17 @@
 /**
  * Publisher reading-metric aggregation helpers.
  *
- * These functions keep the publisher analytics tables in sync with reading
- * progress updates in a D1-safe, idempotent way:
+ * These functions preserve the legacy no-syncBatchId request behavior while
+ * keeping publisher aggregate definitions in one place:
  *  - `publisherBookReaderDays`: one row per (book, user, date) — distinct reader-days.
  *  - `publisherBookDailyMetrics`: daily starts, completions, reading seconds.
  *  - `books.readCount` / `books.readTimeMinutes`: lifetime counters.
  *
  * IMPORTANT: never re-introduce FTS5 DELETE/UPDATE operations here. These
  * helpers only INSERT (or UPSERT scalar columns), which D1 supports.
+ * Requests with a syncBatchId use the reading route's atomic D1 batch instead.
+ * A legacy call has no batch identity, so replaying its time delta remains
+ * non-idempotent by contract until those clients are retired.
  */
 
 import {

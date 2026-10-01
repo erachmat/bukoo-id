@@ -7,6 +7,7 @@ import {
   StatusBar,
   Animated,
   Platform,
+  AppState,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
@@ -33,6 +34,9 @@ import { BookCompletionModal } from './components/BookCompletionModal';
 import { ShareSheetModal } from '../../components/share/ShareSheetModal';
 import { bookShareLink } from '../../services/shareService';
 import { QuickJumpSlider } from './components/QuickJumpSlider';
+import { useAuthStore } from '../../stores/authStore';
+import type { ReadingManifest } from '../../hooks/useReadingSession';
+import type { ReadingCoverageManifestDto } from '@bukoo/shared-types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,7 +53,7 @@ interface TocItem {
 }
 
 interface EpubMessage {
-  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY' | 'TOGGLE_CONTROLS' | 'SEARCH_RESULTS' | 'HIGHLIGHT_CLICKED';
+  type: 'PAGE_CHANGED' | 'READY' | 'ERROR' | 'TOTAL_PAGES' | 'TOC' | 'TEXT_SELECTED' | 'SHELL_READY' | 'TOGGLE_CONTROLS' | 'SEARCH_RESULTS' | 'HIGHLIGHT_CLICKED' | 'COVERAGE_READY' | 'VISIBLE_RANGE';
   page?: number;
   cfi?: string;
   percent?: number;
@@ -65,6 +69,10 @@ interface EpubMessage {
   locationGenTimeMs?: number;
   cachedLocsUsed?: boolean;
   results?: SearchResultItem[];
+  totalWords?: number;
+  startBlock?: number;
+  endBlock?: number;
+  visibleWordCount?: number;
 }
 
 // ─── JavaScript injected into the WebView ────────────────────────────────────
@@ -125,6 +133,97 @@ const EPUB_JS_BRIDGE = `
     currentNum: 1,
     total: 0,
     canvases: []
+  };
+
+  var __bukooWordAnchors = [];
+  var __bukooTotalWords = 0;
+  var __bukooWordsPerBlock = 5;
+
+  function buildWordAnchors(book) {
+    var anchors = [];
+    var totalWords = 0;
+    var sections = book.spine && book.spine.spineItems ? book.spine.spineItems : [];
+    var chain = Promise.resolve();
+    sections.forEach(function (section) {
+      if (!section.linear) return;
+      chain = chain.then(function () {
+        return section.load(book.load.bind(book)).then(function () {
+          var doc = section.document;
+          var root = doc && (doc.body || doc.documentElement);
+          if (!root) return;
+          var walker = doc.createTreeWalker(root, 4, null, false);
+          var node;
+          while ((node = walker.nextNode())) {
+            var parent = node.parentElement;
+            var excluded = false;
+            while (parent) {
+              var tag = (parent.tagName || '').toLowerCase();
+              if (tag === 'head' || tag === 'script' || tag === 'style' || tag === 'svg' || tag === 'noscript' || tag === 'template' || parent.hidden || String(parent.getAttribute('aria-hidden') || '').toLowerCase() === 'true') {
+                excluded = true;
+                break;
+              }
+              parent = parent.parentElement;
+            }
+            if (excluded) continue;
+            var text = node.textContent || '';
+            var matcher = /\\S+/g;
+            var word;
+            while ((word = matcher.exec(text))) {
+              if (totalWords % __bukooWordsPerBlock === 0) {
+                var range = doc.createRange();
+                range.setStart(node, word.index);
+                range.setEnd(node, word.index + word[0].length);
+                anchors.push(section.cfiFromRange(range));
+              }
+              totalWords += 1;
+            }
+          }
+          section.unload();
+        });
+      });
+    });
+    return chain.then(function () {
+      __bukooWordAnchors = anchors;
+      __bukooTotalWords = totalWords;
+      sendMessage({ type: 'COVERAGE_READY', totalWords: totalWords });
+    }).catch(function () {
+      // Keep the book readable if one section cannot be indexed. A zero word
+      // count disables progress instead of failing the EPUB load or guessing.
+      __bukooWordAnchors = [];
+      __bukooTotalWords = 0;
+      sendMessage({ type: 'COVERAGE_READY', totalWords: 0 });
+    });
+  }
+
+  function findWordBlock(cfi, findFirstAtOrAfter) {
+    if (!cfi || !__bukooWordAnchors.length || !ePub.CFI) return -1;
+    var low = 0;
+    var high = __bukooWordAnchors.length;
+    while (low < high) {
+      var mid = Math.floor((low + high) / 2);
+      var comparison = ePub.CFI.compare(__bukooWordAnchors[mid], cfi);
+      if (comparison < 0 || (!findFirstAtOrAfter && comparison === 0)) low = mid + 1;
+      else high = mid;
+    }
+    if (findFirstAtOrAfter) return Math.min(low, __bukooWordAnchors.length);
+    return Math.max(0, low - 1);
+  }
+
+  window.__bukooReportVisibleRange = function () {
+    var rendition = window.__bukooCurrentRendition;
+    if (!rendition || !__bukooTotalWords || document.hidden) return;
+    try {
+      var location = rendition.currentLocation();
+      if (!location || !location.start || !location.end) return;
+      // Charge the block that intersects the first visible CFI. Starting at
+      // the next block would leave up to four words uncounted on every page.
+      var startBlock = findWordBlock(location.start.cfi, false);
+      var endBlock = findWordBlock(location.end.cfi, false) + 1;
+      startBlock = Math.max(0, Math.min(__bukooWordAnchors.length, startBlock));
+      endBlock = Math.max(startBlock, Math.min(__bukooWordAnchors.length, endBlock));
+      var visibleWordCount = Math.max(0, Math.min(__bukooTotalWords, endBlock * __bukooWordsPerBlock) - startBlock * __bukooWordsPerBlock);
+      if (visibleWordCount > 0) sendMessage({ type: 'VISIBLE_RANGE', startBlock: startBlock, endBlock: endBlock, visibleWordCount: visibleWordCount });
+    } catch (e) {}
   };
 
   var __bukooChunkBuffer = [];
@@ -837,6 +936,8 @@ const EPUB_JS_BRIDGE = `
         }
         return book.locations.generate(1024);
       }).then(function () {
+        return buildWordAnchors(book);
+      }).then(function () {
         var locEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
         var locDuration = Math.round(locEnd - locStart);
         var totalLoadDuration = Math.round(locEnd - loadStart);
@@ -1044,18 +1145,25 @@ const themeColors = {
 
 interface ReadingRouteParams {
   bookId: string;
+  contentVersion?: string;
+  totalWords?: number;
   title?: string;
   localEpubUri?: string;
   epubUrl?: string;
 }
 
 export default function ReadingScreen({ navigation, route }: ReadingScreenProps) {
-  const { bookId, title, localEpubUri, epubUrl } = (route.params || {}) as ReadingRouteParams;
+  const { bookId, title, localEpubUri, epubUrl, contentVersion, totalWords: routeTotalWords } = (route.params || {}) as ReadingRouteParams;
+  const userId = useAuthStore((state) => state.user?.id ?? null);
+  const annotationUserId = userId ?? 'guest';
 
   const [isReady, setIsReady] = useState(false);
+  const [readingManifest, setReadingManifest] = useState<ReadingManifest | null>(null);
+  const [coverageCompatible, setCoverageCompatible] = useState(false);
+  const [epubWordCount, setEpubWordCount] = useState<number | null>(null);
 
-  const { currentPage, progressPercent, readingTimeSeconds, isGoalAchieved, dismissGoalBanner, initialCfi, updateProgress } =
-    useReadingSession(bookId, isReady);
+  const { currentPage, progressPercent, readingTimeSeconds, isGoalAchieved, dismissGoalBanner, initialCfi, updateProgress, updateVisibleCoverage } =
+    useReadingSession(bookId, isReady, userId, readingManifest);
 
   const webViewRef = useRef<WebView>(null);
   const controlsOpacity = useRef(new Animated.Value(1)).current;
@@ -1086,17 +1194,59 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [selectedHighlightData, setSelectedHighlightData] = useState<{ cfi: string; text: string } | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const hasShownCompletionRef = useRef(false);
+  const lastVisibleSampleRef = useRef<number | null>(null);
 
   const [shareVisible, setShareVisible] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
   const [achievementCoverUrl, setAchievementCoverUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (progressPercent >= 99.5 && !hasShownCompletionRef.current) {
+    if (coverageCompatible && progressPercent === 100 && !hasShownCompletionRef.current) {
       hasShownCompletionRef.current = true;
       setShowCompletionModal(true);
     }
-  }, [progressPercent]);
+  }, [coverageCompatible, progressPercent]);
+
+  useEffect(() => {
+    setReadingManifest(null);
+    setCoverageCompatible(false);
+    setEpubWordCount(null);
+    setIsReady(false);
+    hasShownCompletionRef.current = false;
+    lastVisibleSampleRef.current = null;
+    if (!bookId || !userId) return;
+    let cancelled = false;
+    const cacheKey = `@bukoo_reading_manifest:${userId}:${bookId}`;
+    const loadManifest = async () => {
+      try {
+        const response = await api.get<ReadingCoverageManifestDto>(`/reading/manifest/${bookId}`, { expectedUserId: userId });
+        if (cancelled) return;
+        if (contentVersion && response.data.contentVersion !== contentVersion) return;
+        setReadingManifest(response.data);
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(response.data));
+      } catch {
+        try {
+          const cached = await AsyncStorage.getItem(cacheKey);
+          if (cancelled) return;
+          if (!cached && contentVersion && routeTotalWords && routeTotalWords > 0) {
+            setReadingManifest({ contentVersion, totalWords: routeTotalWords, wordsPerBlock: 5 });
+            return;
+          }
+          if (!cached) return;
+          const parsed = JSON.parse(cached) as ReadingCoverageManifestDto;
+          if (!contentVersion || parsed.contentVersion === contentVersion) setReadingManifest(parsed);
+        } catch {
+          // Reading remains available offline; progress stays disabled until a manifest is cached.
+        }
+      }
+    };
+    void loadManifest();
+    return () => { cancelled = true; };
+  }, [bookId, userId, contentVersion, routeTotalWords]);
+
+  useEffect(() => {
+    setCoverageCompatible(!!readingManifest && epubWordCount !== null && epubWordCount === readingManifest.totalWords);
+  }, [readingManifest, epubWordCount]);
 
   /** Fetches the book cover on demand (route params carry no cover), then opens the share sheet. */
   const handleShareAchievement = async () => {
@@ -1163,6 +1313,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const [fontFamily, setFontFamily] = useState<string>('DM Sans');
   const [pageTurnStyle, setPageTurnStyle] = useState<'horizontal' | 'vertical' | 'animated'>('horizontal');
   const [lineHeight, setLineHeight] = useState<number>(1.6);
+  const [settingsLoadedUser, setSettingsLoadedUser] = useState<string | null>(null);
   const [textAlign, setTextAlign] = useState<'left' | 'justify'>('left');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showQuickJump, setShowQuickJump] = useState<boolean>(false);
@@ -1208,18 +1359,18 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [bookId, localFileUri]);
 
   const loadHighlights = useCallback(async () => {
-    const hls = await highlightService.getHighlights(bookId);
+    const hls = await highlightService.getHighlights(annotationUserId, bookId);
     setHighlights(hls);
-  }, [bookId]);
+  }, [annotationUserId, bookId]);
 
   const handleDeleteHighlight = async (id: number) => {
     const target = highlights.find((h) => Number(h.id) === Number(id));
     if (target && webViewRef.current) {
       webViewRef.current.injectJavaScript(`if (window.__bukooRemoveHighlight) window.__bukooRemoveHighlight(${JSON.stringify(target.cfiRange)}); true;`);
       // Remove locally and mirror the deletion to the server.
-      await annotationSyncService.deleteHighlight(bookId, target.cfiRange);
+      await annotationSyncService.deleteHighlight(bookId, annotationUserId, target.cfiRange);
     } else {
-      await highlightService.removeHighlight(id);
+      await highlightService.removeHighlight(annotationUserId, id);
     }
     loadHighlights();
   };
@@ -1333,9 +1484,9 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   }, [bookId, localEpubUri, epubUrl]);
 
   const loadBookmarks = useCallback(async () => {
-    const bms = await bookmarkService.getBookmarks(bookId);
+    const bms = await bookmarkService.getBookmarks(annotationUserId, bookId);
     setBookmarks(bms);
-  }, [bookId]);
+  }, [annotationUserId, bookId]);
 
   useEffect(() => {
     loadBookmarks();
@@ -1348,8 +1499,8 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
     if (!bookId) return;
     let cancelled = false;
     Promise.all([
-      annotationSyncService.syncHighlights(bookId),
-      annotationSyncService.syncBookmarks(bookId),
+      annotationSyncService.syncHighlights(bookId, annotationUserId),
+      annotationSyncService.syncBookmarks(bookId, annotationUserId),
     ]).then(([hls, bms]) => {
       if (!cancelled) {
         setHighlights(hls);
@@ -1357,7 +1508,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       }
     }).catch(() => {});
     return () => { cancelled = true; };
-  }, [bookId]);
+  }, [bookId, annotationUserId]);
 
   useEffect(() => {
     if (!isReady || !webViewRef.current) return;
@@ -1376,9 +1527,10 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   // Load per-book (or fallback global) reader settings from AsyncStorage on bookId change
   useEffect(() => {
     if (!bookId) return;
-    const key = `reader_settings_${bookId}`;
+    setSettingsLoadedUser(null);
+    const key = `reader_settings_${annotationUserId}:${bookId}`;
     AsyncStorage.getItem(key).then(async (perBook) => {
-      const stored = perBook || (await AsyncStorage.getItem('reader_settings'));
+      const stored = perBook || (await AsyncStorage.getItem(`reader_settings_${annotationUserId}:global`));
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -1395,8 +1547,9 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           console.warn('[ReadingScreen] Failed to parse stored settings:', e);
         }
       }
+      setSettingsLoadedUser(annotationUserId);
     }).catch(() => {});
-  }, [bookId]);
+  }, [bookId, annotationUserId]);
 
   // Sync typography, theme, and layout settings to the WebView. Runs only when
   // a setting actually changes (or the reader becomes ready), NOT on every page
@@ -1428,6 +1581,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
   // Persist settings to both per-book and global keys when settings change.
   useEffect(() => {
+    if (settingsLoadedUser !== annotationUserId) return;
     const payload = JSON.stringify({
       theme,
       fontSize,
@@ -1436,19 +1590,19 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
       lineHeight,
       textAlign,
     });
-    AsyncStorage.setItem('reader_settings', payload).catch(console.error);
+    AsyncStorage.setItem(`reader_settings_${annotationUserId}:global`, payload).catch(console.error);
     if (bookId) {
-      AsyncStorage.setItem(`reader_settings_${bookId}`, payload).catch(console.error);
+      AsyncStorage.setItem(`reader_settings_${annotationUserId}:${bookId}`, payload).catch(console.error);
     }
-  }, [bookId, theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign]);
+  }, [annotationUserId, settingsLoadedUser, bookId, theme, fontSize, fontFamily, pageTurnStyle, lineHeight, textAlign]);
 
   const toggleBookmark = async () => {
     if (!currentCfi) return;
-    const isBookmarked = await bookmarkService.isBookmarked(bookId, currentCfi);
+    const isBookmarked = await bookmarkService.isBookmarked(annotationUserId, bookId, currentCfi);
     if (isBookmarked) {
-      await annotationSyncService.deleteBookmark(bookId, currentCfi);
+      await annotationSyncService.deleteBookmark(bookId, annotationUserId, currentCfi);
     } else {
-      await annotationSyncService.pushBookmark(bookId, currentCfi, chapterTitle || 'Unknown Chapter');
+      await annotationSyncService.pushBookmark(bookId, annotationUserId, currentCfi, chapterTitle || 'Unknown Chapter');
     }
     loadBookmarks();
   };
@@ -1503,6 +1657,25 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
   const isAnyModalOpen = showToc || showSettings || showBookmarks || showHighlights || showSearch;
 
   useEffect(() => {
+    lastVisibleSampleRef.current = null;
+    if (!isReady || !coverageCompatible || !readingManifest || !userId || isAnyModalOpen || showCompletionModal || AppState.currentState !== 'active') return;
+    const interval = setInterval(() => {
+      webViewRef.current?.injectJavaScript('if (window.__bukooReportVisibleRange) window.__bukooReportVisibleRange(); true;');
+    }, 1_000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      lastVisibleSampleRef.current = null;
+      if (state === 'active' && !isAnyModalOpen && !showCompletionModal) {
+        webViewRef.current?.injectJavaScript('if (window.__bukooReportVisibleRange) window.__bukooReportVisibleRange(); true;');
+      }
+    });
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+      lastVisibleSampleRef.current = null;
+    };
+  }, [isReady, coverageCompatible, readingManifest, userId, isAnyModalOpen, showCompletionModal]);
+
+  useEffect(() => {
     if (isAnyModalOpen) {
       showControls();
     }
@@ -1528,6 +1701,32 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             }
             break;
           }
+          case 'COVERAGE_READY':
+            setEpubWordCount(msg.totalWords ?? 0);
+            break;
+          case 'VISIBLE_RANGE': {
+            if (
+              !coverageCompatible || !readingManifest || !userId ||
+              AppState.currentState !== 'active' || showToc || showSettings ||
+              showBookmarks || showHighlights || showSearch || showCompletionModal ||
+              msg.startBlock === undefined || msg.endBlock === undefined ||
+              msg.visibleWordCount === undefined || msg.endBlock <= msg.startBlock
+            ) {
+              lastVisibleSampleRef.current = null;
+              break;
+            }
+            const now = Date.now();
+            const previous = lastVisibleSampleRef.current;
+            lastVisibleSampleRef.current = now;
+            if (previous !== null) {
+              updateVisibleCoverage(
+                [{ startBlock: msg.startBlock, endBlock: msg.endBlock }],
+                Math.max(0, Math.min(2_000, now - previous)),
+                msg.visibleWordCount,
+              );
+            }
+            break;
+          }
           case 'TOTAL_PAGES':
             if (msg.totalPages !== undefined) setTotalPages(msg.totalPages);
             if (msg.cachedLocations) {
@@ -1543,6 +1742,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
             if (msg.toc) setToc(msg.toc);
             break;
           case 'PAGE_CHANGED':
+            lastVisibleSampleRef.current = null;
             if (msg.page !== undefined && msg.cfi !== undefined) {
               currentCfiRef.current = msg.cfi;
               setChapterInfo({
@@ -1552,7 +1752,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
                 currentPage: msg.chapterCurrentPage ?? 0,
                 totalPages: msg.chapterTotalPages ?? 1,
               });
-              updateProgress(msg.page, msg.cfi, msg.percent);
+              updateProgress(msg.page, msg.cfi);
             }
             break;
           case 'TEXT_SELECTED':
@@ -1597,7 +1797,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         console.warn('[ReadingScreen] Failed to parse WebView message:', e);
       }
     },
-    [bookId, updateProgress, handleCenterTap, pageTurnStyle, localFileUri]
+    [bookId, userId, readingManifest, coverageCompatible, updateVisibleCoverage, updateProgress, handleCenterTap, pageTurnStyle, localFileUri, showToc, showSettings, showBookmarks, showHighlights, showSearch, showCompletionModal]
   );
 
   // Static HTML shell: depends only on the JS libraries, never on the EPUB file.
@@ -1696,8 +1896,15 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
 
       {/* ── Progress bar (always visible, 2px) ── */}
       <View style={[styles.progressBarTrack, { backgroundColor: themeColors[theme].border }]}>
-        <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+        <View style={[styles.progressBarFill, { width: `${coverageCompatible ? progressPercent : 0}%` }]} />
       </View>
+      {userId && isReady && readingManifest && epubWordCount !== null && !coverageCompatible && (
+        <View style={{ paddingHorizontal: 16, paddingVertical: 5, backgroundColor: themeColors[theme].bgHeader }}>
+          <Text style={{ color: themeColors[theme].text + 'BB', fontSize: 11, textAlign: 'center', fontFamily: FONTS.sansRegular }}>
+            Progres belum bisa dihitung karena indeks teks buku tidak cocok.
+          </Text>
+        </View>
+      )}
 
       {/* ── Header (animated show/hide) ── */}
       {controlsVisible && (
@@ -1961,12 +2168,12 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
           const target = highlights.find((h) => String(h.id) === String(id));
           const cfiRange = target?.cfiRange;
           if (cfiRange) {
-            annotationSyncService.updateHighlightNote(bookId, cfiRange, note).then(() => {
-              if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
+            annotationSyncService.updateHighlightNote(bookId, annotationUserId, cfiRange, note).then(() => {
+              if (bookId) highlightService.getHighlights(annotationUserId, bookId).then(setHighlights);
             });
           } else {
-            highlightService.updateNote(Number(id), note).then(() => {
-              if (bookId) highlightService.getHighlights(bookId).then(setHighlights);
+            highlightService.updateNote(annotationUserId, Number(id), note).then(() => {
+              if (bookId) highlightService.getHighlights(annotationUserId, bookId).then(setHighlights);
             });
           }
         }}
@@ -1980,7 +2187,7 @@ export default function ReadingScreen({ navigation, route }: ReadingScreenProps)
         onConfirm={(color, note) => {
           if (selectedHighlightData) {
             const { cfi, text } = selectedHighlightData;
-            annotationSyncService.pushHighlight(bookId, cfi, text, color, note).then(() => {
+            annotationSyncService.pushHighlight(bookId, annotationUserId, cfi, text, color, note).then(() => {
               loadHighlights();
               webViewRef.current?.injectJavaScript(
                 `if (window.__bukooAddHighlight) window.__bukooAddHighlight(${JSON.stringify(cfi)}, ${JSON.stringify(color)}); true;`

@@ -7,6 +7,7 @@ import {
   bucketReaderLoyalty,
   estimatePooledRoyalty,
   getDominantAgeGroup,
+  getDiscoveryCoverageState,
   dateInRange,
   getCurrentMonthStart,
   getPeakBucket,
@@ -19,6 +20,36 @@ import {
   rankTopBooks,
   resolveDashboardPeriod,
 } from './metrics';
+
+describe('publisher discovery coverage', () => {
+  it('marks a selected range that overlaps only part of stored coverage', () => {
+    expect(getDiscoveryCoverageState(
+      { key: 'custom', label: 'Custom', start: '2026-08-01', endExclusive: '2026-09-16' },
+      '2026-08-10',
+    )).toBe('partial');
+  });
+
+  it('does not treat a range ending before first coverage as zero activity', () => {
+    expect(getDiscoveryCoverageState(
+      { key: 'custom', label: 'Custom', start: '2026-07-01', endExclusive: '2026-08-01' },
+      '2026-08-10',
+    )).toBe('not-covered');
+  });
+
+  it('limits all-time reporting to the first stored coverage date', () => {
+    expect(getDiscoveryCoverageState(
+      { key: 'all_time', label: 'Semua waktu', start: null, endExclusive: null },
+      '2026-08-10',
+    )).toBe('partial');
+  });
+
+  it('distinguishes a book with no stored funnel coverage', () => {
+    expect(getDiscoveryCoverageState(
+      { key: 'this_month', label: 'Bulan ini', start: '2026-09-01', endExclusive: '2026-10-01' },
+      null,
+    )).toBe('none');
+  });
+});
 
 describe('publisher dashboard metrics', () => {
   it('includes the first day of the current month and excludes another publisher', () => {

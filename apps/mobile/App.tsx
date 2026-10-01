@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -27,7 +27,7 @@ import {
 } from '@expo-google-fonts/dm-sans';
 
 export default function App(): React.JSX.Element {
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
   const isReady = useAuthHydration();
   const navigationRef = useRef(createNavigationContainerRef<RootStackParamList>());
   const [fontsLoaded] = useFonts({
@@ -38,6 +38,17 @@ export default function App(): React.JSX.Element {
     'DMSans-Medium': DMSans_500Medium,
     'DMSans-Bold': DMSans_700Bold,
   });
+
+  useEffect(() => {
+    let previousUserId = useAuthStore.getState().user?.id ?? null;
+    return useAuthStore.subscribe((state) => {
+      const nextUserId = state.user?.id ?? null;
+      if (nextUserId !== previousUserId) {
+        previousUserId = nextUserId;
+        queryClient.clear();
+      }
+    });
+  }, [queryClient]);
 
   // Firebase: enable crash reporting + load A/B feature flags once on boot.
   // Both are fire-and-forget — the app renders on local defaults immediately.

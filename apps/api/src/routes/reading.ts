@@ -3,14 +3,27 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import {
-  readingProgress, highlights, bookmarks, books, recordPublisherReadingMetric,
+  readingProgress,
+  highlights,
+  bookmarks,
+  books,
+  normalizeCountryCode,
 } from '@bukoo/db';
+import { countEpubWords } from '@bukoo/db/reading-manifest';
 import { isBookAccessible } from '@bukoo/shared-types';
 import { createDb } from '../db/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { createId } from '../lib/cuid.js';
 import { getUserTier } from '../lib/tier.js';
 import { buildCoverUrl } from '../lib/cover-url.js';
+import {
+  MAX_READING_WORDS,
+  READING_COVERAGE_MICROS_PER_WORD,
+  READING_COVERAGE_WORDS_PER_BLOCK,
+  READING_PROGRESS_EPOCH,
+  validateCoverageDeltas,
+  type CoverageDelta,
+} from '../lib/reading-coverage.js';
 import type { Env } from '../types/env.js';
 
 const reading = new Hono<{ Bindings: Env }>();
@@ -22,81 +35,282 @@ reading.use('*', authMiddleware);
 
 const updateProgressSchema = z.object({
   bookId: z.string().min(1).optional(),
+  syncBatchId: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      'syncBatchId must be a UUIDv4',
+    )
+    .optional(),
+  coverageVersion: z.literal(2).optional(),
+  contentVersion: z.string().min(1).max(512).optional(),
+  revision: z.number().int().min(0).max(2_147_483_647).optional(),
   currentPage: z.number().int().min(0).optional(),
   cfiPosition: z.string().optional(),
-  progressPercent: z.number().min(0).max(100),
-  reading_time_delta: z.number().int().min(0).default(0), // seconds since last sync
+  // Kept parseable only so old clients receive an explicit upgrade response.
+  progressPercent: z.number().min(0).max(100).default(0),
+  coverageDeltas: z.array(z.object({
+    blockIndex: z.number().int().min(0),
+    exposureMicros: z.number().int().positive(),
+  })).max(2_000).optional(),
+  reading_time_delta: z.number().int().min(0).max(86_400).default(0),
 });
 
-async function handleUpsertProgress(
+type CoverageSyncDto = {
+  bookId?: string;
+  syncBatchId: string;
+  coverageVersion: 2;
+  contentVersion: string;
+  revision: number;
+  currentPage?: number;
+  cfiPosition?: string;
+  coverageDeltas: CoverageDelta[];
+  reading_time_delta: number;
+};
+
+async function getReadingManifest(
+  c: import('hono').Context<{ Bindings: Env }>,
+  book: typeof books.$inferSelect,
+) {
+  if (!book.epubKey) return { error: 'Book does not have an EPUB reading manifest', status: 415 as const };
+  let totalWords = book.totalWords;
+  if (!totalWords) {
+    const object = await c.env.BUKOO_STORAGE.get(book.epubKey);
+    if (!object) return { error: 'EPUB file not found', status: 404 as const };
+    try {
+      totalWords = await countEpubWords(await object.arrayBuffer());
+    } catch {
+      return { error: 'EPUB reading manifest could not be built', status: 422 as const };
+    }
+    if (!Number.isSafeInteger(totalWords) || totalWords > MAX_READING_WORDS) {
+      return { error: 'EPUB word count exceeds the supported limit', status: 422 as const };
+    }
+    await c.env.DB.prepare('UPDATE books SET total_words = ? WHERE id = ? AND epub_key = ?')
+      .bind(totalWords, book.id, book.epubKey)
+      .run();
+  }
+  if (!Number.isSafeInteger(totalWords) || totalWords <= 0 || totalWords > MAX_READING_WORDS) {
+    return { error: 'EPUB reading manifest has an invalid word count', status: 422 as const };
+  }
+  return {
+    contentVersion: book.epubKey,
+    totalWords,
+    wordsPerBlock: READING_COVERAGE_WORDS_PER_BLOCK,
+  };
+}
+
+async function handleCoverageUpsertProgress(
   c: import('hono').Context<{ Bindings: Env }>,
   targetBookId: string,
-  dto: z.infer<typeof updateProgressSchema>
+  dto: CoverageSyncDto,
 ) {
   const db = createDb(c.env.DB);
   const userId = c.get('userId');
-
+  if (dto.bookId && dto.bookId !== targetBookId) {
+    return c.json({ error: 'bookId does not match the progress route' }, 400);
+  }
   const book = await db.query.books.findFirst({ where: eq(books.id, targetBookId) });
   if (!book) return c.json({ error: 'Book not found' }, 404);
-
   const userTier = await getUserTier(userId, db);
   if (!isBookAccessible(userTier, book.subscriptionRequired)) {
     return c.json({ error: 'Subscription required to access this book' }, 403);
   }
-
-  const existing = await db.query.readingProgress.findFirst({
-    where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, targetBookId)),
-  });
-
-  const totalSeconds = (existing?.readingTimeSeconds ?? 0) + dto.reading_time_delta;
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const now = new Date().toISOString();
-
-  if (existing) {
-    await db
-      .update(readingProgress)
-      .set({
-        currentPage: dto.currentPage ?? existing.currentPage,
-        cfiPosition: dto.cfiPosition ?? existing.cfiPosition,
-        progressPercent: dto.progressPercent,
-        readingTimeSeconds: totalSeconds,
-        readingTimeMinutes: totalMinutes,
-        lastReadAt: now,
-        updatedAt: now,
-      })
-      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, targetBookId)));
-  } else {
-    await db.insert(readingProgress).values({
-      id: createId(),
-      userId,
-      bookId: targetBookId,
-      currentPage: dto.currentPage ?? 0,
-      totalPages: book.totalPages ?? 0,
-      cfiPosition: dto.cfiPosition,
-      progressPercent: dto.progressPercent,
-      readingTimeSeconds: totalSeconds,
-      readingTimeMinutes: totalMinutes,
-      lastReadAt: now,
-      updatedAt: now,
-    });
+  const manifest = await getReadingManifest(c, book);
+  if ('error' in manifest) return c.json({ error: manifest.error }, manifest.status);
+  if (dto.contentVersion !== manifest.contentVersion) {
+    return c.json({ error: 'Book content changed; reload the reading manifest' }, 409);
+  }
+  let deltas: CoverageDelta[];
+  try {
+    deltas = validateCoverageDeltas(dto.coverageDeltas, manifest.totalWords);
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : 'Invalid coverage deltas' }, 400);
   }
 
-  // Aggregate publisher analytics idempotently.
-  const isCompletion =
-    dto.progressPercent >= 100 && (existing?.progressPercent ?? 0) < 100;
-    const countryCode = c.req.header('cf-ipcountry') ?? null;
-  await recordPublisherReadingMetric(db, {
-    userId,
+  const syncBatchId = dto.syncBatchId.toLowerCase();
+  const canonicalPayload = JSON.stringify({
     bookId: targetBookId,
-    progressPercent: dto.progressPercent,
-    readingSecondsDelta: dto.reading_time_delta,
-    isStart: !existing,
-    isCompletion,
-      countryCode,
+    coverageVersion: dto.coverageVersion,
+    contentVersion: dto.contentVersion,
+    revision: dto.revision,
+    currentPage: dto.currentPage ?? null,
+    cfiPosition: dto.cfiPosition ?? null,
+    coverageDeltas: deltas,
+    reading_time_delta: dto.reading_time_delta,
   });
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonicalPayload));
+  const payloadHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  const existingReceipt = await c.env.DB.prepare(
+    'SELECT user_id, book_id, payload_hash FROM reading_sync_batches WHERE sync_batch_id = ?',
+  ).bind(syncBatchId).first<{ user_id: string; book_id: string; payload_hash: string }>();
+  if (existingReceipt) {
+    if (existingReceipt.user_id !== userId || existingReceipt.book_id !== targetBookId || existingReceipt.payload_hash !== payloadHash) {
+      return c.json({ error: 'syncBatchId is already bound to another progress update' }, 409);
+    }
+    return c.json({ success: true });
+  }
 
-  return c.json({ success: true });
+  const now = new Date().toISOString();
+  const metricDate = now.slice(0, 10);
+  const attemptId = createId();
+  const countryCode = normalizeCountryCode(c.req.header('cf-ipcountry'));
+  const latestCtaClick = await c.env.DB.prepare(
+    'SELECT last_clicked_at FROM book_discovery_cta_last_clicks WHERE account_id = ? AND book_id = ?',
+  ).bind(userId, targetBookId).first<{ last_clicked_at: string }>();
+  const clickedAtMs = latestCtaClick ? Date.parse(latestCtaClick.last_clicked_at) : Number.NaN;
+  const receivedAtMs = Date.parse(now);
+  const isDiscoveryAttributed = Number.isFinite(clickedAtMs) && clickedAtMs < receivedAtMs && clickedAtMs >= receivedAtMs - 7 * 24 * 60 * 60 * 1000;
+  const receiptGuard = `EXISTS (SELECT 1 FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ?)`;
+  const statements: D1PreparedStatement[] = [
+    c.env.DB.prepare(
+      `INSERT INTO reading_sync_batches (
+         sync_batch_id, user_id, book_id, payload_hash, attempt_id, metric_date,
+         is_start, is_completion, is_new_reader_day, is_discovery_attributed, created_at
+       ) VALUES (?, ?, ?, ?, ?, ?,
+         CASE WHEN NOT EXISTS (SELECT 1 FROM reading_progress WHERE user_id = ? AND book_id = ? AND progress_epoch = ?) THEN 1 ELSE 0 END,
+         0, 0, ?, ?)
+       ON CONFLICT(sync_batch_id) DO NOTHING`,
+    ).bind(syncBatchId, userId, targetBookId, payloadHash, attemptId, metricDate, userId, targetBookId, READING_PROGRESS_EPOCH, isDiscoveryAttributed ? 1 : 0, now),
+  ];
+  statements.push(c.env.DB.prepare(
+    `INSERT INTO reading_coverage_blocks (user_id, book_id, content_version, block_index, exposure_micros, updated_at)
+     SELECT ?, ?, ?, CAST(json_extract(value, '$.blockIndex') AS INTEGER),
+            CAST(json_extract(value, '$.exposureMicros') AS INTEGER), ?
+       FROM json_each(?) WHERE ${receiptGuard}
+     ON CONFLICT(user_id, book_id, content_version, block_index) DO UPDATE SET
+       exposure_micros = MIN(?, reading_coverage_blocks.exposure_micros + excluded.exposure_micros),
+       updated_at = excluded.updated_at`,
+  ).bind(userId, targetBookId, manifest.contentVersion, now, JSON.stringify(deltas), syncBatchId, attemptId, READING_COVERAGE_MICROS_PER_WORD));
+  statements.push(
+    c.env.DB.prepare(
+      `UPDATE reading_sync_batches
+          SET is_completion = CASE WHEN
+            (SELECT COALESCE(SUM(MIN(?, ? - block_index * ?)), 0) FROM reading_coverage_blocks
+              WHERE user_id = ? AND book_id = ? AND content_version = ? AND exposure_micros >= ?) >= ?
+            AND COALESCE((SELECT progress_percent FROM reading_progress
+              WHERE user_id = ? AND book_id = ? AND progress_epoch = ? AND content_version = ?), 0) < 100
+            THEN 1 ELSE 0 END
+        WHERE sync_batch_id = ? AND attempt_id = ?`,
+    ).bind(READING_COVERAGE_WORDS_PER_BLOCK, manifest.totalWords, READING_COVERAGE_WORDS_PER_BLOCK, userId, targetBookId, manifest.contentVersion, READING_COVERAGE_MICROS_PER_WORD, manifest.totalWords, userId, targetBookId, READING_PROGRESS_EPOCH, manifest.contentVersion, syncBatchId, attemptId),
+    c.env.DB.prepare(
+      `INSERT INTO reading_progress (
+       id, user_id, book_id, progress_percent, progress_epoch, content_version,
+         revision, current_page, total_pages, cfi_position, reading_time_minutes, reading_time_seconds, last_read_at, updated_at
+       ) SELECT ?, ?, ?, CASE WHEN coverage.covered_words >= ? THEN 100 ELSE MIN(99, CAST(coverage.covered_words * 100 / ? AS INTEGER)) END,
+         ?, ?, ?, COALESCE(?, 0), ?, ?, CAST(? / 60 AS INTEGER), ?, ?, ?
+         FROM (SELECT COALESCE(SUM(MIN(?, ? - block_index * ?)), 0) AS covered_words
+           FROM reading_coverage_blocks WHERE user_id = ? AND book_id = ? AND content_version = ? AND exposure_micros >= ?) coverage
+         WHERE ${receiptGuard}
+       ON CONFLICT(user_id, book_id) DO UPDATE SET
+         progress_percent = CASE WHEN excluded.progress_percent >= 100 THEN 100 ELSE excluded.progress_percent END,
+         progress_epoch = excluded.progress_epoch,
+         content_version = excluded.content_version,
+         revision = MAX(reading_progress.revision, excluded.revision),
+         current_page = CASE WHEN excluded.revision >= reading_progress.revision AND ? = 1 THEN excluded.current_page ELSE reading_progress.current_page END,
+         cfi_position = CASE WHEN excluded.revision >= reading_progress.revision AND ? = 1 THEN excluded.cfi_position ELSE reading_progress.cfi_position END,
+         reading_time_seconds = CASE WHEN reading_progress.progress_epoch != ? OR reading_progress.content_version != excluded.content_version
+           THEN excluded.reading_time_seconds ELSE reading_progress.reading_time_seconds + excluded.reading_time_seconds END,
+         reading_time_minutes = CAST((CASE WHEN reading_progress.progress_epoch != ? OR reading_progress.content_version != excluded.content_version
+           THEN excluded.reading_time_seconds ELSE reading_progress.reading_time_seconds + excluded.reading_time_seconds END) / 60 AS INTEGER),
+         last_read_at = excluded.last_read_at, updated_at = excluded.updated_at`,
+    ).bind(
+      createId(), userId, targetBookId, manifest.totalWords, manifest.totalWords, READING_PROGRESS_EPOCH,
+      manifest.contentVersion, dto.revision, dto.currentPage ?? 0, book.totalPages ?? 0, dto.cfiPosition ?? null,
+      dto.reading_time_delta, dto.reading_time_delta, now, now,
+      READING_COVERAGE_WORDS_PER_BLOCK, manifest.totalWords, READING_COVERAGE_WORDS_PER_BLOCK, userId, targetBookId, manifest.contentVersion, READING_COVERAGE_MICROS_PER_WORD,
+      syncBatchId, attemptId,
+      dto.currentPage === undefined ? 0 : 1, dto.cfiPosition === undefined ? 0 : 1,
+      READING_PROGRESS_EPOCH, READING_PROGRESS_EPOCH,
+    ),
+    c.env.DB.prepare(
+      `INSERT INTO publisher_book_reader_days (book_id, user_id, read_date, first_read_at, last_read_at)
+       SELECT ?, ?, ?, ?, ? WHERE ${receiptGuard}
+       ON CONFLICT(book_id, user_id, read_date) DO NOTHING`,
+    ).bind(targetBookId, userId, metricDate, now, now, syncBatchId, attemptId),
+    c.env.DB.prepare('UPDATE reading_sync_batches SET is_new_reader_day = changes() WHERE sync_batch_id = ? AND attempt_id = ?').bind(syncBatchId, attemptId),
+    c.env.DB.prepare(
+      `INSERT INTO publisher_book_daily_metrics (id, book_id, metric_date, read_starts, completed_reads, reading_seconds, created_at, updated_at)
+       SELECT ?, ?, ?, CASE WHEN is_start = 1 OR is_new_reader_day = 1 THEN 1 ELSE 0 END, is_completion, ?, ?, ?
+         FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ?
+       ON CONFLICT(book_id, metric_date) DO UPDATE SET
+         read_starts = publisher_book_daily_metrics.read_starts + excluded.read_starts,
+         completed_reads = publisher_book_daily_metrics.completed_reads + excluded.completed_reads,
+         reading_seconds = publisher_book_daily_metrics.reading_seconds + excluded.reading_seconds,
+         updated_at = excluded.updated_at`,
+    ).bind(createId(), targetBookId, metricDate, dto.reading_time_delta, now, now, syncBatchId, attemptId),
+    c.env.DB.prepare(
+      `UPDATE books SET read_time_minutes = read_time_minutes + CAST(? / 60 AS INTEGER),
+         read_count = read_count + COALESCE((SELECT is_new_reader_day FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ?), 0),
+         updated_at = ? WHERE id = ? AND ${receiptGuard} AND (? > 0 OR (SELECT is_new_reader_day FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ?) = 1)`,
+    ).bind(dto.reading_time_delta, syncBatchId, attemptId, now, targetBookId, syncBatchId, attemptId, dto.reading_time_delta, syncBatchId, attemptId),
+    c.env.DB.prepare(
+      `INSERT INTO publisher_book_country_metrics (id, book_id, metric_date, country_code, reader_days, created_at, updated_at)
+       SELECT ?, ?, ?, ?, 1, ?, ? FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ? AND is_new_reader_day = 1
+       ON CONFLICT(book_id, metric_date, country_code) DO UPDATE SET reader_days = publisher_book_country_metrics.reader_days + 1, updated_at = excluded.updated_at`,
+    ).bind(createId(), targetBookId, metricDate, countryCode, now, now, syncBatchId, attemptId),
+    c.env.DB.prepare(
+      `INSERT INTO book_discovery_daily_metrics (book_id, metric_date, attributed_reader_days, unattributed_reader_days, created_at, updated_at)
+       SELECT ?, metric_date, CASE WHEN is_discovery_attributed = 1 THEN 1 ELSE 0 END, CASE WHEN is_discovery_attributed = 1 THEN 0 ELSE 1 END, ?, ?
+         FROM reading_sync_batches WHERE sync_batch_id = ? AND attempt_id = ? AND is_new_reader_day = 1
+       ON CONFLICT(book_id, metric_date) DO UPDATE SET
+         attributed_reader_days = book_discovery_daily_metrics.attributed_reader_days + excluded.attributed_reader_days,
+         unattributed_reader_days = book_discovery_daily_metrics.unattributed_reader_days + excluded.unattributed_reader_days,
+         updated_at = excluded.updated_at`,
+    ).bind(targetBookId, now, now, syncBatchId, attemptId),
+  );
+  await c.env.DB.batch(statements);
+  const receipt = await c.env.DB.prepare('SELECT user_id, book_id, payload_hash FROM reading_sync_batches WHERE sync_batch_id = ?')
+    .bind(syncBatchId).first<{ user_id: string; book_id: string; payload_hash: string }>();
+  if (!receipt || receipt.user_id !== userId || receipt.book_id !== targetBookId || receipt.payload_hash !== payloadHash) {
+    return c.json({ error: 'syncBatchId is already bound to another progress update' }, 409);
+  }
+  const progress = await c.env.DB.prepare('SELECT progress_percent FROM reading_progress WHERE user_id = ? AND book_id = ?')
+    .bind(userId, targetBookId).first<{ progress_percent: number }>();
+  return c.json({ success: true, progressPercent: progress?.progress_percent ?? 0 });
 }
+
+async function handleUpsertProgress(
+  c: import('hono').Context<{ Bindings: Env }>,
+  targetBookId: string,
+  dto: z.infer<typeof updateProgressSchema>,
+) {
+  if (dto.coverageVersion !== 2) {
+    return c.json({
+      error: 'Reading progress format is no longer supported. Update BUKOO to continue reading.',
+      code: 'CLIENT_UPGRADE_REQUIRED',
+      minimumClientVersion: '2.0.0',
+    }, 426);
+  }
+  if (!dto.syncBatchId || !dto.contentVersion || dto.revision === undefined || !dto.coverageDeltas) {
+    return c.json({ error: 'Incomplete reading coverage payload' }, 400);
+  }
+  return handleCoverageUpsertProgress(c, targetBookId, {
+    bookId: dto.bookId,
+    syncBatchId: dto.syncBatchId,
+    coverageVersion: 2,
+    contentVersion: dto.contentVersion,
+    revision: dto.revision,
+    currentPage: dto.currentPage,
+    cfiPosition: dto.cfiPosition,
+    coverageDeltas: dto.coverageDeltas,
+    reading_time_delta: dto.reading_time_delta,
+  });
+}
+
+reading.get('/manifest/:bookId', async (c) => {
+  const db = createDb(c.env.DB);
+  const userId = c.get('userId');
+  const bookId = c.req.param('bookId');
+  const book = await db.query.books.findFirst({ where: eq(books.id, bookId) });
+  if (!book) return c.json({ error: 'Book not found' }, 404);
+  const userTier = await getUserTier(userId, db);
+  if (!isBookAccessible(userTier, book.subscriptionRequired)) {
+    return c.json({ error: 'Subscription required to access this book' }, 403);
+  }
+  const manifest = await getReadingManifest(c, book);
+  if ('error' in manifest) return c.json({ error: manifest.error }, manifest.status);
+  return c.json(manifest);
+});
 
 // POST /v1/reading/progress (bookId in body)
 reading.post('/progress', zValidator('json', updateProgressSchema), async (c) => {
@@ -139,7 +353,11 @@ async function handleGetBookProgress(
   }
 
   const progress = await db.query.readingProgress.findFirst({
-    where: and(eq(readingProgress.userId, userId), eq(readingProgress.bookId, bookId)),
+    where: and(
+      eq(readingProgress.userId, userId),
+      eq(readingProgress.bookId, bookId),
+      eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH),
+    ),
   });
 
   return c.json(progress ?? null);
@@ -174,7 +392,11 @@ async function handleGetRecentProgress(c: import('hono').Context<{ Bindings: Env
     })
     .from(readingProgress)
     .innerJoin(books, eq(readingProgress.bookId, books.id))
-    .where(and(eq(readingProgress.userId, userId), sql`${readingProgress.progressPercent} < 100`))
+    .where(and(
+      eq(readingProgress.userId, userId),
+      eq(readingProgress.progressEpoch, READING_PROGRESS_EPOCH),
+      sql`${readingProgress.progressPercent} < 100`,
+    ))
     .orderBy(desc(readingProgress.lastReadAt))
     .limit(10);
 

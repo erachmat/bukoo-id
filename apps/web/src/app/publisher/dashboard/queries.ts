@@ -2,6 +2,7 @@ import { getDb } from '@/lib/db';
 import { getPlatformSetting } from '@/lib/platform-settings';
 import {
   books as booksTable,
+  bookDiscoveryDailyMetrics,
   publisherBookDailyMetrics,
   publisherBookReaderDays,
   publisherBookCountryMetrics,
@@ -54,6 +55,49 @@ export interface PublisherBookAnalytics {
   daily: { date: string; starts: number; seconds: number; completions: number }[];
   uniqueReaders: number;
   loyalty: ReturnType<typeof bucketReaderLoyalty>;
+  discovery: {
+    status: 'ready' | 'error';
+    coverageStart: string | null;
+    coverageEnd: string | null;
+    daily: {
+      date: string;
+      anonymousDetailViews: number;
+      anonymousAppCtaClicks: number;
+      signedInDetailViews: number;
+      signedInAppCtaClicks: number;
+      attributedReaderDays: number;
+      unattributedReaderDays: number;
+    }[];
+  };
+}
+
+export interface PublisherDiscoveryFunnelCounts {
+  anonymousDetailViews: number;
+  anonymousAppCtaClicks: number;
+  signedInDetailViews: number;
+  signedInAppCtaClicks: number;
+  attributedReaderDays: number;
+  unattributedReaderDays: number;
+}
+
+export function sumPublisherDiscoveryDailyMetrics(
+  rows: readonly PublisherDiscoveryFunnelCounts[],
+): PublisherDiscoveryFunnelCounts {
+  return rows.reduce((totals, row) => ({
+    anonymousDetailViews: totals.anonymousDetailViews + row.anonymousDetailViews,
+    anonymousAppCtaClicks: totals.anonymousAppCtaClicks + row.anonymousAppCtaClicks,
+    signedInDetailViews: totals.signedInDetailViews + row.signedInDetailViews,
+    signedInAppCtaClicks: totals.signedInAppCtaClicks + row.signedInAppCtaClicks,
+    attributedReaderDays: totals.attributedReaderDays + row.attributedReaderDays,
+    unattributedReaderDays: totals.unattributedReaderDays + row.unattributedReaderDays,
+  }), {
+    anonymousDetailViews: 0,
+    anonymousAppCtaClicks: 0,
+    signedInDetailViews: 0,
+    signedInAppCtaClicks: 0,
+    attributedReaderDays: 0,
+    unattributedReaderDays: 0,
+  });
 }
 
 export async function getPublisherBookAnalytics(
@@ -83,7 +127,148 @@ export async function getPublisherBookAnalytics(
   const readerRows = await db.select({ userId: publisherBookReaderDays.userId, days: sql<number>`count(*)` })
     .from(publisherBookReaderDays).where(and(...readerConditions)).groupBy(publisherBookReaderDays.userId);
   const loyalty = bucketReaderLoyalty(readerRows.map((row) => Number(row.days)));
-  return { book: book[0], period, daily, uniqueReaders: readerRows.length, loyalty };
+
+  let discovery: PublisherBookAnalytics['discovery'];
+  try {
+    const discoveryConditions = [eq(bookDiscoveryDailyMetrics.bookId, bookId)];
+    if (period.start) discoveryConditions.push(gte(bookDiscoveryDailyMetrics.metricDate, period.start));
+    if (period.endExclusive) discoveryConditions.push(sql`${bookDiscoveryDailyMetrics.metricDate} < ${period.endExclusive}`);
+    const [discoveryDaily, coverageRows] = await Promise.all([
+      db.select({
+        date: bookDiscoveryDailyMetrics.metricDate,
+        anonymousDetailViews: bookDiscoveryDailyMetrics.anonymousDetailViews,
+        anonymousAppCtaClicks: bookDiscoveryDailyMetrics.anonymousAppCtaClicks,
+        signedInDetailViews: bookDiscoveryDailyMetrics.signedInDetailViews,
+        signedInAppCtaClicks: bookDiscoveryDailyMetrics.signedInAppCtaClicks,
+        attributedReaderDays: bookDiscoveryDailyMetrics.attributedReaderDays,
+        unattributedReaderDays: bookDiscoveryDailyMetrics.unattributedReaderDays,
+      })
+        .from(bookDiscoveryDailyMetrics)
+        .where(and(...discoveryConditions))
+        .orderBy(bookDiscoveryDailyMetrics.metricDate),
+      db.select({
+        coverageStart: sql<string | null>`min(${bookDiscoveryDailyMetrics.metricDate})`,
+        coverageEnd: sql<string | null>`max(${bookDiscoveryDailyMetrics.metricDate})`,
+      })
+        .from(bookDiscoveryDailyMetrics)
+        .where(eq(bookDiscoveryDailyMetrics.bookId, bookId)),
+    ]);
+    discovery = {
+      status: 'ready',
+      coverageStart: coverageRows[0]?.coverageStart ?? null,
+      coverageEnd: coverageRows[0]?.coverageEnd ?? null,
+      daily: discoveryDaily.map((row) => ({
+        ...row,
+        anonymousDetailViews: Number(row.anonymousDetailViews),
+        anonymousAppCtaClicks: Number(row.anonymousAppCtaClicks),
+        signedInDetailViews: Number(row.signedInDetailViews),
+        signedInAppCtaClicks: Number(row.signedInAppCtaClicks),
+        attributedReaderDays: Number(row.attributedReaderDays),
+        unattributedReaderDays: Number(row.unattributedReaderDays),
+      })),
+    };
+  } catch {
+    discovery = { status: 'error', coverageStart: null, coverageEnd: null, daily: [] };
+  }
+
+  return { book: book[0], period, daily, uniqueReaders: readerRows.length, loyalty, discovery };
+}
+
+export type PublisherDiscoveryFunnelExportRow = {
+  bookId: string;
+  title: string;
+  author: string;
+  coverageStart: string | null;
+  coverageEnd: string | null;
+  /** True only when the selected range contains a stored daily funnel row. */
+  hasSelectedMetrics: boolean;
+} & PublisherDiscoveryFunnelCounts;
+
+export function buildPublisherDiscoveryFunnelRows(
+  publisherBooks: readonly { id: string; title: string; author: string }[],
+  dailyRows: readonly ({ bookId: string } & PublisherDiscoveryFunnelCounts)[],
+  coverageRows: readonly { bookId: string; coverageStart: string | null; coverageEnd: string | null }[],
+): PublisherDiscoveryFunnelExportRow[] {
+  const totals = new Map<string, PublisherDiscoveryFunnelCounts>();
+  for (const row of dailyRows) {
+    const current = totals.get(row.bookId) ?? sumPublisherDiscoveryDailyMetrics([]);
+    totals.set(row.bookId, sumPublisherDiscoveryDailyMetrics([current, {
+      anonymousDetailViews: Number(row.anonymousDetailViews),
+      anonymousAppCtaClicks: Number(row.anonymousAppCtaClicks),
+      signedInDetailViews: Number(row.signedInDetailViews),
+      signedInAppCtaClicks: Number(row.signedInAppCtaClicks),
+      attributedReaderDays: Number(row.attributedReaderDays),
+      unattributedReaderDays: Number(row.unattributedReaderDays),
+    }]));
+  }
+  const booksWithSelectedMetrics = new Set(dailyRows.map((row) => row.bookId));
+  const coverageByBook = new Map(coverageRows.map((row) => [row.bookId, {
+    coverageStart: row.coverageStart,
+    coverageEnd: row.coverageEnd,
+  }]));
+
+  return publisherBooks.map((book) => ({
+    bookId: book.id,
+    title: book.title,
+    author: book.author,
+    ...(coverageByBook.get(book.id) ?? { coverageStart: null, coverageEnd: null }),
+    hasSelectedMetrics: booksWithSelectedMetrics.has(book.id),
+    ...(totals.get(book.id) ?? sumPublisherDiscoveryDailyMetrics([])),
+  }));
+}
+
+export interface PublisherDiscoveryFunnelReport {
+  period: DateRange;
+  rows: PublisherDiscoveryFunnelExportRow[];
+}
+
+export async function getPublisherDiscoveryFunnelExport(
+  publisherUserId: string,
+  periodInput?: { period?: string | null; from?: string | null; to?: string | null; now?: Date },
+  bookId?: string | null,
+): Promise<PublisherDiscoveryFunnelReport> {
+  const db = getDb();
+  const period = periodInput
+    ? resolveDashboardPeriod(periodInput)
+    : getPeriodRange('this_month', new Date());
+  const bookConditions = [eq(booksTable.publisherUserId, publisherUserId)];
+  if (bookId) bookConditions.push(eq(booksTable.id, bookId));
+  const publisherBooks = await db
+    .select({ id: booksTable.id, title: booksTable.title, author: booksTable.author })
+    .from(booksTable)
+    .where(and(...bookConditions));
+  if (publisherBooks.length === 0) return { period, rows: [] };
+
+  const bookIds = publisherBooks.map((book) => book.id);
+  const metricConditions = [inArray(bookDiscoveryDailyMetrics.bookId, bookIds)];
+  if (period.start) metricConditions.push(gte(bookDiscoveryDailyMetrics.metricDate, period.start));
+  if (period.endExclusive) metricConditions.push(sql`${bookDiscoveryDailyMetrics.metricDate} < ${period.endExclusive}`);
+  const [dailyRows, coverageRows] = await Promise.all([
+    db.select({
+      bookId: bookDiscoveryDailyMetrics.bookId,
+      anonymousDetailViews: bookDiscoveryDailyMetrics.anonymousDetailViews,
+      anonymousAppCtaClicks: bookDiscoveryDailyMetrics.anonymousAppCtaClicks,
+      signedInDetailViews: bookDiscoveryDailyMetrics.signedInDetailViews,
+      signedInAppCtaClicks: bookDiscoveryDailyMetrics.signedInAppCtaClicks,
+      attributedReaderDays: bookDiscoveryDailyMetrics.attributedReaderDays,
+      unattributedReaderDays: bookDiscoveryDailyMetrics.unattributedReaderDays,
+    })
+      .from(bookDiscoveryDailyMetrics)
+      .where(and(...metricConditions)),
+    db.select({
+      bookId: bookDiscoveryDailyMetrics.bookId,
+      coverageStart: sql<string | null>`min(${bookDiscoveryDailyMetrics.metricDate})`,
+      coverageEnd: sql<string | null>`max(${bookDiscoveryDailyMetrics.metricDate})`,
+    })
+      .from(bookDiscoveryDailyMetrics)
+      .where(inArray(bookDiscoveryDailyMetrics.bookId, bookIds))
+      .groupBy(bookDiscoveryDailyMetrics.bookId),
+  ]);
+
+  return {
+    period,
+    rows: buildPublisherDiscoveryFunnelRows(publisherBooks, dailyRows, coverageRows),
+  };
 }
 
 /** Estimated royalty config — documented in the design spec. */
@@ -195,6 +380,8 @@ export interface PublisherDashboardOverview {
   };
   /** In-period reading activity series (daily for months/quarters, monthly for YTD). */
   dailyTrend: TrendPoint[];
+  /** Latest stored reading activity date within the selected period, in UTC. */
+  readingDataThrough: string | null;
   /** Read starts grouped by month from January through the selected month. */
   monthlyReadTrend: MonthlyReadPoint[];
   /** Actual-data royalty estimates for the current month and preceding five months. */
@@ -255,6 +442,13 @@ export function buildMonthlyReadTrend(
   });
 }
 
+export function getLatestMetricDate(rows: readonly { metricDate: string }[]): string | null {
+  return rows.reduce<string | null>(
+    (latest, row) => !latest || row.metricDate > latest ? row.metricDate : latest,
+    null,
+  );
+}
+
 export async function getPublisherDashboardOverview(
   publisherUserId: string,
   publisherName?: string | null,
@@ -310,6 +504,7 @@ export async function getPublisherDashboardOverview(
   let cities: CityReaders[] = [];
   let weekdayRhythm: RhythmPoint[] = [];
   let hourRhythm: RhythmPoint[] = [];
+  let readingDataThrough: string | null = null;
   const bookStatsMap = new Map<string, { reads: number; seconds: number; completions: number }>();
   const previousBookReads = new Map<string, number>();
 
@@ -370,6 +565,7 @@ export async function getPublisherDashboardOverview(
       .from(publisherBookDailyMetrics)
       .where(and(...metricConditions))
       .groupBy(publisherBookDailyMetrics.metricDate);
+    readingDataThrough = getLatestMetricDate(trendRows);
     const monthlyBuckets = period.key === 'ytd';
     for (const row of trendRows) {
       const key = trendBucketKey(row.metricDate, monthlyBuckets);
@@ -428,7 +624,7 @@ export async function getPublisherDashboardOverview(
       .groupBy(sql`strftime('%w', ${publisherBookDailyMetrics.metricDate})`);
     weekdayRhythm = weekdayRows.map((r) => ({ bucket: r.dow, reads: Number(r.reads) }));
 
-    // Hour rhythm — last-session hour per reader-day.
+  // Hour rhythm — last-read hour per reader-day.
     const hourRows = await db
       .select({
         hour: sql<string>`strftime('%H', ${publisherBookReaderDays.lastReadAt})`,
@@ -779,6 +975,7 @@ export async function getPublisherDashboardOverview(
     dailyTrend: [...dailyTrendMap.entries()]
       .map(([bucket, agg]) => ({ bucket, ...agg }))
       .sort((a, b) => a.bucket.localeCompare(b.bucket)),
+    readingDataThrough,
     royaltyTrend,
     genreSplit,
     demographics,

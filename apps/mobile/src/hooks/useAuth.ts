@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -11,6 +11,7 @@ import {
   SocialLoginData,
   ACCESS_TOKEN_KEY,
   REFRESH_TOKEN_KEY,
+  AUTH_TOKEN_USER_ID_KEY,
 } from '../services/api';
 import { configureGoogleSignIn } from '../services/socialAuth';
 
@@ -31,6 +32,7 @@ export function useAuthHydration() {
         if (refreshToken) {
           try {
             const data = await authApi.refresh(refreshToken);
+            await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, data.user.id);
             await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
             if (data.refreshToken) {
               await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
@@ -42,6 +44,7 @@ export function useAuthHydration() {
               // Token is invalid/revoked: purge local tokens & clear user
               await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
               await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+              await SecureStore.deleteItemAsync(AUTH_TOKEN_USER_ID_KEY);
               clearUser();
             }
             // Network error or backend offline: leave persisted user intact
@@ -69,12 +72,15 @@ export function useAuthHydration() {
  */
 export function useLogin() {
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: LoginData) => authApi.login(data),
     onSuccess: async (data) => {
+      await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, data.user.id);
       await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
+      queryClient.clear();
       setUser(toUserDto(data.user));
     },
   });
@@ -85,13 +91,16 @@ export function useLogin() {
  */
 export function useRegister() {
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: RegisterData) => authApi.register(data),
     onSuccess: async (data) => {
       if (data.accessToken && data.refreshToken) {
+        await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, data.user.id);
         await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
         await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
+        queryClient.clear();
         setUser(toUserDto(data.user));
       }
     },
@@ -103,12 +112,15 @@ export function useRegister() {
  */
 export function useSocialLogin() {
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: SocialLoginData) => authApi.loginSocial(data),
     onSuccess: async (data) => {
+      await SecureStore.setItemAsync(AUTH_TOKEN_USER_ID_KEY, data.user.id);
       await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, data.accessToken);
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, data.refreshToken);
+      queryClient.clear();
       setUser(toUserDto(data.user));
     },
   });
@@ -119,13 +131,18 @@ export function useSocialLogin() {
  */
 export function useLogout() {
   const clearUser = useAuthStore((state) => state.clearUser);
+  const userId = useAuthStore((state) => state.user?.id ?? null);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () => authApi.logout(),
     onSettled: async () => {
       try {
+        if (userId) await (await import('../services/readingSync')).readingSync.stopSession(userId).catch(() => {});
         await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
         await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(AUTH_TOKEN_USER_ID_KEY);
+        queryClient.clear();
         // Purge the Zustand-persisted user from AsyncStorage so a stale user
         // object cannot restore isAuthenticated = true on the next app launch.
         await AsyncStorage.removeItem('bukoo-auth-storage');

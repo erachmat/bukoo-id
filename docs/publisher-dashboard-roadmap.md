@@ -1,10 +1,10 @@
 # Publisher Dashboard Roadmap
 
-**Last updated:** 2026-09-28
+**Last updated:** 2026-09-29
 
 **Owner:** Product (Eko Rahmat)
 
-**Status:** Living roadmap; operational book workflow is shipped, cross-surface measurement is next.
+**Status:** Phase 3 and the reading-completion/account-isolation follow-up are locally verified. Production rollout is pending; Phase 4 is next.
 
 ## Purpose and handoff
 
@@ -17,9 +17,9 @@ The roadmap prioritizes publisher workflows, metric integrity, and useful UX acr
 - **Publisher web:** Publisher registration/login, public showcase, authenticated dashboard, overview and book analytics, catalog/upload workflow, CSV exports, settings, promotion requests, and royalty estimates/history are in place.
 - **Book lifecycle:** Draft, submission, internal review, revision, approval/rejection, archive/restore, and bulk catalog operations were implemented and deployed in the 2026-09-27 catalog workflow. The remaining authenticated live visual/smoke check is listed under `Publisher Dashboard Figma Refresh — 2026-09-27` in `task.md`.
 - **Team operations:** Catalog review, campaign review, royalty period close, and payout operations belong in Bukoo's internal workspace. Publishers use the publisher portal to submit work and see their own status and outcomes.
-- **Mobile reading data:** The mobile app is the source of reader progress. Progress sync reaches the API and feeds aggregate publisher metrics. Offline retries can resend reading-time deltas; the sync contract needs a stable idempotency key before these metrics can be treated as retry-safe.
-- **Web discovery:** Web book details already link readers to the mobile app. Page views and app-CTA clicks are not yet recorded as a publisher-facing discovery funnel.
-- **Metric semantics:** Existing reader-day/read-start aggregates represent distinct reader/book/day activity, not reading sessions. Preserve their historical meaning; label them accurately and do not infer session counts from them.
+- **Mobile reading data:** The mobile app is the source of reader progress. Version 2 syncs use a stable outbox key and atomic D1 updates. Position-only legacy writes receive `426 CLIENT_UPGRADE_REQUIRED`; they cannot change progress or publisher metrics.
+- **Web discovery:** Book-detail views and user-initiated app-CTA clicks are recorded with server time. Publisher book analytics and CSV export expose daily aggregates, with anonymous web activity kept unlinked.
+- **Metric semantics:** Existing reader-day/read-start aggregates represent distinct reader/book/day activity, not reading sessions. Completion now means time-qualified coverage of every canonical five-word block in the current linear EPUB text; a chapter/page position does not count as completion. Preserve historical aggregate meanings and do not infer session counts from them.
 
 ## Product and data decisions
 
@@ -30,7 +30,7 @@ The roadmap prioritizes publisher workflows, metric integrity, and useful UX acr
 | Publisher accounts | One account per publisher. Member seats and publisher-team roles are out of scope. |
 | Privacy | Publisher analytics expose aggregates only. Never return or display individual reader identities or reader-level event histories. |
 | Web-to-mobile attribution | Attribute reading activity only when the same signed-in account and same book match, using the most recent eligible web app-CTA click within the prior seven days. Anonymous web activity stays unlinked to reader accounts. |
-| Mobile metric integrity | Add a stable `syncBatchId` to the mobile progress-sync contract and deduplicate retries server-side before applying reading-time deltas or aggregate updates. Preserve existing metric history and definitions. |
+| Mobile metric integrity | Require a stable `syncBatchId` and coverage v2 contract; deduplicate retries server-side before applying reading-time deltas or aggregate updates. Derive completion from time-qualified visible-text coverage, and preserve historical reader-day definitions. |
 | Historical data | Do not fabricate or backfill web page-view or CTA events for periods before tracking exists. Clearly show the start of trustworthy web-event coverage. |
 | Royalty language | Keep estimates distinct from closed-period settlement and payout status. Never present an estimate as a finalized amount or a payout as paid before its recorded status supports that claim. |
 | Production database | Web and API share the production D1 database `bukoo-db`. Any schema change must follow the repository's manual migration workflow; never apply a production migration directly. |
@@ -49,19 +49,35 @@ The 2026-09-27 catalog/upload work established the first priority: a publisher c
 
 - Write a shared metric glossary for the mobile progress event, API handling, aggregate tables, and publisher dashboard labels.
 - Add a stable `syncBatchId` to progress-sync requests and persist/detect processed batches server-side so offline retries do not increment reading time or reader-day aggregates twice.
-- Preserve the current meaning of existing totals; define how duplicate, stale, malformed, and partially retried batches behave before implementation.
-- Add coverage for first delivery, duplicate retry, retry after partial failure, and two distinct batches for the same reader/book.
+- Preserve the current meaning of existing totals; define duplicate, delayed/stale, malformed, and partially retried behavior. A delayed replay with the same ID is a no-op. A different ID counts as a new delta even when late; progress fields keep last-processed-write behavior because the contract has no client revision/timestamp. Mobile drains its outbox in creation order.
+- Require upgraded clients: position-only writes receive 426; malformed IDs return 400; reusing an ID with another account, book, or payload returns 409.
+- Add coverage for first delivery, exact/delayed duplicate retry, retry after partial failure, concurrent duplicate delivery, and two distinct batches for the same reader/book.
 
 **Exit criteria:** A replayed batch has no second effect; a new batch still contributes normally; the same definitions appear in API, stored aggregates, exports, and dashboard labels.
 
+**Completion state (2026-09-28):** Implementation and local D1 verification complete. Migration `0017_mean_zeigeist.sql` is additive and reviewed; it creates only the internal retry receipt table. It was exercised by the local Miniflare D1 integration suite. No production migration or deploy was run. For rollout, apply the migration through `migrate-d1.yml`, deploy the API, then release mobile. Receipt rows are retained to deduplicate delayed retries, so storage growth should be monitored.
+
 ### Phase 3 — Web discovery and mobile-CTA measurement
 
-- Record web book-detail views and app-CTA clicks with book and event time; capture account linkage only when the visitor is signed in.
-- Attribute a later mobile reading event only to the same account and same book, using the most recent qualifying CTA click within seven days.
-- Keep anonymous page views and clicks anonymous. Do not join them to a reader account or treat them as attributed reading activity.
-- Keep the event-coverage start date visible to downstream analytics; do not synthesize earlier events.
+- Record one book-detail view per page exposure and each explicit app-CTA click with the canonical book ID and server-received time. The client sends no account ID or event timestamp; signed-in identity comes from the web session.
+- Store anonymous views/clicks only in daily aggregate counters. For signed-in CTA clicks, retain only the newest timestamp per account/book, which is the minimum state required for attribution.
+- Attribute a mobile reader/book/day only when its authenticated account and canonical book match a CTA click no more than seven days before the first server receipt of its `syncBatchId`. Replay receipts do not create another attribution or aggregate increment.
+- Reject ID-less legacy progress syncs with 426 and keep them outside this funnel; they cannot be safely deduplicated for attribution. Existing aggregate definitions remain distinct reader/book/day, not sessions.
+- Show each book's earliest stored funnel day and selected period in publisher analytics/export. Do not backfill earlier web events or imply coverage before the first stored day.
+- Document the v1 time limitation: progress payloads have no client event time, so server receipt is a proxy. Offline sync can arrive after the actual reading activity.
 
-**Exit criteria:** Tests cover same-account/same-book attribution, last-click precedence, the seven-day boundary, expired clicks, different books/accounts, anonymous activity, and missing event history.
+**Exit criteria:** Tests cover the inclusive seven-day boundary, expired clicks, same/different accounts and books, no click, anonymous events, legacy requests, first delivery/replay, and two distinct progress batches. Publisher response and CSV contain aggregate fields only; loading, empty, error, selected-range, and coverage states are clear.
+
+**Completion state (2026-09-29):** Implemented and locally verified. Migration `0018_faithful_bromley.sql` adds daily discovery counters, one latest signed-in CTA timestamp per account/book, and an attribution flag on Phase 2 receipts. The local Miniflare D1 suite exercised the migration and sync path. Web tracking uses a best-effort beacon/keepalive request that does not block app navigation. No historical data was backfilled. Production migrations and deployment remain pending through the repository workflow.
+
+### Reading completion and account isolation — locally verified follow-up
+
+- Derive completion from the API's EPUB linear-spine word manifest and per-account, per-content-version five-word coverage blocks. Each word needs at least 240,000 microseconds of visible exposure; book position, chapter jumps, and legacy percentage fields cannot complete a book.
+- Scope mobile progress, coverage, immutable offline outbox entries, reader settings, reading goals, bookmarks, highlights, and wishlist data to the authenticated account. Keep existing device-global rows without an account owner quarantined instead of assigning them to whichever account logs in next.
+- Advance reading progress to epoch 2 on the first coverage-v2 write. Hide epoch-1 progress from reader APIs and publisher completion metrics; retain existing publisher aggregate history. The first v2 write replaces the old position/time snapshot with progress derived from new coverage.
+- Require API identity checks when replaying an outbox item. Position-only legacy writes return `426 CLIENT_UPGRADE_REQUIRED`; no legacy update reaches progress or publisher metrics.
+
+**Completion state (2026-10-01):** Implemented and locally verified, including isolated Miniflare D1 migration/sync tests and mobile/API checks. Migrations `0019`–`0021` were reviewed and exercised locally only. No production data was reset, no production migration was applied, and no deployment was run. Production rollout remains pending through `migrate-d1.yml` after review.
 
 ### Phase 4 — Publisher insight and action UX
 
@@ -116,6 +132,9 @@ The 2026-09-27 catalog/upload work established the first priority: a publisher c
 | 2026-09-28 | Publisher-facing metrics are aggregate-only; anonymous web traffic stays unlinked. | Protect reader privacy and avoid unsupported identity joins. |
 | 2026-09-28 | Use same-account, same-book, last web CTA within seven days for attribution. | Define a bounded, explainable cross-surface funnel. |
 | 2026-09-28 | Keep existing reader-day semantics and add idempotency to mobile progress sync before expanding analytics. | Avoid double-counting retries and misleading “session” claims. |
+| 2026-09-28 | Retain receipts for retry-safe batches; legacy position-only writes require a client upgrade. | Delayed retries remain deduplicated, and unsafe progress writes cannot distort completion or publisher metrics. |
+| 2026-09-29 | Use first server receipt time for Phase 3 read attribution until the mobile contract includes an event timestamp; keep ID-less syncs out of the funnel. | Avoid claiming offline sync time is the actual reading time or counting unsafe legacy retries. |
+| 2026-10-01 | Derive completion from time-qualified linear EPUB text coverage and scope local reading state to the authenticated account. | Chapter jumps and device-global caches must not create false completion or carry one account's history into another. |
 
 ---
 

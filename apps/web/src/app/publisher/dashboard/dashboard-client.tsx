@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "../(protected)/dashboard-shell";
 import type { PublisherDashboardOverview, RhythmPoint } from "./queries";
+import type { PublisherDiscoveryFunnelExportRow } from "./queries";
+import { formatSelectedPeriodBounds, getDashboardPeriodQuery, DiscoveryFunnelPanel } from "./discovery-funnel-panel";
 import { CatalogTable, type PublisherCatalogBook } from "../catalog-table";
 import { countryLabel, getDominantAgeGroup, getPeakBucket } from "./metrics";
 import { getCoverUrl } from "@/lib/cover-url";
@@ -14,11 +16,26 @@ interface DashboardClientProps {
   user: { name?: string | null; email?: string | null } | null;
   overview?: PublisherDashboardOverview;
   catalog?: PublisherCatalogBook[];
+  discoveryFunnel: {
+    status: 'ready' | 'error';
+    period: PublisherDashboardOverview['period'];
+    rows: PublisherDiscoveryFunnelExportRow[];
+  };
   tab: string;
 }
 
 // ── page: overview ────────────────────────────────────────────
 type Overview = PublisherDashboardOverview;
+
+function PublisherMetricContext({ overview, definition }: { overview?: Overview; definition: string }) {
+  const range = overview?.period ? formatSelectedPeriodBounds(overview.period) : 'Rentang belum tersedia';
+  const freshness = overview?.readingDataThrough ? `${overview.readingDataThrough} UTC` : 'belum tersedia';
+  return (
+    <p className="pds-metric-context">
+      Rentang: {range}. Data baca terakhir tersimpan: {freshness}. {definition}
+    </p>
+  );
+}
 
 const CHART_COLORS = ['var(--pds-teal)', 'var(--pds-sky)', 'var(--pds-amber)', 'var(--pds-coral)', 'var(--pds-lavender)', 'rgba(255,255,255,0.28)'];
 const fmtId = new Intl.NumberFormat('id-ID');
@@ -27,8 +44,9 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
   const fmtRpCompact = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', notation: 'compact', maximumFractionDigits: 1 });
   const period = overview?.period;
+  const periodBounds = period ? formatSelectedPeriodBounds(period) : 'Rentang waktu belum tersedia';
   const currentReads = overview?.totalReadStarts ?? overview?.dailyTrend.reduce((sum, point) => sum + point.reads, 0) ?? 0;
-  const completionRate = currentReads > 0 ? (overview?.totalCompletions ?? 0) / currentReads * 100 : 0;
+  const completionRate = currentReads > 0 ? (overview?.totalCompletions ?? 0) / currentReads * 100 : null;
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
   const monthlyReads = overview?.monthlyReadTrend ?? [];
   const monthValue = monthlyReads[monthlyReads.length - 1]?.bucket ?? period?.start?.slice(0, 7) ?? new Date().toISOString().slice(0, 7);
@@ -65,7 +83,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
     if (!hasData) return <span className="pds-delta is-new">Baru</span>;
     if (previous === 0) return <span className="pds-delta is-new">Baru</span>;
     const delta = ((current - previous) / previous) * 100;
-    return <span className={`pds-delta ${delta < 0 ? 'is-down' : 'is-up'}`}>{delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toLocaleString('id-ID', { maximumFractionDigits: 1 })}% vs bulan lalu</span>;
+    return <span className={`pds-delta ${delta < 0 ? 'is-down' : 'is-up'}`}>{delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toLocaleString('id-ID', { maximumFractionDigits: 1 })}% vs periode sebelumnya</span>;
   };
   const selectMonth = (value: string) => {
     const [year, month] = value.split('-').map(Number);
@@ -73,14 +91,15 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
     window.location.assign(`/publisher/dashboard?period=custom&from=${value}-01&to=${end}`);
   };
   const reportEnd = new Date(Date.UTC(Number(monthValue.slice(0, 4)), Number(monthValue.slice(5, 7)), 0)).toISOString().slice(0, 10);
-  const reportUrl = `/publisher/dashboard/export?kind=book-stats&period=custom&from=${monthValue}-01&to=${reportEnd}`;
+  const reportPeriod = period ? getDashboardPeriodQuery(period) : `period=custom&from=${monthValue}-01&to=${reportEnd}`;
+  const reportUrl = `/publisher/dashboard/export?kind=book-stats&${reportPeriod}`;
 
   return (
     <div className="pds-figma-overview">
       <section className="pds-overview-head">
         <div className="pds-welcome">
           <h1>Selamat datang, {overview?.publisherName || 'Mitra Penerbit'}</h1>
-          <p>Data terupdate: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })} · Periode {period?.label ?? 'bulan ini'}</p>
+          <p>Rentang data: {periodBounds} · Data baca agregat terakhir tercatat: {overview?.readingDataThrough ?? 'belum tersedia'}{overview?.readingDataThrough ? ' UTC' : ''}</p>
         </div>
         <div className="pds-head-actions">
           <label className="pds-month-picker">
@@ -98,15 +117,16 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
       </section>
 
       <section className="pds-kpi-row pds-figma-kpis" aria-label="Ringkasan performa">
-        <article className="pds-kpi pds-kpi-white amber"><div className="pds-kpi-label">Total Pembaca Bulan ini</div><div className="pds-kpi-num">{fmtId.format(overview?.totalDistinctReaders ?? 0)}</div>{comparisonLabel(overview?.totalDistinctReaders ?? 0, overview?.comparison.readers.previous ?? 0, overview?.comparison.readers.hasData ?? false)}</article>
-        <article className="pds-kpi pds-kpi-white gold"><div className="pds-kpi-label">Pendapatan Royalti ({monthNames[Number(monthValue.slice(5, 7)) - 1]})</div><div className="pds-kpi-num" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</div>{comparisonLabel(overview?.royaltyEstimate ?? 0, overview?.comparison.royalty.previous ?? 0, overview?.comparison.royalty.hasData ?? false)}</article>
-        <article className="pds-kpi pds-kpi-white coral"><div className="pds-kpi-label">Tingkat Selesai Baca</div><div className="pds-kpi-num">{completionRate.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</div>{comparisonLabel(completionRate, (overview?.comparison.reads.previous ?? 0) > 0 ? ((overview?.comparison.completions.previous ?? 0) / (overview?.comparison.reads.previous ?? 1)) * 100 : 0, (overview?.comparison.reads.hasData ?? false) && (overview?.comparison.completions.hasData ?? false))}</article>
-        <article className="pds-kpi pds-kpi-white blue"><div className="pds-kpi-label">Judul Aktif di platform</div><div className="pds-kpi-num">{fmtId.format(overview?.publishedBooks ?? 0)}</div><span className="pds-delta is-up">↑ Judul terbit</span></article>
+        <article className="pds-kpi pds-kpi-white amber"><div className="pds-kpi-label">Pembaca unik pada periode</div><div className="pds-kpi-num">{fmtId.format(overview?.totalDistinctReaders ?? 0)}</div><div className="pds-kpi-note">Akun berbeda; bukan jumlah hari-baca.</div>{comparisonLabel(overview?.totalDistinctReaders ?? 0, overview?.comparison.readers.previous ?? 0, overview?.comparison.readers.hasData ?? false)}</article>
+        <article className="pds-kpi pds-kpi-white gold"><div className="pds-kpi-label">Estimasi royalti (periode terpilih)</div><div className="pds-kpi-num" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</div><div className="pds-kpi-note">Estimasi periode; bukan settlement final.</div>{comparisonLabel(overview?.royaltyEstimate ?? 0, overview?.comparison.royalty.previous ?? 0, overview?.comparison.royalty.hasData ?? false)}</article>
+        <article className="pds-kpi pds-kpi-white coral"><div className="pds-kpi-label">Tingkat selesai baca</div><div className="pds-kpi-num">{completionRate === null ? '—' : `${completionRate.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`}</div><div className="pds-kpi-note">Selesai ÷ mulai baca pada periode.</div>{completionRate === null ? <span className="pds-delta is-new">Belum ada mulai baca</span> : comparisonLabel(completionRate, (overview?.comparison.reads.previous ?? 0) > 0 ? ((overview?.comparison.completions.previous ?? 0) / (overview?.comparison.reads.previous ?? 1)) * 100 : 0, (overview?.comparison.reads.hasData ?? false) && (overview?.comparison.completions.hasData ?? false))}</article>
+        <article className="pds-kpi pds-kpi-white blue"><div className="pds-kpi-label">Judul terbit</div><div className="pds-kpi-num">{fmtId.format(overview?.publishedBooks ?? 0)}</div><div className="pds-kpi-note">Katalog saat ini; tidak dibatasi rentang.</div><span className="pds-delta is-up">↑ Judul terbit</span></article>
       </section>
 
       <section className="pds-figma-grid pds-figma-row-main">
         <article className="pds-panel pds-figma-card pds-month-chart">
-          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">▥</span> Tren Pembacaan Bulanan (Total Buku Dibaca)</h2><span>{monthlyReads[0]?.bucket.slice(0, 4) ?? monthValue.slice(0, 4)} – {monthNames[Number(monthValue.slice(5, 7)) - 1]} {monthValue.slice(0, 4)}</span></header>
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">▥</span> Mulai baca bulanan</h2><span>{monthlyReads[0]?.bucket.slice(0, 4) ?? monthValue.slice(0, 4)} – {monthNames[Number(monthValue.slice(5, 7)) - 1]} {monthValue.slice(0, 4)}</span></header>
+          <p className="pds-metric-context">Satu hitungan per pembaca, buku, dan hari; bukan sesi.</p>
           {monthlyReads.length === 0 ? <div className="pds-empty">Belum ada data pembacaan.</div> : <div className="pds-month-bars">
             {monthlyReads.map((point, index) => {
               const month = Number(point.bucket.slice(5, 7)) - 1;
@@ -118,10 +138,10 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
               </div>;
             })}
           </div>}
-          <footer className="pds-chart-legend"><span><i /> Total Pembaca Bulan ini</span><span>YTD: {fmtId.format(monthlyReads.reduce((sum, point) => sum + point.reads, 0))} pembacaan total</span></footer>
+          <footer className="pds-chart-legend"><span><i /> Pembacaan per bulan</span><span>YTD: {fmtId.format(monthlyReads.reduce((sum, point) => sum + point.reads, 0))} pembacaan total</span></footer>
         </article>
         <article className="pds-panel pds-figma-card pds-top-books">
-          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♙</span> Top Buku Bulan Ini</h2><button type="button" onClick={() => onTabChange('performa')}>Detail</button></header>
+          <header className="pds-figma-card-head"><h2><span className="pds-card-icon">♙</span> Top Buku pada Periode Terpilih</h2><button type="button" onClick={() => onTabChange('performa')}>Detail</button></header>
           {topBooks.length === 0 ? <div className="pds-empty">Belum ada data pembacaan.</div> : <ol className="pds-top-book-list">
             {topBooks.map((book, index) => <li key={book.id}>
               <span className="pds-top-book-rank">{index + 1}</span>
@@ -166,7 +186,7 @@ function PageOverview({ onTabChange, overview }: { onTabChange: (t: string) => v
             const trend = hasTrend ? (book.reads - book.previousReads) / book.previousReads * 100 : 0;
             return <tr key={book.id}><td>{index + 1}.</td><td><strong>{book.title}</strong><small>{book.author}</small></td><td className="align-right">{fmtId.format(book.reads)}</td><td className="align-right"><strong title={book.estimatedRoyalty > 0 ? fmtRp.format(book.estimatedRoyalty) : undefined}>{book.estimatedRoyalty > 0 ? fmtRpCompact.format(book.estimatedRoyalty) : '—'}</strong></td><td className={`align-right ${!hasTrend ? '' : trend >= 0 ? 'trend-up' : 'trend-down'}`}>{hasTrend ? `${trend >= 0 ? '▲' : '▼'} ${Math.abs(trend).toFixed(1)}%` : '—'}</td></tr>;
           })}
-        </tbody><tfoot><tr><th colSpan={2}>TOTAL ROYALTI BULAN INI</th><th className="align-right">{fmtId.format(currentReads)}<small>Total Pembacaan</small></th><th className="align-right" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</th><th className="align-right">{overview?.comparison.royalty.hasData && overview.comparison.royalty.previous > 0 ? `▲ ${(((overview.royaltyEstimate - overview.comparison.royalty.previous) / overview.comparison.royalty.previous) * 100).toFixed(1)}% vs bulan lalu` : '—'}</th></tr></tfoot></table></div>
+        </tbody><tfoot><tr><th colSpan={2}>TOTAL ESTIMASI PERIODE TERPILIH</th><th className="align-right">{fmtId.format(currentReads)}<small>Total Pembacaan</small></th><th className="align-right" title={overview?.royaltyEstimate ? fmtRp.format(overview.royaltyEstimate) : undefined}>{overview?.royaltyEstimate ? fmtRpCompact.format(overview.royaltyEstimate) : '—'}</th><th className="align-right">{overview?.comparison.royalty.hasData && overview.comparison.royalty.previous > 0 ? `▲ ${(((overview.royaltyEstimate - overview.comparison.royalty.previous) / overview.comparison.royalty.previous) * 100).toFixed(1)}% vs periode sebelumnya` : '—'}</th></tr></tfoot></table></div>
       </article>
     </div>
   );
@@ -207,15 +227,17 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
   const fmtRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
   const estimate = overview?.royaltyEstimate ?? 0;
   const stats = (overview?.bookStats ?? []).filter((b) => b.isPublished && b.seconds > 0).sort((a, b) => b.seconds - a.seconds);
+  const periodQuery = overview ? getDashboardPeriodQuery(overview.period) : 'period=this_month';
 
   return (
     <>
       <div className="pds-page-head">
         <div><div className="pds-page-title">Royalti</div><div className="pds-page-sub">Estimasi berbasis data baca · {overview?.period.label ?? 'Bulan ini'} · nilai final dihitung dari settlement resmi</div></div>
         <div className="pds-head-actions">
-          <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>Unduh CSV</a>
+          <a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&${periodQuery}`}>Unduh CSV</a>
         </div>
       </div>
+      <PublisherMetricContext overview={overview} definition="Estimasi adalah perkiraan periode, bukan settlement atau pencairan final." />
       <div className="pds-kpi-row pds-royalty-kpis">
         <div className="pds-kpi amber"><div className="pds-kpi-label">Estimasi Royalti ({overview?.period.label ?? 'Periode'})</div><div className="pds-kpi-num">{estimate > 0 ? fmtRp.format(estimate) : 'Belum tersedia'}</div><div className="pds-kpi-chg pds-flat">estimasi · pool diatur admin</div></div>
         <div className="pds-kpi teal"><div className="pds-kpi-label">Total Pembacaan</div><div className="pds-kpi-num">{(overview?.totalLifetimeReads ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">pembacaan kumulatif</div></div>
@@ -266,12 +288,20 @@ function PageRoyalti({ overview }: { overview?: PublisherDashboardOverview }) {
   );
 }
 
-function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: PublisherCatalogBook[] }) {
+function PagePerforma({ overview, catalog, discoveryFunnel }: {
+  overview?: Overview;
+  catalog: PublisherCatalogBook[];
+  discoveryFunnel: DashboardClientProps['discoveryFunnel'];
+}) {
   const stats = (overview?.bookStats ?? []).slice().sort((a, b) => b.reads - a.reads || b.lifetimeReads - a.lifetimeReads);
+  const period = discoveryFunnel.period;
+  const periodBounds = formatSelectedPeriodBounds(period);
+  const periodQuery = getDashboardPeriodQuery(period);
   return <>
     <div className="pds-page-head"><div><div className="pds-page-title">Performa Buku</div><div className="pds-page-sub">Pembacaan, waktu baca & penyelesaian per judul · {overview?.period.label ?? 'periode terpilih'}</div></div>
-      <div className="pds-head-actions"><a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&period=${overview?.period.key ?? 'this_month'}`}>Unduh CSV</a></div>
+      <div className="pds-head-actions"><a className="pds-btn pds-btn-ghost" href={`/publisher/dashboard/export?kind=book-stats&${periodQuery}`}>Unduh CSV</a></div>
     </div>
+    <p className="pds-metric-context">Rentang: {periodBounds}. Pembacaan = mulai baca per pembaca, buku, dan hari (bukan sesi); selesai baca dihitung saat progres mencapai 100%. Data baca terakhir tersimpan: {overview?.readingDataThrough ?? 'belum tersedia'}{overview?.readingDataThrough ? ' UTC' : ''}.</p>
     <div className="pds-panel">
       <div className="pds-tbl-scroll">
         <table className="pds-tbl">
@@ -280,17 +310,17 @@ function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: Pub
             {stats.length === 0 ? (
               <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: 'var(--pds-muted)' }}>Belum ada data pembacaan periode ini. {catalog.length === 0 ? 'Unggah buku pertama Anda.' : ''}</td></tr>
             ) : stats.map((b) => {
-              const completionPct = b.reads > 0 ? Math.round((b.completions / b.reads) * 100) : 0;
+              const completionPct = b.reads > 0 ? Math.round((b.completions / b.reads) * 100) : null;
               return (
                 <tr key={b.id}>
                   <td className="t-main">{b.title}</td>
                   <td>{b.subscriptionRequired}</td>
                   <td className="r num" style={{ color: 'var(--pds-teal)' }}>{b.reads.toLocaleString('id-ID')}</td>
                   <td className="r num">{Math.round(b.seconds / 3600).toLocaleString('id-ID')} jam</td>
-                  <td className="r num" style={{ color: completionPct >= 50 ? 'var(--pds-teal)' : 'var(--pds-amber-lt)' }}>{completionPct}%</td>
+                  <td className="r num" style={{ color: completionPct !== null && completionPct >= 50 ? 'var(--pds-teal)' : 'var(--pds-amber-lt)' }}>{completionPct === null ? '—' : `${completionPct}%`}</td>
                   <td className="r num">{b.lifetimeReads.toLocaleString('id-ID')}</td>
                   <td className="c"><span className={`pds-chip ${b.isPublished ? 'pds-chip-live' : 'pds-chip-draft'}`}><span className="pds-dotk" />{b.isPublished ? 'Aktif' : 'Belum aktif'}</span></td>
-                  <td className="c"><Link href={`/publisher/books/${b.id}/analytics`} style={{ color: 'var(--pds-teal)', textDecoration: 'none', fontWeight: 600 }}>Analitik</Link></td>
+                  <td className="c"><Link href={`/publisher/books/${b.id}/analytics?${periodQuery}`} style={{ color: 'var(--pds-teal)', textDecoration: 'none', fontWeight: 600 }}>Analitik</Link></td>
                 </tr>
               );
             })}
@@ -298,6 +328,13 @@ function PagePerforma({ overview, catalog }: { overview?: Overview; catalog: Pub
         </table>
       </div>
     </div>
+    <DiscoveryFunnelPanel
+      period={period}
+      rows={discoveryFunnel.rows}
+      status={discoveryFunnel.status}
+      exportHref={`/publisher/dashboard/export?kind=discovery-funnel&${periodQuery}`}
+      retryHref={`/publisher/dashboard?tab=performa&${periodQuery}`}
+    />
   </>;
 }
 
@@ -307,6 +344,7 @@ function PageGeo({ overview }: { overview?: Overview }) {
   const totalGeo = geo.reduce((s, g) => s + g.readerDays, 0) || 1;
   return <>
     <div className="pds-page-head"><div><div className="pds-page-title">Sebaran Geografis</div><div className="pds-page-sub">Negara & kota pembaca · {overview?.period.label ?? 'periode terpilih'} · tanpa IP/alamat</div></div></div>
+    <PublisherMetricContext overview={overview} definition="Negara dihitung sebagai reader-days; kota berasal dari profil yang dilaporkan pembaca dan ditampilkan sebagai agregat." />
     <div className="pds-grid pds-mb14 pds-grid-2col">
       <div className="pds-panel">
         <div className="pds-panel-title">Negara<span className="tag">reader-days</span></div>
@@ -348,9 +386,10 @@ function PagePembaca({ overview }: { overview?: Overview }) {
   ];
   return <>
     <div className="pds-page-head"><div><div className="pds-page-title">Pembaca</div><div className="pds-page-sub">Keterlibatan & retensi · {overview?.period.label ?? 'periode terpilih'}</div></div></div>
+    <PublisherMetricContext overview={overview} definition="Pembaca unik menghitung akun; mulai baca dihitung per pembaca, buku, dan hari (bukan sesi). Persentase selesai memakai read starts sebagai denominator." />
     <div className="pds-kpi-row">
       <div className="pds-kpi teal"><div className="pds-kpi-label">Pembaca Unik</div><div className="pds-kpi-num">{(overview?.totalDistinctReaders ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">periode terpilih</div></div>
-      <div className="pds-kpi sky"><div className="pds-kpi-label">Baca Selesai</div><div className="pds-kpi-num">{(overview?.totalCompletions ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">{opened > 0 ? `${Math.round(((overview?.totalCompletions ?? 0) / opened) * 100)}% dari sesi` : '—'}</div></div>
+      <div className="pds-kpi sky"><div className="pds-kpi-label">Baca Selesai</div><div className="pds-kpi-num">{(overview?.totalCompletions ?? 0).toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">{opened > 0 ? `${Math.round(((overview?.totalCompletions ?? 0) / opened) * 100)}% dari mulai baca` : '—'}</div></div>
       <div className="pds-kpi amber"><div className="pds-kpi-label">Pembaca Setia (5+ hari)</div><div className="pds-kpi-num">{loyalty.fivePlusDays.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">hari baca berbeda</div></div>
       <div className="pds-kpi coral"><div className="pds-kpi-label">Pembaca Sekali</div><div className="pds-kpi-num">{loyalty.oneDay.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">peluang retensi</div></div>
     </div>
@@ -423,6 +462,7 @@ function PageDemografi({ overview }: { overview?: Overview }) {
   return (
     <>
       <div className="pds-page-head"><div><div className="pds-page-title">Demografi Pembaca</div><div className="pds-page-sub">Profil agregat & anonim · {overview?.period.label ?? 'periode terpilih'} · {known} pembaca dengan data</div></div></div>
+      <PublisherMetricContext overview={overview} definition="Jumlah profil hanya mencakup pembaca dengan data demografi yang tersedia; hasil tetap agregat dan anonim." />
       <div className="pds-kpi-row">
         <div className="pds-kpi teal"><div className="pds-kpi-label">Pembaca Teridentifikasi</div><div className="pds-kpi-num">{known.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">dari {(overview?.totalDistinctReaders ?? 0).toLocaleString('id-ID')} pembaca</div></div>
         <div className="pds-kpi amber"><div className="pds-kpi-label">Grup Usia Dominan</div><div className="pds-kpi-num" style={{ fontSize: 22 }}>{dominantAgeGroup ?? '—'}</div><div className="pds-kpi-chg pds-flat">tahun</div></div>
@@ -497,18 +537,19 @@ function PageWaktu({ overview }: { overview?: Overview }) {
   const peakHour = getPeakBucket(sortedHours);
   const peakHourLabel = peakHour && peakHour.reads > 0 ? `${peakHour.bucket}.00` : '—';
   const totals = overview?.dailyTrend?.reduce((acc, p) => ({ reads: acc.reads + p.reads, seconds: acc.seconds + p.seconds }), { reads: 0, seconds: 0 }) ?? { reads: 0, seconds: 0 };
-  const avgSession = totals.reads > 0 ? Math.round(totals.seconds / totals.reads / 60) : 0;
+  const avgMinutesPerStart = totals.reads > 0 ? Math.round(totals.seconds / totals.reads / 60) : null;
   return (
     <>
       <div className="pds-page-head"><div><div className="pds-page-title">Waktu Baca</div><div className="pds-page-sub">Ritme baca pembaca Anda · {overview?.period.label ?? 'periode terpilih'}</div></div></div>
+      <PublisherMetricContext overview={overview} definition="Waktu baca dibagi read starts untuk rata-rata; saat tidak ada read starts, rata-rata tidak tersedia." />
       <div className="pds-kpi-row">
         <div className="pds-kpi teal"><div className="pds-kpi-label">Total Waktu Baca</div><div className="pds-kpi-num">{Math.round(totals.seconds / 3600).toLocaleString('id-ID')} jam</div><div className="pds-kpi-chg pds-flat">periode terpilih</div></div>
-        <div className="pds-kpi amber"><div className="pds-kpi-label">Durasi Rata-rata Sesi</div><div className="pds-kpi-num">{avgSession} mnt</div><div className="pds-kpi-chg pds-flat">per read start</div></div>
-        <div className="pds-kpi sky"><div className="pds-kpi-label">Jam Puncak</div><div className="pds-kpi-num">{peakHourLabel}</div><div className="pds-kpi-chg pds-flat">waktu lokal pembaca</div></div>
-        <div className="pds-kpi mint"><div className="pds-kpi-label">Total Sesi</div><div className="pds-kpi-num">{totals.reads.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">read starts</div></div>
+        <div className="pds-kpi amber"><div className="pds-kpi-label">Waktu per Mulai Baca</div><div className="pds-kpi-num">{avgMinutesPerStart === null ? '—' : `${avgMinutesPerStart} mnt`}</div><div className="pds-kpi-chg pds-flat">{avgMinutesPerStart === null ? 'belum ada mulai baca' : 'waktu baca ÷ read starts'}</div></div>
+        <div className="pds-kpi sky"><div className="pds-kpi-label">Jam Puncak</div><div className="pds-kpi-num">{peakHourLabel}</div><div className="pds-kpi-chg pds-flat">jam UTC receipt pertama pada reader-day</div></div>
+        <div className="pds-kpi mint"><div className="pds-kpi-label">Mulai Baca</div><div className="pds-kpi-num">{totals.reads.toLocaleString('id-ID')}</div><div className="pds-kpi-chg pds-flat">read starts</div></div>
       </div>
       <div className="pds-panel pds-mb14">
-        <div className="pds-panel-title">Ritme Jam<span className="tag">jam terakhir dibaca (00–23)</span></div>
+        <div className="pds-panel-title">Ritme Jam<span className="tag">receipt pertama server pada reader-day (UTC, 00–23)</span></div>
         {hours.length === 0 ? <div className="pds-empty">Belum ada data ritme jam.</div> : <RhythmBars points={sortedHours} highlight={(b) => b === peakHour?.bucket} />}
       </div>
       <div className="pds-panel">
@@ -520,7 +561,7 @@ function PageWaktu({ overview }: { overview?: Overview }) {
 }
 
 // ── main dashboard client ─────────────────────────────────────
-export function DashboardClient({ user, overview, catalog = [], tab }: DashboardClientProps) {
+export function DashboardClient({ user, overview, catalog = [], discoveryFunnel, tab }: DashboardClientProps) {
   const router = useRouter();
   const activeTab = tab;
   const onTabChange = (nextTab: string) => {
@@ -540,7 +581,7 @@ export function DashboardClient({ user, overview, catalog = [], tab }: Dashboard
       case "overview":   return <PageOverview onTabChange={onTabChange} overview={overview} />;
       case "katalog":    return <PageKatalog catalog={catalog} />;
       case "royalti":    return <PageRoyalti overview={overview} />;
-      case "performa":   return <PagePerforma overview={overview} catalog={catalog} />;
+      case "performa":   return <PagePerforma overview={overview} catalog={catalog} discoveryFunnel={discoveryFunnel} />;
       case "pembaca":    return <PagePembaca overview={overview} />;
       case "demografi":  return <PageDemografi overview={overview} />;
       case "geo":        return <PageGeo overview={overview} />;

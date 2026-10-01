@@ -1,3 +1,26 @@
+# Reading Completion and Account Isolation — 2026-10-01
+
+- `[x]` Derive EPUB completion from linear-spine words and time-qualified visible coverage: all five-word blocks require 240,000 microseconds per word; page/chapter position alone cannot complete a book.
+- `[x]` Scope mobile progress, coverage, retry-safe offline outbox, reader settings, goals, bookmarks, highlights, and wishlist state to the signed-in account. Quarantine old device-global rows without an owner.
+- `[x]` Add progress epoch 2: hide position-only legacy progress; reset its percentage, location, and reading-time snapshot on the first v2 sync while preserving publisher aggregate history.
+- `[x]` Return `426 CLIENT_UPGRADE_REQUIRED` for position-only syncs. Verify coverage-derived completion, account separation, block bounds, idempotent replay, retry rollback, old-progress reset, and aggregate behavior in local Miniflare D1 tests.
+- `[x]` Verify API typecheck/lint/tests (45 tests; 0 lint errors, 4 existing console warnings), mobile typecheck/lint/tests (11 tests), web typecheck/lint/tests/build (136 tests; 0 lint errors, 25 existing warnings), DB typecheck/build/drizzle check, and shared-types typecheck/build.
+- `[x]` No production data was reset, no production migration was applied, and no production deployment was run.
+
+# Publisher Discovery Event Abuse Guard — 2026-09-29
+
+- `[x]` Limit valid discovery event POSTs to 120 per client IP per hour with an atomic D1 counter and hashed IP; keep visitor data out of funnel aggregates.
+- `[x]` Web typecheck passes; lint has 0 errors and 25 warnings in unrelated files.
+- `[ ]` Run route tests before production rollout.
+- `[ ]` No production migration or deploy until separately approved.
+
+# Publisher CSV Formula Injection — 2026-09-29
+
+- `[x]` Trace publisher-controlled CSV text through `csvEscape`; RFC quoting alone does not prevent spreadsheet formulas from running.
+- `[x]` Prefix formula-leading text fields with an apostrophe while keeping typed numeric values numeric.
+- `[x]` Web typecheck passes; lint has 0 errors and 25 warnings in unrelated files.
+- `[ ]` Run CSV tests before production rollout; no production deploy in this task.
+
 # About Page and YouTube Footer Cleanup — 2026-09-29
 
 - `[x]` Remove the statistics section shown in the About page screenshot; retain shared styles used on other pages.
@@ -28,8 +51,23 @@
 
 - `[x]` Save the agreed product decisions, current foundation, and ordered roadmap in `docs/publisher-dashboard-roadmap.md` as the source of truth for future Codex tasks.
 - `[x]` Record the 2026-09-27 operational book lifecycle as shipped; its authenticated live visual/smoke check remains in the existing `Publisher Dashboard Figma Refresh — 2026-09-27` section below.
-- `[ ]` Phase 2 — Add retry-safe mobile reading progress sync with stable `syncBatchId`; preserve existing aggregate definitions.
-- `[ ]` Phase 3 — Track web book-detail views and app-CTA clicks; implement same-account, same-book, last-click attribution within seven days while keeping anonymous activity unlinked.
+- `[x]` Phase 2 — Implement and locally verify retry-safe mobile reading progress sync; preserve existing aggregate definitions.
+  - `[x]` Add the shared request DTO/glossary; coverage-v2 requires upgraded clients and position-only writes receive 426. Malformed IDs return 400 and conflicting ID reuse returns 409.
+  - `[x]` Persist UUIDv4 `syncBatchId` plus immutable payload/revision in the mobile SQLite outbox before sending; retries reuse it and newer snapshots get a fresh ID.
+  - `[x]` Add D1 receipt schema/migration 0017 and apply keyed progress plus all existing aggregates in one atomic D1 batch.
+  - `[x]` Cover first send, exact/delayed replay, distinct IDs, account/book/payload conflicts, malformed/legacy requests, completion semantics, concurrency, and injected partial failure/retry.
+  - `[x]` Verify API: typecheck, lint (0 errors; 4 pre-existing console warnings), 15 Node tests + 10 local D1 integration tests.
+  - `[x]` Verify mobile: typecheck, lint, and 5 outbox contract tests. Verify DB/shared-types typecheck + build; DB migration drift check passed.
+  - `[x]` Verify publisher web labels: typecheck, lint (0 errors; 26 pre-existing warnings), 97 tests passed.
+  - Production rollout remains separate: apply migration only through `migrate-d1.yml`, then deploy API before releasing the mobile client. No production migration or deploy was run here.
+- `[x]` Phase 3 — Track web book-detail views and app-CTA clicks; implement same-account, same-book, last-click attribution within seven days while keeping anonymous activity unlinked.
+  - `[x]` Instrument one view per book-page exposure and explicit store/deep-link CTA clicks; send events best-effort without blocking app navigation. Resolve signed-in identity only from the server session.
+  - `[x]` Add migration 0018 for anonymous/signed-in daily discovery counters, one latest signed-in CTA time per account/book, and the Phase 2 receipt attribution flag; review SQL and apply only in local Miniflare D1 tests.
+  - `[x]` Attribute first accepted `syncBatchId` reader/book/day only for a same-account, same-book CTA in the inclusive prior seven days; preserve reader/book/day counts and reject ID-less syncs before funnel processing.
+  - `[x]` Add aggregate-only publisher book funnel and CSV with range, earliest stored coverage date, offline-sync limitation, and loading/empty/error states. No anonymous identifiers, IPs, event history, or historical backfill.
+  - `[x]` Cover event book identity, render-effect dedupe, session identity, anonymous aggregate storage, seven-day boundary/expiry, account/book mismatch, no click, legacy sync, replay, distinct IDs, and export privacy.
+  - `[x]` Verify API typecheck/lint/tests; web typecheck/lint/tests; DB and shared-types typecheck/build; DB migration drift check. DB and shared-types have no lint or test scripts.
+  - Production rollout remains pending: apply migrations through `migrate-d1.yml` and deploy only through repository workflows. No production migration or deploy was run.
 - `[ ]` Phase 4 — Deliver publisher funnel and analytics UX with clear definitions, coverage, freshness, privacy, and responsive states.
 - `[ ]` Phase 5 — Align publisher campaign requests, internal review outcomes, and measured campaign results.
 - `[ ]` Phase 6 — Clarify estimate, closed royalty period, and payout states across dashboard, notifications, and exports.
